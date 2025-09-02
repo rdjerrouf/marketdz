@@ -1,0 +1,404 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { supabase } from '@/lib/supabase/client'
+import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
+import { isValidEmail, isValidAlgerianPhone } from '@/lib/utils'
+
+interface FormData {
+  email: string
+  password: string
+  confirmPassword: string
+  firstName: string
+  lastName: string
+  phone: string
+  wilaya: string
+  city: string
+  bio: string
+}
+
+interface FormErrors {
+  [key: string]: string
+}
+
+export default function SignUpPage() {
+  const router = useRouter()
+  
+  const [formData, setFormData] = useState<FormData>({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    wilaya: '',
+    city: '',
+    bio: ''
+  })
+  
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  
+  // Get cities for selected wilaya
+  const selectedWilaya = ALGERIA_WILAYAS.find(w => w.code === formData.wilaya)
+  const availableCities = selectedWilaya ? selectedWilaya.cities : []
+
+  // Validation function
+  const validateForm = (): FormErrors => {
+    const newErrors: FormErrors = {}
+
+    // Email validation
+    if (!formData.email) {
+      newErrors.email = 'Email est requis'
+    } else if (!isValidEmail(formData.email)) {
+      newErrors.email = 'Format email invalide'
+    }
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = 'Mot de passe est requis'
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères'
+    }
+
+    // Confirm password
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Les mots de passe ne correspondent pas'
+    }
+
+    // Name validation
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'Prénom est requis'
+    }
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Nom est requis'
+    }
+
+    // Phone validation (optional but if provided must be valid)
+    if (formData.phone && !isValidAlgerianPhone(formData.phone)) {
+      newErrors.phone = 'Numéro de téléphone invalide (ex: 0551234567)'
+    }
+
+    // Location validation
+    if (!formData.wilaya) {
+      newErrors.wilaya = 'Wilaya est requise'
+    }
+    if (!formData.city) {
+      newErrors.city = 'Ville est requise'
+    }
+
+    return newErrors
+  }
+
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }))
+    }
+
+    // Reset city when wilaya changes
+    if (name === 'wilaya') {
+      setFormData(prev => ({ ...prev, city: '' }))
+    }
+  }
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    const validationErrors = validateForm()
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+
+    setIsLoading(true)
+    setErrors({})
+
+    try {
+      // Sign up with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            phone: formData.phone || null,
+            wilaya: formData.wilaya,
+            city: formData.city,
+            bio: formData.bio || null,
+          }
+        }
+      })
+
+      if (error) {
+        if (error.message.includes('already registered')) {
+          setErrors({ email: 'Cette adresse email est déjà utilisée' })
+        } else {
+          setErrors({ general: error.message })
+        }
+        return
+      }
+
+      if (data.user) {
+        // Redirect to sign in page with success message
+        router.push('/signin?message=Compte créé avec succès! Veuillez vous connecter.')
+      }
+
+    } catch (error) {
+      console.error('Sign up error:', error)
+      setErrors({ general: 'Une erreur est survenue. Veuillez réessayer.' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
+          MarketDZ
+        </h1>
+        <h2 className="text-center text-xl text-gray-600">
+          Créer votre compte
+        </h2>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            
+            {errors.general && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+                {errors.general}
+              </div>
+            )}
+
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email *
+              </label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.email ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="exemple@email.com"
+              />
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Mot de passe *
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  id="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.password ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  placeholder="Minimum 6 caractères"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600"
+                >
+                  {showPassword ? 'Cacher' : 'Voir'}
+                </button>
+              </div>
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Confirmer le mot de passe *
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                id="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
+            </div>
+
+            {/* First Name & Last Name */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                  Prénom *
+                </label>
+                <input
+                  type="text"
+                  name="firstName"
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.firstName ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                />
+                {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
+              </div>
+              
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                  Nom *
+                </label>
+                <input
+                  type="text"
+                  name="lastName"
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.lastName ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                />
+                {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                Téléphone (optionnel)
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                id="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.phone ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="0551234567"
+              />
+              {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+            </div>
+
+            {/* Wilaya */}
+            <div>
+              <label htmlFor="wilaya" className="block text-sm font-medium text-gray-700">
+                Wilaya *
+              </label>
+              <select
+                name="wilaya"
+                id="wilaya"
+                value={formData.wilaya}
+                onChange={handleInputChange}
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.wilaya ? 'border-red-300' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Sélectionner une wilaya</option>
+                {ALGERIA_WILAYAS.map(wilaya => (
+                  <option key={wilaya.code} value={wilaya.code}>
+                    {wilaya.code} - {wilaya.name}
+                  </option>
+                ))}
+              </select>
+              {errors.wilaya && <p className="mt-1 text-sm text-red-600">{errors.wilaya}</p>}
+            </div>
+
+            {/* City */}
+            <div>
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                Ville *
+              </label>
+              <select
+                name="city"
+                id="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                disabled={!formData.wilaya}
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.city ? 'border-red-300' : 'border-gray-300'
+                } ${!formData.wilaya ? 'bg-gray-100' : ''}`}
+              >
+                <option value="">Sélectionner une ville</option>
+                {availableCities.map(city => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+              {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
+            </div>
+
+            {/* Bio */}
+            <div>
+              <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+                Présentation (optionnel)
+              </label>
+              <textarea
+                name="bio"
+                id="bio"
+                rows={3}
+                value={formData.bio}
+                onChange={handleInputChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Parlez-nous de vous..."
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                  isLoading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                }`}
+              >
+                {isLoading ? 'Création en cours...' : 'Créer mon compte'}
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-6">
+            <div className="text-center">
+              <span className="text-sm text-gray-600">
+                Vous avez déjà un compte?{' '}
+                <Link 
+                  href="/signin" 
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  Se connecter
+                </Link>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

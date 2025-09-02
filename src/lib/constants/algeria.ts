@@ -1,0 +1,388 @@
+// Algeria-specific constants
+// src/lib/constants/algeria.ts
+
+export interface Wilaya {
+  code: string
+  name: string
+  nameAr: string
+  cities: string[]
+}
+
+// All 58 Wilayas of Algeria
+export const ALGERIA_WILAYAS: Wilaya[] = [
+  {
+    code: '01',
+    name: 'Adrar',
+    nameAr: 'أدرار',
+    cities: ['Adrar', 'Timimoun', 'Aoulef', 'Reggane', 'Inzegmir', 'Tit', 'Ksar Kaddour']
+  },
+  {
+    code: '02',
+    name: 'Chlef',
+    nameAr: 'الشلف',
+    cities: ['Chlef', 'Tenès', 'Beni Haoua', 'El Karimia', 'Sobha', 'Harchoun', 'Ouled Fares']
+  },
+  {
+    code: '03',
+    name: 'Laghouat',
+    nameAr: 'الأغواط',
+    cities: ['Laghouat', 'Aflou', 'Ksar El Hirane', 'Brida', 'Gueltat Sidi Saad', 'Ain Madhi']
+  },
+  {
+    code: '04',
+    name: 'Oum El Bouaghi',
+    nameAr: 'أم البواقي',
+    cities: ['Oum El Bouaghi', 'Ain Beida', 'Ain MLila', 'Behir Chergui', 'El Amiria', 'Sigus']
+  },
+  {
+    code: '05',
+    name: 'Batna',
+    nameAr: 'باتنة',
+    cities: ['Batna', 'Barika', 'Arris', 'Biskra', 'Ain Touta', 'Merouana', 'El Madher']
+  },
+  {
+    code: '06',
+    name: 'Béjaïa',
+    nameAr: 'بجاية',
+    cities: ['Béjaïa', 'Akbou', 'Kherrata', 'Sidi Aich', 'Amizour', 'Barbacha', 'Tazmalt']
+  },
+  {
+    code: '07',
+    name: 'Biskra',
+    nameAr: 'بسكرة',
+    cities: ['Biskra', 'Sidi Okba', 'Ouled Djellal', 'El Kantara', 'Tolga', 'Foughala', 'Lichana']
+  },
+  {
+    code: '08',
+    name: 'Béchar',
+    nameAr: 'بشار',
+    cities: ['Béchar', 'Kenadsa', 'Abadla', 'Beni Ounif', 'Igli', 'Taghit', 'Ouled Khoudir']
+  },
+  {
+    code: '09',
+    name: 'Blida',
+    nameAr: 'البليدة',
+    cities: ['Blida', 'Boufarik', 'Larbaa', 'Bougara', 'Ouled Yaich', 'Chebli', 'Mouzaia']
+  },
+  {
+    code: '10',
+    name: 'Bouira',
+    nameAr: 'البويرة',
+    cities: ['Bouira', 'Lakhdaria', 'Msila', 'Sour El Ghouzlane', 'Ain Bessem', 'Birghbalou']
+  },
+  {
+    code: '11',
+    name: 'Tamanrasset',
+    nameAr: 'تمنراست',
+    cities: ['Tamanrasset', 'In Guezzam', 'Tin Zaouaten', 'In Salah', 'Foggaret Ezzaouia']
+  },
+  {
+    code: '12',
+    name: 'Tébessa',
+    nameAr: 'تبسة',
+    cities: ['Tébessa', 'Cheria', 'El Aouinet', 'Bir El Ater', 'El Ogla', 'Negrine', 'El Houidjbet']
+  },
+  {
+    code: '13',
+    name: 'Tlemcen',
+    nameAr: 'تلمسان',
+    cities: ['Tlemcen', 'Maghnia', 'Nedroma', 'Remchi', 'Sebdou', 'Ghazaouet', 'Marsa Ben Mhidi']
+  },
+  {
+    code: '14',
+    name: 'Tiaret',
+    nameAr: 'تيارت',
+    cities: ['Tiaret', 'Sougueur', 'Mahdia', 'Medroussa', 'Frenda', 'Ain Deheb', 'Ksar Chellala']
+  },
+  {
+    code: '15',
+    name: 'Tizi Ouzou',
+    nameAr: 'تيزي وزو',
+    cities: ['Tizi Ouzou', 'Azazga', 'Draa El Mizan', 'Tigzirt', 'Larbaa Nath Irathen', 'Azzefoun']
+  },
+  {
+    code: '16',
+    name: 'Alger',
+    nameAr: 'الجزائر',
+    cities: ['Algiers', 'Bab Ezzouar', 'Draria', 'Zeralda', 'Birtouta', 'El Harrach', 'Rouiba', 'Reghaia']
+  },
+  {
+    code: '17',
+    name: 'Djelfa',
+    nameAr: 'الجلفة',
+    cities: ['Djelfa', 'Messaad', 'Ain Oussera', 'Birine', 'Sidi Laadjal', 'El Idrissia', 'Had Sahary']
+  },
+  {
+    code: '18',
+    name: 'Jijel',
+    nameAr: 'جيجل',
+    cities: ['Jijel', 'Taher', 'El Milia', 'Sidi Maarouf', 'Settara', 'El Aouana', 'Ziama Mansouria']
+  },
+  {
+    code: '19',
+    name: 'Sétif',
+    nameAr: 'سطيف',
+    cities: ['Sétif', 'El Eulma', 'Ain Arnat', 'Ain Abessa', 'Bougaa', 'Salah Bey', 'Ain Oulmene']
+  },
+  {
+    code: '20',
+    name: 'Saïda',
+    nameAr: 'سعيدة',
+    cities: ['Saïda', 'Balloul', 'Ouled Brahim', 'Moulay Larbi', 'Youb', 'Hounet', 'Sidi Boubekeur']
+  },
+  {
+    code: '21',
+    name: 'Skikda',
+    nameAr: 'سكيكدة',
+    cities: ['Skikda', 'Collo', 'Azzaba', 'Tamalous', 'Ouled Attia', 'Sidi Mezghiche', 'El Harrouch']
+  },
+  {
+    code: '22',
+    name: 'Sidi Bel Abbès',
+    nameAr: 'سيدي بلعباس',
+    cities: ['Sidi Bel Abbès', 'Telagh', 'Ain Trid', 'Mostefa Ben Brahim', 'Ras El Ma', 'Tessala']
+  },
+  {
+    code: '23',
+    name: 'Annaba',
+    nameAr: 'عنابة',
+    cities: ['Annaba', 'El Hadjar', 'Sidi Amar', 'Berrahal', 'El Bouni', 'Treatry', 'Ain Berda']
+  },
+  {
+    code: '24',
+    name: 'Guelma',
+    nameAr: 'قالمة',
+    cities: ['Guelma', 'Bouchegouf', 'Heliopolis', 'Hammam Debagh', 'Oued Zenati', 'Ain Hessania']
+  },
+  {
+    code: '25',
+    name: 'Constantine',
+    nameAr: 'قسنطينة',
+    cities: ['Constantine', 'Ali Mendjeli', 'Hamma Bouziane', 'Didouche Mourad', 'El Khroub', 'Ain Smara']
+  },
+  {
+    code: '26',
+    name: 'Médéa',
+    nameAr: 'المدية',
+    cities: ['Médéa', 'Berrouaghia', 'Ksar El Boukhari', 'Ain Boucif', 'Tablat', 'Chellalet El Adhaoura']
+  },
+  {
+    code: '27',
+    name: 'Mostaganem',
+    nameAr: 'مستغانم',
+    cities: ['Mostaganem', 'Relizane', 'Sidi Ali', 'Hassi Mameche', 'Stidia', 'Ain Tedeles', 'Fornaka']
+  },
+  {
+    code: '28',
+    name: 'M\'Sila',
+    nameAr: 'المسيلة',
+    cities: ['M\'Sila', 'Sidi Aissa', 'Magra', 'Boussaada', 'Ouled Derradj', 'Hammam Dalaa', 'Bou Saada']
+  },
+  {
+    code: '29',
+    name: 'Mascara',
+    nameAr: 'معسكر',
+    cities: ['Mascara', 'Sig', 'Tighenif', 'Ghriss', 'Bouhanifia', 'Mohammadia', 'Oued El Abtal']
+  },
+  {
+    code: '30',
+    name: 'Ouargla',
+    nameAr: 'ورقلة',
+    cities: ['Ouargla', 'Hassi Messaoud', 'Touggourt', 'Temacine', 'Megarine', 'El Borma', 'Ngoussa']
+  },
+  {
+    code: '31',
+    name: 'Oran',
+    nameAr: 'وهران',
+    cities: ['Oran', 'Bir El Djir', 'Es Senia', 'Gdyel', 'Ain El Turk', 'Arzew', 'Bethioua', 'Sidi Chami']
+  },
+  {
+    code: '32',
+    name: 'El Bayadh',
+    nameAr: 'البيض',
+    cities: ['El Bayadh', 'Rogassa', 'Stitten', 'Brezina', 'Boualem', 'El Mehara', 'Cheguig']
+  },
+  {
+    code: '33',
+    name: 'Illizi',
+    nameAr: 'إليزي',
+    cities: ['Illizi', 'Djanet', 'In Amenas', 'Debdeb', 'Bordj Omar Driss', 'Fort Polignac']
+  },
+  {
+    code: '34',
+    name: 'Bordj Bou Arréridj',
+    nameAr: 'برج بوعريريج',
+    cities: ['Bordj Bou Arréridj', 'Ras El Oued', 'Bordj Ghdir', 'Mansourah', 'El Achir', 'Ain Taghrout']
+  },
+  {
+    code: '35',
+    name: 'Boumerdès',
+    nameAr: 'بومرداس',
+    cities: ['Boumerdès', 'Dellys', 'Naciria', 'Isser', 'Bordj Menaiel', 'Khemis El Khechna', 'Corso']
+  },
+  {
+    code: '36',
+    name: 'El Tarf',
+    nameAr: 'الطارف',
+    cities: ['El Tarf', 'El Kala', 'Boutheldja', 'Ben Mhidi', 'Besbès', 'Drean', 'Cheffia']
+  },
+  {
+    code: '37',
+    name: 'Tindouf',
+    nameAr: 'تندوف',
+    cities: ['Tindouf', 'Oum El Assel']
+  },
+  {
+    code: '38',
+    name: 'Tissemsilt',
+    nameAr: 'تيسمسيلت',
+    cities: ['Tissemsilt', 'Theniet El Had', 'Bordj Bou Naama', 'Larbaa', 'Beni Chaib', 'Lardjem']
+  },
+  {
+    code: '39',
+    name: 'El Oued',
+    nameAr: 'الوادي',
+    cities: ['El Oued', 'Robbah', 'Guemar', 'Reguiba', 'Magrane', 'Still', 'Taghzout']
+  },
+  {
+    code: '40',
+    name: 'Khenchela',
+    nameAr: 'خنشلة',
+    cities: ['Khenchela', 'Kais', 'Baghai', 'El Hamma', 'Ain Touila', 'Remila', 'El Ouledja']
+  },
+  {
+    code: '41',
+    name: 'Souk Ahras',
+    nameAr: 'سوق أهراس',
+    cities: ['Souk Ahras', 'Sedrata', 'Hanancha', 'Ouled Moumen', 'Taoura', 'Zaarouria', 'Merahna']
+  },
+  {
+    code: '42',
+    name: 'Tipaza',
+    nameAr: 'تيبازة',
+    cities: ['Tipaza', 'Kolea', 'Cherchell', 'Menaceur', 'Ahmer El Ain', 'Bou Ismail', 'Chaiba']
+  },
+  {
+    code: '43',
+    name: 'Mila',
+    nameAr: 'ميلة',
+    cities: ['Mila', 'Ferdjioua', 'Chelghoum Laid', 'Rouached', 'Grarem Gouga', 'Hamala', 'Ain Beida Harriche']
+  },
+  {
+    code: '44',
+    name: 'Ain Defla',
+    nameAr: 'عين الدفلى',
+    cities: ['Ain Defla', 'Khemis Miliana', 'Rouina', 'Djelida', 'El Attaf', 'Arib', 'Miliana']
+  },
+  {
+    code: '45',
+    name: 'Naâma',
+    nameAr: 'النعامة',
+    cities: ['Naâma', 'Mecheria', 'Ain Sefra', 'Tiout', 'Sfissifa', 'Moghrar', 'Assela']
+  },
+  {
+    code: '46',
+    name: 'Ain Témouchent',
+    nameAr: 'عين تموشنت',
+    cities: ['Ain Témouchent', 'Beni Saf', 'El Malah', 'Hammam Bou Hadjar', 'Ouled Boudjemaa', 'Aghlal']
+  },
+  {
+    code: '47',
+    name: 'Ghardaïa',
+    nameAr: 'غرداية',
+    cities: ['Ghardaïa', 'El Meniaa', 'Berriane', 'Metlili', 'El Guerrara', 'Dhayet Ben Dhahoua', 'Sebseb']
+  },
+  {
+    code: '48',
+    name: 'Relizane',
+    nameAr: 'غليزان',
+    cities: ['Relizane', 'Mazouna', 'Oued Rhiou', 'Yellel', 'Sidi Mhamed Ben Ali', 'El Hassi', 'Hamri']
+  },
+  {
+    code: '49',
+    name: 'Timimoun',
+    nameAr: 'تيميمون',
+    cities: ['Timimoun', 'Ouled Said', 'Aougrout', 'Deldoul', 'Charouine', 'Metarfa', 'Tinerkouk']
+  },
+  {
+    code: '50',
+    name: 'Bordj Badji Mokhtar',
+    nameAr: 'برج باجي مختار',
+    cities: ['Bordj Badji Mokhtar', 'Timiaouine', 'Timokten']
+  },
+  {
+    code: '51',
+    name: 'Ouled Djellal',
+    nameAr: 'أولاد جلال',
+    cities: ['Ouled Djellal', 'Sidi Khaled', 'Doucen', 'Chaiba', 'Besbes']
+  },
+  {
+    code: '52',
+    name: 'Béni Abbès',
+    nameAr: 'بني عباس',
+    cities: ['Béni Abbès', 'El Ouata', 'Tamtert', 'Igli', 'Kerzaz']
+  },
+  {
+    code: '53',
+    name: 'In Salah',
+    nameAr: 'عين صالح',
+    cities: ['In Salah', 'Foggaret Ezzaouia', 'In Ghar']
+  },
+  {
+    code: '54',
+    name: 'In Guezzam',
+    nameAr: 'عين قزام',
+    cities: ['In Guezzam', 'Tin Zaouaten']
+  },
+  {
+    code: '55',
+    name: 'Touggourt',
+    nameAr: 'تقرت',
+    cities: ['Touggourt', 'Temacine', 'Megarine', 'Sidi Slimane', 'Nezla', 'Zaouia El Abidia']
+  },
+  {
+    code: '56',
+    name: 'Djanet',
+    nameAr: 'جانت',
+    cities: ['Djanet', 'Bordj El Haoues']
+  },
+  {
+    code: '57',
+    name: 'El Meghaier',
+    nameAr: 'المغير',
+    cities: ['El Meghaier', 'Djamaa', 'Sidi Amrane', 'Still', 'Ourmes']
+  },
+  {
+    code: '58',
+    name: 'El Menia',
+    nameAr: 'المنيعة',
+    cities: ['El Menia', 'Hassi Gara']
+  }
+]
+
+// Helper functions
+export function getWilayaByCode(code: string): Wilaya | undefined {
+  return ALGERIA_WILAYAS.find(wilaya => wilaya.code === code)
+}
+
+export function getWilayaByName(name: string): Wilaya | undefined {
+  return ALGERIA_WILAYAS.find(wilaya => 
+    wilaya.name.toLowerCase() === name.toLowerCase() || 
+    wilaya.nameAr === name
+  )
+}
+
+export function getCitiesByWilaya(wilayaCode: string): string[] {
+  const wilaya = getWilayaByCode(wilayaCode)
+  return wilaya ? wilaya.cities : []
+}
+
+export function searchWilayas(query: string): Wilaya[] {
+  const lowerQuery = query.toLowerCase()
+  return ALGERIA_WILAYAS.filter(wilaya => 
+    wilaya.name.toLowerCase().includes(lowerQuery) ||
+    wilaya.nameAr.includes(query) ||
+    wilaya.cities.some(city => city.toLowerCase().includes(lowerQuery))
+  )
+}
+
