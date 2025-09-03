@@ -1,9 +1,17 @@
 // Supabase client configuration
 // src/lib/supabase/client.ts
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@supabase/supabase-js'
 
-// For client-side components
-export const supabase = createClientComponentClient()
+// Debug: Check if environment variables are loaded
+console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Found' : 'Missing')
+console.log('Supabase Key:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Found' : 'Missing')
+
+// For client-side components with explicit env vars (more reliable)
+export const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 // Types for our database
 export type Database = {

@@ -10,20 +10,22 @@ export default function TestConnection() {
     setSupabaseTest('Testing...')
     
     try {
+      console.log('Environment Variables Check:')
+      console.log('URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+      console.log('Key exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+      
       // First, let's test if we can import the Supabase client
       const { supabase } = await import('@/lib/supabase/client')
       setSupabaseTest('Supabase client imported successfully')
       
-      // Now test the actual connection
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('count')
-        .limit(1)
+      // Test basic connectivity without querying a specific table
+      const { data, error } = await supabase.auth.getSession()
       
       if (error) {
         setSupabaseTest(`Supabase error: ${error.message}`)
       } else {
         setSupabaseTest('✅ Supabase connection successful!')
+        console.log('Session data:', data)
       }
     } catch (err) {
       setSupabaseTest(`Import/Connection failed: ${err}`)

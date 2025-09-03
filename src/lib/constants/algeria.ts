@@ -1,15 +1,15 @@
 // Algeria-specific constants
 // src/lib/constants/algeria.ts
 
-export interface Wilaya {
+export interface wilaya {
   code: string
   name: string
   nameAr: string
   cities: string[]
 }
 
-// All 58 Wilayas of Algeria
-export const ALGERIA_WILAYAS: Wilaya[] = [
+// All 58 wilayas of Algeria
+export const ALGERIA_WILAYAS: wilaya[] = [
   {
     code: '01',
     name: 'Adrar',
@@ -361,11 +361,11 @@ export const ALGERIA_WILAYAS: Wilaya[] = [
 ]
 
 // Helper functions
-export function getWilayaByCode(code: string): Wilaya | undefined {
+export function getWilayaByCode(code: string): wilaya | undefined {
   return ALGERIA_WILAYAS.find(wilaya => wilaya.code === code)
 }
 
-export function getWilayaByName(name: string): Wilaya | undefined {
+export function getWilayaByName(name: string): wilaya | undefined {
   return ALGERIA_WILAYAS.find(wilaya => 
     wilaya.name.toLowerCase() === name.toLowerCase() || 
     wilaya.nameAr === name
@@ -377,7 +377,7 @@ export function getCitiesByWilaya(wilayaCode: string): string[] {
   return wilaya ? wilaya.cities : []
 }
 
-export function searchWilayas(query: string): Wilaya[] {
+export function searchWilayas(query: string): wilaya[] {
   const lowerQuery = query.toLowerCase()
   return ALGERIA_WILAYAS.filter(wilaya => 
     wilaya.name.toLowerCase().includes(lowerQuery) ||

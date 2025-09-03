@@ -174,6 +174,7 @@ export default function CreateListingForm() {
         .upload(filePath, photo)
 
       if (uploadError) {
+        console.error('Photo upload error:', uploadError)
         throw new Error(`Failed to upload photo: ${uploadError.message}`)
       }
 
@@ -223,40 +224,70 @@ export default function CreateListingForm() {
     e.preventDefault()
     
     if (!validateForm()) return
+    if (!user) {
+      setError('User not authenticated')
+      return
+    }
 
     setLoading(true)
     setError('')
 
     try {
-      const photoUrls = await uploadPhotos()
+      console.log('Starting form submission...')
+      console.log('Form data:', formData)
+      console.log('User:', user)
 
-      const { data, error } = await supabase
-        .from('listings')
-        .insert({
-          user_id: user!.id,
-          title: formData.title.trim(),
-          description: formData.description.trim(),
-          category: formData.category,
-          price: formData.price ? Number(formData.price) : null,
+      // Upload photos first
+      let photoUrls: string[] = []
+      if (formData.photos.length > 0) {
+        console.log('Uploading photos...')
+        photoUrls = await uploadPhotos()
+        console.log('Photos uploaded:', photoUrls)
+      }
+
+      // Prepare the listing data with location and metadata
+    const allowedCategories = ['for_sale', 'job', 'service', 'for_rent'];
+    const safeCategory = allowedCategories.includes(formData.category) ? formData.category : null;
+
+        const listingData = {
+        user_id: user.id,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        category: safeCategory,
+        price: formData.price ? parseFloat(formData.price) : null,
+        status: 'active',
+        photos: photoUrls,
+        location: {
+          wilaya: formData.wilaya,
+          city: formData.city.trim()
+        },
+        metadata: {
+          ...formData.metadata,
           currency: formData.currency,
-          status: 'active',
-          location: {
-            wilaya: formData.wilaya,
-            city: formData.city.trim()
-          },
-          contact: {
-            phone: formData.phone.trim(),
-            email: formData.email.trim()
-          },
-          photos: photoUrls,
-          metadata: formData.metadata
-        })
+          phone: formData.phone.trim(),
+          email: formData.email.trim()
+        }
+      }
+
+      console.log('Inserting listing data:', listingData)
+
+      // Insert the listing
+      const { data, error: insertError } = await supabase
+        .from('listings')
+        .insert([listingData])
         .select()
-        .single()
 
-      if (error) throw error
+      if (insertError) {
+        console.error('Supabase insert error:', insertError)
+        throw new Error(`Database error: ${insertError.message}`)
+      }
 
-      setSuccess('Listing created successfully!')
+      if (!data || data.length === 0) {
+        throw new Error('No data returned from database')
+      }
+
+      console.log('Listing created successfully:', data)
+      setSuccess('Listing created successfully! Redirecting...')
       
       setTimeout(() => {
         router.push('/')
@@ -264,7 +295,15 @@ export default function CreateListingForm() {
 
     } catch (err) {
       console.error('Error creating listing:', err)
-      setError(err instanceof Error ? err.message : 'Failed to create listing')
+      let errorMessage = 'Failed to create listing'
+      
+      if (err instanceof Error) {
+        errorMessage = err.message
+      } else if (typeof err === 'object' && err !== null) {
+        errorMessage = JSON.stringify(err)
+      }
+      
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -544,7 +583,8 @@ export default function CreateListingForm() {
 
         {error && (
           <div className="mb-6 bg-red-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-lg font-medium">
-            {error}
+            <div className="font-semibold mb-2">Error creating listing:</div>
+            <div className="text-sm">{error}</div>
           </div>
         )}
 

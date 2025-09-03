@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
-import { getAllCategories } from '@/lib/constants/categories'
 
 interface Listing {
   id: string
@@ -14,14 +13,7 @@ interface Listing {
   category: 'for_sale' | 'job' | 'service' | 'for_rent'
   photos: string[]
   created_at: string
-  location: {
-    wilaya: string
-    city: string
-  }
-  profiles: {
-    first_name: string
-    last_name: string
-  }[]
+  user_id: string
 }
 
 interface User {
@@ -74,28 +66,22 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch featured listings (latest 6)
-        const { data: listings } = await supabase
+        console.log('Fetching listings...')
+
+        // Fetch featured listings (latest 6) - simplified query
+        const { data: listings, error: listingsError } = await supabase
           .from('listings')
-          .select(`
-            id,
-            title,
-            description,
-            price,
-            category,
-            photos,
-            created_at,
-            location,
-            profiles (
-              first_name,
-              last_name
-            )
-          `)
+          .select('*')
           .eq('status', 'active')
           .order('created_at', { ascending: false })
           .limit(6)
 
-        setFeaturedListings(listings || [])
+        if (listingsError) {
+          console.error('Error fetching listings:', listingsError)
+        } else {
+          console.log('Listings fetched:', listings)
+          setFeaturedListings(listings || [])
+        }
 
         // Fetch stats
         const { count: totalCount } = await supabase
@@ -103,11 +89,12 @@ export default function HomePage() {
           .select('*', { count: 'exact', head: true })
           .eq('status', 'active')
 
+        const today = new Date().toISOString().split('T')[0]
         const { count: newTodayCount } = await supabase
           .from('listings')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'active')
-          .gte('created_at', new Date().toISOString().split('T')[0])
+          .gte('created_at', today)
 
         const { count: hotDealsCount } = await supabase
           .from('listings')
@@ -121,6 +108,8 @@ export default function HomePage() {
           hotDeals: hotDealsCount || 0,
           newToday: newTodayCount || 0
         })
+
+        console.log('Stats:', { totalCount, newTodayCount, hotDealsCount })
       } catch (error) {
         console.error('Error fetching data:', error)
       } finally {
@@ -159,12 +148,24 @@ export default function HomePage() {
 
   const getCategoryBadge = (category: string) => {
     const badges = {
-      'for_sale': { text: 'For Sale', color: 'bg-green-500' },
-      'for_rent': { text: 'For Rent', color: 'bg-blue-500' },
-      'job': { text: 'Jobs', color: 'bg-red-500' },
-      'service': { text: 'Services', color: 'bg-purple-500' }
+      'for_sale': { text: 'For Sale', color: 'bg-green-500', emoji: '💰' },
+      'for_rent': { text: 'For Rent', color: 'bg-blue-500', emoji: '🏠' },
+      'job': { text: 'Jobs', color: 'bg-red-500', emoji: '💼' },
+      'service': { text: 'Services', color: 'bg-purple-500', emoji: '🔧' }
     }
-    return badges[category as keyof typeof badges] || { text: category, color: 'bg-gray-500' }
+    return badges[category as keyof typeof badges] || { text: category, color: 'bg-gray-500', emoji: '📦' }
+  }
+
+  const getTimeAgo = (dateString: string) => {
+    const now = new Date()
+    const date = new Date(dateString)
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
+    
+    if (diffInHours < 1) return 'Just now'
+    if (diffInHours < 24) return `${diffInHours}h ago`
+    const diffInDays = Math.floor(diffInHours / 24)
+    if (diffInDays < 7) return `${diffInDays}d ago`
+    return date.toLocaleDateString()
   }
 
   return (
@@ -230,7 +231,6 @@ export default function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
               Favorites
-              <span className="ml-auto bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full">3</span>
             </button>
 
             <button className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors">
@@ -294,7 +294,7 @@ export default function HomePage() {
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
                   <span className="text-white font-semibold">
-                    {user.first_name[0]}
+                    {user.first_name?.[0] || 'U'}
                   </span>
                 </div>
                 <div>
@@ -338,7 +338,7 @@ export default function HomePage() {
               onClick={handleSearch}
               className="px-8 py-4 bg-orange-500 text-white font-semibold rounded-r-full hover:bg-orange-600 transition-colors shadow-lg"
             >
-              🔍 Search
+              Search
             </button>
           </div>
         </div>
@@ -349,25 +349,25 @@ export default function HomePage() {
             onClick={() => handleCategoryClick('for_sale')}
             className="px-6 py-3 bg-white bg-opacity-90 backdrop-blur-sm text-gray-800 font-semibold rounded-full hover:bg-opacity-100 transition-colors flex items-center shadow-lg"
           >
-            💰 For Sale
+            For Sale
           </button>
           <button
             onClick={() => handleCategoryClick('for_rent')}
             className="px-6 py-3 bg-white bg-opacity-90 backdrop-blur-sm text-gray-800 font-semibold rounded-full hover:bg-opacity-100 transition-colors flex items-center shadow-lg"
           >
-            🏠 For Rent
+            For Rent
           </button>
           <button
             onClick={() => handleCategoryClick('job')}
             className="px-6 py-3 bg-white bg-opacity-90 backdrop-blur-sm text-gray-800 font-semibold rounded-full hover:bg-opacity-100 transition-colors flex items-center shadow-lg"
           >
-            💼 Jobs
+            Jobs
           </button>
           <button
             onClick={() => handleCategoryClick('service')}
             className="px-6 py-3 bg-white bg-opacity-90 backdrop-blur-sm text-gray-800 font-semibold rounded-full hover:bg-opacity-100 transition-colors flex items-center shadow-lg"
           >
-            🔧 Services
+            Services
           </button>
         </div>
 
@@ -376,19 +376,20 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-4xl font-bold text-green-600 mb-2">
-                {stats.totalListings}+
+                {stats.totalListings}
               </div>
               <div className="text-gray-600 font-medium">Active Listings</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-orange-500 mb-2 flex items-center justify-center">
-                {stats.hotDeals} 🔥
+              <div className="text-4xl font-bold text-orange-500 mb-2">
+                {stats.hotDeals}
               </div>
               <div className="text-gray-600 font-medium">Hot Deals</div>
             </div>
             <div>
               <div className="text-4xl font-bold text-blue-500 mb-2 flex items-center justify-center">
-                {stats.newToday} <span className="ml-2 bg-blue-500 text-white text-sm px-2 py-1 rounded-full">NEW</span>
+                {stats.newToday} 
+                {stats.newToday > 0 && <span className="ml-2 bg-blue-500 text-white text-sm px-2 py-1 rounded-full">NEW</span>}
               </div>
               <div className="text-gray-600 font-medium">New Today</div>
             </div>
@@ -398,8 +399,8 @@ export default function HomePage() {
         {/* Featured Listings */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-white flex items-center">
-              ⭐ Featured Listings
+            <h2 className="text-3xl font-bold text-white">
+              Featured Listings
             </h2>
             <button
               onClick={() => router.push('/browse')}
@@ -448,7 +449,14 @@ export default function HomePage() {
                       {/* Category Badge */}
                       <div className="absolute top-2 left-2">
                         <span className={`${badge.color} text-white px-3 py-1 rounded-full text-sm font-medium`}>
-                          {badge.text}
+                          {badge.emoji} {badge.text}
+                        </span>
+                      </div>
+
+                      {/* Time Badge */}
+                      <div className="absolute top-2 right-2">
+                        <span className="bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-xs">
+                          {getTimeAgo(listing.created_at)}
                         </span>
                       </div>
                     </div>
@@ -468,7 +476,7 @@ export default function HomePage() {
                           {formatPrice(listing.price, listing.category)}
                         </span>
                         <span className="text-sm text-gray-500">
-                          {listing.location?.city}
+                          ID: {listing.id.slice(-6)}
                         </span>
                       </div>
                     </div>
