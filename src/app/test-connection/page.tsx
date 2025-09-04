@@ -3,6 +3,18 @@
 import { useState } from 'react'
 
 export default function TestConnection() {
+  // Only show this page in development
+  if (process.env.NODE_ENV === 'production') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">404</h1>
+          <p className="text-gray-600">Page not found</p>
+        </div>
+      </div>
+    )
+  }
+
   const [message, setMessage] = useState('Test page loaded successfully!')
   const [supabaseTest, setSupabaseTest] = useState('Not tested yet')
 

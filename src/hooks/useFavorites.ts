@@ -92,7 +92,21 @@ export function useFavorites(page: number = 1, limit: number = 20) {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/favorites?page=${page}&limit=${limit}`);
+      // Get current session to include token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Add authorization header if we have a session
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch(`/api/favorites?page=${page}&limit=${limit}`, {
+        headers
+      });
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -139,11 +153,21 @@ export function useFavoriteStatus(listingId: string) {
     }
 
     try {
+      // Get current session to include token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Add authorization header if we have a session
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch(`/api/favorites/${listingId}`, {
         credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers
       });
       if (response.ok) {
         const data = await response.json();
@@ -249,11 +273,21 @@ export function useFavoriteStatus(listingId: string) {
 export function useFavoritesActions() {
   const addToFavorites = async (listingId: string) => {
     try {
+      // Get current session to include token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Add authorization header if we have a session
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch('/api/favorites', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify({ listingId })
       });
 
@@ -271,8 +305,21 @@ export function useFavoritesActions() {
 
   const removeFromFavorites = async (listingId: string) => {
     try {
+      // Get current session to include token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Add authorization header if we have a session
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch(`/api/favorites/${listingId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers
       });
 
       if (!response.ok) {

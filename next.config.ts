@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
-import withPWA from 'next-pwa';
+// Temporarily disabled PWA to prevent infinite reload loop
+// import withPWA from 'next-pwa';
 
 const nextConfig = {
   images: {
@@ -12,28 +13,4 @@ const nextConfig = {
   },
 };
 
-const pwaConfig = withPWA({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  runtimeCaching: [
-    {
-      urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'supabase-cache',
-        networkTimeoutSeconds: 10,
-      },
-    },
-    {
-      urlPattern: /\/api\/.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'api-cache',
-        networkTimeoutSeconds: 10,
-      },
-    },
-  ],
-});
-
-export default pwaConfig(nextConfig);
+export default nextConfig;
