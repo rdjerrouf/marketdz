@@ -1,9 +1,8 @@
 // src/app/api/messages/[conversationId]/route.ts
 
-// @ts-expect-error: Ignore missing types for Supabase client
 import { NextRequest, NextResponse } from 'next/server';
-// @ts-expect-error: Ignore missing types for Supabase client
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { Database } from '@/lib/supabase/client';
 
 interface RouteParams {
   params: Promise<{ conversationId: string }>;
@@ -18,9 +17,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     // Verify user is part of conversation
-    // @ts-expect-error: Ignore missing types for Supabase client
     const { data: conversation, error: convError } = await supabase
-      .from('conversations')
+  .from('conversations')
       .select('buyer_id, seller_id')
       .eq('id', conversationId)
       .single();
@@ -31,9 +29,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
     // Fetch messages
-    // @ts-expect-error: Ignore missing types for Supabase client
     const { data: messages, error } = await supabase
-      .from('messages')
+  .from('messages')
       .select(`
         id,
         content,
@@ -55,15 +52,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 });
     }
     // Mark unread messages as read
-    // @ts-expect-error: Ignore missing types for Supabase client
     const unreadIds = messages
       ?.filter((msg: any) => msg.sender_id !== user.id && !msg.read_at)
       .map((msg: any) => msg.id) || [];
     if (unreadIds.length > 0) {
-      // @ts-expect-error: Ignore missing types for Supabase client
       await supabase
         .from('messages')
-        .update({ read_at: new Date().toISOString() })
+        .update({ read_at: new Date().toISOString() } as Database['public']['Tables']['messages']['Update'])
         .in('id', unreadIds);
     }
     return NextResponse.json({ messages: messages || [] });
@@ -86,9 +81,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     // Verify access
-    // @ts-expect-error: Ignore missing types for Supabase client
     const { data: conversation, error: convError } = await supabase
-      .from('conversations')
+  .from('conversations')
       .select('buyer_id, seller_id, listing_id')
       .eq('id', conversationId)
       .single();
@@ -99,7 +93,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
     // Send message
-    // @ts-expect-error: Ignore missing types for Supabase client
     const { data: message, error } = await supabase
       .from('messages')
       .insert({
@@ -107,7 +100,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         sender_id: user.id,
         content: content.trim(),
         message_type: messageType
-      })
+      } as Database['public']['Tables']['messages']['Insert'])
       .select(`
         id,
         content,
@@ -128,10 +121,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
     }
     // Update conversation timestamp
-    // @ts-expect-error: Ignore missing types for Supabase client
     await supabase
       .from('conversations')
-      .update({ last_message_at: message.created_at })
+      .update({ last_message_at: message.created_at } as Database['public']['Tables']['conversations']['Update'])
       .eq('id', conversationId);
     return NextResponse.json({ message });
   } catch (error) {

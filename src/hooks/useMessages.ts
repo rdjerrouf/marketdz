@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/hooks/useUser';
-import { createClient } from '@/lib/supabase/client';
+import { supabase, Database } from '@/lib/supabase/client';
 
 // You should define these interfaces in a types file and import them
 interface Message {
@@ -56,7 +56,7 @@ export function useMessages(conversationId?: string) {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
+  // use the exported supabase instance
 
   const fetchConversations = useCallback(async () => {
     if (!user) return;
@@ -140,7 +140,7 @@ export function useMessages(conversationId?: string) {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`
         },
-        async (payload: any) => {
+        async (payload: { new: { id: string } }) => {
           // Fetch complete message with sender info
           const { data: newMessage } = await supabase
             .from('messages')
@@ -161,7 +161,7 @@ export function useMessages(conversationId?: string) {
             .eq('id', payload.new.id)
             .single();
           if (newMessage && newMessage.sender_id !== user.id) {
-            setMessages(prev => [...prev, newMessage]);
+            setMessages(prev => [...prev, newMessage as Message]);
           }
         }
       )
@@ -169,7 +169,7 @@ export function useMessages(conversationId?: string) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, conversationId, supabase]);
+  }, [user, conversationId]);
 
   useEffect(() => {
     if (user) {
