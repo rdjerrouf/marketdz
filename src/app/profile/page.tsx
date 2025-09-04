@@ -21,7 +21,7 @@ interface User {
 interface Listing {
   id: string
   title: string
-  description: string
+  description: string | null
   price: number | null
   category: 'for_sale' | 'job' | 'service' | 'for_rent'
   photos: string[]
@@ -636,7 +636,7 @@ export default function ProfilePage() {
                           {/* Content */}
                           <div className="p-4">
                             <h3 className="font-semibold text-gray-900 mb-2 truncate">{listing.title}</h3>
-                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{listing.description}</p>
+                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{listing.description || 'No description available'}</p>
                             
                             <div className="flex items-center justify-between mb-4">
                               <span className="font-bold text-green-600">
@@ -776,10 +776,15 @@ export default function ProfilePage() {
                       <div className="border-t border-gray-200 pt-4">
                         <h4 className="font-medium text-red-900 mb-2">Danger Zone</h4>
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             if (confirm('Are you sure you want to sign out?')) {
-                              supabase.auth.signOut()
-                              router.push('/')
+                              try {
+                                await fetch('/api/auth/signout', { method: 'POST' })
+                                router.push('/')
+                              } catch (error) {
+                                console.error('Signout error:', error)
+                                router.push('/')
+                              }
                             }
                           }}
                           className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors mr-3"

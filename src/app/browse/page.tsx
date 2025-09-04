@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
+import FavoriteButton from '@/components/common/FavoriteButton'
 
 interface Listing {
   id: string
@@ -277,6 +278,16 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               Create Listing
+            </button>
+
+            <button 
+              onClick={() => router.push('/favorites')}
+              className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              Favorites
             </button>
 
             <button 
@@ -613,7 +624,12 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
                           </span>
                         </div>
 
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-2 right-2 flex items-center space-x-2">
+                          <FavoriteButton 
+                            listingId={listing.id}
+                            size="sm"
+                            className="bg-white bg-opacity-90 hover:bg-white shadow-lg"
+                          />
                           <span className="bg-black bg-opacity-60 text-white px-2 py-1 rounded-full text-xs shadow-lg">
                             {getTimeAgo(listing.created_at)}
                           </span>

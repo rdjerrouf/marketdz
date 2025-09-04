@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase/client'
 interface Listing {
   id: string
   title: string
-  description: string
+  description: string | null
   price: number | null
   category: 'for_sale' | 'job' | 'service' | 'for_rent'
   photos: string[]

@@ -1,6 +1,18 @@
 // TypeScript type definitions
 // src/types/index.ts
 
+// Rate limiting types
+export interface RateLimit {
+  id: string
+  key: string
+  identifier: string
+  count: number
+  window_start: string
+  window_end: string
+  created_at: string
+  updated_at: string
+}
+
 // User related types
 export interface User {
   id: string
@@ -12,11 +24,11 @@ export interface UserProfile {
   id: string
   first_name: string
   last_name: string
-  bio?: string
-  phone?: string
-  avatar_url?: string
-  city?: string
-  wilaya?: string
+  bio?: string | null
+  phone?: string | null
+  avatar_url?: string | null
+  city?: string | null
+  wilaya?: string | null
   rating: number
   review_count: number
   created_at: string
@@ -40,18 +52,21 @@ export interface BaseListing {
   id: string
   user_id: string
   category: ListingCategory
-  subcategory?: string
+  subcategory?: string | null
   title: string
-  description?: string
-  price?: number
+  description: string | null
+  price: number | null
   status: ListingStatus
   location_city?: string
   location_wilaya?: string
   photos: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
   created_at: string
   updated_at: string
 }
+
+// Database compatible types
+export type Listing = BaseListing
 
 export interface ListingWithProfile extends BaseListing {
   profile: UserProfile
@@ -121,7 +136,7 @@ export interface CreateListingData {
   location_city?: string
   location_wilaya?: string
   photos?: File[]
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 // Chat related types
@@ -222,11 +237,11 @@ export interface NotificationData {
   icon?: string
   badge?: string
   tag?: string
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 }
 
 // API response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T
   error?: string
   message?: string

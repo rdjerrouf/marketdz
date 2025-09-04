@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase/client'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import { isValidEmail, isValidAlgerianPhone } from '@/lib/utils'
+import { supabase } from '@/lib/supabase/client'
 
 interface FormData {
   email: string
@@ -123,35 +123,37 @@ export default function SignUpPage() {
     setErrors({})
 
     try {
-      // Sign up with Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            phone: formData.phone || null,
-            wilaya: formData.wilaya,
-            city: formData.city,
-            bio: formData.bio || null,
-          }
-        }
+      // Send signup request to API route
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone || null,
+          wilaya: formData.wilaya,
+          city: formData.city,
+          bio: formData.bio || null,
+        }),
       })
 
-      if (error) {
-        if (error.message.includes('already registered')) {
+      const result = await response.json()
+
+      if (!response.ok) {
+        if (result.error.includes('already registered') || result.error.includes('User already registered')) {
           setErrors({ email: 'Cette adresse email est déjà utilisée' })
         } else {
-          setErrors({ general: error.message })
+          setErrors({ general: result.error })
         }
         return
       }
 
-      if (data.user) {
-        // Redirect to sign in page with success message
-        router.push('/signin?message=Compte créé avec succès! Veuillez vous connecter.')
-      }
+      // Success - redirect to sign in page with success message
+      router.push('/signin?message=Compte créé avec succès! Veuillez vous connecter.')
 
     } catch (error) {
       console.error('Sign up error:', error)
@@ -164,6 +166,19 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        {/* Back button */}
+        <div className="mb-4">
+          <Link 
+            href="/" 
+            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Retour à l'accueil
+          </Link>
+        </div>
+        
         <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
           MarketDZ
         </h1>
@@ -193,7 +208,7 @@ export default function SignUpPage() {
                 id="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.email ? 'border-red-300' : 'border-gray-300'
                 }`}
                 placeholder="exemple@email.com"
@@ -213,7 +228,7 @@ export default function SignUpPage() {
                   id="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder="Minimum 6 caractères"
@@ -240,7 +255,7 @@ export default function SignUpPage() {
                 id="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                 }`}
               />
@@ -259,7 +274,7 @@ export default function SignUpPage() {
                   id="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.firstName ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />
@@ -276,7 +291,7 @@ export default function SignUpPage() {
                   id="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.lastName ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />
@@ -295,7 +310,7 @@ export default function SignUpPage() {
                 id="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.phone ? 'border-red-300' : 'border-gray-300'
                 }`}
                 placeholder="0551234567"
@@ -313,7 +328,7 @@ export default function SignUpPage() {
                 id="wilaya"
                 value={formData.wilaya}
                 onChange={handleInputChange}
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.wilaya ? 'border-red-300' : 'border-gray-300'
                 }`}
               >
@@ -338,7 +353,7 @@ export default function SignUpPage() {
                 value={formData.city}
                 onChange={handleInputChange}
                 disabled={!formData.wilaya}
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.city ? 'border-red-300' : 'border-gray-300'
                 } ${!formData.wilaya ? 'bg-gray-100' : ''}`}
               >
@@ -363,7 +378,7 @@ export default function SignUpPage() {
                 rows={3}
                 value={formData.bio}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Parlez-nous de vous..."
               />
             </div>

@@ -4,11 +4,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
+import FavoriteButton from '@/components/common/FavoriteButton'
 
 interface Listing {
   id: string
   title: string
-  description: string
+  description: string | null
   price: number | null
   category: 'for_sale' | 'job' | 'service' | 'for_rent'
   photos: string[]
@@ -133,8 +134,13 @@ export default function HomePage() {
   }
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/signin')
+    try {
+      await fetch('/api/auth/signout', { method: 'POST' })
+      router.push('/signin')
+    } catch (error) {
+      console.error('Signout error:', error)
+      router.push('/signin')
+    }
   }
 
   const formatPrice = (price: number | null, category: string) => {
@@ -226,7 +232,10 @@ export default function HomePage() {
               Search
             </button>
 
-            <button className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors">
+            <button 
+              onClick={() => router.push('/favorites')}
+              className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+            >
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
@@ -453,8 +462,14 @@ export default function HomePage() {
                         </span>
                       </div>
 
-                      {/* Time Badge */}
-                      <div className="absolute top-2 right-2">
+                      {/* Time Badge and Favorite Button */}
+                      <div className="absolute top-2 right-2 flex items-center space-x-2">
+                        <FavoriteButton 
+                          listingId={listing.id}
+                          listingOwnerId={listing.user_id}
+                          size="sm"
+                          className="bg-white bg-opacity-90 hover:bg-white shadow-lg"
+                        />
                         <span className="bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-xs">
                           {getTimeAgo(listing.created_at)}
                         </span>
@@ -468,7 +483,7 @@ export default function HomePage() {
                       </h3>
                       
                       <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                        {listing.description}
+                        {listing.description || 'No description available'}
                       </p>
                       
                       <div className="flex items-center justify-between">

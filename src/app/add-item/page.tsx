@@ -201,8 +201,13 @@ export default function AddItemPage() {
               {user ? (
                 <button 
                   onClick={async () => {
-                    await supabase.auth.signOut()
-                    router.push('/signin')
+                    try {
+                      await fetch('/api/auth/signout', { method: 'POST' })
+                      router.push('/signin')
+                    } catch (error) {
+                      console.error('Signout error:', error)
+                      router.push('/signin')
+                    }
                   }}
                   className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
                 >

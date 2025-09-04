@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { getAllCategories, getCategoryByValue } from '@/lib/constants/categories'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
+import type { ListingCategory } from '@/types'
 
 interface FormData {
   title: string
@@ -246,16 +247,16 @@ export default function CreateListingForm() {
       }
 
       // Prepare the listing data with location and metadata
-    const allowedCategories = ['for_sale', 'job', 'service', 'for_rent'];
-    const safeCategory = allowedCategories.includes(formData.category) ? formData.category : null;
+      const allowedCategories = ['for_sale', 'job', 'service', 'for_rent'] as const;
+      const safeCategory = allowedCategories.includes(formData.category as any) ? formData.category as ListingCategory : 'for_sale';
 
-        const listingData = {
+      const listingData = {
         user_id: user.id,
         title: formData.title.trim(),
         description: formData.description.trim(),
         category: safeCategory,
         price: formData.price ? parseFloat(formData.price) : null,
-        status: 'active',
+        status: 'active' as const,
         photos: photoUrls,
         location: {
           wilaya: formData.wilaya,

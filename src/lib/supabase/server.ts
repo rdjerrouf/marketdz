@@ -2,12 +2,42 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
-import type { Database } from './client'
+import type { Database } from '@/types/database'
+import { NextRequest } from 'next/server'
 
 // For server-side components and API routes (Next.js 15 compatible)
-export const createServerSupabaseClient = async () => {
+export const createServerSupabaseClient = async (request?: NextRequest) => {
   const cookieStore = await cookies()
 
+  // If this is an API route request with an Authorization header, use it
+  if (request?.headers.get('Authorization')) {
+    const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+    if (token) {
+      // Create a server client that properly sets the auth context
+      return createServerClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              // For API routes with JWT, we don't need cookies
+              return []
+            },
+            setAll() {
+              // Don't set cookies in API routes
+            },
+          },
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        }
+      );
+    }
+  }
+
+  // Default cookie-based client for server components
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -29,6 +59,35 @@ export const createServerSupabaseClient = async () => {
     }
   )
 }
+
+// For API routes that need to work with middleware-processed requests
+export const createApiSupabaseClient = (request: NextRequest) => {
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          // Don't try to set cookies in API routes - they're already set by middleware
+        },
+      },
+      global: {
+        headers: {
+          Authorization: request.headers.get('Authorization') || ''
+        }
+      }
+    }
+  )
+}
+
+// Simple client for API routes
+export const supabase = createClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 // For admin operations
 export const supabaseAdmin = createClient<Database>(

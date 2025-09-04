@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = await createServerSupabaseClient(request);
+    const supabase = await createServerSupabaseClient();
     
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -148,20 +148,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createServerSupabaseClient(request);
-    
-    // Debug: Check what we're getting for POST request
-    console.log('🔍 POST Debug: Checking user authentication...');
-    console.log('🔍 POST Debug: Request cookies:', request.cookies.getAll());
+    const supabase = await createServerSupabaseClient();
     
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    console.log('🔍 POST Debug: User data:', user ? { id: user.id, email: user.email } : 'null');
-    console.log('🔍 POST Debug: User error:', userError);
-    
     if (userError || !user) {
-      console.log('🔍 POST Debug: Authentication failed, returning 401');
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
@@ -200,11 +192,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Add to favorites using proper auth context
-    console.log('🔍 POST Debug: About to insert favorite with proper auth');
-    console.log('🔍 POST Debug: user.id:', user.id);
-    console.log('🔍 POST Debug: listingId:', listingId);
-    
+    // Add to favorites (upsert to handle duplicates)
     const { data: favorite, error: favoriteError } = await supabase
       .from('favorites')
       .upsert(
