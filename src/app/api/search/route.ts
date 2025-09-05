@@ -1,6 +1,12 @@
-// src/app/api/search/route.ts - Production-ready with multi-instance safe rate limiting
+// src/app/api/search/route.ts - Production-ready with enhanced search engine
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { 
+  AdvancedSearchEngine,
+  SearchCache,
+  SearchAnalyticsClass,
+  type SearchParams 
+} from '@/lib/search/enhanced-utils';
 import { 
   escapeSearchQuery, 
   normalizeSearchQuery, 
@@ -39,17 +45,17 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
-    const searchParams = request.nextUrl.searchParams;
-    const rawQuery = searchParams.get('q')?.trim() || '';
-    const category = searchParams.get('category')?.trim();
-    const wilaya = searchParams.get('wilaya')?.trim();
-    const city = searchParams.get('city')?.trim();
-    const minPriceParam = searchParams.get('minPrice')?.trim();
-    const maxPriceParam = searchParams.get('maxPrice')?.trim();
-    const sortBy = searchParams.get('sortBy')?.trim() || 'created_at';
-    const pageParam = searchParams.get('page')?.trim() || '1';
-    const limitParam = searchParams.get('limit')?.trim() || '20';
-    const includeCount = searchParams.get('includeCount') === 'true'; // Default false for max performance
+    const urlSearchParams = request.nextUrl.searchParams;
+    const rawQuery = urlSearchParams.get('q')?.trim() || '';
+    const category = urlSearchParams.get('category')?.trim();
+    const wilaya = urlSearchParams.get('wilaya')?.trim();
+    const city = urlSearchParams.get('city')?.trim();
+    const minPriceParam = urlSearchParams.get('minPrice')?.trim();
+    const maxPriceParam = urlSearchParams.get('maxPrice')?.trim();
+    const sortBy = urlSearchParams.get('sortBy')?.trim() || 'created_at';
+    const pageParam = urlSearchParams.get('page')?.trim() || '1';
+    const limitParam = urlSearchParams.get('limit')?.trim() || '20';
+    const includeCount = urlSearchParams.get('includeCount') === 'true'; // Default false for max performance
 
     // Normalize and validate search query
     const query = normalizeSearchQuery(rawQuery);
@@ -72,168 +78,63 @@ export async function GET(request: NextRequest) {
     }
 
     // Extract validated parameters with DoS protection
-    const page = Math.max(Math.min(parseInt(pageParam) || 1, 500), 1); // Max page 500 to prevent deep scans
-    const limit = Math.min(Math.max(parseInt(limitParam) || 20, 1), 100);
-    const offset = (page - 1) * limit;
-    const minPrice = minPriceParam ? parseFloat(minPriceParam) : undefined;
-    const maxPrice = maxPriceParam ? parseFloat(maxPriceParam) : undefined;
+    const searchParams: SearchParams = {
+      query: query || undefined,
+      category: category as 'for_sale' | 'job' | 'service' | 'for_rent' | undefined,
+      wilaya: wilaya || undefined,
+      city: city || undefined,
+      minPrice: minPriceParam ? parseFloat(minPriceParam) : undefined,
+      maxPrice: maxPriceParam ? parseFloat(maxPriceParam) : undefined,
+      sortBy: sortBy || 'created_at',
+      page: Math.max(Math.min(parseInt(pageParam) || 1, 500), 1), // Max page 500 to prevent deep scans
+      limit: Math.min(Math.max(parseInt(limitParam) || 20, 1), 100),
+      includeCount
+    };
 
     const supabase = await createServerSupabaseClient();
-
-    // Optimized single query with joins to avoid N+1 problem
-    // Count disabled by default for maximum performance - use /api/search/count endpoint when needed
-    let queryBuilder = supabase
-      .from('listings')
-      .select(`
-        id,
-        title,
-        description,
-        price,
-        category,
-        location_wilaya,
-        location_city,
-        photos,
-        created_at,
-        user_id,
-        status,
-        profiles!inner (
-          id,
-          first_name,
-          last_name,
-          avatar_url,
-          city,
-          wilaya,
-          rating
-        )
-      `, { count: includeCount ? 'estimated' : undefined }) // No count by default for speed
-      .eq('status', 'active');
-
-    // Apply filters with proper escaping
-    if (category) {
-      queryBuilder = queryBuilder.eq('category', category as 'for_sale' | 'job' | 'service' | 'for_rent');
-    }
-    if (wilaya) {
-      queryBuilder = queryBuilder.eq('location_wilaya', wilaya);
-    }
-    if (city) {
-      queryBuilder = queryBuilder.eq('location_city', city);
-    }
-    if (minPrice !== undefined) {
-      queryBuilder = queryBuilder.gte('price', minPrice);
-    }
-    if (maxPrice !== undefined) {
-      queryBuilder = queryBuilder.lte('price', maxPrice);
-    }
     
-    // Secure search implementation with optimized strategy
-    if (query) {
-      // Use trigram similarity for better performance with fuzzy matching
-      // This works best with the gin_trgm_ops indexes we deploy
-      const escapedQuery = escapeSearchQuery(query);
-      
-      // Option 1: Current ILIKE approach (works without additional indexes)
-      queryBuilder = queryBuilder.or(`title.ilike.%${escapedQuery}%,description.ilike.%${escapedQuery}%`);
-      
-      // Option 2: Trigram similarity (uncomment when trigram indexes are deployed)
-      // queryBuilder = queryBuilder.or(`title.like.%${escapedQuery}%,description.like.%${escapedQuery}%`);
-      
-      // Option 3: Full-text search (uncomment when FTS indexes are deployed)  
-      // const ftsQuery = escapedQuery.split(' ').join(' & ');
-      // queryBuilder = queryBuilder.textSearch('fts', ftsQuery);
-    }
+    // Initialize advanced search engine
+    const searchEngine = new AdvancedSearchEngine(supabase);
+    
+    // Generate cache key for caching strategy
+    const cacheKey = SearchCache.generateKey(searchParams);
+    
+    // Perform enhanced search
+    const result = await searchEngine.search(searchParams);
 
-    // Apply sorting
-    if (sortBy === 'price_asc') {
-      queryBuilder = queryBuilder.order('price', { ascending: true });
-    } else if (sortBy === 'price_desc') {
-      queryBuilder = queryBuilder.order('price', { ascending: false });
-    } else {
-      queryBuilder = queryBuilder.order('created_at', { ascending: false });
-    }
-
-    // Apply pagination
-    queryBuilder = queryBuilder.range(offset, offset + limit - 1);
-
-    const { data: listings, error: listingsError, count } = await queryBuilder;
-
-    if (listingsError) {
-      console.error('Listings query error:', listingsError);
-      return NextResponse.json(
-        { error: 'Search failed', details: listingsError.message },
-        { status: 500 }
-      );
-    }
-
-    // Transform results to consistent format - optimized photo handling
-    const transformedListings = (listings || []).map((listing: any) => ({
-      id: listing.id,
-      title: listing.title,
-      description: listing.description,
-      price: listing.price,
-      category: listing.category,
-      wilaya: listing.location_wilaya,
-      city: listing.location_city,
-      photos: Array.isArray(listing.photos) ? listing.photos.slice(0, 3) : [], // Limit to 3 photos for performance
-      created_at: listing.created_at,
-      user_id: listing.user_id,
-      status: listing.status,
-      user: listing.profiles ? {
-        id: listing.profiles.id,
-        first_name: listing.profiles.first_name,
-        last_name: listing.profiles.last_name,
-        avatar_url: listing.profiles.avatar_url,
-        city: listing.profiles.city,
-        wilaya: listing.profiles.wilaya,
-        rating: listing.profiles.rating
-      } : null
-    }));
-
-    // Calculate pagination from count (when enabled)
-    const totalItems = includeCount ? (count || 0) : null;
-    const totalPages = totalItems ? Math.ceil(totalItems / limit) : null;
+    // Log performance analytics
+    SearchAnalyticsClass.logPerformance(
+      result.metadata?.strategy || 'unknown',
+      rawQuery,
+      result.listings.length,
+      result.metadata?.executionTime || 0
+    );
 
     // Enhanced search analytics with performance metrics
     logSearchAnalytics({
       query: rawQuery,
       category,
-      resultsCount: transformedListings.length,
+      resultsCount: result.listings.length,
       timestamp: new Date(),
       ip,
       responseTime: Date.now() - startTime
     });
 
-    // Create response with caching headers
+    // Create response with enhanced metadata
     const response = NextResponse.json({
-      listings: transformedListings,
-      pagination: {
-        currentPage: page,
-        totalPages: totalPages || 0,
-        totalItems: totalItems || 0,
-        hasNextPage: totalPages ? page < totalPages : transformedListings.length === limit,
-        hasPreviousPage: page > 1,
-        hasCount: includeCount // Indicate whether count was requested
-      },
-      filters: { 
-        query, 
-        category, 
-        wilaya, 
-        city, 
-        minPrice: minPrice?.toString(), 
-        maxPrice: maxPrice?.toString(), 
-        sortBy 
-      }
+      listings: result.listings,
+      pagination: result.pagination,
+      filters: result.filters,
+      metadata: result.metadata
     });
 
-    // Add caching headers for performance
-    if (!query && (totalItems || 0) > 0) {
-      // Cache non-search queries for 60 seconds
-      response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
-    } else {
-      // Short cache for search queries
-      response.headers.set('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=5');
-    }
+    // Add caching headers based on search cache strategy
+    const cacheHeaders = SearchCache.getCacheHeaders(searchParams);
+    Object.entries(cacheHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
 
-    // Add rate limit headers for transparency (sync with actual limit)
+    // Add rate limit headers for transparency
     response.headers.set('X-RateLimit-Limit', rateLimitResult.limit.toString());
     response.headers.set('X-RateLimit-Remaining', rateLimitResult.remaining.toString());
 

@@ -122,27 +122,42 @@ export interface Database {
       conversations: {
         Row: {
           id: string
-          listing_id: string | null
           buyer_id: string
           seller_id: string
-          last_message_at: string | null
+          listing_id: string | null
+          last_message_id: string | null
+          last_message_at: string
+          buyer_unread_count: number
+          seller_unread_count: number
+          status: 'active' | 'archived' | 'blocked'
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
-          listing_id?: string | null
           buyer_id: string
           seller_id: string
-          last_message_at?: string | null
+          listing_id?: string | null
+          last_message_id?: string | null
+          last_message_at?: string
+          buyer_unread_count?: number
+          seller_unread_count?: number
+          status?: 'active' | 'archived' | 'blocked'
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
-          listing_id?: string | null
           buyer_id?: string
           seller_id?: string
-          last_message_at?: string | null
+          listing_id?: string | null
+          last_message_id?: string | null
+          last_message_at?: string
+          buyer_unread_count?: number
+          seller_unread_count?: number
+          status?: 'active' | 'archived' | 'blocked'
           created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -174,8 +189,11 @@ export interface Database {
           conversation_id: string
           sender_id: string
           content: string
-          message_type: 'text' | 'image' | 'system'
+          message_type: 'text' | 'image' | 'file' | 'system'
+          metadata: Json
           read_at: string | null
+          edited_at: string | null
+          deleted_at: string | null
           created_at: string
         }
         Insert: {
@@ -183,8 +201,11 @@ export interface Database {
           conversation_id: string
           sender_id: string
           content: string
-          message_type?: 'text' | 'image' | 'system'
+          message_type?: 'text' | 'image' | 'file' | 'system'
+          metadata?: Json
           read_at?: string | null
+          edited_at?: string | null
+          deleted_at?: string | null
           created_at?: string
         }
         Update: {
@@ -192,8 +213,11 @@ export interface Database {
           conversation_id?: string
           sender_id?: string
           content?: string
-          message_type?: 'text' | 'image' | 'system'
+          message_type?: 'text' | 'image' | 'file' | 'system'
+          metadata?: Json
           read_at?: string | null
+          edited_at?: string | null
+          deleted_at?: string | null
           created_at?: string
         }
         Relationships: [
