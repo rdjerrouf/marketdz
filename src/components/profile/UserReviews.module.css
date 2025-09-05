@@ -1,0 +1,27 @@
+/* UserReviews component styles */
+
+.ratingBar {
+  transition: width 0.3s ease-in-out;
+}
+
+.ratingBar0 { width: 0%; }
+.ratingBar5 { width: 5%; }
+.ratingBar10 { width: 10%; }
+.ratingBar15 { width: 15%; }
+.ratingBar20 { width: 20%; }
+.ratingBar25 { width: 25%; }
+.ratingBar30 { width: 30%; }
+.ratingBar35 { width: 35%; }
+.ratingBar40 { width: 40%; }
+.ratingBar45 { width: 45%; }
+.ratingBar50 { width: 50%; }
+.ratingBar55 { width: 55%; }
+.ratingBar60 { width: 60%; }
+.ratingBar65 { width: 65%; }
+.ratingBar70 { width: 70%; }
+.ratingBar75 { width: 75%; }
+.ratingBar80 { width: 80%; }
+.ratingBar85 { width: 85%; }
+.ratingBar90 { width: 90%; }
+.ratingBar95 { width: 95%; }
+.ratingBar100 { width: 100%; }
