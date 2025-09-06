@@ -1,7 +1,7 @@
 // src/app/browse/page.tsx - Compatible with current API
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import FavoriteButton from '@/components/common/FavoriteButton'
@@ -50,7 +50,7 @@ interface SearchResponse {
   filters: any
 }
 
-export default function ImprovedSearchBrowsePage() {
+function BrowsePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
@@ -728,5 +728,13 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ImprovedSearchBrowsePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <BrowsePageContent />
+    </Suspense>
   )
 }
