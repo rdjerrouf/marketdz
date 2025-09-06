@@ -5,6 +5,9 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
+    console.log('=== Signin API Called ===')
+    console.log('Request data:', { email })
+
     // Validate required fields
     if (!email || !password) {
       return NextResponse.json(
@@ -29,6 +32,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
+      console.error('Signin error:', error)
       return NextResponse.json(
         { error: error.message },
         { status: 401 }
@@ -41,6 +45,8 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
+
+    console.log('=== Signin successful ===')
 
     // Get user profile
     const { data: profile, error: profileError } = await supabase

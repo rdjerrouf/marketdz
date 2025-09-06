@@ -1,98 +1,71 @@
+// src/app/api/auth/signup/route.ts
+// Simple, working signup route without complex fallbacks
+
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, firstName, lastName, phone, wilaya, city, bio } = await request.json()
+    const requestUrl = new URL(request.url)
+    const formData = await request.json()
+    const { email, password, firstName, lastName, phone, city, wilaya } = formData
+
+    console.log('=== Simple Signup API Called ===')
+    console.log('Email:', email)
 
     // Validate required fields
-    if (!email || !password || !firstName || !lastName) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Email and password are required' },
         { status: 400 }
       )
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      )
-    }
+    // Create Supabase client
+    const supabase = createRouteHandlerClient({ cookies })
 
-    // Validate password strength
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: 'Password must be at least 8 characters long' },
-        { status: 400 }
-      )
-    }
-
-    // Create user account
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Simple signup - let the database triggers handle profile creation
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: `${requestUrl.origin}/auth/callback`,
         data: {
-          first_name: firstName,
-          last_name: lastName,
-        }
-      }
+          first_name: firstName || '',
+          last_name: lastName || '',
+          phone: phone || '',
+          city: city || '',
+          wilaya: wilaya || '',
+        },
+      },
     })
 
-    if (authError) {
+    if (error) {
+      console.error('Signup error:', error.message)
       return NextResponse.json(
-        { error: authError.message },
+        { error: error.message },
         { status: 400 }
       )
     }
 
-    if (!authData.user) {
+    if (!data.user) {
       return NextResponse.json(
-        { error: 'Failed to create user account' },
+        { error: 'Failed to create user' },
         { status: 400 }
       )
     }
 
-    // Create user profile (use upsert to handle existing profiles)
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({
-        id: authData.user.id,
-        first_name: firstName,
-        last_name: lastName,
-        phone: phone || null,
-        city: city || null,
-        wilaya: wilaya || null,
-        bio: bio || null,
-        rating: 0,
-        review_count: 0
-      }, {
-        onConflict: 'id'
-      })
-
-    if (profileError) {
-      console.error('Profile creation error:', profileError)
-      // Note: User account was created but profile failed
-      // In production, you might want to implement cleanup
-      return NextResponse.json(
-        { error: 'Account created but profile setup failed. Please contact support.' },
-        { status: 400 }
-      )
-    }
+    console.log('User created successfully:', data.user.id)
 
     return NextResponse.json({
-      message: 'Account created successfully! Please check your email to verify your account.',
-      user: {
-        id: authData.user.id,
-        email: authData.user.email
-      }
+      success: true,
+      user: data.user,
+      message: 'User created successfully'
     })
 
   } catch (error) {
-    console.error('Signup error:', error)
+    console.error('Unexpected signup error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
