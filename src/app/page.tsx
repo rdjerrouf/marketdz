@@ -152,11 +152,12 @@ export default function CompleteKickAssHomepage() {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut()
-      window.location.href = '/signin'
+      // Stay on home page after sign out
+      window.location.reload()
     } catch (error) {
       console.error('Sign out error:', error)
-      // Still redirect even if there's an error
-      window.location.href = '/signin'
+      // Still reload the page to reflect signed out state
+      window.location.reload()
     }
   }
 

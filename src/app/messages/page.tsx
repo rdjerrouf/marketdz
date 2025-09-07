@@ -72,19 +72,48 @@ export default function MessagesPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Please sign in</h1>
-          <p className="text-gray-600">You need to be signed in to access messages.</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden flex items-center justify-center">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+        </div>
+        
+        <div className="relative z-10 text-center bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20">
+          <h1 className="text-2xl font-bold mb-4 text-white">Please sign in</h1>
+          <p className="text-white/80">You need to be signed in to access messages.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-8">Messages</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
+        
+        {/* Floating particles */}
+        <div className="absolute inset-0">
+          {[
+            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
+            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
+            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
+            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
+            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' }
+          ].map((particle, i) => (
+            <div
+              key={i}
+              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-8 text-white">Messages</h1>
         
         {error && (
           <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-md">

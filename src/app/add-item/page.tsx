@@ -90,24 +90,17 @@ export default function AddItemPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-400 via-green-500 to-green-600 flex">
-        {/* Sidebar (same as homepage) */}
-        <div className="w-64 bg-black bg-opacity-20 backdrop-blur-sm">
-          <div className="p-6">
-            <div className="flex items-center mb-8">
-              <div className="bg-white bg-opacity-20 p-2 rounded-lg mr-3">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-              </div>
-              <h1 className="text-white text-xl font-bold">MarketDZ</h1>
-            </div>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+          <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
         </div>
-
-        <div className="flex-1 flex items-center justify-center">
+        
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
           <div className="text-center text-white">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
             <p>Loading...</p>
           </div>
         </div>
@@ -116,16 +109,46 @@ export default function AddItemPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-400 via-green-500 to-green-600 flex">
-      {/* Sidebar Navigation (same as homepage) */}
-      <div className="w-64 bg-black bg-opacity-20 backdrop-blur-sm">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
+        
+        {/* Floating particles */}
+        <div className="absolute inset-0">
+          {[
+            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
+            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
+            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
+            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
+            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' },
+            { left: 'left-[15%]', top: 'top-[60%]', opacity: 'opacity-20' },
+            { left: 'left-[35%]', top: 'top-[75%]', opacity: 'opacity-30' },
+            { left: 'left-[55%]', top: 'top-[50%]', opacity: 'opacity-10' },
+            { left: 'left-[75%]', top: 'top-[70%]', opacity: 'opacity-40' },
+            { left: 'left-[90%]', top: 'top-[45%]', opacity: 'opacity-20' }
+          ].map((particle, i) => (
+            <div
+              key={i}
+              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="relative z-10 flex">
+      {/* Sidebar Navigation */}
+      <div className="w-64 bg-black/20 backdrop-blur-lg border-r border-white/10">
         <div className="p-6">
           {/* Logo */}
           <div className="flex items-center mb-8">
-            <div className="bg-white bg-opacity-20 p-2 rounded-lg mr-3">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3 relative">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
             </div>
             <h1 className="text-white text-xl font-bold">MarketDZ</h1>
           </div>
@@ -134,7 +157,7 @@ export default function AddItemPage() {
           <nav className="space-y-2">
             <button 
               onClick={() => router.push('/')}
-              className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              className="flex items-center w-full p-3 text-white/80 rounded-xl hover:bg-white/10 hover:text-white transition-all duration-200"
             >
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -144,16 +167,16 @@ export default function AddItemPage() {
 
             <button 
               onClick={() => router.push('/browse')}
-              className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              className="flex items-center w-full p-3 text-white/80 rounded-xl hover:bg-white/10 hover:text-white transition-all duration-200"
             >
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              Listings
+              Browse
             </button>
 
             <button 
-              className="flex items-center w-full p-3 text-white bg-white bg-opacity-20 rounded-lg"
+              className="flex items-center w-full p-3 text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-xl"
             >
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -288,10 +311,10 @@ export default function AddItemPage() {
               <button
                 key={category.id}
                 onClick={() => handleCategorySelect(category.id)}
-                className="group relative bg-white bg-opacity-10 backdrop-blur-sm hover:bg-opacity-20 rounded-2xl p-8 transition-all duration-300 transform hover:scale-105 border border-white border-opacity-20"
+                className="group relative bg-white/10 backdrop-blur-lg hover:bg-white/20 rounded-2xl p-8 transition-all duration-300 transform hover:scale-105 border border-white/20 hover:border-white/30"
               >
                 {/* Background Gradient */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-20 rounded-2xl transition-opacity duration-300`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-30 rounded-2xl transition-opacity duration-300`}></div>
                 
                 {/* Content */}
                 <div className="relative z-10 text-center">
@@ -299,21 +322,21 @@ export default function AddItemPage() {
                     {category.icon}
                   </div>
                   
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3">
                     {category.title}
                   </h3>
                   
-                  <p className="text-gray-700 mb-2 font-medium">
+                  <p className="text-white/90 mb-2 font-medium">
                     {category.description}
                   </p>
                   
-                  <p className="text-gray-600 italic text-sm">
+                  <p className="text-white/70 italic text-sm">
                     {category.subtitle}
                   </p>
 
                   {/* Arrow Icon */}
                   <div className="mt-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg className="w-6 h-6 text-gray-700 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-6 h-6 text-white mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
@@ -335,6 +358,7 @@ export default function AddItemPage() {
             Back to Home
           </button>
         </div>
+      </div>
       </div>
     </div>
   )

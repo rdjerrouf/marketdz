@@ -72,7 +72,6 @@ export default function ProfilePage() {
           setError('Failed to load profile')
           return
         }
-
         const userData: User = {
           id: profile.id,
           email: session.user.email || '',
@@ -234,10 +233,16 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden flex items-center justify-center">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+        </div>
+        
+        <div className="relative z-10 text-center bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
+          <p className="text-white/80">Loading profile...</p>
         </div>
       </div>
     )
@@ -245,18 +250,24 @@ export default function ProfilePage() {
 
   if (error && !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden flex items-center justify-center">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+        </div>
+        
+        <div className="relative z-10 text-center bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20">
+          <div className="text-red-400 mb-4">
             <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Failed to load profile</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <h2 className="text-xl font-semibold text-white mb-2">Failed to load profile</h2>
+          <p className="text-white/80 mb-4">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
+            className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
           >
             Go Home
           </button>
@@ -265,19 +276,42 @@ export default function ProfilePage() {
     )
   }
 
-  const inputClassName = "w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
-  const selectClassName = "w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
-  const labelClassName = "block text-sm font-semibold text-gray-800 mb-2"
+  const inputClassName = "w-full px-4 py-3 border-2 border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white bg-white/10 backdrop-blur-sm font-medium placeholder-white/60"
+  const selectClassName = "w-full px-4 py-3 border-2 border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white bg-white/10 backdrop-blur-sm font-medium"
+  const labelClassName = "block text-sm font-semibold text-white mb-2"
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
+        
+        {/* Floating particles */}
+        <div className="absolute inset-0">
+          {[
+            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
+            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
+            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
+            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
+            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' }
+          ].map((particle, i) => (
+            <div
+              key={i}
+              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
+            />
+          ))}
+        </div>
+      </div>
+
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="relative z-10 bg-white/10 backdrop-blur-sm border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
             <button
               onClick={() => router.push('/')}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center text-white/80 hover:text-white transition-colors"
             >
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

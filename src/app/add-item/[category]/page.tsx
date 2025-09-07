@@ -110,29 +110,54 @@ export default function CreateListingPage() {
   const display = getCategoryDisplay(category)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-4">{display.icon}</div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Create New {display.title}
-          </h1>
-          <p className="text-xl text-gray-600">
-            {display.description}
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
+        
+        {/* Floating particles */}
+        <div className="absolute inset-0">
+          {[
+            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
+            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
+            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
+            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
+            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' }
+          ].map((particle, i) => (
+            <div
+              key={i}
+              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
+            />
+          ))}
         </div>
+      </div>
 
-        {/* Form */}
-        <div className="max-w-4xl mx-auto">
-          <ListingForm
-            initialData={{
-              category: category as 'for_sale' | 'job' | 'service' | 'for_rent',
-              location_city: user?.city || '',
-              location_wilaya: user?.wilaya || ''
-            }}
-            mode="create"
-          />
+      <div className="relative z-10">
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="text-6xl mb-4">{display.icon}</div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Create New {display.title}
+            </h1>
+            <p className="text-xl text-white/80">
+              {display.description}
+            </p>
+          </div>
+
+          {/* Form */}
+          <div className="max-w-4xl mx-auto">
+            <ListingForm
+              initialData={{
+                category: category as 'for_sale' | 'job' | 'service' | 'for_rent',
+                location_city: user?.city || '',
+                location_wilaya: user?.wilaya || ''
+              }}
+              mode="create"
+            />
+          </div>
         </div>
       </div>
     </div>

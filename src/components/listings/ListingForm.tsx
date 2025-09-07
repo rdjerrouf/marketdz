@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase/client'
 import { LISTING_CATEGORIES } from '@/lib/constants/categories'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import ImageUpload from './ImageUpload'
@@ -117,6 +118,13 @@ export default function ListingForm({
     setSuccess('')
 
     try {
+      // Get the current session to include auth token
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.access_token) {
+        throw new Error('You must be signed in to create a listing')
+      }
+
       const url = mode === 'edit' && listingId 
         ? `/api/listings/${listingId}`
         : '/api/listings'
@@ -127,7 +135,9 @@ export default function ListingForm({
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           title: formData.title.trim(),
           description: formData.description.trim(),

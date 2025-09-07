@@ -237,13 +237,36 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-400 via-green-500 to-green-600 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden flex">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
+        
+        {/* Floating particles */}
+        <div className="absolute inset-0">
+          {[
+            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
+            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
+            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
+            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
+            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' }
+          ].map((particle, i) => (
+            <div
+              key={i}
+              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
+            />
+          ))}
+        </div>
+      </div>
+
       {/* Sidebar Navigation */}
-      <div className="w-64 bg-black bg-opacity-20 backdrop-blur-sm">
+      <div className="relative z-10 w-64 bg-slate-900/90 backdrop-blur-sm border-r border-white/10">
         <div className="p-6">
           {/* Logo */}
           <div className="flex items-center mb-8">
-            <div className="bg-white bg-opacity-20 p-2 rounded-lg mr-3">
+            <div className="bg-purple-600/30 p-2 rounded-lg mr-3">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -255,7 +278,7 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
           <nav className="space-y-2">
             <button 
               onClick={() => router.push('/')}
-              className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
             >
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -263,7 +286,7 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
               Home
             </button>
 
-            <div className="flex items-center w-full p-3 text-white bg-white bg-opacity-20 rounded-lg">
+            <div className="flex items-center w-full p-3 text-white bg-purple-600/30 rounded-lg border border-purple-400/30">
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -272,7 +295,7 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
 
             <button 
               onClick={() => router.push('/add-item')}
-              className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
             >
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -282,7 +305,7 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
 
             <button 
               onClick={() => router.push('/favorites')}
-              className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
             >
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -292,7 +315,7 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
 
             <button 
               onClick={() => router.push('/profile')}
-              className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
             >
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -304,7 +327,7 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="relative z-10 flex-1 p-8 overflow-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Search MarketDZ</h1>
