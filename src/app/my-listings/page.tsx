@@ -29,6 +29,12 @@ export default function MyListingsPage() {
         id: session.user.id,
         email: session.user.email || ''
       })
+      
+      console.log('👤 MyListingsPage - User authenticated:', {
+        id: session.user.id,
+        email: session.user.email
+      })
+      
       setLoading(false)
     }
 
@@ -101,7 +107,25 @@ export default function MyListingsPage() {
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-8">
-        <ListingManager userId={user.id} />
+        {/* Header with back button */}
+        <div className="mb-8">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center text-white/80 hover:text-white transition-colors mb-4 group"
+          >
+            <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back
+          </button>
+          
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-6">
+            <h1 className="text-3xl font-bold text-white mb-2">My Listings</h1>
+            <p className="text-white/70">Manage your posted items and services</p>
+          </div>
+        </div>
+
+        {user && <ListingManager userId={user.id} />}
       </div>
     </div>
   )

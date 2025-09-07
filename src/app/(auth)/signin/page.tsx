@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { isValidEmail } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client'
-import { mockSignIn } from '@/lib/auth/mockAuth'
 
 interface FormData {
   email: string
@@ -82,25 +81,17 @@ function SignInPageContent() {
     setErrors({})
 
     try {
-      // For now, use a mock signin to demonstrate the flow
-      // TODO: Replace with real Supabase authentication once database is fixed
-      if (formData.email === 'test@example.com' && formData.password === 'password123') {
-        // Use mock authentication
-        await mockSignIn()
-        console.log('Mock signin successful')
-        router.push('/')
-        return
-      }
-      
-      // Try real Supabase authentication for other emails
+      // Try Supabase authentication
+      console.log('🔑 Signin: Attempting Supabase authentication for:', formData.email)
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       })
 
       if (error) {
+        console.log('🔑 Signin: Authentication error:', error.message)
         if (error.message.includes('Invalid login credentials')) {
-          setErrors({ general: 'Email ou mot de passe incorrect. Essayez test@example.com / password123 pour tester.' })
+          setErrors({ general: 'Email ou mot de passe incorrect.' })
         } else {
           setErrors({ general: error.message })
         }
@@ -112,6 +103,7 @@ function SignInPageContent() {
         return
       }
 
+      console.log('🔑 Signin: Authentication successful, user:', data.user.email)
       // Success - redirect to main app
       router.push('/')
 

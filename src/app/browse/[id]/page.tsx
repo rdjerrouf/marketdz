@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
+import ContactSeller from '@/components/listings/ContactSeller'
 
 interface Listing {
   id: string
@@ -42,7 +43,6 @@ export default function ListingDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [showContactInfo, setShowContactInfo] = useState(false)
 
   // Check authentication
   useEffect(() => {
@@ -166,23 +166,6 @@ export default function ListingDetailsPage() {
     if (listing?.photos && listing.photos.length > 1) {
       setCurrentImageIndex((prev) => (prev - 1 + listing.photos.length) % listing.photos.length)
     }
-  }
-
-  const handleContactSeller = () => {
-    if (!user) {
-      router.push('/signin?redirect=' + encodeURIComponent(window.location.pathname))
-      return
-    }
-    setShowContactInfo(true)
-  }
-
-  const handleMessageSeller = () => {
-    if (!user) {
-      router.push('/signin?redirect=' + encodeURIComponent(window.location.pathname))
-      return
-    }
-    // TODO: Implement chat functionality
-    alert('Chat feature coming soon!')
   }
 
   if (loading) {
@@ -396,22 +379,13 @@ export default function ListingDetailsPage() {
                 </div>
               </div>
 
-              {!isOwner && (
-                <div className="space-y-3">
-                  <button
-                    onClick={handleContactSeller}
-                    className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors"
-                  >
-                    Contact Seller
-                  </button>
-                  
-                  <button
-                    onClick={handleMessageSeller}
-                    className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                  >
-                    Send Message
-                  </button>
-                </div>
+              {!isOwner && seller && (
+                <ContactSeller
+                  sellerId={seller.id}
+                  sellerName={`${seller.first_name} ${seller.last_name}`}
+                  listingId={listing.id}
+                  listingTitle={listing.title}
+                />
               )}
 
               {isOwner && (
@@ -420,7 +394,7 @@ export default function ListingDetailsPage() {
                     <p className="text-green-800 font-medium">This is your listing</p>
                   </div>
                   <button
-                    onClick={() => router.push(`/add-item/edit/${listing.id}`)}
+                    onClick={() => router.push(`/edit-listing/${listing.id}`)}
                     className="w-full bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
                   >
                     Edit Listing
@@ -450,23 +424,6 @@ export default function ListingDetailsPage() {
                       </p>
                     </div>
                   </div>
-
-                  {showContactInfo && !isOwner && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                      <h4 className="font-semibold text-blue-900 mb-2">Contact Information</h4>
-                      <p className="text-blue-800 text-sm mb-2">
-                        Please be respectful when contacting the seller.
-                      </p>
-                      <div className="space-y-1 text-sm">
-                        <p className="text-blue-900">
-                          <span className="font-medium">Name:</span> {seller.first_name} {seller.last_name}
-                        </p>
-                        <p className="text-blue-700">
-                          Use the "Send Message" button to contact this seller safely through our platform.
-                        </p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="animate-pulse">

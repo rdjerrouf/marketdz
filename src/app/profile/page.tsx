@@ -690,7 +690,7 @@ export default function ProfilePage() {
                                 View
                               </button>
                               <button
-                                onClick={() => router.push(`/add-item/edit/${listing.id}`)}
+                                onClick={() => router.push(`/edit-listing/${listing.id}`)}
                                 className="flex-1 bg-blue-600 text-white py-2 px-4 rounded text-sm hover:bg-blue-700 transition-colors"
                               >
                                 Edit

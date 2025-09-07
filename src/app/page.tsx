@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Menu, X, Home, User, MessageCircle, Bell, Zap, Shield, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
 import { useUser } from '@/hooks/useUser'
 import { supabase } from '@/lib/supabase/client'
 import { mockSignOut, getMockAuth } from '@/lib/auth/mockAuth'
@@ -85,6 +84,16 @@ export default function CompleteKickAssHomepage() {
   const [favorites, setFavorites] = useState(new Set(['1', '3']))
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
+  // Debug authentication state
+  useEffect(() => {
+    console.log('🏠 HomePage Authentication State:', {
+      user: user ? { id: user.id, email: user.email } : null,
+      profile: profile ? { first_name: profile.first_name, last_name: profile.last_name } : null,
+      loading,
+      timestamp: new Date().toISOString()
+    })
+  }, [user, profile, loading])
+
   // Auto-rotate hero images
   useEffect(() => {
     const interval = setInterval(() => {
@@ -151,8 +160,21 @@ export default function CompleteKickAssHomepage() {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut()
-      // Stay on home page after sign out
+      console.log('🔓 Home: Starting sign out process')
+      
+      // Sign out from Supabase (primary)
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('🔓 Home: Supabase sign out error:', error)
+      } else {
+        console.log('🔓 Home: Supabase sign out successful')
+      }
+      
+      // Also clear mock auth if it exists (cleanup)
+      await mockSignOut()
+      console.log('🔓 Home: Sign out complete')
+      
+      // Reload the page to reflect signed out state
       window.location.reload()
     } catch (error) {
       console.error('Sign out error:', error)
@@ -415,7 +437,8 @@ export default function CompleteKickAssHomepage() {
                       </p>
                       <p className="text-white/60 text-xs flex items-center">
                         <Trophy className="w-3 h-3 mr-1" />
-                        Premium Member
+                        {/* TODO: Add premium status field to database when implementing premium features */}
+                        {profile?.rating && profile.rating > 4.0 ? 'Trusted Seller' : 'Member'}
                       </p>
                     </div>
                     <div className="relative">

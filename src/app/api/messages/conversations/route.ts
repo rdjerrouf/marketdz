@@ -2,9 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient(request);
     
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'buyer_id and seller_id are required' }, { status: 400 });
     }
 
-    const supabase = await createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient(request);
     
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {

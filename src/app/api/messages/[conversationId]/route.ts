@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const before = searchParams.get('before');
 
-    const supabase = await createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient(request);
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
@@ -44,21 +44,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         conversation_id,
         sender_id,
         content,
-        message_type,
-        metadata,
         read_at,
-        edited_at,
-        deleted_at,
         created_at,
         sender:profiles(
           id,
           first_name,
-          last_name,
-          avatar_url
+          last_name
         )
       `)
       .eq('conversation_id', conversationId)
-      .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(limit);
 
@@ -116,13 +110,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { conversationId } = await params;
-    const { content, message_type = 'text', metadata } = await request.json();
+    const { content } = await request.json();
     
     if (!content?.trim()) {
       return NextResponse.json({ error: 'Message content is required' }, { status: 400 });
     }
 
-    const supabase = await createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient(request);
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
@@ -150,24 +144,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .insert({
         conversation_id: conversationId,
         sender_id: user.id,
-        content: content.trim(),
-        message_type: message_type,
-        metadata: metadata || {}
+        content: content.trim()
       })
       .select(`
         id,
         conversation_id,
         sender_id,
         content,
-        message_type,
-        metadata,
         read_at,
         created_at,
         sender:profiles(
           id,
           first_name,
-          last_name,
-          avatar_url
+          last_name
         )
       `)
       .single();

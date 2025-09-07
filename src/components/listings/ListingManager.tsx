@@ -52,12 +52,9 @@ export default function ListingManager({ userId }: ListingManagerProps) {
           price,
           status,
           photos,
-          location_city,
-          location_wilaya,
-          views_count,
-          favorites_count,
           created_at,
-          updated_at
+          updated_at,
+          user_id
         `)
         .order('created_at', { ascending: false })
 
