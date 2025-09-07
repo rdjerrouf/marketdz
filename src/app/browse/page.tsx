@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import FavoriteButton from '@/components/common/FavoriteButton'
+import StarRating from '@/components/common/StarRating'
 
 interface Listing {
   id: string
@@ -24,6 +25,7 @@ interface Listing {
     first_name: string
     last_name: string
     avatar_url: string
+    rating: number
   } | null
 }
 
@@ -718,7 +720,15 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
                         {/* User Info */}
                         {listing.user && (
                           <div className="mt-3 pt-3 border-t border-gray-100">
-                            <div className="flex items-center text-sm text-gray-600">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (listing.user?.id) {
+                                  router.push(`/profile/${listing.user.id}`)
+                                }
+                              }}
+                              className="flex items-center text-sm text-gray-600 hover:text-purple-600 transition-colors w-full text-left"
+                            >
                               {listing.user.avatar_url ? (
                                 <img
                                   src={listing.user.avatar_url}
@@ -732,8 +742,18 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
                                   </span>
                                 </div>
                               )}
-                              <span>By {listing.user.first_name} {listing.user.last_name}</span>
-                            </div>
+                              <div className="flex flex-col flex-1">
+                                <span>By {listing.user.first_name} {listing.user.last_name}</span>
+                                {listing.user.rating > 0 && (
+                                  <div className="flex items-center mt-1">
+                                    <StarRating rating={listing.user.rating} readonly size="sm" />
+                                    <span className="text-xs text-gray-500 ml-1">
+                                      ({listing.user.rating.toFixed(1)})
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </button>
                           </div>
                         )}
                       </div>

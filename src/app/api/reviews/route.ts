@@ -1,9 +1,10 @@
 // src/app/api/reviews/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createServerSupabaseClient(request)
     const { searchParams } = new URL(request.url)
     const reviewedId = searchParams.get('reviewed_id')
     const reviewerId = searchParams.get('reviewer_id')
@@ -70,13 +71,25 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createServerSupabaseClient(request)
+    
+    // Get current user from authentication
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
-    const { reviewer_id, reviewed_id, listing_id, rating, comment } = body
+    const { reviewed_id, listing_id, rating, comment } = body
 
     // Validate required fields
-    if (!reviewer_id || !reviewed_id || !rating) {
+    if (!reviewed_id || !rating) {
       return NextResponse.json(
-        { error: 'Missing required fields: reviewer_id, reviewed_id, rating' },
+        { error: 'Missing required fields: reviewed_id, rating' },
         { status: 400 }
       )
     }
@@ -89,11 +102,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Prevent self-reviews
+    if (user.id === reviewed_id) {
+      return NextResponse.json(
+        { error: 'You cannot review yourself' },
+        { status: 400 }
+      )
+    }
+
     // Check if review already exists for this combination
     const { data: existingReview } = await supabase
       .from('reviews')
       .select('id')
-      .eq('reviewer_id', reviewer_id)
+      .eq('reviewer_id', user.id)
       .eq('reviewed_id', reviewed_id)
       .eq('listing_id', listing_id || null)
       .single()
@@ -108,7 +129,7 @@ export async function POST(request: NextRequest) {
     const { data: review, error } = await supabase
       .from('reviews')
       .insert([{
-        reviewer_id,
+        reviewer_id: user.id,
         reviewed_id,
         listing_id: listing_id || null,
         rating,

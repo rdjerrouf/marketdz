@@ -205,22 +205,32 @@ export default function FavoritesPage() {
                         {/* User Info */}
                         {listing.user && (
                           <div className="flex items-center mt-3 pt-3 border-t border-white border-opacity-20">
-                            <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center mr-2">
-                              {listing.user.avatar_url ? (
-                                <img
-                                  src={listing.user.avatar_url}
-                                  alt={`${listing.user.first_name} ${listing.user.last_name}`}
-                                  className="w-8 h-8 rounded-full object-cover"
-                                />
-                              ) : (
-                                <span className="text-white text-xs font-bold">
-                                  {listing.user.first_name?.[0]}{listing.user.last_name?.[0]}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-sm">
-                              <span className="text-black">Par {listing.user.first_name} {listing.user.last_name}</span>
-                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (listing.user?.id) {
+                                  router.push(`/profile/${listing.user.id}`)
+                                }
+                              }}
+                              className="flex items-center hover:bg-white hover:bg-opacity-10 rounded-lg p-1 transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center mr-2">
+                                {listing.user.avatar_url ? (
+                                  <img
+                                    src={listing.user.avatar_url}
+                                    alt={`${listing.user.first_name} ${listing.user.last_name}`}
+                                    className="w-8 h-8 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <span className="text-white text-xs font-bold">
+                                    {listing.user.first_name?.[0]}{listing.user.last_name?.[0]}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-sm">
+                                <span className="text-black">Par {listing.user.first_name} {listing.user.last_name}</span>
+                              </div>
+                            </button>
                           </div>
                         )}
                       </div>

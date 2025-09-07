@@ -4,6 +4,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
+import { useUserRating } from '@/hooks/useReviews'
+import StarRating from '@/components/common/StarRating'
 import ContactSeller from '@/components/listings/ContactSeller'
 
 interface Listing {
@@ -43,6 +45,9 @@ export default function ListingDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  // Get seller's rating
+  const { rating: sellerRating, reviewCount: sellerReviewCount, loading: ratingLoading } = useUserRating(listing?.user_id || '')
 
   // Check authentication
   useEffect(() => {
@@ -408,22 +413,59 @@ export default function ListingDetailsPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Seller Information</h3>
               
               {seller ? (
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mr-4">
-                      <span className="text-white font-semibold text-lg">
-                        {seller.first_name?.[0] || 'U'}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {seller.first_name} {seller.last_name}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Member since {new Date(seller.created_at).getFullYear()}
-                      </p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-white font-semibold text-lg">
+                          {seller.first_name?.[0] || 'U'}
+                        </span>
+                      </div>
+                      <div>
+                        <button
+                          onClick={() => router.push(`/profile/${listing?.user_id}`)}
+                          className="font-semibold text-gray-900 hover:text-purple-600 transition-colors text-left"
+                        >
+                          {seller.first_name} {seller.last_name}
+                        </button>
+                        <p className="text-sm text-gray-600">
+                          Member since {new Date(seller.created_at).getFullYear()}
+                        </p>
+                        
+                        {/* Seller Rating */}
+                        {!ratingLoading && (
+                          <div className="flex items-center mt-1">
+                            <StarRating rating={sellerRating} readonly size="sm" />
+                            <span className="text-sm text-gray-600 ml-2">
+                              {sellerRating > 0 ? (
+                                <>({sellerRating.toFixed(1)} - {sellerReviewCount} avis)</>
+                              ) : (
+                                '(Pas encore d\'avis)'
+                              )}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* Rating Actions */}
+                  {user && user.id !== listing?.user_id && (
+                    <div className="flex space-x-3 pt-3 border-t border-gray-100">
+                      <button
+                        onClick={() => router.push(`/profile/${listing?.user_id}`)}
+                        className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                      >
+                        Voir le profil et noter
+                      </button>
+                      <button
+                        onClick={() => router.push(`/profile/${listing?.user_id}#reviews`)}
+                        className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                      >
+                        Voir les avis
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="animate-pulse">
