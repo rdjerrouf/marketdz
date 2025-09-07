@@ -360,6 +360,14 @@ export default function CompleteKickAssHomepage() {
               <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </Link>
 
+            {user ? (
+              <Link href="/my-listings" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
+                <Grid className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
+                <span className="font-medium">My Listings</span>
+                <div className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium animate-pulse shadow-lg">3</div>
+              </Link>
+            ) : null}
+
             <Link href="/add-item" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group relative overflow-hidden">
               <Plus className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
               <span className="font-medium">Create Listing</span>

@@ -55,30 +55,56 @@ export default function AddItemPage() {
   // Check authentication
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
+      try {
+        console.log('🔍 Checking authentication for add-item page...')
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError) {
+          console.error('❌ Session error:', sessionError)
+          router.push('/signin?redirect=/add-item')
+          return
+        }
+        
+        if (!session) {
+          console.log('❌ No session found, redirecting to signin')
+          router.push('/signin?redirect=/add-item')
+          return
+        }
+
+        console.log('✅ Session found for user:', session.user.id)
+
+        // Fetch user profile
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+
+        if (error) {
+          console.warn('⚠️ Profile fetch error (will use basic info):', error)
+          // Even if profile fetch fails, we can still allow user to proceed with basic info
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            first_name: '',
+            last_name: ''
+          })
+        } else if (profile) {
+          console.log('✅ Profile loaded:', profile.first_name, profile.last_name)
+          setUser({
+            id: profile.id,
+            email: session.user.email || '',
+            first_name: profile.first_name || '',
+            last_name: profile.last_name || ''
+          })
+        }
+      } catch (error) {
+        console.error('❌ Authentication check failed:', error)
         router.push('/signin?redirect=/add-item')
-        return
+      } finally {
+        console.log('✅ Setting loading to false')
+        setLoading(false)
       }
-
-      // Fetch user profile
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single()
-
-      if (profile) {
-        setUser({
-          id: profile.id,
-          email: session.user.email || '',
-          first_name: profile.first_name || '',
-          last_name: profile.last_name || ''
-        })
-      }
-
-      setLoading(false)
     }
 
     checkAuth()
