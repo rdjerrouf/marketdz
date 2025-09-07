@@ -44,9 +44,21 @@ export default function MessagesPage() {
 
       <div className="relative z-10 max-w-6xl mx-auto p-4 min-h-screen">
         {/* Header */}
-        <div className="text-center mb-8 pt-8">
-          <h1 className="text-4xl font-bold text-white mb-2">💬 Messages</h1>
-          <p className="text-purple-200">Your conversations with other users</p>
+        <div className="mb-8 pt-8">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center text-white/80 hover:text-white transition-colors mb-6 group"
+          >
+            <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back
+          </button>
+          
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-white mb-2">💬 Messages</h1>
+            <p className="text-purple-200">Your conversations with other users</p>
+          </div>
         </div>
 
         {/* Debug Info */}

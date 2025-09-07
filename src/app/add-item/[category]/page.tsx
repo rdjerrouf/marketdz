@@ -136,15 +136,27 @@ export default function CreateListingPage() {
 
       <div className="relative z-10">
         <div className="container mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="text-6xl mb-4">{display.icon}</div>
-            <h1 className="text-4xl font-bold text-white mb-2">
-              Create New {display.title}
-            </h1>
-            <p className="text-xl text-white/80">
-              {display.description}
-            </p>
+          {/* Header with Back Button */}
+          <div className="mb-8">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center text-white/80 hover:text-white transition-colors mb-6 group"
+            >
+              <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back
+            </button>
+            
+            <div className="text-center">
+              <div className="text-6xl mb-4">{display.icon}</div>
+              <h1 className="text-4xl font-bold text-white mb-2">
+                Create New {display.title}
+              </h1>
+              <p className="text-xl text-white/80">
+                {display.description}
+              </p>
+            </div>
           </div>
 
           {/* Form */}

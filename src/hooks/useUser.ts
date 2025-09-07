@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { getMockAuth } from '@/lib/auth/mockAuth';
 import type { User } from '@supabase/supabase-js';
 import type { UserProfile } from '@/types';
 
@@ -16,13 +15,13 @@ export function useUser() {
     const getUser = async () => {
       console.log('🔍 useUser: Starting authentication check')
       
-      // Check real Supabase auth first
-      console.log('🔍 useUser: Checking Supabase auth')
+      // Check Supabase authentication
       const { data: { user } } = await supabase.auth.getUser()
       console.log('🔍 useUser: Supabase user:', user ? { id: user.id, email: user.email } : null)
       
+      setUser(user);
+      
       if (user) {
-        setUser(user);
         console.log('🔍 useUser: Fetching profile for user:', user.id)
         const { data: profile } = await supabase
           .from('profiles')
@@ -31,53 +30,18 @@ export function useUser() {
           .single();
         console.log('🔍 useUser: Profile data:', profile)
         setProfile(profile);
-        setLoading(false);
-        return;
-      }
-
-      // Fallback to mock authentication only if no real user
-      const mockAuth = getMockAuth();
-      console.log('🔍 useUser: No Supabase user, checking mock auth:', mockAuth)
-      
-      if (mockAuth && mockAuth.authenticated) {
-        console.log('✅ useUser: Using mock authentication:', {
-          user: mockAuth.user.email,
-          profile: `${mockAuth.profile.first_name} ${mockAuth.profile.last_name}`
-        })
-        setUser(mockAuth.user);
-        setProfile(mockAuth.profile);
       } else {
-        setUser(null);
         setProfile(null);
       }
       
-      console.log('🔍 useUser: Setting loading to false')
       setLoading(false);
     };
     
     getUser();
     
-    // Also check on window focus (when user returns to tab)
-    const handleFocus = () => {
-      console.log('🔍 useUser: Window focus detected, rechecking auth')
-      getUser();
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    
-    // Listen for mock auth changes
-    const handleMockAuthChange = (event: CustomEvent) => {
-      console.log('📡 useUser: Mock auth change event received:', event.detail)
-      setUser(event.detail.user);
-      setProfile(event.detail.profile);
-      setLoading(false);
-    };
-
-    window.addEventListener('mockAuthChange', handleMockAuthChange as EventListener);
-    
-    // Listen for real Supabase auth changes
+    // Listen for Supabase auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: string, session: { user?: User | null } | null) => {
+      async (event: string, session: any) => {
         console.log('🔍 useUser: Supabase auth state change:', event, session?.user?.email)
         setUser(session?.user || null);
         
@@ -100,8 +64,6 @@ export function useUser() {
 
     return () => {
       subscription.unsubscribe();
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('mockAuthChange', handleMockAuthChange as EventListener);
     };
   }, []);
 

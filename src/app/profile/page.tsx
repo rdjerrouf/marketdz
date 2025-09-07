@@ -60,6 +60,11 @@ export default function ProfilePage() {
           return
         }
 
+        console.log('🔍 Profile: Current user session:', {
+          userId: session.user.id,
+          email: session.user.email
+        })
+
         // Fetch user profile
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -95,16 +100,34 @@ export default function ProfilePage() {
         })
 
         // Fetch user's listings
+        console.log('🔍 Profile: Fetching listings for user:', session.user.id)
         const { data: listings, error: listingsError } = await supabase
           .from('listings')
           .select('*')
           .eq('user_id', session.user.id)
+          .neq('title', '') // Exclude listings with empty titles (invalid data)
           .order('created_at', { ascending: false })
 
         if (listingsError) {
           console.error('Error fetching listings:', listingsError)
         } else {
-          setUserListings(listings || [])
+          // Additional client-side filtering to ensure data integrity
+          const validListings = (listings || []).filter(listing => 
+            listing.user_id === session.user.id && // Double-check user_id match
+            listing.title && // Must have a title
+            listing.title.trim().length > 0 && // Title must not be empty
+            listing.id // Must have a valid ID
+          )
+          
+          console.log('🔍 Profile: Found listings:', listings?.length || 0)
+          console.log('🔍 Profile: Valid listings after filtering:', validListings.length)
+          console.log('🔍 Profile: Listings data:', validListings.map(l => ({
+            id: l.id,
+            title: l.title,
+            user_id: l.user_id,
+            created_at: l.created_at
+          })))
+          setUserListings(validListings)
         }
 
       } catch (err) {

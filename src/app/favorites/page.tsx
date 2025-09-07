@@ -78,9 +78,21 @@ export default function FavoritesPage() {
 
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl">
-          <h1 className="text-3xl font-bold text-white mb-6">
-            ❤️ Mes Favoris
-          </h1>
+          <div className="mb-6">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center text-white/80 hover:text-white transition-colors mb-4 group"
+            >
+              <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back
+            </button>
+            
+            <h1 className="text-3xl font-bold text-white">
+              ❤️ Mes Favoris
+            </h1>
+          </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-16">

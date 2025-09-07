@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Menu, X, Home, User, MessageCircle, Bell, Zap, Shield, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
 import { supabase } from '@/lib/supabase/client'
-import { mockSignOut, getMockAuth } from '@/lib/auth/mockAuth'
 
 // Mock data for preview
 const mockListings = [
@@ -83,6 +82,7 @@ export default function CompleteKickAssHomepage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [favorites, setFavorites] = useState(new Set(['1', '3']))
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [userListingsCount, setUserListingsCount] = useState(0)
 
   // Debug authentication state
   useEffect(() => {
@@ -93,6 +93,38 @@ export default function CompleteKickAssHomepage() {
       timestamp: new Date().toISOString()
     })
   }, [user, profile, loading])
+
+  // Fetch user's listings count
+  useEffect(() => {
+    const fetchUserListingsCount = async () => {
+      if (!user) {
+        setUserListingsCount(0)
+        return
+      }
+
+      try {
+        console.log('🏠 HomePage: Fetching listings count for user:', user.id)
+        const { count, error } = await supabase
+          .from('listings')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .neq('title', '') // Exclude invalid listings
+
+        if (error) {
+          console.error('🏠 HomePage: Error fetching listings count:', error)
+          setUserListingsCount(0)
+        } else {
+          console.log('🏠 HomePage: User listings count:', count)
+          setUserListingsCount(count || 0)
+        }
+      } catch (err) {
+        console.error('🏠 HomePage: Error:', err)
+        setUserListingsCount(0)
+      }
+    }
+
+    fetchUserListingsCount()
+  }, [user])
 
   // Auto-rotate hero images
   useEffect(() => {
@@ -162,7 +194,7 @@ export default function CompleteKickAssHomepage() {
     try {
       console.log('🔓 Home: Starting sign out process')
       
-      // Sign out from Supabase (primary)
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut()
       if (error) {
         console.error('🔓 Home: Supabase sign out error:', error)
@@ -170,8 +202,6 @@ export default function CompleteKickAssHomepage() {
         console.log('🔓 Home: Supabase sign out successful')
       }
       
-      // Also clear mock auth if it exists (cleanup)
-      await mockSignOut()
       console.log('🔓 Home: Sign out complete')
       
       // Reload the page to reflect signed out state
@@ -281,7 +311,11 @@ export default function CompleteKickAssHomepage() {
                 <Link href="/my-listings" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300">
                   <Grid className="w-5 h-5 mr-4" />
                   <span className="font-medium">My Listings</span>
-                  <div className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">3</div>
+                  {userListingsCount > 0 && (
+                    <div className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                      {userListingsCount}
+                    </div>
+                  )}
                 </Link>
               ) : null}
               
@@ -386,7 +420,11 @@ export default function CompleteKickAssHomepage() {
               <Link href="/my-listings" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
                 <Grid className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
                 <span className="font-medium">My Listings</span>
-                <div className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium animate-pulse shadow-lg">3</div>
+                {userListingsCount > 0 && (
+                  <div className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium animate-pulse shadow-lg">
+                    {userListingsCount}
+                  </div>
+                )}
               </Link>
             ) : null}
 
