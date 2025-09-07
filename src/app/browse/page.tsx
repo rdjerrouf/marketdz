@@ -660,6 +660,7 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
                         <div className="absolute top-2 right-2 flex items-center space-x-2">
                           <FavoriteButton 
                             listingId={listing.id}
+                            listingOwnerId={listing.user_id}
                             size="sm"
                             className="bg-white bg-opacity-90 hover:bg-white shadow-lg"
                           />

@@ -30,7 +30,11 @@ export default function FavoriteButton({
   // Check if the current user owns this listing
   const isOwnListing = user && listingOwnerId && user.id === listingOwnerId;
 
-  const handleToggle = async () => {
+  const handleToggle = async (e: React.MouseEvent) => {
+    // Prevent event from bubbling up to parent elements
+    e.stopPropagation();
+    e.preventDefault();
+    
     console.log('🔥 FavoriteButton handleToggle called');
     console.log('- isAuthenticated:', isAuthenticated);
     console.log('- isToggling:', isToggling);
