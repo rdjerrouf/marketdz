@@ -83,6 +83,7 @@ export default function CompleteKickAssHomepage() {
   const [favorites, setFavorites] = useState(new Set(['1', '3']))
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [userListingsCount, setUserListingsCount] = useState(0)
+  const [userFavoritesCount, setUserFavoritesCount] = useState(0)
 
   // Debug authentication state
   useEffect(() => {
@@ -124,6 +125,47 @@ export default function CompleteKickAssHomepage() {
     }
 
     fetchUserListingsCount()
+  }, [user])
+
+  // Fetch user's favorites count
+  useEffect(() => {
+    const fetchUserFavoritesCount = async () => {
+      if (!user) {
+        setUserFavoritesCount(0)
+        return
+      }
+
+      try {
+        console.log('🏠 HomePage: Fetching favorites count for user:', user.id)
+        // Match the same query as the API to get accurate count
+        const { data, error } = await supabase
+          .from('favorites')
+          .select(`
+            id,
+            listing_id,
+            listings!inner (
+              id,
+              status
+            )
+          `)
+          .eq('user_id', user.id)
+          .eq('listings.status', 'active')
+
+        if (error) {
+          console.error('🏠 HomePage: Error fetching favorites count:', error)
+          setUserFavoritesCount(0)
+        } else {
+          const count = data?.length || 0
+          console.log('🏠 HomePage: User favorites count (active listings only):', count)
+          setUserFavoritesCount(count)
+        }
+      } catch (err) {
+        console.error('🏠 HomePage: Error:', err)
+        setUserFavoritesCount(0)
+      }
+    }
+
+    fetchUserFavoritesCount()
   }, [user])
 
   // Auto-rotate hero images
@@ -328,9 +370,9 @@ export default function CompleteKickAssHomepage() {
               <Link href="/favorites" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300">
                 <Heart className="w-5 h-5 mr-4" />
                 <span className="font-medium">Favorites</span>
-                {favorites.size > 0 && (
+                {userFavoritesCount > 0 && (
                   <div className="ml-auto bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center">
-                    {favorites.size}
+                    {userFavoritesCount}
                   </div>
                 )}
               </Link>
@@ -439,9 +481,9 @@ export default function CompleteKickAssHomepage() {
             <Link href="/favorites" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
               <Heart className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
               <span className="font-medium">Favorites</span>
-              {favorites.size > 0 && (
+              {userFavoritesCount > 0 && (
                 <div className="ml-auto bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center animate-pulse shadow-lg">
-                  {favorites.size}
+                  {userFavoritesCount}
                 </div>
               )}
             </Link>

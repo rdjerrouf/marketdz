@@ -36,11 +36,13 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Get user's favorites with listing details
+    // Use inner join to only return favorites where the listing exists and is active
     const { data: favorites, error: favoritesError, count } = await supabase
       .from('favorites')
       .select(`
         id,
         created_at,
+        listing_id,
         listings!inner (
           id,
           title,
@@ -53,7 +55,7 @@ export async function GET(request: NextRequest) {
           created_at,
           user_id,
           status,
-          profiles!inner (
+          profiles:user_id (
             id,
             first_name,
             last_name,

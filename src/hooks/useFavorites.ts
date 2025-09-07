@@ -104,7 +104,9 @@ export function useFavorites(page: number = 1, limit: number = 20) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
-      const response = await fetch(`/api/favorites?page=${page}&limit=${limit}`, {
+      const url = `/api/favorites?page=${page}&limit=${limit}`;
+      
+      const response = await fetch(url, {
         headers
       });
       
@@ -123,8 +125,10 @@ export function useFavorites(page: number = 1, limit: number = 20) {
   };
 
   useEffect(() => {
-    fetchFavorites();
-  }, [page, limit]);
+    if (!authLoading) {
+      fetchFavorites();
+    }
+  }, [page, limit, authLoading, isAuthenticated]);
 
   const refetch = () => {
     fetchFavorites();

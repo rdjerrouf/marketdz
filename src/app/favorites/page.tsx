@@ -81,7 +81,7 @@ export default function FavoritesPage() {
           <div className="mb-6">
             <button
               onClick={() => router.back()}
-              className="flex items-center text-white/80 hover:text-white transition-colors mb-4 group"
+              className="flex items-center text-black hover:text-gray-700 transition-colors mb-4 group"
             >
               <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -89,7 +89,7 @@ export default function FavoritesPage() {
               Back
             </button>
             
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-3xl font-bold text-black">
               ❤️ Mes Favoris
             </h1>
           </div>
@@ -126,7 +126,7 @@ export default function FavoritesPage() {
           ) : (
             <>
               <div className="mb-6">
-                <p className="text-purple-200">
+                <p className="text-black">
                   {favoritesData.pagination.totalItems} annonce{favoritesData.pagination.totalItems > 1 ? 's' : ''} dans vos favoris
                 </p>
               </div>
@@ -181,11 +181,11 @@ export default function FavoritesPage() {
                       </div>
 
                       <div className="p-4">
-                        <h3 className="font-bold text-white text-lg mb-2 line-clamp-2 group-hover:text-purple-200 transition-colors">
+                        <h3 className="font-bold text-white text-lg mb-2 line-clamp-2 group-hover:text-gray-200 transition-colors">
                           {listing.title}
                         </h3>
                         
-                        <p className="text-purple-200 text-sm mb-3 line-clamp-2">
+                        <p className="text-black text-sm mb-3 line-clamp-2">
                           {listing.description}
                         </p>
 
@@ -196,7 +196,7 @@ export default function FavoritesPage() {
                                 {formatPrice(listing.price)}
                               </p>
                             )}
-                            <p className="text-purple-300 text-sm">
+                            <p className="text-black text-sm">
                               {listing.wilaya}, {listing.city}
                             </p>
                           </div>
@@ -219,7 +219,7 @@ export default function FavoritesPage() {
                               )}
                             </div>
                             <div className="text-sm">
-                              <span className="text-purple-200">Par {listing.user.first_name} {listing.user.last_name}</span>
+                              <span className="text-black">Par {listing.user.first_name} {listing.user.last_name}</span>
                             </div>
                           </div>
                         )}
