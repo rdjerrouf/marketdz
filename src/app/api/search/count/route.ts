@@ -6,7 +6,7 @@ import {
   normalizeSearchQuery,
   validateSearchParams 
 } from '@/lib/search/utils';
-import { smartRateLimit } from '@/lib/rate-limit/hybrid';
+import { smartRateLimit } from '@/lib/rate-limit/database';
 
 export async function GET(request: NextRequest) {
   try {

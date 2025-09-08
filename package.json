@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack & start http://localhost:3000",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:pool": "node scripts/test-connection-pool.js",
+    "health": "curl http://localhost:3000/api/health"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

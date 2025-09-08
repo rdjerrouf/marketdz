@@ -325,12 +325,68 @@ export interface Database {
           }
         ]
       }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: 'review' | 'favorite' | 'message' | 'system'
+          title: string
+          message: string
+          data: Json | null
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: 'review' | 'favorite' | 'message' | 'system'
+          title: string
+          message: string
+          data?: Json | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: 'review' | 'favorite' | 'message' | 'system'
+          title?: string
+          message?: string
+          data?: Json | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      mark_messages_read: {
+        Args: {
+          conversation_uuid: string
+        }
+        Returns: undefined
+      }
+      mark_notification_read: {
+        Args: {
+          notification_id: string
+        }
+        Returns: undefined
+      }
+      mark_all_notifications_read: {
+        Args: Record<string, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

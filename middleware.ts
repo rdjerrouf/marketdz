@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  const start = Date.now() // Add performance timing
   console.log('🔧 Middleware: Processing request to:', request.nextUrl.pathname);
   
   let response = NextResponse.next({
@@ -37,6 +38,18 @@ export async function middleware(request: NextRequest) {
   console.log('🔧 Middleware: User after getUser:', user ? { id: user.id } : 'null');
   console.log('🔧 Middleware: Error:', error);
 
+  // Add performance monitoring headers
+  const duration = Date.now() - start
+  response.headers.set('X-Response-Time', `${duration}ms`)
+  response.headers.set('X-Timestamp', new Date().toISOString())
+  
+  // Add connection pool info for API routes
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    response.headers.set('X-Pool-Strategy', 'supabase-pgbouncer')
+    response.headers.set('X-MarketDZ-Version', '1.0.0')
+  }
+
+  console.log('🔧 Middleware: Request completed in', duration, 'ms');
   return response
 }
 

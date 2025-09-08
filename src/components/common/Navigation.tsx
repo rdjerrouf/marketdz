@@ -3,10 +3,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { Home, Search, Plus, User, MessageCircle } from 'lucide-react';
+import { useRealtimeNotifications } from '@/hooks/useRealtime';
+import { NotificationBell } from '@/components/chat/NotificationsDropdown';
+import NotificationsDropdown from '@/components/chat/NotificationsDropdown';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const [showNotifications, setShowNotifications] = useState(false);
+  const { unreadCount } = useRealtimeNotifications();
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -55,6 +61,20 @@ export default function Navigation() {
                   </Link>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Notifications and user menu */}
+          <div className="hidden md:flex items-center space-x-4">
+            <div className="relative">
+              <NotificationBell
+                onClick={() => setShowNotifications(!showNotifications)}
+                unreadCount={unreadCount}
+              />
+              <NotificationsDropdown
+                isOpen={showNotifications}
+                onClose={() => setShowNotifications(false)}
+              />
             </div>
           </div>
 

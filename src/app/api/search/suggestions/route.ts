@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { SearchSuggestionEngine } from '@/lib/search/enhanced-utils';
-import { smartRateLimit } from '@/lib/rate-limit/hybrid';
+import { smartRateLimit } from '@/lib/rate-limit/database';
 import { normalizeSearchQuery } from '@/lib/search/utils';
 
 export async function GET(request: NextRequest) {

@@ -48,6 +48,9 @@ CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
 CREATE INDEX idx_messages_sender_id ON messages(sender_id);
 CREATE INDEX idx_messages_created_at ON messages(created_at DESC);
 
+-- Additional performance indexes for message queries
+CREATE INDEX idx_messages_conversation_created ON messages(conversation_id, created_at DESC);
+
 -- Enable Row Level Security
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;

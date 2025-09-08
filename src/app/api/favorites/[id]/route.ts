@@ -1,7 +1,7 @@
 // src/app/api/favorites/[id]/route.ts - Remove from favorites and get favorite status
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { smartRateLimit } from '@/lib/rate-limit/hybrid';
+import { smartRateLimit } from '@/lib/rate-limit/database';
 
 export async function DELETE(
   request: NextRequest,

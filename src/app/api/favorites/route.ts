@@ -1,7 +1,7 @@
 // src/app/api/favorites/route.ts - Enhanced favorites API with rate limiting and better error handling
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { smartRateLimit } from '@/lib/rate-limit/hybrid';
+import { smartRateLimit } from '@/lib/rate-limit/database';
 
 export async function GET(request: NextRequest) {
   try {
