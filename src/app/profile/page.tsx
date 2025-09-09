@@ -154,9 +154,19 @@ export default function ProfilePage() {
     setMessage('')
 
     try {
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
+      // Get the current session to include the JWT token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('You must be signed in to update your profile')
+      }
+
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           first_name: formData.first_name.trim(),
           last_name: formData.last_name.trim(),
           bio: formData.bio.trim(),
@@ -164,11 +174,14 @@ export default function ProfilePage() {
           city: formData.city.trim(),
           wilaya: formData.wilaya
         })
-        .eq('id', user.id)
+      })
 
-      if (updateError) {
-        throw updateError
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update profile')
       }
+
+      const result = await response.json()
 
       // Update local user state
       setUser(prev => prev ? {
@@ -181,7 +194,7 @@ export default function ProfilePage() {
         wilaya: formData.wilaya
       } : null)
 
-      setMessage('Profile updated successfully!')
+      setMessage(result.message || 'Profile updated successfully!')
       setEditMode(false)
 
       // Clear message after 3 seconds
@@ -189,7 +202,7 @@ export default function ProfilePage() {
 
     } catch (err) {
       console.error('Error updating profile:', err)
-      setError('Failed to update profile')
+      setError(err instanceof Error ? err.message : 'Failed to update profile')
     } finally {
       setSaving(false)
     }
@@ -201,13 +214,23 @@ export default function ProfilePage() {
     }
 
     try {
-      const { error } = await supabase
-        .from('listings')
-        .delete()
-        .eq('id', listingId)
+      // Get the current session to include the JWT token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('You must be signed in to delete listings')
+      }
 
-      if (error) {
-        throw error
+      const response = await fetch(`/api/listings/${listingId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete listing')
       }
 
       setUserListings(prev => prev.filter(listing => listing.id !== listingId))
@@ -216,7 +239,7 @@ export default function ProfilePage() {
 
     } catch (err) {
       console.error('Error deleting listing:', err)
-      setError('Failed to delete listing')
+      setError(err instanceof Error ? err.message : 'Failed to delete listing')
     }
   }
 
@@ -299,20 +322,20 @@ export default function ProfilePage() {
     )
   }
 
-  const inputClassName = "w-full px-4 py-3 border-2 border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white bg-white/10 backdrop-blur-sm font-medium placeholder-white/60"
-  const selectClassName = "w-full px-4 py-3 border-2 border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white bg-white/10 backdrop-blur-sm font-medium"
-  const labelClassName = "block text-sm font-semibold text-white mb-2"
+  const inputClassName = "w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium placeholder-gray-500"
+  const selectClassName = "w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white font-medium"
+  const labelClassName = "block text-sm font-semibold text-gray-700 mb-2"
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
+      {/* Animated background elements - Fixed to not interfere with clicks */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse pointer-events-none"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s] pointer-events-none"></div>
+        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s] pointer-events-none"></div>
         
-        {/* Floating particles */}
-        <div className="absolute inset-0">
+        {/* Floating particles - Fixed to not interfere with clicks */}
+        <div className="absolute inset-0 pointer-events-none">
           {[
             { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
             { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
@@ -322,7 +345,7 @@ export default function ProfilePage() {
           ].map((particle, i) => (
             <div
               key={i}
-              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
+              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse pointer-events-none ${particle.left} ${particle.top} ${particle.opacity}`}
             />
           ))}
         </div>
@@ -349,16 +372,16 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Messages */}
         {message && (
-          <div className="mb-6 bg-green-50 border-2 border-green-200 text-green-800 px-6 py-4 rounded-lg font-medium">
+          <div className="mb-6 bg-green-50 border-2 border-green-200 text-green-800 px-6 py-4 rounded-lg font-medium relative z-30">
             {message}
           </div>
         )}
 
         {error && (
-          <div className="mb-6 bg-red-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-lg font-medium">
+          <div className="mb-6 bg-red-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-lg font-medium relative z-30">
             {error}
           </div>
         )}
@@ -366,7 +389,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 relative z-30">
               {/* User Avatar and Info */}
               <div className="text-center mb-6">
                 <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -438,7 +461,7 @@ export default function ProfilePage() {
           <div className="lg:col-span-3">
             {/* Profile Tab */}
             {activeTab === 'profile' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 relative z-30">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">Profile Information</h2>
                   {!editMode && (
@@ -626,7 +649,7 @@ export default function ProfilePage() {
 
             {/* Listings Tab */}
             {activeTab === 'listings' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 relative z-30">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">My Listings ({userListings.length})</h2>
                   <button
@@ -736,7 +759,7 @@ export default function ProfilePage() {
 
             {/* Settings Tab */}
             {activeTab === 'settings' && (
-              <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 relative z-30">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Account Settings</h2>
                 
                 <div className="space-y-6">

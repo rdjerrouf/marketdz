@@ -85,9 +85,16 @@ export default function ListingManager({ userId }: ListingManagerProps) {
 
   const handleStatusChange = async (listingId: string, newStatus: string) => {
     try {
+      // Get the current session to include the JWT token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('You must be signed in to update listings')
+      }
+      
       const response = await fetch(`/api/listings/${listingId}`, {
         method: 'PUT',
         headers: {
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status: newStatus })
@@ -119,8 +126,18 @@ export default function ListingManager({ userId }: ListingManagerProps) {
     try {
       setDeletingId(listingId)
       
+      // Get the current session to include the JWT token
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('You must be signed in to delete listings')
+      }
+      
       const response = await fetch(`/api/listings/${listingId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
       })
 
       if (!response.ok) {
