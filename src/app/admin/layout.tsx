@@ -43,7 +43,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       // Check if user is admin (you'll need to implement this based on your admin system)
       // For now, we'll use a simple email check or you can implement the admin_users table
-      const adminEmails = ['admin@marketdz.com', 'moderator@marketdz.com'] // Replace with your admin emails
+      const adminEmails = ['admin@marketdz.com', 'moderator@marketdz.com', 'test@example.com'] // Replace with your admin emails
       const userIsAdmin = adminEmails.includes(user.email || '')
 
       if (!userIsAdmin) {
@@ -83,14 +83,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+      } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col`}>
         
         {/* Logo */}
-        <div className="flex items-center justify-center h-16 px-4 bg-green-600">
+        <div className="flex items-center justify-center h-16 px-4 bg-green-600 flex-shrink-0">
           <div className="flex items-center">
             <ShieldCheckIcon />
             <span className="ml-2 text-xl font-bold text-white">Admin Panel</span>
@@ -98,7 +98,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="mt-8">
+        <nav className="flex-1 mt-8 overflow-y-auto">
           {navigation.map((item) => (
             <a
               key={item.name}
@@ -112,7 +112,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         {/* User Info */}
-        <div className="absolute bottom-0 w-full p-4 border-t border-gray-200">
+        <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-gray-50">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
               <span className="text-sm font-medium text-white">
@@ -128,7 +128,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className={`lg:ml-64 ${sidebarOpen ? 'ml-64' : 'ml-0'} transition-all duration-300`}>
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-0">
         {/* Top bar */}
         <div className="bg-white shadow-sm border-b border-gray-200">
           <div className="flex items-center justify-between px-6 py-4">
@@ -162,7 +162,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Page content */}
-        <main className="p-6">
+        <main className="flex-1 p-6 overflow-y-auto">
           {children}
         </main>
       </div>

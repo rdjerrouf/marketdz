@@ -6,7 +6,15 @@
       "Bash(npx supabase db push:*)",
       "Bash(node:*)",
       "Bash(npx supabase:*)",
-      "Bash(docker container prune:*)"
+      "Bash(docker container prune:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp:*)",
+      "Bash(npx playwright:*)",
+      "Bash(curl:*)",
+      "Bash(start http://localhost:3001)",
+      "Bash(psql:*)",
+      "Bash(npm run dev:*)",
+      "mcp__ide__executeCode"
     ],
     "deny": [],
     "ask": []

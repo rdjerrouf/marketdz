@@ -28,6 +28,7 @@ function SignInPageContent() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   // Clear success message after 5 seconds
   useEffect(() => {
@@ -104,8 +105,20 @@ function SignInPageContent() {
       }
 
       console.log('🔑 Signin: Authentication successful, user:', data.user.email)
-      // Success - redirect to main app
-      router.push('/')
+      
+      // Show redirect state
+      setIsRedirecting(true);
+      
+      // Check if user has a redirect parameter
+      const redirect = searchParams?.get('redirect')
+      const targetUrl = redirect || '/'
+      
+      // Wait for session to be properly established
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Force page reload to ensure auth state is fresh
+      console.log('🔑 Signin: Redirecting to:', targetUrl)
+      window.location.href = targetUrl
 
     } catch (error) {
       console.error('Sign in error:', error)
@@ -231,14 +244,24 @@ function SignInPageContent() {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isRedirecting}
                 className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                  isLoading
+                  isLoading || isRedirecting
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                 }`}
               >
-                {isLoading ? 'Connexion en cours...' : 'Se connecter'}
+                {isRedirecting ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Connexion réussie! Redirection...
+                  </div>
+                ) : isLoading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Connexion en cours...
+                  </div>
+                ) : 'Se connecter'}
               </button>
             </div>
           </form>

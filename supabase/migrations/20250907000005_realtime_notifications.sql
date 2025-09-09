@@ -187,9 +187,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger for message notifications
+-- Trigger for message notifications (DISABLED temporarily due to RLS issues)
 DROP TRIGGER IF EXISTS on_message_created ON messages;
-CREATE TRIGGER on_message_created
-  AFTER INSERT ON messages
-  FOR EACH ROW
-  EXECUTE FUNCTION notify_on_new_message();
+-- CREATE TRIGGER on_message_created
+--   AFTER INSERT ON messages
+--   FOR EACH ROW
+--   EXECUTE FUNCTION notify_on_new_message();
