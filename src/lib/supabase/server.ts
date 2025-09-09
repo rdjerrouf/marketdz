@@ -15,7 +15,7 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
     if (token) {
       // Create a server client that properly sets the auth context
       return createServerClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
           cookies: {
@@ -39,7 +39,7 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
 
   // Default cookie-based client for server components
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
@@ -63,7 +63,7 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
 // For API routes that need to work with middleware-processed requests
 export const createApiSupabaseClient = (request: NextRequest) => {
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
@@ -85,13 +85,13 @@ export const createApiSupabaseClient = (request: NextRequest) => {
 
 // Simple client for API routes
 export const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
 // For admin operations
 export const supabaseAdmin = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
   {
     auth: {

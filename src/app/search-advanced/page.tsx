@@ -120,7 +120,7 @@ export default function AdvancedSearchPage() {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-DZ', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'DZD',
       minimumFractionDigits: 0
@@ -293,7 +293,7 @@ export default function AdvancedSearchPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Prix minimum (DZD)
+                Minimum Price (DZD)
               </label>
               <input
                 type="number"
@@ -306,7 +306,7 @@ export default function AdvancedSearchPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Prix maximum (DZD)
+                Maximum Price (DZD)
               </label>
               <input
                 type="number"

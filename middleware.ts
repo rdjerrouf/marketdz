@@ -13,9 +13,13 @@ export async function middleware(request: NextRequest) {
   })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      auth: {
+        storageKey: 'marketdz-auth', // Match client-side storage key
+        flowType: 'implicit'
+      },
       cookies: {
         getAll() {
           const cookies = request.cookies.getAll();
@@ -26,17 +30,32 @@ export async function middleware(request: NextRequest) {
           console.log('🔧 Middleware: Setting cookies:', cookiesToSet.map(c => c.name));
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value)
-            response.cookies.set(name, value, options)
+            response.cookies.set(name, value, {
+              ...options,
+              httpOnly: false,
+              secure: false,
+              sameSite: 'lax',
+              domain: undefined, // Let browser handle domain automatically
+              path: '/'
+            })
           })
         },
       },
     }
   )
 
-  // Refresh session if expired
+  // Try to refresh the session to ensure proper cookie handling
   const { data: { user }, error } = await supabase.auth.getUser();
-  console.log('🔧 Middleware: User after getUser:', user ? { id: user.id } : 'null');
-  console.log('🔧 Middleware: Error:', error);
+  
+  if (error && error.message !== 'Auth session missing!') {
+    console.log('🔧 Middleware: Auth error:', error.message);
+  }
+  
+  if (user) {
+    console.log('🔧 Middleware: User authenticated:', { id: user.id, email: user.email });
+  } else {
+    console.log('🔧 Middleware: No authenticated user');
+  }
 
   // Add performance monitoring headers
   const duration = Date.now() - start

@@ -16,7 +16,20 @@ export async function GET(request: NextRequest) {
     const page = parseInt(urlSearchParams.get('page') || '1');
     const limit = parseInt(urlSearchParams.get('limit') || '20');
 
-    console.log('🔍 Search params:', { query, category, wilaya, city, minPrice, maxPrice, sortBy, page, limit });
+    // New category-specific filters
+    const availableFrom = urlSearchParams.get('availableFrom');
+    const availableTo = urlSearchParams.get('availableTo');
+    const rentalPeriod = urlSearchParams.get('rentalPeriod');
+    const minSalary = urlSearchParams.get('minSalary');
+    const maxSalary = urlSearchParams.get('maxSalary');
+    const jobType = urlSearchParams.get('jobType');
+    const companyName = urlSearchParams.get('companyName');
+    const condition = urlSearchParams.get('condition');
+
+    console.log('🔍 Search params:', { 
+      query, category, wilaya, city, minPrice, maxPrice, sortBy, page, limit,
+      availableFrom, availableTo, rentalPeriod, minSalary, maxSalary, jobType, companyName, condition
+    });
 
     // Build the query
     let supabaseQuery = supabase
@@ -50,6 +63,38 @@ export async function GET(request: NextRequest) {
 
     if (maxPrice && !isNaN(parseFloat(maxPrice))) {
       supabaseQuery = supabaseQuery.lte('price', parseFloat(maxPrice));
+    }
+
+    // Category-specific filters
+    if (category === 'for_rent') {
+      if (availableFrom) {
+        supabaseQuery = supabaseQuery.gte('available_from', availableFrom);
+      }
+      if (availableTo) {
+        supabaseQuery = supabaseQuery.lte('available_to', availableTo);
+      }
+      if (rentalPeriod) {
+        supabaseQuery = supabaseQuery.eq('rental_period', rentalPeriod);
+      }
+    }
+
+    if (category === 'job') {
+      if (minSalary && !isNaN(parseFloat(minSalary))) {
+        supabaseQuery = supabaseQuery.gte('salary_min', parseFloat(minSalary));
+      }
+      if (maxSalary && !isNaN(parseFloat(maxSalary))) {
+        supabaseQuery = supabaseQuery.lte('salary_max', parseFloat(maxSalary));
+      }
+      if (jobType) {
+        supabaseQuery = supabaseQuery.eq('job_type', jobType);
+      }
+      if (companyName) {
+        supabaseQuery = supabaseQuery.ilike('company_name', `%${companyName}%`);
+      }
+    }
+
+    if (category === 'for_sale' && condition) {
+      supabaseQuery = supabaseQuery.eq('condition', condition);
     }
 
     // Text search (simple version)

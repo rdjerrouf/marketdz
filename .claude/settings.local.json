@@ -14,7 +14,18 @@
       "Bash(start http://localhost:3001)",
       "Bash(psql:*)",
       "Bash(npm run dev:*)",
-      "mcp__ide__executeCode"
+      "mcp__ide__executeCode",
+      "mcp__ide__getDiagnostics",
+      "Bash(docker build:*)",
+      "Bash(docker-compose:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker logs:*)",
+      "Bash(start http://localhost:3001/signin)",
+      "Bash(netstat:*)",
+      "Bash(supabase db:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(docker system prune:*)"
     ],
     "deny": [],
     "ask": []

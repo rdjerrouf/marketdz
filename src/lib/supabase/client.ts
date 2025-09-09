@@ -9,7 +9,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    flowType: 'pkce'
+    flowType: 'implicit', // Switch to implicit flow for better Docker compatibility
+    storageKey: 'marketdz-auth'
+  },
+  global: {
+    headers: {
+      'x-docker-env': 'true'
+    }
   }
 })
 

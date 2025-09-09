@@ -105,6 +105,7 @@ function SignInPageContent() {
       }
 
       console.log('🔑 Signin: Authentication successful, user:', data.user.email)
+      console.log('🔑 Signin: Session:', data.session ? 'exists' : 'null')
       
       // Show redirect state
       setIsRedirecting(true);
@@ -113,12 +114,21 @@ function SignInPageContent() {
       const redirect = searchParams?.get('redirect')
       const targetUrl = redirect || '/'
       
-      // Wait for session to be properly established
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait longer for session to be properly established and cookies to be set
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Force page reload to ensure auth state is fresh
-      console.log('🔑 Signin: Redirecting to:', targetUrl)
-      window.location.href = targetUrl
+      // Try to refresh the session to ensure cookies are set
+      const { data: refreshData } = await supabase.auth.getSession()
+      console.log('🔑 Signin: Session after refresh:', refreshData.session ? 'exists' : 'null')
+      
+      if (refreshData.session) {
+        // Force page reload to ensure auth state is fresh
+        console.log('🔑 Signin: Redirecting to:', targetUrl)
+        window.location.href = targetUrl
+      } else {
+        console.log('🔑 Signin: Session not properly established, trying router push')
+        router.push(targetUrl)
+      }
 
     } catch (error) {
       console.error('Sign in error:', error)

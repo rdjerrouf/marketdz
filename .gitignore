@@ -33,6 +33,14 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# sensitive configuration files
+CLAUDE.md.sensitive
+*.key
+*.pem
+*.p12
+*.p8
+secrets/
+
 # vercel
 .vercel
 

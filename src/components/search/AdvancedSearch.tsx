@@ -324,7 +324,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFiltersCha
             {/* Price Range */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Gamme de prix (DZD)
+                Price Range (DZD)
               </label>
               <div className="flex space-x-2">
                 <input
@@ -410,7 +410,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, query }) => {
   };
 
   const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('fr-DZ', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'DZD',
       minimumFractionDigits: 0

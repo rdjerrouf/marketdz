@@ -169,7 +169,7 @@ const SimpleAdvancedSearch = () => {
   }, [searchParams, performSearch]);
 
   const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('fr-DZ', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'DZD',
       minimumFractionDigits: 0

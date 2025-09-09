@@ -7,14 +7,17 @@ import { supabase } from '@/lib/supabase/client'
 interface Listing {
   id: string
   title: string
-  description: string
-  price: number
-  category: string
-  status: 'active' | 'pending' | 'sold' | 'expired'
+  description: string | null
+  price: number | null
+  category: 'for_sale' | 'job' | 'service' | 'for_rent'
+  subcategory: string | null
+  status: 'active' | 'sold' | 'expired' | 'rented' | 'completed'
   location_city: string
   location_wilaya: string
   created_at: string
   user_id: string
+  photos: string[]
+  metadata: any
   profiles?: {
     first_name: string
     last_name: string
@@ -26,7 +29,7 @@ export default function AdminListings() {
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'pending' | 'sold' | 'expired'>('all')
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'sold' | 'expired' | 'rented' | 'completed'>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [selectedListings, setSelectedListings] = useState<string[]>([])

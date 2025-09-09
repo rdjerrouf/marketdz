@@ -168,6 +168,7 @@ export default function CreateListingPage() {
                 location_wilaya: user?.wilaya || ''
               }}
               mode="create"
+              fixedCategory={true}
             />
           </div>
         </div>

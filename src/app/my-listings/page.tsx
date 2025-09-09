@@ -18,22 +18,47 @@ export default function MyListingsPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
+      try {
+        console.log('👤 MyListingsPage - Checking authentication...')
+        
+        // Add timeout to prevent hanging
+        const sessionPromise = supabase.auth.getSession()
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session check timeout')), 5000)
+        )
+        
+        const { data: { session }, error: sessionError } = await Promise.race([
+          sessionPromise, 
+          timeoutPromise
+        ]) as any
+        
+        if (sessionError) {
+          console.error('👤 MyListingsPage - Session error:', sessionError)
+          router.push('/signin?redirect=/my-listings')
+          return
+        }
+        
+        if (!session) {
+          console.log('👤 MyListingsPage - No session found, redirecting to signin')
+          router.push('/signin?redirect=/my-listings')
+          return
+        }
+
+        setUser({
+          id: session.user.id,
+          email: session.user.email || ''
+        })
+        
+        console.log('👤 MyListingsPage - User authenticated:', {
+          id: session.user.id,
+          email: session.user.email
+        })
+        
+      } catch (error) {
+        console.error('👤 MyListingsPage - Auth check failed:', error)
         router.push('/signin?redirect=/my-listings')
         return
       }
-
-      setUser({
-        id: session.user.id,
-        email: session.user.email || ''
-      })
-      
-      console.log('👤 MyListingsPage - User authenticated:', {
-        id: session.user.id,
-        email: session.user.email
-      })
       
       setLoading(false)
     }
@@ -110,7 +135,20 @@ export default function MyListingsPage() {
         {/* Header with back button */}
         <div className="mb-8">
           <button
-            onClick={() => router.back()}
+            onClick={() => {
+              console.log('👤 MyListingsPage - Back button clicked')
+              try {
+                if (window.history.length > 1) {
+                  router.back()
+                } else {
+                  console.log('👤 MyListingsPage - No history, going to home')
+                  router.push('/')
+                }
+              } catch (error) {
+                console.error('👤 MyListingsPage - Back navigation failed:', error)
+                router.push('/')
+              }
+            }}
             className="flex items-center text-white/80 hover:text-white transition-colors mb-4 group"
           >
             <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

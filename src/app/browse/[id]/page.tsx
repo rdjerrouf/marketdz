@@ -131,7 +131,7 @@ export default function ListingDetailsPage() {
 
   const formatPrice = (price: number | null, category: string) => {
     if (!price) return category === 'job' ? 'Salary negotiable' : 'Price negotiable'
-    return new Intl.NumberFormat('fr-DZ', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'DZD',
       minimumFractionDigits: 0

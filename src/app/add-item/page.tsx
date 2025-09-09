@@ -57,7 +57,17 @@ export default function AddItemPage() {
     const checkAuth = async () => {
       try {
         console.log('🔍 Checking authentication for add-item page...')
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        // Add timeout to prevent hanging
+        const sessionPromise = supabase.auth.getSession()
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session check timeout')), 5000)
+        )
+        
+        const { data: { session }, error: sessionError } = await Promise.race([
+          sessionPromise, 
+          timeoutPromise
+        ]) as any
         
         if (sessionError) {
           console.error('❌ Session error:', sessionError)
@@ -100,6 +110,10 @@ export default function AddItemPage() {
         }
       } catch (error) {
         console.error('❌ Authentication check failed:', error)
+        if (error instanceof Error && error.message === 'Session check timeout') {
+          console.error('❌ Authentication check timed out - possible Docker connectivity issue')
+          alert('Authentication check timed out. Please try refreshing the page or check your connection.')
+        }
         router.push('/signin?redirect=/add-item')
       } finally {
         console.log('✅ Setting loading to false')

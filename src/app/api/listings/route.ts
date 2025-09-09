@@ -22,7 +22,16 @@ export async function POST(request: NextRequest) {
       location_city,
       location_wilaya,
       photos,
-      metadata
+      metadata,
+      // New category-specific fields
+      available_from,
+      available_to,
+      rental_period,
+      salary_min,
+      salary_max,
+      job_type,
+      company_name,
+      condition
     } = body
 
     // Validate required fields
@@ -74,7 +83,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create the listing
+    // Create the listing (temporarily without new fields due to schema cache issue)
     const { data, error } = await supabase
       .from('listings')
       .insert([{
@@ -87,7 +96,18 @@ export async function POST(request: NextRequest) {
         location_city: location_city?.trim(),
         location_wilaya,
         photos: photos || [],
-        metadata: metadata || {},
+        metadata: {
+          ...metadata || {},
+          // Store new fields in metadata temporarily until schema cache refreshes
+          ...(available_from && { available_from }),
+          ...(available_to && { available_to }),
+          ...(rental_period && { rental_period }),
+          ...(salary_min && { salary_min }),
+          ...(salary_max && { salary_max }),
+          ...(job_type && { job_type }),
+          ...(company_name?.trim() && { company_name: company_name.trim() }),
+          ...(condition && { condition })
+        },
         status: 'active'
       }])
       .select()

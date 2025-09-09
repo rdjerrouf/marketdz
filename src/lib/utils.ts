@@ -10,7 +10,7 @@ export function cn(...inputs: ClassValue[]) {
 
 // Format currency for Algeria (DZD)
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat('fr-DZ', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'DZD',
     minimumFractionDigits: 0,
@@ -22,7 +22,7 @@ export function formatPrice(price: number): string {
 export function formatDate(date: string | Date): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date
   
-  return new Intl.DateTimeFormat('fr-DZ', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -36,16 +36,16 @@ export function formatRelativeTime(date: string | Date): string {
   const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000)
 
   if (diffInSeconds < 60) {
-    return 'À l\'instant'
+    return 'Just now'
   } else if (diffInSeconds < 3600) {
     const minutes = Math.floor(diffInSeconds / 60)
-    return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`
+    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`
   } else if (diffInSeconds < 86400) {
     const hours = Math.floor(diffInSeconds / 3600)
-    return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`
+    return `${hours} hour${hours > 1 ? 's' : ''} ago`
   } else {
     const days = Math.floor(diffInSeconds / 86400)
-    return `Il y a ${days} jour${days > 1 ? 's' : ''}`
+    return `${days} day${days > 1 ? 's' : ''} ago`
   }
 }
 
