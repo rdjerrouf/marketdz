@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import FavoriteButton from '@/components/common/FavoriteButton'
 import StarRating from '@/components/common/StarRating'
+import PWAInstallButton from '@/components/PWAInstallButton'
+import { fixPhotoUrl } from '@/lib/utils'
 
 interface Listing {
   id: string
@@ -276,16 +278,18 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
             <h1 className="text-white text-xl font-bold">MarketDZ</h1>
           </div>
 
-          {/* Back Button */}
-          <button
-            onClick={() => router.back()}
-            className="flex items-center text-white/80 hover:text-white transition-colors mb-6 group"
-          >
-            <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back
-          </button>
+          {/* Back Button and PWA Install */}
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center text-white/80 hover:text-white transition-colors group"
+            >
+              <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back
+            </button>
+          </div>
 
           {/* Navigation Menu */}
           <nav className="space-y-2">
@@ -352,7 +356,10 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
       {/* Main Content */}
       <div className="relative z-10 flex-1 p-8 overflow-auto">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 relative">
+          <div className="absolute top-0 right-0">
+            <PWAInstallButton variant="compact" />
+          </div>
           <h1 className="text-4xl font-bold text-white mb-2">Search MarketDZ</h1>
           <p className="text-lg text-white text-opacity-90">
             Find exactly what you're looking for in Algeria's premier marketplace
@@ -647,7 +654,7 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
                       <div className="h-48 bg-gray-200 relative overflow-hidden">
                         {listing.photos && listing.photos.length > 0 ? (
                           <img
-                            src={listing.photos[0]}
+                            src={fixPhotoUrl(listing.photos[0])}
                             alt={listing.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                             onError={(e) => {

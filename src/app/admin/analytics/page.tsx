@@ -44,27 +44,33 @@ export default function AdminAnalytics() {
       const daysBack = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : 365
       const startDate = new Date(now.getTime() - (daysBack * 24 * 60 * 60 * 1000))
 
-      // Fetch total users
+      // LEAN APPROACH: Use lightweight count queries with filters to use indexes efficiently
+      
+      // Fetch total users - lightweight count
       const { count: totalUsers } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
 
-      // Fetch total listings
+      // Fetch total active listings only (use status index)
       const { count: totalListings } = await supabase
         .from('listings')
         .select('*', { count: 'exact', head: true })
+        .eq('status', 'active')
 
-      // Fetch active users (users who created listings or messages in the time range)
+      // Fetch recent listings as proxy for active users (cost-effective)
       const { count: activeUsers } = await supabase
-        .from('profiles')
+        .from('listings')
         .select('*', { count: 'exact', head: true })
-        .gte('updated_at', startDate.toISOString())
+        .eq('status', 'active')
+        .gte('created_at', startDate.toISOString())
 
-      // Fetch top categories
+      // LEAN: Limited category query with filters to use compound index
       const { data: categoryData } = await supabase
         .from('listings')
         .select('category')
+        .eq('status', 'active')
         .gte('created_at', startDate.toISOString())
+        .limit(1000) // Hard limit for cost control
 
       const categoryStats = categoryData?.reduce((acc: Record<string, number>, item) => {
         acc[item.category] = (acc[item.category] || 0) + 1
@@ -76,13 +82,15 @@ export default function AdminAnalytics() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5)
 
-      // Fetch location stats
+      // LEAN: Limited location query with filters to use compound index
       const { data: locationData } = await supabase
         .from('listings')
         .select('location_wilaya')
+        .eq('status', 'active')
         .gte('created_at', startDate.toISOString())
+        .limit(1000) // Hard limit for cost control
 
-      const locationStats = locationData?.reduce((acc: Record<string, number>, item) => {
+      const locationStats = locationData?.reduce((acc: Record<string, number>, item: any) => {
         if (item.location_wilaya) {
           acc[item.location_wilaya] = (acc[item.location_wilaya] || 0) + 1
         }

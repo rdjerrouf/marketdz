@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
-// Temporarily disabled PWA to prevent infinite reload loop
-// import withPWA from 'next-pwa';
+const withPWA = require('next-pwa');
 
 const nextConfig = {
   images: {
@@ -11,16 +10,6 @@ const nextConfig = {
       },
     ],
   },
-  // Enable standalone output for Docker
-  output: 'standalone',
-  // Disable ESLint during builds for Docker
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  // Disable TypeScript errors during build for Docker
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   // Turbopack configuration
   turbopack: {
     // Remove ts-loader rule as Next.js handles TypeScript natively
@@ -29,4 +18,24 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
 };
 
-export default nextConfig;
+const withPWAConfig = withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development', // Only enable in production/Docker
+  runtimeCaching: [
+    {
+      urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'supabase-cache',
+        expiration: {
+          maxEntries: 32,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
+        },
+      },
+    },
+  ],
+});
+
+export default withPWAConfig(nextConfig);

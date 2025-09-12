@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useFavorites, useAuth } from '@/hooks/useFavorites'
 import FavoriteButton from '@/components/common/FavoriteButton'
+import PWAInstallButton from '@/components/PWAInstallButton'
 
 export default function FavoritesPage() {
   const router = useRouter()
@@ -77,18 +78,22 @@ export default function FavoritesPage() {
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-8">
+        {/* Header with PWA button outside the content area */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center text-white hover:text-white/80 transition-colors group"
+          >
+            <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back
+          </button>
+          <PWAInstallButton />
+        </div>
+        
         <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl">
           <div className="mb-6">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center text-black hover:text-gray-700 transition-colors mb-4 group"
-            >
-              <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back
-            </button>
-            
             <h1 className="text-3xl font-bold text-black">
               ❤️ Mes Favoris
             </h1>

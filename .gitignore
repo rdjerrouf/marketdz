@@ -41,6 +41,16 @@ CLAUDE.md.sensitive
 *.p8
 secrets/
 
+# Docker files with hardcoded keys (SECURITY)
+Dockerfile.optimized
+docker-compose.dev.yml
+
+# Environment files with secrets
+.env.docker
+.env.local
+.env.development
+.env.production
+
 # vercel
 .vercel
 

@@ -52,42 +52,42 @@ export default function SignUpPage() {
 
     // Email validation
     if (!formData.email) {
-      newErrors.email = 'Email est requis'
+      newErrors.email = 'Email is required'
     } else if (!isValidEmail(formData.email)) {
-      newErrors.email = 'Format email invalide'
+      newErrors.email = 'Invalid email format'
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Mot de passe est requis'
+      newErrors.password = 'Password is required'
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères'
+      newErrors.password = 'Password must be at least 6 characters'
     }
 
     // Confirm password
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Les mots de passe ne correspondent pas'
+      newErrors.confirmPassword = 'Passwords do not match'
     }
 
     // Name validation
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'Prénom est requis'
+      newErrors.firstName = 'First name is required'
     }
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Nom est requis'
+      newErrors.lastName = 'Last name is required'
     }
 
     // Phone validation (optional but if provided must be valid)
     if (formData.phone && !isValidAlgerianPhone(formData.phone)) {
-      newErrors.phone = 'Numéro de téléphone invalide (ex: 0551234567)'
+      newErrors.phone = 'Invalid phone number (ex: 0551234567)'
     }
 
     // Location validation
     if (!formData.wilaya) {
-      newErrors.wilaya = 'Wilaya est requise'
+      newErrors.wilaya = 'Province is required'
     }
     if (!formData.city) {
-      newErrors.city = 'Ville est requise'
+      newErrors.city = 'City is required'
     }
 
     return newErrors
@@ -145,7 +145,7 @@ export default function SignUpPage() {
 
       if (!response.ok) {
         if (result.error.includes('already registered') || result.error.includes('User already registered')) {
-          setErrors({ email: 'Cette adresse email est déjà utilisée' })
+          setErrors({ email: 'This email address is already in use' })
         } else {
           setErrors({ general: result.error })
         }
@@ -153,11 +153,11 @@ export default function SignUpPage() {
       }
 
       // Success - redirect to sign in page with success message
-      router.push('/signin?message=Compte créé avec succès! Veuillez vous connecter.')
+      router.push('/signin?message=Account created successfully! Please sign in.')
 
     } catch (error) {
       console.error('Sign up error:', error)
-      setErrors({ general: 'Une erreur est survenue. Veuillez réessayer.' })
+      setErrors({ general: 'An error occurred. Please try again.' })
     } finally {
       setIsLoading(false)
     }
@@ -198,7 +198,7 @@ export default function SignUpPage() {
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Retour à l'accueil
+            Back to Home
           </Link>
         </div>
         
@@ -206,7 +206,7 @@ export default function SignUpPage() {
           MarketDZ
         </h1>
         <h2 className="text-center text-xl text-white/80">
-          Créer votre compte
+          Create Your Account
         </h2>
       </div>
 
@@ -234,7 +234,7 @@ export default function SignUpPage() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.email ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="exemple@email.com"
+                placeholder="example@email.com"
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
@@ -242,7 +242,7 @@ export default function SignUpPage() {
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Mot de passe *
+                Password *
               </label>
               <div className="relative">
                 <input
@@ -254,14 +254,14 @@ export default function SignUpPage() {
                   className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Minimum 6 caractères"
+                  placeholder="Minimum 6 characters"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600"
                 >
-                  {showPassword ? 'Cacher' : 'Voir'}
+                  {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
@@ -270,7 +270,7 @@ export default function SignUpPage() {
             {/* Confirm Password */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirmer le mot de passe *
+                Confirm Password *
               </label>
               <input
                 type="password"
@@ -289,7 +289,7 @@ export default function SignUpPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  Prénom *
+                  First Name *
                 </label>
                 <input
                   type="text"
@@ -306,7 +306,7 @@ export default function SignUpPage() {
               
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  Nom *
+                  Last Name *
                 </label>
                 <input
                   type="text"
@@ -325,7 +325,7 @@ export default function SignUpPage() {
             {/* Phone */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Téléphone (optionnel)
+                Phone (optional)
               </label>
               <input
                 type="tel"
@@ -344,7 +344,7 @@ export default function SignUpPage() {
             {/* Wilaya */}
             <div>
               <label htmlFor="wilaya" className="block text-sm font-medium text-gray-700">
-                Wilaya *
+                Province *
               </label>
               <select
                 name="wilaya"
@@ -355,7 +355,7 @@ export default function SignUpPage() {
                   errors.wilaya ? 'border-red-300' : 'border-gray-300'
                 }`}
               >
-                <option value="">Sélectionner une wilaya</option>
+                <option value="">Select a province</option>
                 {ALGERIA_WILAYAS.map(wilaya => (
                   <option key={wilaya.code} value={wilaya.code}>
                     {wilaya.code} - {wilaya.name}
@@ -368,7 +368,7 @@ export default function SignUpPage() {
             {/* City */}
             <div>
               <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                Ville *
+                City *
               </label>
               <select
                 name="city"
@@ -380,7 +380,7 @@ export default function SignUpPage() {
                   errors.city ? 'border-red-300' : 'border-gray-300'
                 } ${!formData.wilaya ? 'bg-gray-100' : ''}`}
               >
-                <option value="">Sélectionner une ville</option>
+                <option value="">Select a city</option>
                 {availableCities.map(city => (
                   <option key={city} value={city}>
                     {city}
@@ -393,7 +393,7 @@ export default function SignUpPage() {
             {/* Bio */}
             <div>
               <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
-                Présentation (optionnel)
+                Bio (optional)
               </label>
               <textarea
                 name="bio"
@@ -402,7 +402,7 @@ export default function SignUpPage() {
                 value={formData.bio}
                 onChange={handleInputChange}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Parlez-nous de vous..."
+                placeholder="Tell us about yourself..."
               />
             </div>
 
@@ -417,7 +417,7 @@ export default function SignUpPage() {
                     : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                 }`}
               >
-                {isLoading ? 'Création en cours...' : 'Créer mon compte'}
+                {isLoading ? 'Creating account...' : 'Create Account'}
               </button>
             </div>
           </form>
@@ -425,12 +425,12 @@ export default function SignUpPage() {
           <div className="mt-6">
             <div className="text-center">
               <span className="text-sm text-gray-600">
-                Vous avez déjà un compte?{' '}
+                Already have an account?{' '}
                 <Link 
                   href="/signin" 
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
-                  Se connecter
+                  Sign In
                 </Link>
               </span>
             </div>

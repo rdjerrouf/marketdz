@@ -136,7 +136,7 @@ function validateFile(file: File, bucket: string): {
   }
 
   // Check file size
-  const maxSize = maxSizes[bucket]
+  const maxSize = maxSizes[bucket as keyof typeof maxSizes]
   if (file.size > maxSize) {
     const maxSizeMB = Math.round(maxSize / (1024 * 1024))
     return {

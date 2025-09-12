@@ -11,7 +11,7 @@
 ### 🔍 **Advanced Search & Discovery**
 - **Arabic RTL Full-Text Search** with Unicode normalization
 - **AI-Powered Content Filtering** and sentiment analysis
-- **Geographic Search** across all 48 Algerian wilayas
+- **Geographic Search** across all 58 Algerian wilayas
 - **Smart Ranking Algorithm** with personalization
 - **Autocomplete Suggestions** in Arabic and French
 

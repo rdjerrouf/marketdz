@@ -4,6 +4,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import PWAInstallButton from '@/components/PWAInstallButton'
 
 interface User {
   id: string
@@ -246,7 +247,7 @@ export default function AddItemPage() {
               Search
             </button>
 
-            <button className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors">
+            <button className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors">
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
@@ -263,7 +264,7 @@ export default function AddItemPage() {
 
             <button 
               onClick={() => router.push('/profile')}
-              className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+              className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
             >
               <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -294,7 +295,7 @@ export default function AddItemPage() {
                 <>
                   <button 
                     onClick={() => router.push('/signin')}
-                    className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors mb-2"
+                    className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors mb-2"
                   >
                     <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -303,7 +304,7 @@ export default function AddItemPage() {
                   </button>
                   <button 
                     onClick={() => router.push('/signup')}
-                    className="flex items-center w-full p-3 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
+                    className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
                   >
                     <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -319,9 +320,9 @@ export default function AddItemPage() {
         {/* User Info at Bottom */}
         {user && (
           <div className="absolute bottom-4 left-4 right-4 max-w-56">
-            <div className="bg-white bg-opacity-10 p-3 rounded-lg">
+            <div className="bg-black/30 backdrop-blur-sm border border-white/10 p-3 rounded-lg">
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-3">
                   <span className="text-white font-semibold">
                     {user.first_name[0]}
                   </span>
@@ -330,7 +331,7 @@ export default function AddItemPage() {
                   <p className="text-white font-medium text-sm truncate">
                     {user.first_name} {user.last_name}
                   </p>
-                  <p className="text-white text-opacity-70 text-xs truncate">
+                  <p className="text-white/70 text-xs truncate">
                     {user.email}
                   </p>
                 </div>
@@ -343,7 +344,10 @@ export default function AddItemPage() {
       {/* Main Content */}
       <div className="flex-1 p-8 overflow-auto">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 relative">
+          <div className="absolute top-0 right-0">
+            <PWAInstallButton />
+          </div>
           <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center">
             ✨ Create Your Listing
           </h1>

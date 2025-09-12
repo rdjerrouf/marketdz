@@ -26,7 +26,7 @@ interface Listing {
 }
 
 export default function AdminListings() {
-  const [listings, setListings] = useState<Listing[]>([])
+  const [listings, setListings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'sold' | 'expired' | 'rented' | 'completed'>('all')
@@ -44,6 +44,7 @@ export default function AdminListings() {
     try {
       setLoading(true)
 
+      // LEAN APPROACH: Always filter by status first to use index efficiently
       let query = supabase
         .from('listings')
         .select(`
@@ -56,13 +57,18 @@ export default function AdminListings() {
         `, { count: 'exact' })
         .range((currentPage - 1) * listingsPerPage, currentPage * listingsPerPage - 1)
         .order('created_at', { ascending: false })
+        .limit(listingsPerPage) // Hard limit for cost control
+
+      // Always apply status filter to use compound index
+      if (filterStatus !== 'all') {
+        query = query.eq('status', filterStatus)
+      } else {
+        // Default to active listings when no filter to use index
+        query = query.in('status', ['active', 'sold', 'expired', 'rented', 'completed'])
+      }
 
       if (searchTerm) {
         query = query.ilike('title', `%${searchTerm}%`)
-      }
-
-      if (filterStatus !== 'all') {
-        query = query.eq('status', filterStatus)
       }
 
       const { data, error, count } = await query
@@ -79,9 +85,9 @@ export default function AdminListings() {
     }
   }
 
-  const handleListingAction = async (listingId: string, action: 'approve' | 'reject' | 'feature' | 'delete') => {
+  const handleListingAction = async (listingId: string, action: 'approve' | 'reject' | 'delete') => {
     try {
-      let updateData: any = {}
+      const updateData: any = {}
       
       switch (action) {
         case 'approve':
@@ -89,9 +95,6 @@ export default function AdminListings() {
           break
         case 'reject':
           updateData.status = 'expired'
-          break
-        case 'feature':
-          updateData.featured = true
           break
         case 'delete':
           const { error: deleteError } = await supabase
@@ -269,6 +272,8 @@ export default function AdminListings() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   <input
                     type="checkbox"
+                    aria-label="Select all listings"
+                    title="Select all listings"
                     onChange={(e) => {
                       if (e.target.checked) {
                         setSelectedListings(listings.map(l => l.id))
@@ -308,6 +313,8 @@ export default function AdminListings() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <input
                       type="checkbox"
+                      aria-label={`Select listing: ${listing.title}`}
+                      title={`Select listing: ${listing.title}`}
                       checked={selectedListings.includes(listing.id)}
                       onChange={() => toggleListingSelection(listing.id)}
                     />
@@ -333,7 +340,7 @@ export default function AdminListings() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {formatPrice(listing.price)}
+                      {listing.price ? formatPrice(listing.price) : 'N/A'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -350,7 +357,7 @@ export default function AdminListings() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-                      {listing.status === 'pending' && (
+                      {(listing.status as any) === 'pending' && (
                         <>
                           <button
                             onClick={() => handleListingAction(listing.id, 'approve')}
@@ -366,12 +373,6 @@ export default function AdminListings() {
                           </button>
                         </>
                       )}
-                      <button
-                        onClick={() => handleListingAction(listing.id, 'feature')}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        Feature
-                      </button>
                       <button
                         onClick={() => handleListingAction(listing.id, 'delete')}
                         className="text-red-600 hover:text-red-900"

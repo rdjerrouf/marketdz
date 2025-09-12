@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase/client'
 import { useUserRating } from '@/hooks/useReviews'
 import StarRating from '@/components/common/StarRating'
 import ContactSeller from '@/components/listings/ContactSeller'
+import { fixPhotoUrl } from '@/lib/utils'
 
 interface Listing {
   id: string
@@ -261,7 +262,7 @@ export default function ListingDetailsPage() {
                 <div className="relative">
                   <div className="aspect-video bg-gray-200">
                     <img
-                      src={listing.photos[currentImageIndex]}
+                      src={fixPhotoUrl(listing.photos[currentImageIndex])}
                       alt={listing.title}
                       className="w-full h-full object-cover"
                     />
@@ -328,7 +329,7 @@ export default function ListingDetailsPage() {
                         }`}
                       >
                         <img
-                          src={photo}
+                          src={fixPhotoUrl(photo)}
                           alt={`${listing.title} - ${index + 1}`}
                           className="w-full h-full object-cover"
                         />

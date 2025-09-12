@@ -1,5 +1,6 @@
 // Latency Optimization Library for MarketDZ - Algeria Focus
 import { createClient } from '@supabase/supabase-js'
+import { useState, useEffect } from 'react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -221,7 +222,7 @@ class LatencyOptimizer {
       ssl_negotiation: entry.connectEnd - entry.secureConnectionStart,
       server_response: entry.responseStart - entry.requestStart,
       dom_processing: entry.domContentLoadedEventStart - entry.responseEnd,
-      total_load_time: entry.loadEventEnd - entry.navigationStart
+      total_load_time: entry.loadEventEnd - entry.fetchStart
     }
 
     // Send to analytics if load time is concerning for Algeria users
@@ -402,12 +403,12 @@ export function getRecommendedImageQuality(): 'high' | 'medium' | 'low' {
   return 'low'
 }
 
-// Hook for React components
+// Hook for React components  
 export function useLatencyOptimization() {
-  const [metrics, setMetrics] = React.useState<PerformanceMetrics | null>(null)
-  const [recommendations, setRecommendations] = React.useState<any[]>([])
+  const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null)
+  const [recommendations, setRecommendations] = useState<any[]>([])
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Measure performance on component mount
     latencyOptimizer.measurePerformance().then(setMetrics)
     

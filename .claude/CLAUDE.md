@@ -1,192 +1,172 @@
-# MarketDZ - Claude Development Guide
+# CLAUDE.md
 
-> **🔒 SECURITY NOTICE**: This file contains development setup instructions. Never commit actual API keys, secrets, or sensitive configuration data to version control. Use environment variables and .env files that are properly gitignored.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-MarketDZ is a Next.js 15 marketplace application optimized for Algeria users, featuring authentication, listings management, file uploads, and real-time messaging. The application runs in Docker containers with Supabase as the backend.
 
-## Docker Setup & Commands
+MarketDZ is a Next.js 15 marketplace application optimized for Algeria users with:
+- **PWA Support**: Installable app with offline functionality via next-pwa
+- **Bilingual Interface**: Arabic RTL + French localization
+- **Authentication**: Supabase PKCE flow with Docker networking fixes
+- **File Uploads**: Secure photo storage with content moderation via Edge Functions
+- **Real-time**: Messaging and notifications
+- **Search**: Advanced Arabic full-text search with geographic filtering
 
-### Prerequisites
-- Docker and Docker Compose installed
-- Supabase local development environment running
+## Essential Commands
 
-### Key Docker Commands
+### Quick Start (New Developers)
 ```bash
-# Build and start the application
-cd /c/Users/rdjer/marketdz
-docker-compose build app
-docker-compose up -d app
+# 1. Start Supabase (required first)
+npx supabase start
 
-# Restart after code changes
-docker-compose restart app
+# 2. Setup environment
+cp .env.docker.example .env.docker
+# Edit .env.docker with keys from: npx supabase status
 
-# View logs (essential for debugging)
-docker logs marketdz-app-1 --follow
-docker logs marketdz-app-1 --tail 50 --follow
-
-# Stop services
-docker-compose down
+# 3. Start application
+npm run docker:up
 ```
 
-### Environment Variables Required
-```env
-# Build-time variables (in Dockerfile)
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=[YOUR_ANON_KEY_HERE]
-SUPABASE_SERVICE_ROLE_KEY=[YOUR_SERVICE_ROLE_KEY_HERE]
-
-# Runtime variables (in docker-compose.yml)
-NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
-SUPABASE_URL=http://supabase_kong_marketdz:8000
+### Development Commands
+```bash
+npm run dev              # Local development with turbopack (opens browser)
+npm run build            # Build application with turbopack
+npm run start            # Start production build
+npm run lint             # Run ESLint
+npm run health           # Check health endpoint (requires app running)
 ```
 
-**⚠️ Security Note**: Never commit actual API keys to version control. Use environment files (.env.local) that are in .gitignore.
+### Docker Management
+```bash
+npm run docker:up        # Start application container
+npm run docker:down      # Stop container
+npm run docker:restart   # Restart container
+npm run docker:build     # Rebuild container
+npm run docker:logs      # View container logs (follow mode)
+npm run docker:shell     # Access container shell
+npm run docker:status    # Check container & network status
+npm run docker:reset     # Full reset (down + up)
+npm run docker:dev       # Start development container
+```
 
-## Authentication Architecture
+### Testing & Debugging
+```bash
+npm run test:pool        # Test database connection pool
+npm run docker:logs | grep "Middleware"    # Debug authentication
+docker logs marketdz-app-1 --follow       # Raw container logs
+```
 
-### PKCE Flow Issues & Solutions
-**Problem**: Session cookies set by client-side authentication not recognized by server-side middleware in Docker environment.
+## Architecture
 
-**Root Cause**: Cookie domain/path mismatch between client-side Supabase auth and server-side middleware.
+### Authentication System
+The app uses Supabase PKCE authentication with complex Docker networking:
 
-**Solution Applied**:
-1. **Client Configuration** (`src/lib/supabase/client.ts`):
-   - Uses standard PKCE flow without custom storage
-   - Relies on Supabase's built-in cookie handling
+- **Client** (`src/lib/supabase/client.ts`): Browser-side auth with implicit flow
+- **Server** (`src/lib/supabase/server.ts`): SSR auth with cookie handling  
+- **Server Pool** (`src/lib/supabase/serverPool.ts`): Connection pooling for API routes
+- **Middleware** (`middleware.ts`): Request interception and session validation
 
-2. **Middleware Configuration** (`middleware.ts`):
-   - Proper cookie attributes for Docker: `httpOnly: false`, `secure: false`, `sameSite: 'lax'`
-   - Domain handling: `domain: undefined` (lets browser handle)
-   - Consistent path: `path: '/'`
+**Key Issue**: Session cookies in Docker require specific configuration:
+- Cookie attributes: `httpOnly: false`, `secure: false`, `sameSite: 'lax'`
+- Dual URL pattern: `SUPABASE_URL` (container) vs `NEXT_PUBLIC_SUPABASE_URL` (browser)
 
-3. **Server Configuration** (`src/lib/supabase/server.ts`):
-   - Dual URL pattern: `SUPABASE_URL || NEXT_PUBLIC_SUPABASE_URL`
-   - Container-to-container communication vs client access
+**Connection Pooling**: Uses singleton pattern in `serverPool.ts` for optimal performance on Nano tier
 
-### Authentication Flow
-1. User logs in via client-side form → `/api/auth/signin`
-2. Supabase sets PKCE cookies with proper domain/path
-3. Middleware reads and validates session from cookies
-4. Server-side components access authenticated user data
-
-## File Upload System
-
-### Architecture
+### File Upload Architecture
 - **Client**: `src/components/FileUpload.tsx` - React component with drag/drop
-- **Storage**: `src/lib/storage.ts` - Handles uploads via Supabase Edge Functions
-- **Security**: Content moderation + file validation
+- **Storage**: `src/lib/storage.ts` - Manages uploads via Supabase Edge Functions
+- **Security**: Content moderation + file validation (JPEG, PNG, WebP only)
+- **Flow**: Client validation → Content moderation → Secure upload → Metadata storage
 
-### Upload Flow
-1. Client validates file (type, size, suspicious names)
-2. Content moderation check via Edge Function
-3. Secure upload via `secure-file-upload` Edge Function
-4. Server stores metadata and returns public URL
+### Docker Configuration
+- **Main Config**: `docker-compose.yml` - Production setup with health checks
+- **Networking**: Uses external `supabase_network_marketdz` network
+- **Environment**: Secure injection via `.env.docker` (never commit actual keys)
+- **Build**: Multi-stage Dockerfile with Alpine Linux for minimal image size
 
-### Common Issues
-- **Authentication Required**: Ensure user session exists before upload
-- **File Validation**: Check allowed types (JPEG, PNG, WebP) and size limits
-- **Edge Function Access**: Verify Supabase Edge Functions are deployed and accessible
+### API Structure
+API routes in `src/app/api/` organized by domain:
+- `auth/` - Authentication endpoints (signin, signup, signout)
+- `listings/` - Marketplace item management
+- `search/` - Advanced search with Arabic support
+- `messages/` - Real-time messaging system
+- `admin/` - Administrative functions
+- `upload/` - File upload handling
+
+### PWA Implementation
+- **Manifest**: `public/manifest.json` with app metadata
+- **Icons**: `public/icons/` with 192x192 and 512x512 SVG icons
+- **Service Worker**: Automatic caching via next-pwa configuration
+- **Config**: `next.config.ts` with PWA setup (temporarily disabled to prevent reload loops)
+
+### Performance Configuration
+- **Turbopack**: Enabled for faster development builds
+- **Source Maps**: Disabled in production (`productionBrowserSourceMaps: false`)
+- **Standalone Output**: Optimized for Docker deployment
+
+## Environment Setup
+
+### File Structure
+```
+├── .env.docker.example     # Template (commit this)
+├── .env.docker            # Your keys (NEVER commit)
+├── docker-compose.yml     # Uses ${VARIABLES} for security
+```
+
+### Required Variables
+```env
+# Get from: npx supabase status
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
 
 ## Development Workflow
 
-### Making Code Changes
-1. Edit files in the host filesystem
-2. Rebuild Docker image: `docker-compose build app`
-3. Restart container: `docker-compose up -d app`
-4. Monitor logs: `docker logs marketdz-app-1 --follow`
+### Making Changes
+1. Edit files in host filesystem (hot reload works in Docker)
+2. For major changes: `npm run docker:build && npm run docker:up`
+3. Monitor logs: `npm run docker:logs`
 
-### Debugging Authentication Issues
+### Common Issues & Solutions
+
+**Authentication fails**: Check cookie handling in middleware, verify session flow
+**Photos not loading**: Use `fixPhotoUrl()` utility for Docker URL conversion
+**Container won't start**: Verify Supabase running (`npx supabase status`)
+**Build failures**: Ensure environment variables in `.env.docker`
+
+### Debugging Commands
 ```bash
-# Check middleware logs for cookie handling
+# Check middleware authentication
 docker logs marketdz-app-1 --follow | grep "🔧 Middleware"
 
-# Check authentication API calls
-docker logs marketdz-app-1 --follow | grep "=== Signin"
-
-# Monitor file upload attempts
+# Monitor upload attempts
 docker logs marketdz-app-1 --follow | grep "Upload"
+
+# Verify network connectivity
+npm run docker:status
+docker network ls | grep supabase
 ```
 
-### Testing Commands
-```bash
-# Run linting and type checking
-npm run lint
-npm run typecheck
+## Key URLs
+- **Local Development**: http://localhost:3000 (npm run dev)
+- **Docker Application**: http://localhost:3001 (Docker container)
+- **Supabase Studio**: http://localhost:54323
+- **Health Check**: http://localhost:3001/api/health (Docker) or http://localhost:3000/api/health (local)
 
-# Test build locally (if needed)
-npm run build
-```
+## Critical Notes
 
-## Network Configuration
+### Security
+- **Never commit**: Actual API keys, `.env.docker`, sensitive configs
+- **Always use**: Environment variable placeholders in Docker configs
+- **File uploads**: Go through Edge Functions for content moderation
 
-### Docker Compose Network
-- **App Container**: `marketdz-app-1` on port 3000
-- **Supabase Network**: `supabase_default_marketdz`
-- **Kong Gateway**: `supabase_kong_marketdz:8000` (internal)
-- **Public Access**: `localhost:54321` (external)
+### Performance  
+- **Turbopack**: Fast bundler for development and builds
+- **Connection Pooling**: Singleton Supabase clients to minimize connections
+- **Docker Optimization**: Standalone output for minimal container size
+- **Build Optimization**: Source maps disabled for faster production builds
 
-### URL Patterns
-```javascript
-// Client-side (browser)
-NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
-
-// Server-side (container-to-container)
-SUPABASE_URL=http://supabase_kong_marketdz:8000
-
-// Dual pattern in server code
-process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-```
-
-## Common Issues & Solutions
-
-### 1. Authentication Session Missing
-**Symptom**: `AuthSessionMissingError` in middleware logs
-**Solution**: Check cookie handling in middleware, ensure proper PKCE flow
-
-### 2. File Upload Fails
-**Symptom**: "Authentication required" during upload
-**Solution**: Verify session cookies are properly set and middleware recognizes user
-
-### 3. Container Build Failures
-**Symptom**: Docker build fails with missing environment variables
-**Solution**: Ensure all required env vars are in Dockerfile and docker-compose.yml
-
-### 4. Supabase Connection Issues
-**Symptom**: "fetch failed" errors in server-side operations
-**Solution**: Use correct URL pattern (container vs browser access)
-
-## Code Structure
-
-### Key Files
-- `middleware.ts` - Authentication and cookie handling
-- `src/lib/supabase/client.ts` - Client-side Supabase configuration
-- `src/lib/supabase/server.ts` - Server-side Supabase configuration
-- `src/lib/storage.ts` - File upload and management
-- `src/components/FileUpload.tsx` - Upload UI component
-
-### Docker Files
-- `Dockerfile` - Multi-stage build with Alpine Linux
-- `docker-compose.yml` - Service configuration and networking
-- `.dockerignore` - Files excluded from Docker context
-
-## Performance Considerations
-
-### Docker Optimization
-- Multi-stage build to minimize image size
-- Standalone output mode: `output: 'standalone'` in next.config.ts
-- Disabled linting/TypeScript in production build for faster builds
-
-### Monitoring
-- Response time headers: `X-Response-Time`
-- Request logging in middleware
-- Background log monitoring for real-time debugging
-
-## Next Steps
-- Monitor authentication flow after login attempts
-- Test photo upload functionality once session sync is confirmed
-- Verify all protected routes work properly with authenticated sessions
-
----
-
-**Last Updated**: Session cookie synchronization implemented and PKCE flow optimized for Docker environment.
+### Networking
+- **Internal**: `supabase_kong_marketdz:8000` (container-to-container)
+- **External**: `localhost:54321` (browser access)
+- **URL fixing**: Use dual pattern in server code for environment detection

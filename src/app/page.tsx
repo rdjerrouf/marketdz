@@ -84,6 +84,8 @@ export default function CompleteKickAssHomepage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [userListingsCount, setUserListingsCount] = useState(0)
   const [userFavoritesCount, setUserFavoritesCount] = useState(0)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [showInstallButton, setShowInstallButton] = useState(false)
 
   // Debug authentication state
   useEffect(() => {
@@ -176,6 +178,41 @@ export default function CompleteKickAssHomepage() {
     return () => clearInterval(interval)
   }, [])
 
+  // PWA Install functionality
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      console.log('📱 PWA: beforeinstallprompt event fired')
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault()
+      // Stash the event so it can be triggered later
+      setDeferredPrompt(e)
+      // Show install button
+      setShowInstallButton(true)
+    }
+
+    const handleAppInstalled = () => {
+      console.log('📱 PWA: App was installed')
+      // Hide install button
+      setShowInstallButton(false)
+      setDeferredPrompt(null)
+    }
+
+    // Listen for the beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('appinstalled', handleAppInstalled)
+
+    // Check if app is already installed
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+      console.log('📱 PWA: App is running in standalone mode')
+      setShowInstallButton(false)
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('appinstalled', handleAppInstalled)
+    }
+  }, [])
+
   const formatPrice = (price: number | null, category: string): string => {
     if (!price) return category === 'job' ? 'Salary negotiable' : 'Price negotiable'
     return new Intl.NumberFormat('en-US', {
@@ -253,6 +290,31 @@ export default function CompleteKickAssHomepage() {
       // Still reload the page to reflect signed out state
       window.location.reload()
     }
+  }
+
+  const handleInstallPWA = async () => {
+    if (!deferredPrompt) {
+      console.log('📱 PWA: No deferred prompt available')
+      return
+    }
+
+    console.log('📱 PWA: Showing install prompt')
+    // Show the install prompt
+    deferredPrompt.prompt()
+    
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice
+    console.log(`📱 PWA: User response to install prompt: ${outcome}`)
+    
+    if (outcome === 'accepted') {
+      console.log('📱 PWA: User accepted the install prompt')
+    } else {
+      console.log('📱 PWA: User dismissed the install prompt')
+    }
+    
+    // Clear the deferredPrompt variable
+    setDeferredPrompt(null)
+    setShowInstallButton(false)
   }
 
   const heroImages = [
@@ -394,15 +456,41 @@ export default function CompleteKickAssHomepage() {
               {/* Mobile Auth Buttons */}
               <div className="pt-4 border-t border-white/10 space-y-3">
                 {user ? (
-                  <button
-                    onClick={handleSignOut}
-                    className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-red-500/10 hover:text-red-300 transition-all duration-300 border border-red-500/20"
-                  >
+                  <>
+                    {/* PWA Download Button - Mobile Signed-in */}
+                    <button 
+                      className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20"
+                      onClick={deferredPrompt ? handleInstallPWA : () => {
+                        console.log('📱 PWA: Mobile manual trigger')
+                        if ('serviceWorker' in navigator) {
+                          if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+                            alert('📱 App is already installed!')
+                          } else {
+                            alert('📱 Use "Add to Home Screen" from your browser menu to install the app!')
+                          }
+                        } else {
+                          alert('📱 PWA not supported in this browser')
+                        }
+                      }}
+                    >
+                      <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <span className="font-medium">Install App</span>
+                      <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
+                        {deferredPrompt ? 'PWA' : 'TEST'}
+                      </div>
+                    </button>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-red-500/10 hover:text-red-300 transition-all duration-300 border border-red-500/20"
+                    >
                     <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                     <span className="font-medium">Sign Out</span>
                   </button>
+                  </>
                 ) : (
                   <>
                     <Link href="/signin" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-green-500/10 hover:text-green-300 transition-all duration-300 border border-green-500/20">
@@ -417,6 +505,30 @@ export default function CompleteKickAssHomepage() {
                       </svg>
                       <span className="font-medium">Register</span>
                     </Link>
+                    {/* PWA Download Button - Mobile */}
+                    <button 
+                      className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20"
+                      onClick={deferredPrompt ? handleInstallPWA : () => {
+                        console.log('📱 PWA: Mobile manual trigger')
+                        if ('serviceWorker' in navigator) {
+                          if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+                            alert('📱 App is already installed!')
+                          } else {
+                            alert('📱 Use "Add to Home Screen" from your browser menu to install the app!')
+                          }
+                        } else {
+                          alert('📱 PWA not supported in this browser')
+                        }
+                      }}
+                    >
+                        <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        <span className="font-medium">Install App</span>
+                        <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
+                          {deferredPrompt ? 'PWA' : 'TEST'}
+                        </div>
+                      </button>
                   </>
                 )}
               </div>
@@ -501,7 +613,7 @@ export default function CompleteKickAssHomepage() {
           </nav>
 
           {/* Desktop Authentication Buttons */}
-          <div className="mt-6 space-y-3">
+          <div className="mt-4 space-y-3">
             {user ? (
               <>
                 {/* Enhanced User Profile */}
@@ -527,6 +639,32 @@ export default function CompleteKickAssHomepage() {
                     </div>
                   </div>
                 </div>
+                {/* PWA Download Button for Signed-in Users */}
+                <button 
+                  id="pwa-install-button-signed-in"
+                  className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20 group mb-3"
+                  onClick={deferredPrompt ? handleInstallPWA : () => {
+                    console.log('📱 PWA: Manual trigger - checking install capability')
+                    if ('serviceWorker' in navigator) {
+                      // Check if already installed
+                      if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+                        alert('📱 App is already installed!')
+                      } else {
+                        alert('📱 Use your browser\'s install option:\n\n🖥️ Desktop: Look for install icon in address bar\n📱 Mobile: Use "Add to Home Screen" from browser menu')
+                      }
+                    } else {
+                      alert('📱 PWA not supported in this browser')
+                    }
+                  }}
+                >
+                  <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  <span className="font-medium">Install App</span>
+                  <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
+                    {deferredPrompt ? 'PWA' : 'TEST'}
+                  </div>
+                </button>
                 {/* Sign Out Button */}
                 <button
                   onClick={handleSignOut}
@@ -563,6 +701,32 @@ export default function CompleteKickAssHomepage() {
                   <span className="font-medium">Register</span>
                   <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </Link>
+                {/* PWA Download Button - Always show for testing */}
+                <button 
+                  id="pwa-install-button"
+                  className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20 group"
+                  onClick={deferredPrompt ? handleInstallPWA : () => {
+                    console.log('📱 PWA: Manual trigger - checking install capability')
+                    if ('serviceWorker' in navigator) {
+                      // Check if already installed
+                      if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+                        alert('📱 App is already installed!')
+                      } else {
+                        alert('📱 Use your browser\'s install option:\n\n🖥️ Desktop: Look for install icon in address bar\n📱 Mobile: Use "Add to Home Screen" from browser menu')
+                      }
+                    } else {
+                      alert('📱 PWA not supported in this browser')
+                    }
+                  }}
+                >
+                  <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  <span className="font-medium">Install App</span>
+                  <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
+                    {deferredPrompt ? 'PWA' : 'TEST'}
+                  </div>
+                </button>
               </>
             )}
           </div>
@@ -728,9 +892,10 @@ export default function CompleteKickAssHomepage() {
                 const badge = getCategoryBadge(category)
                 const Icon = badge.icon
                 return (
-                  <button
+                  <Link
                     key={category}
-                    className="group bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/30 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl"
+                    href={`/browse?category=${category}`}
+                    className="group bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/30 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl block"
                   >
                     <div className={`bg-gradient-to-r ${badge.color} p-4 rounded-xl mb-4 mx-auto w-fit group-hover:scale-110 transition-transform shadow-lg group-hover:shadow-2xl`}>
                       <Icon className="w-8 h-8 text-white" />
@@ -742,7 +907,7 @@ export default function CompleteKickAssHomepage() {
                       {category === 'job' && 'Full-time, part-time & remote positions'}
                       {category === 'service' && 'Professional services & expertise'}
                     </p>
-                  </button>
+                  </Link>
                 )
               })}
             </div>

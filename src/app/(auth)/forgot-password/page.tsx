@@ -29,9 +29,9 @@ export default function ForgotPasswordPage() {
     const newErrors: FormErrors = {}
 
     if (!formData.email) {
-      newErrors.email = 'Email est requis'
+      newErrors.email = 'Email is required'
     } else if (!isValidEmail(formData.email)) {
-      newErrors.email = 'Format email invalide'
+      newErrors.email = 'Invalid email format'
     }
 
     return newErrors
@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
 
     } catch (error) {
       console.error('Password reset error:', error)
-      setErrors({ general: 'Une erreur est survenue. Veuillez réessayer.' })
+      setErrors({ general: 'An error occurred. Please try again.' })
     } finally {
       setIsLoading(false)
     }
@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
             MarketDZ
           </h1>
           <h2 className="text-center text-xl text-gray-600">
-            Email envoyé!
+            Email Sent!
           </h2>
         </div>
 
@@ -113,16 +113,16 @@ export default function ForgotPasswordPage() {
               </div>
               
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Instructions envoyées
+                Instructions Sent
               </h3>
               
               <p className="text-sm text-gray-600 mb-6">
-                Si un compte existe avec l'adresse <strong>{formData.email}</strong>, 
-                vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.
+                If an account exists with the email <strong>{formData.email}</strong>, 
+                you will receive an email with instructions to reset your password.
               </p>
               
               <p className="text-xs text-gray-500 mb-6">
-                N'oubliez pas de vérifier votre dossier spam si vous ne voyez pas l'email.
+                Don't forget to check your spam folder if you don't see the email.
               </p>
               
               <div className="space-y-3">
@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
                   href="/signin"
                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  Retour à la connexion
+                  Back to Sign In
                 </Link>
                 
                 <button
@@ -140,7 +140,7 @@ export default function ForgotPasswordPage() {
                   }}
                   className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  Envoyer à nouveau
+                  Send Again
                 </button>
               </div>
             </div>
@@ -162,7 +162,7 @@ export default function ForgotPasswordPage() {
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Retour à la connexion
+            Back to Sign In
           </Link>
         </div>
         
@@ -170,10 +170,10 @@ export default function ForgotPasswordPage() {
           MarketDZ
         </h1>
         <h2 className="text-center text-xl text-gray-600">
-          Mot de passe oublié
+          Forgot Password
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Entrez votre adresse email pour recevoir les instructions de réinitialisation
+          Enter your email address to receive reset instructions
         </p>
       </div>
 
@@ -190,7 +190,7 @@ export default function ForgotPasswordPage() {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Adresse email
+                Email Address
               </label>
               <input
                 type="email"
@@ -201,7 +201,7 @@ export default function ForgotPasswordPage() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.email ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="votre@email.com"
+                placeholder="your@email.com"
                 autoComplete="email"
                 autoFocus
               />
@@ -219,7 +219,7 @@ export default function ForgotPasswordPage() {
                     : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                 }`}
               >
-                {isLoading ? 'Envoi en cours...' : 'Envoyer les instructions'}
+                {isLoading ? 'Sending...' : 'Send Instructions'}
               </button>
             </div>
           </form>
@@ -231,18 +231,18 @@ export default function ForgotPasswordPage() {
                 href="/signin" 
                 className="text-sm text-blue-600 hover:text-blue-500"
               >
-                ← Retour à la connexion
+                ← Back to Sign In
               </Link>
             </div>
             
             <div className="text-center">
               <span className="text-sm text-gray-600">
-                Pas encore de compte?{' '}
+                Don't have an account?{' '}
                 <Link 
                   href="/signup" 
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
-                  Créer un compte
+                  Create Account
                 </Link>
               </span>
             </div>

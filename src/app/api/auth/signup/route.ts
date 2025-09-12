@@ -1,9 +1,8 @@
 // src/app/api/auth/signup/route.ts
 // Simple, working signup route without complex fallbacks
 
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,22 +21,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create Supabase client
-    const supabase = createRouteHandlerClient({ cookies })
-
-    // Simple signup - let the database triggers handle profile creation
-    const { data, error } = await supabase.auth.signUp({
+    // Use admin client for signup
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      options: {
-        emailRedirectTo: `${requestUrl.origin}/auth/callback`,
-        data: {
-          first_name: firstName || '',
-          last_name: lastName || '',
-          phone: phone || '',
-          city: city || '',
-          wilaya: wilaya || '',
-        },
+      email_confirm: true,
+      user_metadata: {
+        first_name: firstName || '',
+        last_name: lastName || '',
+        phone: phone || '',
+        city: city || '',
+        wilaya: wilaya || '',
       },
     })
 

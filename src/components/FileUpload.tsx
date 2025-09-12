@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
-import { uploadFile, moderateContent } from '@/lib/storage'
+import { uploadFile, moderateContent, type UploadOptions } from '@/lib/storage'
 
 interface FileUploadProps {
   bucket: 'avatars' | 'listing-photos' | 'user-photos'

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { isValidEmail } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client'
+import PWAInstallButton from '@/components/PWAInstallButton'
 
 interface FormData {
   email: string
@@ -45,13 +46,13 @@ function SignInPageContent() {
     const newErrors: FormErrors = {}
 
     if (!formData.email) {
-      newErrors.email = 'Email est requis'
+      newErrors.email = 'Email is required'
     } else if (!isValidEmail(formData.email)) {
-      newErrors.email = 'Format email invalide'
+      newErrors.email = 'Invalid email format'
     }
 
     if (!formData.password) {
-      newErrors.password = 'Mot de passe est requis'
+      newErrors.password = 'Password is required'
     }
 
     return newErrors
@@ -92,7 +93,7 @@ function SignInPageContent() {
       if (error) {
         console.log('🔑 Signin: Authentication error:', error.message)
         if (error.message.includes('Invalid login credentials')) {
-          setErrors({ general: 'Email ou mot de passe incorrect.' })
+          setErrors({ general: 'Incorrect email or password.' })
         } else {
           setErrors({ general: error.message })
         }
@@ -100,7 +101,7 @@ function SignInPageContent() {
       }
 
       if (!data.user) {
-        setErrors({ general: 'Échec de l\'authentification' })
+        setErrors({ general: 'Authentication failed' })
         return
       }
 
@@ -132,7 +133,7 @@ function SignInPageContent() {
 
     } catch (error) {
       console.error('Sign in error:', error)
-      setErrors({ general: 'Une erreur est survenue. Essayez test@example.com / password123 pour tester.' })
+      setErrors({ general: 'An error occurred. Try test@example.com / password123 to test.' })
     } finally {
       setIsLoading(false)
     }
@@ -164,8 +165,8 @@ function SignInPageContent() {
       </div>
 
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
-        {/* Back button */}
-        <div className="mb-4">
+        {/* Back button and PWA Install */}
+        <div className="mb-4 flex items-center justify-between">
           <Link 
             href="/" 
             className="inline-flex items-center text-sm text-white/80 hover:text-white transition-colors duration-200"
@@ -173,15 +174,16 @@ function SignInPageContent() {
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Retour à l'accueil
+            Back to Home
           </Link>
+          <PWAInstallButton variant="compact" />
         </div>
         
         <h1 className="text-center text-3xl font-bold text-white mb-2">
           MarketDZ
         </h1>
         <h2 className="text-center text-xl text-white/80">
-          Se connecter
+          Sign In
         </h2>
       </div>
 
@@ -217,7 +219,7 @@ function SignInPageContent() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.email ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="votre@email.com"
+                placeholder="your@email.com"
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
@@ -225,7 +227,7 @@ function SignInPageContent() {
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Mot de passe
+                Password
               </label>
               <div className="relative">
                 <input
@@ -237,14 +239,14 @@ function SignInPageContent() {
                   className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Votre mot de passe"
+                  placeholder="Your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600"
                 >
-                  {showPassword ? 'Cacher' : 'Voir'}
+                  {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
@@ -264,14 +266,14 @@ function SignInPageContent() {
                 {isRedirecting ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Connexion réussie! Redirection...
+                    Login successful! Redirecting...
                   </div>
                 ) : isLoading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Connexion en cours...
+                    Signing in...
                   </div>
-                ) : 'Se connecter'}
+                ) : 'Sign In'}
               </button>
             </div>
           </form>
@@ -283,18 +285,18 @@ function SignInPageContent() {
                 href="/forgot-password" 
                 className="text-sm text-blue-600 hover:text-blue-500"
               >
-                Mot de passe oublié?
+                Forgot password?
               </Link>
             </div>
             
             <div className="text-center">
               <span className="text-sm text-gray-600">
-                Pas encore de compte?{' '}
+                Don't have an account?{' '}
                 <Link 
                   href="/signup" 
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
-                  Créer un compte
+                  Create Account
                 </Link>
               </span>
             </div>

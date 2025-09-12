@@ -4,39 +4,39 @@
 export const LISTING_CATEGORIES = {
   FOR_SALE: {
     value: 'for_sale',
-    label: 'À Vendre',
+    label: 'For Sale',
     labelAr: 'للبيع',
     subcategories: [
-      'Électronique',
-      'Véhicules', 
-      'Immobilier',
-      'Meubles',
-      'Vêtements',
-      'Sports & Loisirs',
-      'Livres & Médias',
-      'Jardin & Bricolage',
-      'Enfants & Bébés',
-      'Animaux',
-      'Autres'
+      'Electronics',
+      'Vehicles', 
+      'Real Estate',
+      'Furniture',
+      'Clothing',
+      'Sports & Leisure',
+      'Books & Media',
+      'Garden & DIY',
+      'Baby & Kids',
+      'Animals',
+      'Other'
     ]
   },
   JOB: {
     value: 'job',
-    label: 'Emplois',
+    label: 'Jobs',
     labelAr: 'وظائف',
     subcategories: [
-      'Informatique',
-      'Ingénierie',
-      'Santé',
-      'Éducation',
-      'Commerce',
+      'Information Technology',
+      'Engineering',
+      'Healthcare',
+      'Education',
+      'Sales & Marketing',
       'Administration',
       'Construction',
-      'Transport',
-      'Hôtellerie',
-      'Artisanat',
+      'Transportation',
+      'Hospitality',
+      'Crafts',
       'Agriculture',
-      'Autres'
+      'Other'
     ]
   },
   SERVICE: {
@@ -44,33 +44,33 @@ export const LISTING_CATEGORIES = {
     label: 'Services',
     labelAr: 'خدمات',
     subcategories: [
-      'Nettoyage',
-      'Réparation',
-      'Cours particuliers',
-      'Transport',
-      'Jardinage',
-      'Plomberie',
-      'Électricité',
-      'Peinture',
-      'Coiffure',
-      'Traduction',
-      'Photographie',
-      'Autres'
+      'Cleaning',
+      'Repair & Maintenance',
+      'Tutoring',
+      'Transportation',
+      'Gardening',
+      'Plumbing',
+      'Electrical',
+      'Painting',
+      'Beauty & Hair',
+      'Translation',
+      'Photography',
+      'Other'
     ]
   },
   FOR_RENT: {
     value: 'for_rent',
-    label: 'À Louer',
+    label: 'For Rent',
     labelAr: 'للإيجار',
     subcategories: [
-      'Appartements',
-      'Maisons',
-      'Bureaux',
-      'Magasins',
-      'Véhicules',
-      'Équipements',
-      'Salles',
-      'Autres'
+      'Apartments',
+      'Houses',
+      'Offices',
+      'Commercial Space',
+      'Vehicles',
+      'Equipment',
+      'Event Halls',
+      'Other'
     ]
   }
 } as const

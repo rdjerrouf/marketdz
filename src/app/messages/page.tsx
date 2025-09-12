@@ -4,6 +4,7 @@
 import { useRouter } from 'next/navigation';
 import { useConversations } from '@/hooks/useSimpleMessages';
 import { useUser } from '@/hooks/useUser';
+import PWAInstallButton from '@/components/PWAInstallButton';
 
 export default function MessagesPage() {
   const router = useRouter();
@@ -12,34 +13,50 @@ export default function MessagesPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 relative overflow-hidden flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 dark:opacity-20 animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 dark:opacity-20 animate-pulse [animation-delay:2s]"></div>
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+          <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
         </div>
         
-        <div className="relative z-10 text-center bg-white/80 dark:bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-slate-200 dark:border-white/20">
-          <h1 className="text-2xl font-bold mb-4 text-slate-800 dark:text-white">Please sign in</h1>
-          <p className="text-slate-600 dark:text-white/80">You need to be signed in to access messages.</p>
+        {/* Back button */}
+        <div className="relative z-10 p-4 pt-8">
           <button
-            onClick={() => router.push('/signin')}
-            className="mt-4 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+            onClick={() => router.push('/')}
+            className="flex items-center text-white hover:text-white/80 transition-colors group"
           >
-            Sign In
+            <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Home
           </button>
+        </div>
+        
+        <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-120px)]">
+          <div className="text-center bg-white/80 backdrop-blur-sm p-8 rounded-xl border border-slate-200">
+            <h1 className="text-2xl font-bold mb-4 text-black">Please sign in</h1>
+            <p className="text-black">You need to be signed in to access messages.</p>
+            <button
+              onClick={() => router.push('/signin')}
+              className="mt-4 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+            >
+              Sign In
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 dark:opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 dark:opacity-20 animate-pulse [animation-delay:2s]"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 dark:opacity-20 animate-pulse [animation-delay:4s]"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
+        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto p-4 min-h-screen">
@@ -47,7 +64,7 @@ export default function MessagesPage() {
         <div className="mb-8 pt-8">
           <button
             onClick={() => router.push('/')}
-            className="flex items-center text-slate-600/80 hover:text-slate-600 dark:text-white/80 dark:hover:text-white transition-colors mb-6 group"
+            className="flex items-center text-white hover:text-white/80 transition-colors mb-6 group"
           >
             <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -55,9 +72,12 @@ export default function MessagesPage() {
             Back to Home
           </button>
           
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-2">💬 Messages</h1>
-            <p className="text-purple-600 dark:text-purple-200">Your conversations with other users</p>
+          <div className="flex items-center justify-between">
+            <div className="text-center flex-1">
+              <h1 className="text-4xl font-bold text-white mb-2">💬 Messages</h1>
+              <p className="text-purple-200">Your conversations with other users</p>
+            </div>
+            <PWAInstallButton />
           </div>
         </div>
 

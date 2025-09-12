@@ -98,3 +98,11 @@ export function fileToBase64(file: File): Promise<string> {
     reader.onerror = error => reject(error)
   })
 }
+
+// Fix photo URLs to use the correct Supabase URL for browser access
+export function fixPhotoUrl(url: string): string {
+  if (!url) return url
+  
+  // Replace internal Docker URL with external one accessible from browser
+  return url.replace('http://127.0.0.1:54321', 'http://localhost:54321')
+}
