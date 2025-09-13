@@ -1,8 +1,9 @@
 // src/app/api/admin/users/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase/server'
+import { createSupabaseAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
+  const supabase = createSupabaseAdminClient()
   try {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
@@ -63,6 +64,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const supabase = createSupabaseAdminClient()
   try {
     const body = await request.json()
     const { action, userIds, notificationData } = body
