@@ -2,9 +2,10 @@
 // Simple, working signup route without complex fallbacks
 
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase/server'
+import { createSupabaseAdminClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
+  const supabaseAdmin = createSupabaseAdminClient()
   try {
     const requestUrl = new URL(request.url)
     const formData = await request.json()

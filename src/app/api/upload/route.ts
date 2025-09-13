@@ -1,8 +1,9 @@
 // src/app/api/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase/server'
+import { createSupabaseClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
+  const supabase = createSupabaseClient()
   try {
     // Get current user session
     const { data: { user }, error: authError } = await supabase.auth.getUser()

@@ -1,11 +1,12 @@
 // src/app/api/reviews/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase/server'
+import { createSupabaseClient } from '@/lib/supabase/server'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabase = createSupabaseClient()
   try {
     const { id } = await params
     const { data: review, error } = await supabase
