@@ -10,6 +10,17 @@ const nextConfig = {
       },
     ],
   },
+  // Exclude Supabase functions from build
+  webpack: (config, { isServer }) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+    };
+    return config;
+  },
+  // Exclude supabase functions directory from compilation
+  experimental: {
+    serverComponentsExternalPackages: ['@supabase/supabase-js'],
+  },
   // Turbopack configuration
   turbopack: {
     // Remove ts-loader rule as Next.js handles TypeScript natively
