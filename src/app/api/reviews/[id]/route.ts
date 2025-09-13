@@ -45,6 +45,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabase = createSupabaseClient()
   try {
     const { id } = await params
     const body = await request.json()
@@ -100,6 +101,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabase = createSupabaseClient()
   try {
     const { id } = await params
     const { error } = await supabase
