@@ -92,10 +92,10 @@ export async function GET(request: NextRequest) {
     // Sorting
     switch (sortBy) {
       case 'price_low':
-        supabaseQuery = supabaseQuery.order('price', { ascending: true, nullsLast: true });
+        supabaseQuery = supabaseQuery.order('price', { ascending: true });
         break;
       case 'price_high':
-        supabaseQuery = supabaseQuery.order('price', { ascending: false, nullsLast: true });
+        supabaseQuery = supabaseQuery.order('price', { ascending: false });
         break;
       case 'newest':
         supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
