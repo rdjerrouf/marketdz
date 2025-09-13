@@ -52,7 +52,16 @@
       "Bash(semgrep:*)",
       "mcp__playwright__browser_click",
       "mcp__playwright__browser_handle_dialog",
-      "mcp__playwright__browser_snapshot"
+      "mcp__playwright__browser_snapshot",
+      "WebFetch(domain:vercel.com)",
+      "Bash(git commit:*)",
+      "WebSearch",
+      "WebFetch(domain:community.vercel.com)",
+      "Bash(find:*)",
+      "Bash(sed:*)",
+      "Bash(for:*)",
+      "Bash(do)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []
