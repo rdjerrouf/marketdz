@@ -11,10 +11,7 @@ const nextConfig = {
     ],
   },
   // Exclude Supabase functions from build
-  webpack: (config, { isServer }) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-    };
+  webpack: (config: any) => {
     return config;
   },
   // Exclude supabase functions directory from compilation
