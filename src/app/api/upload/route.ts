@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const supabase = createSupabaseClient()
   try {
     // Get current user session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
