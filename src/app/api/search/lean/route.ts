@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     // Apply filters in order of index efficiency
     if (category && ['for_sale', 'job', 'service', 'for_rent'].includes(category)) {
-      supabaseQuery = supabaseQuery.eq('category', category);
+      supabaseQuery = supabaseQuery.eq('category', category as 'for_sale' | 'job' | 'service' | 'for_rent');
     }
 
     if (wilaya) {
