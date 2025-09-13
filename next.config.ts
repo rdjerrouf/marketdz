@@ -14,10 +14,8 @@ const nextConfig = {
   webpack: (config: any) => {
     return config;
   },
-  // Exclude supabase functions directory from compilation
-  experimental: {
-    serverComponentsExternalPackages: ['@supabase/supabase-js'],
-  },
+  // External packages for server components
+  serverExternalPackages: ['@supabase/supabase-js'],
   // Turbopack configuration
   turbopack: {
     // Remove ts-loader rule as Next.js handles TypeScript natively
