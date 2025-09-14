@@ -1,13 +1,10 @@
 // Create the safe message function in the database
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
+  const supabase = createSupabaseAdminClient();
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Create the function directly using a simple SQL insert approach
     const { data, error } = await supabase.rpc('create_safe_message_function');

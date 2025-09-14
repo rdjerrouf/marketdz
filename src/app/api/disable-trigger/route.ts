@@ -1,13 +1,10 @@
 // API to disable the problematic message trigger
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
+  const supabase = createSupabaseAdminClient();
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Since we can't execute raw SQL directly, let's try a different approach
     // Let's create a simple function in the database first
