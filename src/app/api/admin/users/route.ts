@@ -1,104 +1,232 @@
 // src/app/api/admin/users/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseAdminClient } from '@/lib/supabase/server'
+import { createApiSupabaseClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
-  const supabase = createSupabaseAdminClient()
   try {
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const search = searchParams.get('search') || ''
+    const supabase = createApiSupabaseClient(request)
 
-    // Get current user session
+    // Get the current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Not authenticated' },
+        { status: 401 }
+      )
     }
 
-    // For now, allow any authenticated user to view users
-    // In production, you should check admin permissions
+    // Use admin client for database operations to bypass RLS
+    const adminSupabase = createSupabaseAdminClient()
+    const { data: currentAdmin } = await adminSupabase
+      .from('admin_users')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .single()
 
-    let query = supabase
-      .from('profiles')
+    // Fallback to email-based check for legacy support
+    const adminEmails = [
+      'admin@marketdz.com',
+      'moderator@marketdz.com',
+      'test@example.com',
+      'ryad@marketdz.com',
+      'rdjerrouf@gmail.com',
+      'anyadjerrouf@gmail.com'
+    ]
+
+    const isLegacyAdmin = adminEmails.includes(user.email || '')
+
+    if (!currentAdmin && !isLegacyAdmin) {
+      return NextResponse.json(
+        { error: 'Access denied' },
+        { status: 403 }
+      )
+    }
+
+    // Get all admin users
+    const { data: adminUsers, error: adminError } = await adminSupabase
+      .from('admin_users')
       .select(`
-        id,
-        first_name,
-        last_name,
-        bio,
-        phone,
-        avatar_url,
-        city,
-        wilaya,
-        created_at,
-        updated_at
-      `, { count: 'exact' })
-
-    // Apply search filter
-    if (search) {
-      query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,phone.ilike.%${search}%`)
-    }
-
-    const { data: users, error, count } = await query
+        *,
+        profiles:user_id (
+          email,
+          first_name,
+          last_name
+        )
+      `)
       .order('created_at', { ascending: false })
-      .range((page - 1) * limit, page * limit - 1)
 
-    if (error) {
-      console.error('Error fetching users:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (adminError) {
+      console.error('Error fetching admin users:', adminError)
+      return NextResponse.json(
+        { error: 'Failed to fetch admin users' },
+        { status: 500 }
+      )
     }
+
+    // Get all users from auth
+    const { data: authUsers, error: authError2 } = await adminSupabase.auth.admin.listUsers()
+
+    if (authError2) {
+      console.error('Error fetching auth users:', authError2)
+      return NextResponse.json(
+        { error: 'Failed to fetch users' },
+        { status: 500 }
+      )
+    }
+
+    const allUsers = authUsers.users.map(user => ({
+      id: user.id,
+      email: user.email || 'No email',
+      created_at: user.created_at,
+      email_confirmed_at: user.email_confirmed_at || 'Not confirmed'
+    }))
 
     return NextResponse.json({
-      users,
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        pages: Math.ceil((count || 0) / limit)
+      adminUsers: adminUsers || [],
+      allUsers,
+      currentAdmin: currentAdmin || {
+        id: 'legacy',
+        user_id: user.id,
+        role: 'admin',
+        permissions: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        is_active: true
       }
     })
+
   } catch (error) {
-    console.error('Error in admin users API:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Unexpected error in admin users API:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createSupabaseAdminClient()
   try {
+    const supabase = createApiSupabaseClient(request)
     const body = await request.json()
-    const { action, userIds, notificationData } = body
+    const { action, userId, role, adminUserId, newRole } = body
 
-    // Get current user session
+    // Get the current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Not authenticated' },
+        { status: 401 }
+      )
     }
 
-    // For now, allow any authenticated user to send notifications
-    // In production, you should check admin permissions
+    // Use admin client for database operations to bypass RLS
+    const adminSupabase = createSupabaseAdminClient()
+    const { data: currentAdmin } = await adminSupabase
+      .from('admin_users')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .single()
 
+    // Fallback to email-based check for legacy support
+    const adminEmails = [
+      'admin@marketdz.com',
+      'moderator@marketdz.com',
+      'test@example.com',
+      'ryad@marketdz.com',
+      'rdjerrouf@gmail.com',
+      'anyadjerrouf@gmail.com'
+    ]
+
+    const isLegacyAdmin = adminEmails.includes(user.email || '')
+
+    if (!currentAdmin && !isLegacyAdmin) {
+      return NextResponse.json(
+        { error: 'Access denied' },
+        { status: 403 }
+      )
+    }
+
+    // Handle different actions
     switch (action) {
-      case 'send_notification':
-        // For now, just return success message
-        // In production, implement push notification sending
-        if (!notificationData || !userIds?.length) {
+      case 'promote':
+        if (!currentAdmin || !['super_admin', 'admin'].includes(currentAdmin.role)) {
           return NextResponse.json(
-            { error: 'Missing notification data or user IDs' },
-            { status: 400 }
+            { error: 'You do not have permission to promote users' },
+            { status: 403 }
           )
         }
 
-        return NextResponse.json({ 
-          message: `Notification would be sent to ${userIds.length} users`,
-          data: { notificationData, userIds }
-        })
+        const { error: promoteError } = await adminSupabase
+          .from('admin_users')
+          .insert({
+            user_id: userId,
+            role: role,
+            created_by: currentAdmin.id,
+            notes: `Promoted by ${currentAdmin.user_id}`
+          })
+
+        if (promoteError) {
+          if (promoteError.code === '23505') {
+            return NextResponse.json(
+              { error: 'User is already an admin' },
+              { status: 400 }
+            )
+          }
+          throw promoteError
+        }
+
+        return NextResponse.json({ success: true, message: 'User promoted successfully' })
+
+      case 'updateRole':
+        if (!currentAdmin || currentAdmin.role !== 'super_admin') {
+          return NextResponse.json(
+            { error: 'Only super admins can change roles' },
+            { status: 403 }
+          )
+        }
+
+        const { error: updateError } = await adminSupabase
+          .from('admin_users')
+          .update({ role: newRole })
+          .eq('id', adminUserId)
+
+        if (updateError) throw updateError
+
+        return NextResponse.json({ success: true, message: 'Admin role updated successfully' })
+
+      case 'deactivate':
+        if (!currentAdmin || !['super_admin', 'admin'].includes(currentAdmin.role)) {
+          return NextResponse.json(
+            { error: 'You do not have permission to deactivate admins' },
+            { status: 403 }
+          )
+        }
+
+        const { error: deactivateError } = await adminSupabase
+          .from('admin_users')
+          .update({ is_active: false })
+          .eq('id', adminUserId)
+
+        if (deactivateError) throw deactivateError
+
+        return NextResponse.json({ success: true, message: 'Admin deactivated successfully' })
 
       default:
-        return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+        return NextResponse.json(
+          { error: 'Invalid action' },
+          { status: 400 }
+        )
     }
+
   } catch (error) {
     console.error('Error in admin users POST:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

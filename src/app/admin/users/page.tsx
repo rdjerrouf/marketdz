@@ -26,6 +26,7 @@ export default function AdminUsers() {
   const [totalPages, setTotalPages] = useState(1)
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const [showBulkActions, setShowBulkActions] = useState(false)
+  const [actionMessage, setActionMessage] = useState<string | null>(null)
 
   const usersPerPage = 20
 
@@ -37,25 +38,42 @@ export default function AdminUsers() {
     try {
       setLoading(true)
 
-      let query = supabase
-        .from('profiles')
-        .select('*', { count: 'exact' })
-        .range((currentPage - 1) * usersPerPage, currentPage * usersPerPage - 1)
-        .order('created_at', { ascending: false })
+      // Use the new admin API instead of direct database access
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: usersPerPage.toString(),
+        search: searchTerm,
+        status: filterStatus
+      })
 
-      if (searchTerm) {
-        query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`)
+      // Get current session for Authorization header
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
       }
 
-      const { data, error, count } = await query
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
 
-      if (error) throw error
+      const response = await fetch(`/api/admin/user-management?${params}`, {
+        credentials: 'include',
+        headers
+      })
+      const data = await response.json()
 
-      setUsers(data || [])
-      setTotalPages(Math.ceil((count || 0) / usersPerPage))
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch users')
+      }
+
+      setUsers(data.users || [])
+      setTotalPages(data.pagination?.totalPages || 1)
 
     } catch (error) {
       console.error('Error fetching users:', error)
+      setActionMessage(`❌ Error loading users: ${error.message || error}`)
+      setTimeout(() => setActionMessage(null), 5000)
     } finally {
       setLoading(false)
     }
@@ -63,15 +81,46 @@ export default function AdminUsers() {
 
   const handleUserAction = async (userId: string, action: 'suspend' | 'activate' | 'ban') => {
     try {
-      // For demo purposes, we'll just update a status field
-      // In a real implementation, you might want to update auth metadata or a separate status table
-      console.log(`${action} user ${userId}`)
-      
+      // Map action to status value
+      const statusValue = action === 'activate' ? 'active' : action === 'suspend' ? 'suspended' : 'banned'
+
+      // Use the new admin API
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
+      const response = await fetch('/api/admin/user-management', {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: JSON.stringify({
+          action: 'updateStatus',
+          userId: userId,
+          newStatus: statusValue
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update user status')
+      }
+
+      // Show success message
+      setActionMessage(`✅ ${data.message}`)
+      setTimeout(() => setActionMessage(null), 3000)
+
       // Send notification to user
       const user = users.find(u => u.id === userId)
       if (user) {
         let notificationPayload
-        
+
         switch (action) {
           case 'suspend':
             notificationPayload = {
@@ -96,13 +145,19 @@ export default function AdminUsers() {
             break
         }
 
-        await sendPushNotification(userId, notificationPayload)
+        try {
+          await sendPushNotification(userId, notificationPayload)
+        } catch (notifError) {
+          console.log('Notification failed (non-critical):', notifError)
+        }
       }
 
       // Refresh users list
       fetchUsers()
     } catch (error) {
       console.error('Error updating user:', error)
+      setActionMessage(`❌ Error: ${error.message || error}`)
+      setTimeout(() => setActionMessage(null), 5000)
     }
   }
 
@@ -164,6 +219,11 @@ export default function AdminUsers() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
           <p className="text-gray-600">Manage and moderate platform users</p>
+          {actionMessage && (
+            <div className="mt-2 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-md text-sm">
+              {actionMessage}
+            </div>
+          )}
         </div>
         
         {selectedUsers.length > 0 && (
@@ -230,18 +290,42 @@ export default function AdminUsers() {
           <div>
             <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-2">
               Filter by Status
+              {filterStatus === 'all' && users.length > 0 && !users[0]?.status && (
+                <span className="ml-2 text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
+                  Needs Migration
+                </span>
+              )}
             </label>
             <select
               id="status-filter"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as any)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              disabled={users.length > 0 && !users[0]?.status}
             >
-              <option value="all">All Users</option>
-              <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
-              <option value="banned">Banned</option>
+              <option value="all">All Users ({users.length})</option>
+              <option value="active">✅ Active Users</option>
+              <option value="suspended">⚠️ Suspended Users</option>
+              <option value="banned">🚫 Banned Users</option>
             </select>
+            {users.length > 0 && !users[0]?.status && (
+              <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-md">
+                <p className="text-sm text-orange-800">
+                  <strong>⚠️ Status feature not available</strong><br/>
+                  Run database migration: <code className="bg-orange-100 px-1 rounded">20250928000002_add_user_status_column.sql</code>
+                </p>
+              </div>
+            )}
+            {filterStatus === 'suspended' && users[0]?.status && (
+              <p className="text-sm text-yellow-600 mt-1">
+                💡 Showing suspended users - you can unsuspend them here
+              </p>
+            )}
+            {filterStatus === 'banned' && users[0]?.status && (
+              <p className="text-sm text-red-600 mt-1">
+                💡 Showing banned users - you can unban them here
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -275,6 +359,9 @@ export default function AdminUsers() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Location
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Joined
@@ -317,28 +404,80 @@ export default function AdminUsers() {
                     <div className="text-sm text-gray-900">{user.city || 'Unknown'}</div>
                     <div className="text-sm text-gray-500">{user.wilaya || 'Unknown'}</div>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        user.status === 'suspended'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : user.status === 'banned'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}
+                    >
+                      {user.status || 'active'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(user.created_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => handleUserAction(user.id, 'suspend')}
-                      className="text-yellow-600 hover:text-yellow-900"
-                    >
-                      Suspend
-                    </button>
-                    <button
-                      onClick={() => handleUserAction(user.id, 'activate')}
-                      className="text-green-600 hover:text-green-900"
-                    >
-                      Activate
-                    </button>
-                    <button
-                      onClick={() => handleUserAction(user.id, 'ban')}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Ban
-                    </button>
+                    {/* Show appropriate actions based on user status */}
+                    {user.status === undefined ? (
+                      /* If status column doesn't exist, show basic actions */
+                      <div className="text-xs text-gray-500 italic">
+                        Migration needed for user actions
+                      </div>
+                    ) : (
+                      <>
+                        {(!user.status || user.status === 'active') && (
+                          <>
+                            <button
+                              onClick={() => handleUserAction(user.id, 'suspend')}
+                              className="text-yellow-600 hover:text-yellow-900 px-2 py-1 rounded border border-yellow-300 hover:bg-yellow-50"
+                              title="Suspend this user"
+                            >
+                              Suspend
+                            </button>
+                            <button
+                              onClick={() => handleUserAction(user.id, 'ban')}
+                              className="text-red-600 hover:text-red-900 px-2 py-1 rounded border border-red-300 hover:bg-red-50"
+                              title="Ban this user permanently"
+                            >
+                              Ban
+                            </button>
+                          </>
+                        )}
+
+                        {user.status === 'suspended' && (
+                          <>
+                            <button
+                              onClick={() => handleUserAction(user.id, 'activate')}
+                              className="text-green-600 hover:text-green-900 px-2 py-1 rounded border border-green-300 hover:bg-green-50 font-medium"
+                              title="Reactivate this suspended user"
+                            >
+                              ✓ Unsuspend
+                            </button>
+                            <button
+                              onClick={() => handleUserAction(user.id, 'ban')}
+                              className="text-red-600 hover:text-red-900 px-2 py-1 rounded border border-red-300 hover:bg-red-50"
+                              title="Ban this user permanently"
+                            >
+                              Ban
+                            </button>
+                          </>
+                        )}
+
+                        {user.status === 'banned' && (
+                          <button
+                            onClick={() => handleUserAction(user.id, 'activate')}
+                            className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded border border-blue-300 hover:bg-blue-50 font-medium"
+                            title="Unban and reactivate this user"
+                          >
+                            ✓ Unban
+                          </button>
+                        )}
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
