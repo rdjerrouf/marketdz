@@ -5,28 +5,39 @@ import { smartRateLimit } from '@/lib/rate-limit/database';
 
 export async function GET(request: NextRequest) {
   try {
-    // Rate limiting
+    // Enhanced rate limiting: per-user when authenticated, fallback to per-IP
     const forwarded = request.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
-    
-    const rateLimitResult = await smartRateLimit(`favorites:${ip}`, 60, 60000); // 60 requests per minute
-    
-    if (!rateLimitResult.success) {
+
+    // First check IP-based rate limit
+    const ipRateLimitResult = await smartRateLimit(`favorites:ip:${ip}`, 60, 60000); // 60 requests per minute per IP
+
+    if (!ipRateLimitResult.success) {
       return NextResponse.json(
         { error: 'Too many requests. Please try again later.' },
-        { status: 429 }
+        { status: 429, headers: { 'Cache-Control': 'no-store' } }
       );
     }
 
     const supabase = await createServerSupabaseClient(request);
-    
+
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
+
     if (userError || !user) {
       return NextResponse.json(
         { error: 'Authentication required' },
-        { status: 401 }
+        { status: 401, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+
+    // Additional per-user rate limiting for authenticated users
+    const userRateLimitResult = await smartRateLimit(`favorites:user:${user.id}`, 120, 60000); // 120 requests per minute per user
+
+    if (!userRateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests for this account. Please try again later.' },
+        { status: 429, headers: { 'Cache-Control': 'no-store' } }
       );
     }
 
@@ -35,8 +46,8 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20'), 1), 50);
     const offset = (page - 1) * limit;
 
-    // Get user's favorites with listing details
-    // Use inner join to only return favorites where the listing exists and is active
+    // Optimized favorites query with field selection and smart count strategy
+    const needExactCount = page === 1;
     const { data: favorites, error: favoritesError, count } = await supabase
       .from('favorites')
       .select(`
@@ -46,7 +57,7 @@ export async function GET(request: NextRequest) {
         listings!inner (
           id,
           title,
-          description,
+          left(description, 160) as description,
           price,
           category,
           location_wilaya,
@@ -56,19 +67,16 @@ export async function GET(request: NextRequest) {
           user_id,
           status,
           profiles:user_id (
-            id,
             first_name,
             last_name,
-            avatar_url,
-            city,
-            wilaya,
-            rating
+            avatar_url
           )
         )
-      `, { count: 'estimated' })
+      `, { count: needExactCount ? 'exact' : 'planned' })
       .eq('user_id', user.id)
       .eq('listings.status', 'active')
       .order('created_at', { ascending: false })
+      .order('id', { ascending: false }) // Stable secondary sort
       .range(offset, offset + limit - 1);
 
     if (favoritesError) {
@@ -96,28 +104,36 @@ export async function GET(request: NextRequest) {
         user_id: fav.listings.user_id,
         status: fav.listings.status,
         user: fav.listings.profiles ? {
-          id: fav.listings.profiles.id,
+          id: fav.listings.user_id, // Use listing's user_id since we don't select profiles.id
           first_name: fav.listings.profiles.first_name,
           last_name: fav.listings.profiles.last_name,
           avatar_url: fav.listings.profiles.avatar_url,
-          city: fav.listings.profiles.city,
-          wilaya: fav.listings.profiles.wilaya,
-          rating: fav.listings.profiles.rating
+          city: null, // Removed to reduce data transfer
+          wilaya: null, // Removed to reduce data transfer
+          rating: null // Removed to reduce data transfer
         } : null
       }
     }));
 
-    const totalItems = count || 0;
-    const totalPages = Math.ceil(totalItems / limit);
+    // Calculate pagination with smart count strategy
+    const totalItems = typeof count === 'number' ? count : undefined;
+    const totalPages = totalItems ? Math.ceil(totalItems / limit) : undefined;
+    const hasNextPage = needExactCount
+      ? (totalPages ? page < totalPages : false)
+      : (transformedFavorites.length === limit); // Heuristic for planned count
 
     const response = NextResponse.json({
       favorites: transformedFavorites,
       pagination: {
         currentPage: page,
-        totalPages,
-        totalItems,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
+        totalPages: needExactCount ? totalPages : undefined,
+        totalItems: needExactCount ? totalItems : undefined,
+        hasNextPage,
+        hasPreviousPage: page > 1,
+        limit
+      },
+      metadata: {
+        countStrategy: needExactCount ? 'exact' : 'planned'
       }
     });
 
@@ -137,36 +153,38 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting for adding favorites
+    // Enhanced rate limiting for adding favorites
     const forwarded = request.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
-    
-    const rateLimitResult = await smartRateLimit(`add-favorite:${ip}`, 30, 60000); // 30 adds per minute
-    
-    if (!rateLimitResult.success) {
+
+    const ipRateLimitResult = await smartRateLimit(`add-favorite:ip:${ip}`, 30, 60000); // 30 adds per minute per IP
+
+    if (!ipRateLimitResult.success) {
       return NextResponse.json(
         { error: 'Too many requests. Please try again later.' },
-        { status: 429 }
+        { status: 429, headers: { 'Cache-Control': 'no-store' } }
       );
     }
 
     const supabase = await createServerSupabaseClient(request);
-    
-    // Debug: Check what we're getting for POST request
-    console.log('🔍 POST Debug: Checking user authentication...');
-    console.log('🔍 POST Debug: Request cookies:', request.cookies.getAll());
-    
+
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    console.log('🔍 POST Debug: User data:', user ? { id: user.id, email: user.email } : 'null');
-    console.log('🔍 POST Debug: User error:', userError);
-    
+
     if (userError || !user) {
-      console.log('🔍 POST Debug: Authentication failed, returning 401');
       return NextResponse.json(
         { error: 'Authentication required' },
-        { status: 401 }
+        { status: 401, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+
+    // Additional per-user rate limiting for authenticated users
+    const userRateLimitResult = await smartRateLimit(`add-favorite:user:${user.id}`, 50, 60000); // 50 adds per minute per user
+
+    if (!userRateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many favorite additions for this account. Please try again later.' },
+        { status: 429, headers: { 'Cache-Control': 'no-store' } }
       );
     }
 
@@ -203,9 +221,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Add to favorites using proper auth context
-    console.log('🔍 POST Debug: About to insert favorite with proper auth');
-    console.log('🔍 POST Debug: user.id:', user.id);
-    console.log('🔍 POST Debug: listingId:', listingId);
     
     const { data: favorite, error: favoriteError } = await supabase
       .from('favorites')

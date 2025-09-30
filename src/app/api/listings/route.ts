@@ -1,6 +1,7 @@
 // src/app/api/listings/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { normalizePhoneNumber } from '@/lib/utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +32,13 @@ export async function POST(request: NextRequest) {
       salary_max,
       job_type,
       company_name,
-      condition
+      condition,
+      // Job application fields
+      application_email,
+      application_phone,
+      application_instructions,
+      // Service fields
+      service_phone
     } = body
 
     // Validate required fields
@@ -59,9 +66,11 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-      if (photos.length > 3) {
+      // Allow 5 photos for rentals, 3 for other categories
+      const maxPhotos = category === 'for_rent' ? 5 : 3
+      if (photos.length > maxPhotos) {
         return NextResponse.json(
-          { error: 'Maximum 3 images allowed' },
+          { error: `Maximum ${maxPhotos} images allowed${category === 'for_rent' ? ' for rentals' : ''}` },
           { status: 400 }
         )
       }
@@ -75,10 +84,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Price validation
-    if (category !== 'job' && (!price || price <= 0)) {
+    // Enhanced input validation
+    if (category !== 'job' && category !== 'service') {
+      if (!price || isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
+        return NextResponse.json(
+          { error: 'Price is required and must be a valid positive number' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Validate category-specific enums
+    if (rental_period && !['daily', 'weekly', 'monthly', 'yearly'].includes(rental_period)) {
       return NextResponse.json(
-        { error: 'Price is required and must be greater than 0' },
+        { error: 'Invalid rental period' },
+        { status: 400 }
+      )
+    }
+
+    if (condition && !['new', 'like_new', 'good', 'fair', 'poor'].includes(condition)) {
+      return NextResponse.json(
+        { error: 'Invalid condition' },
+        { status: 400 }
+      )
+    }
+
+    if (job_type && !['full_time', 'part_time', 'contract', 'freelance', 'internship'].includes(job_type)) {
+      return NextResponse.json(
+        { error: 'Invalid job type' },
         { status: 400 }
       )
     }
@@ -92,7 +125,7 @@ export async function POST(request: NextRequest) {
         description: description.trim(),
         category,
         subcategory: subcategory?.trim() || null,
-        price: category === 'job' ? null : parseFloat(price),
+        price: (category === 'job' || category === 'service') ? null : parseFloat(price),
         location_city: location_city?.trim(),
         location_wilaya,
         photos: photos || [],
@@ -106,11 +139,20 @@ export async function POST(request: NextRequest) {
           ...(salary_max && { salary_max }),
           ...(job_type && { job_type }),
           ...(company_name?.trim() && { company_name: company_name.trim() }),
-          ...(condition && { condition })
+          ...(condition && { condition }),
+          // Job application contact fields
+          ...(application_email?.trim() && { application_email: application_email.trim() }),
+          ...(application_phone?.trim() && { application_phone: normalizePhoneNumber(application_phone.trim()) }),
+          ...(application_instructions?.trim() && { application_instructions: application_instructions.trim() }),
+          // Service fields
+          ...(service_phone?.trim() && { service_phone: normalizePhoneNumber(service_phone.trim()) })
         },
         status: 'active'
       }])
-      .select()
+      .select(`
+        id, title, description, category, subcategory, price, created_at, status,
+        user_id, location_city, location_wilaya, photos, metadata
+      `)
       .single()
 
     if (error) {
@@ -135,49 +177,100 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient(request)
     const { searchParams } = new URL(request.url)
-    
-    const userId = searchParams.get('userId')
-    const category = searchParams.get('category')
-    const status = searchParams.get('status')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const offset = (page - 1) * limit
+
+    const userId = searchParams.get('userId') ?? undefined
+    const category = searchParams.get('category') ?? undefined
+    const status = searchParams.get('status') ?? undefined
+
+    // Input validation and bounds checking
+    const rawPage = Number(searchParams.get('page') ?? '1')
+    const rawLimit = Number(searchParams.get('limit') ?? '10')
+    const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1
+    const limit = Math.min(Math.max(Number.isFinite(rawLimit) ? rawLimit : 10, 1), 50)
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    // Only get exact count for page 1 to reduce cost
+    const countMode = page === 1 ? 'exact' : 'planned'
+
+    // Validate enum inputs
+    if (category) {
+      const validCategories = ['for_sale', 'job', 'service', 'for_rent'] as const
+      if (!validCategories.includes(category as any)) {
+        return NextResponse.json({ error: 'Invalid category' }, { status: 400 })
+      }
+    }
+
+    if (status) {
+      const validStatus = ['active', 'sold', 'rented', 'completed', 'expired'] as const
+      if (!validStatus.includes(status as any)) {
+        return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+      }
+    }
 
     let query = supabase
       .from('listings')
       .select(`
-        *,
+        id, title, description, category, subcategory, price, created_at, status,
+        user_id, location_city, location_wilaya, photos, metadata,
         profiles:user_id (
           first_name,
           last_name,
           avatar_url
         )
-      `)
+      `, { count: countMode })
       .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+      .order('id', { ascending: false }) // Stable secondary sort
+      .range(from, to)
 
     if (userId) {
       query = query.eq('user_id', userId)
     }
 
     if (category) {
-      query = query.eq('category', category as 'for_sale' | 'job' | 'service' | 'for_rent')
+      query = query.eq('category', category)
     }
 
     if (status) {
-      query = query.eq('status', status as 'active' | 'sold' | 'rented' | 'completed' | 'expired')
+      query = query.eq('status', status)
     }
 
-    const { data, error } = await query
+    const { data, error, count } = await query
 
     if (error) {
+      console.error('Failed to fetch listings:', error)
       return NextResponse.json(
         { error: 'Failed to fetch listings' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ data })
+    // Calculate pagination metadata
+    const totalItems = typeof count === 'number' ? count : undefined
+    const totalPages = totalItems ? Math.ceil(totalItems / limit) : undefined
+    const hasNextPage = totalItems ? page < (totalPages || 0) : (data?.length || 0) === limit
+
+    const response = {
+      data: data ?? [],
+      pagination: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage: page > 1
+      },
+      metadata: {
+        countStrategy: countMode
+      }
+    }
+
+    // Add cache headers for public content (if no userId, it's public browsing)
+    const headers = !userId ? {
+      'Cache-Control': 'public, max-age=30, s-maxage=60, stale-while-revalidate=120'
+    } : {}
+
+    return NextResponse.json(response, { headers })
   } catch (error) {
     console.error('API error:', error)
     return NextResponse.json(

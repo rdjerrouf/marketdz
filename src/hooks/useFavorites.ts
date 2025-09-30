@@ -1,6 +1,7 @@
-// src/hooks/useFavorites.ts - Custom hook for favorites management
-import { useState, useEffect } from 'react';
+// src/hooks/useFavorites.ts - Optimized custom hook for favorites management
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Favorite {
   favoriteId: string;
@@ -40,50 +41,42 @@ interface FavoritesData {
   };
 }
 
-// Hook to check authentication status
-export function useAuth() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+// Note: Using global auth context from @/contexts/AuthContext
+// Removed local useAuth to prevent conflicts
 
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  return { user, loading, isAuthenticated: !!user };
-}
+// Simple cache for favorites data
+const favoritesCache = new Map<string, { data: FavoritesData; timestamp: number }>();
+const CACHE_TTL = 30000; // 30 seconds cache
 
 export function useFavorites(page: number = 1, limit: number = 20) {
   const [data, setData] = useState<FavoritesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const isAuthenticated = !!user;
+  const abortController = useRef<AbortController | null>(null);
 
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     if (!isAuthenticated) {
-      setData({ 
-        favorites: [], 
-        pagination: { 
-          currentPage: 1, 
-          totalPages: 1, 
-          totalItems: 0, 
-          hasNextPage: false, 
-          hasPreviousPage: false 
-        } 
+      setData({
+        favorites: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0,
+          hasNextPage: false,
+          hasPreviousPage: false
+        }
       });
+      setLoading(false);
+      return;
+    }
+
+    // Check cache first
+    const cacheKey = `${user?.id}-${page}-${limit}`;
+    const cached = favoritesCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      setData(cached.data);
       setLoading(false);
       return;
     }
@@ -92,37 +85,54 @@ export function useFavorites(page: number = 1, limit: number = 20) {
       setLoading(true);
       setError(null);
 
+      // Cancel previous request
+      if (abortController.current) {
+        abortController.current.abort();
+      }
+      abortController.current = new AbortController();
+
       // Get current session to include token
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       const headers: Record<string, string> = {
         'Content-Type': 'application/json'
       };
-      
+
       // Add authorization header if we have a session
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
       const url = `/api/favorites?page=${page}&limit=${limit}`;
-      
+
       const response = await fetch(url, {
-        headers
+        headers,
+        signal: abortController.current.signal
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch favorites');
       }
 
       const favoritesData = await response.json();
+
+      // Cache the result
+      favoritesCache.set(cacheKey, {
+        data: favoritesData,
+        timestamp: Date.now()
+      });
+
       setData(favoritesData);
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        return; // Request was cancelled, ignore
+      }
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, isAuthenticated, user?.id]);
 
   useEffect(() => {
     if (!authLoading) {
@@ -130,15 +140,48 @@ export function useFavorites(page: number = 1, limit: number = 20) {
     }
   }, [page, limit, authLoading, isAuthenticated]);
 
-  const refetch = () => {
+  const refetch = useCallback(() => {
+    // Clear cache for this user when manually refetching
+    if (user?.id) {
+      const keysToDelete = Array.from(favoritesCache.keys()).filter(key => key.startsWith(`${user.id}-`));
+      keysToDelete.forEach(key => favoritesCache.delete(key));
+    }
     fetchFavorites();
-  };
+  }, [fetchFavorites, user?.id]);
+
+  // Optimistic update for removing favorites
+  const removeFavoriteOptimistic = useCallback((favoriteId: string) => {
+    if (!data) return;
+
+    // Optimistically remove from local state
+    const updatedFavorites = data.favorites.filter(fav => fav.favoriteId !== favoriteId);
+    const updatedData = {
+      ...data,
+      favorites: updatedFavorites,
+      pagination: {
+        ...data.pagination,
+        totalItems: data.pagination.totalItems ? data.pagination.totalItems - 1 : undefined
+      }
+    };
+
+    setData(updatedData);
+
+    // Update cache
+    if (user?.id) {
+      const cacheKey = `${user.id}-${page}-${limit}`;
+      favoritesCache.set(cacheKey, {
+        data: updatedData,
+        timestamp: Date.now()
+      });
+    }
+  }, [data, user?.id, page, limit]);
 
   return {
     data,
     loading,
     error,
-    refetch
+    refetch,
+    removeFavoriteOptimistic
   };
 }
 
@@ -146,7 +189,8 @@ export function useFavoriteStatus(listingId: string) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const isAuthenticated = !!user;
 
   const checkFavoriteStatus = async () => {
     if (!isAuthenticated) {

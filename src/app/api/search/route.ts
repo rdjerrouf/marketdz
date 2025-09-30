@@ -13,8 +13,10 @@ export async function GET(request: NextRequest) {
     const minPrice = urlSearchParams.get('minPrice');
     const maxPrice = urlSearchParams.get('maxPrice');
     const sortBy = urlSearchParams.get('sortBy') || 'created_at';
-    const page = parseInt(urlSearchParams.get('page') || '1');
-    const limit = parseInt(urlSearchParams.get('limit') || '20');
+
+    // Input validation and bounds checking
+    const safeLimit = Math.min(Math.max(parseInt(urlSearchParams.get('limit') || '20'), 1), 50);
+    const safePage = Math.max(parseInt(urlSearchParams.get('page') || '1'), 1);
 
     // New category-specific filters
     const availableFrom = urlSearchParams.get('availableFrom');
@@ -26,22 +28,26 @@ export async function GET(request: NextRequest) {
     const companyName = urlSearchParams.get('companyName');
     const condition = urlSearchParams.get('condition');
 
-    console.log('🔍 Search params:', { 
-      query, category, wilaya, city, minPrice, maxPrice, sortBy, page, limit,
+    console.log('🔍 Search params:', {
+      query, category, wilaya, city, minPrice, maxPrice, sortBy, safePage, safeLimit,
       availableFrom, availableTo, rentalPeriod, minSalary, maxSalary, jobType, companyName, condition
     });
 
-    // Build the query
+    // Build the query with explicit column selection
+    const needExactCount = safePage === 1;
     let supabaseQuery = supabase
       .from('listings')
       .select(`
-        *,
+        id, title, description, price, category, created_at, status,
+        user_id, location_wilaya, location_city, photos,
+        condition, available_from, available_to, rental_period,
+        salary_min, salary_max, job_type, company_name,
         profiles:user_id (
           first_name,
           last_name,
           avatar_url
         )
-      `, { count: 'exact' })
+      `, { count: needExactCount ? 'exact' : 'planned' })
       .eq('status', 'active'); // Only show active listings
 
     // Apply filters
@@ -97,29 +103,34 @@ export async function GET(request: NextRequest) {
       supabaseQuery = supabaseQuery.eq('condition', condition);
     }
 
-    // Text search (simple version)
+    // Full-text search using PostgreSQL FTS (much faster than ilike)
     if (query) {
-      supabaseQuery = supabaseQuery.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
+      supabaseQuery = supabaseQuery.textSearch('search_vector', query, {
+        type: 'websearch'
+      });
     }
 
-    // Apply sorting
+    // Apply sorting with stable secondary order
     switch (sortBy) {
       case 'price_low':
-        supabaseQuery = supabaseQuery.order('price', { ascending: true });
+        supabaseQuery = supabaseQuery.order('price', { ascending: true }).order('id', { ascending: true });
         break;
       case 'price_high':
-        supabaseQuery = supabaseQuery.order('price', { ascending: false });
+        supabaseQuery = supabaseQuery.order('price', { ascending: false }).order('id', { ascending: false });
+        break;
+      case 'oldest':
+        supabaseQuery = supabaseQuery.order('created_at', { ascending: true }).order('id', { ascending: true });
         break;
       case 'newest':
       case 'created_at':
       default:
-        supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
+        supabaseQuery = supabaseQuery.order('created_at', { ascending: false }).order('id', { ascending: false });
         break;
     }
 
     // Apply pagination
-    const offset = (page - 1) * limit;
-    supabaseQuery = supabaseQuery.range(offset, offset + limit - 1);
+    const offset = (safePage - 1) * safeLimit;
+    supabaseQuery = supabaseQuery.range(offset, offset + safeLimit - 1);
 
     const { data: listings, error, count } = await supabaseQuery;
 
@@ -135,24 +146,34 @@ export async function GET(request: NextRequest) {
 
     // Calculate pagination info
     const totalItems = count || 0;
-    const totalPages = Math.ceil(totalItems / limit);
+    const totalPages = Math.ceil(totalItems / safeLimit);
+    const hasNextPage = needExactCount
+      ? safePage < totalPages
+      : (listings?.length || 0) === safeLimit; // Heuristic for planned count
 
     const response = {
       listings: listings || [],
       pagination: {
-        currentPage: page,
-        totalPages,
-        totalItems,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
+        currentPage: safePage,
+        totalPages: needExactCount ? totalPages : undefined,
+        totalItems: needExactCount ? totalItems : undefined,
+        hasNextPage,
+        hasPreviousPage: safePage > 1,
+        limit: safeLimit
       },
       metadata: {
         executionTime: Date.now(),
-        strategy: 'database'
+        strategy: 'database',
+        countStrategy: needExactCount ? 'exact' : 'planned'
       }
     };
 
-    return NextResponse.json(response);
+    // Add caching headers for public content
+    const headers = {
+      'Cache-Control': 'public, max-age=30, s-maxage=60, stale-while-revalidate=120'
+    };
+
+    return NextResponse.json(response, { headers });
   } catch (error) {
     console.error('❌ Search API error:', error);
     return NextResponse.json(
