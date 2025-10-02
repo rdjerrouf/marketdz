@@ -4,9 +4,7 @@ import { Database } from '@/types/database'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Temporary debug - remove after testing environment variables
-console.log('🔍 SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-console.log('🔍 KEY starts with:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.slice(0, 14));
+// Debug logs removed - production ready
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
