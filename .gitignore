@@ -42,6 +42,13 @@ CLAUDE.md.sensitive
 *.p8
 secrets/
 
+# Scripts with hardcoded credentials (SECURITY)
+scripts/*-cloud.js
+scripts/*-admin*.js
+scripts/create-*admin*.js
+**/supabase-credentials.js
+**/api-keys.js
+
 # Docker files with hardcoded keys (SECURITY)
 Dockerfile.optimized
 docker-compose.dev.yml
