@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       .eq('is_active', true)
       .maybeSingle()
 
-    if (adminError || !currentAdmin || !currentAdmin.id) {
+    if (adminError || !currentAdmin || !(currentAdmin as any)?.id) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('admin_activity_logs' as any)
           .insert({
-            admin_user_id: admin.id,
+            admin_user_id: (currentAdmin as any).id,
             action: `user_status_changed`,
             target_type: 'user',
             target_id: userId,

@@ -653,11 +653,10 @@ export default function ListingForm({
                 >
                   <option value="">Select condition</option>
                   <option value="new">New</option>
-                  <option value="used">Used - Like New</option>
+                  <option value="like_new">Used - Like New</option>
                   <option value="good">Used - Good</option>
                   <option value="fair">Used - Fair</option>
                   <option value="poor">Used - Poor</option>
-                  <option value="refurbished">Refurbished</option>
                 </select>
               </div>
             )}

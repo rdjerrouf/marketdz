@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
     // Handle different actions
     switch (action) {
       case 'promote':
-        if (!currentAdmin || !['super_admin', 'admin'].includes(currentAdmin.role)) {
+        if (!currentAdmin || !['super_admin', 'admin'].includes((currentAdmin as any).role)) {
           return NextResponse.json(
             { error: 'You do not have permission to promote users' },
             { status: 403 }
@@ -165,8 +165,8 @@ export async function POST(request: NextRequest) {
           .insert({
             user_id: userId,
             role: role,
-            created_by: currentAdmin.id,
-            notes: `Promoted by ${currentAdmin.user_id}`
+            created_by: (currentAdmin as any).id,
+            notes: `Promoted by ${(currentAdmin as any).user_id}`
           })
 
         if (promoteError) {
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, message: 'User promoted successfully' })
 
       case 'updateRole':
-        if (!currentAdmin || currentAdmin.role !== 'super_admin') {
+        if (!currentAdmin || (currentAdmin as any).role !== 'super_admin') {
           return NextResponse.json(
             { error: 'Only super admins can change roles' },
             { status: 403 }
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, message: 'Admin role updated successfully' })
 
       case 'deactivate':
-        if (!currentAdmin || !['super_admin', 'admin'].includes(currentAdmin.role)) {
+        if (!currentAdmin || !['super_admin', 'admin'].includes((currentAdmin as any).role)) {
           return NextResponse.json(
             { error: 'You do not have permission to deactivate admins' },
             { status: 403 }

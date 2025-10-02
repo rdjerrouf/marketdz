@@ -109,37 +109,72 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         console.log('❌ API call error:', apiError)
       }
 
-      // Fallback to legacy email approach
-      const adminEmails = [
-        'admin@marketdz.com',
-        'moderator@marketdz.com',
-        'test@example.com',
-        'ryad@marketdz.com',
-        'rdjerrouf@gmail.com',
-        'anyadjerrouf@gmail.com'
-      ]
+      // Fallback: Check admin_users table directly when API fails
+      console.log('🔄 API failed, checking admin_users table directly...')
 
-      const isLegacyAdmin = adminEmails.includes(user.email || '')
+      try {
+        const { data: adminRecord, error: dbError } = await (supabase as any)
+          .from('admin_users')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
 
-      if (!isLegacyAdmin) {
-        console.log('❌ User not in admin emails list')
-        router.push('/')
-        return
+        if (dbError || !adminRecord) {
+          console.log('❌ No admin record found in database')
+          router.push('/')
+          return
+        }
+
+        // Create admin user object from database record
+        const directAdmin: AdminUser = {
+          id: adminRecord.id,
+          user_id: adminRecord.user_id,
+          role: adminRecord.role as AdminRole,
+          permissions: adminRecord.permissions || {},
+          created_at: adminRecord.created_at,
+          updated_at: adminRecord.updated_at,
+          is_active: adminRecord.is_active !== false
+        }
+
+        console.log('✅ Admin access granted (direct database method)')
+        console.log('👤 Admin role:', adminRecord.role)
+        setAdminUser(directAdmin)
+
+      } catch (dbError) {
+        console.log('❌ Database check failed:', dbError)
+
+        // Final fallback to legacy email approach
+        const adminEmails = [
+          'admin@marketdz.com',
+          'moderator@marketdz.com',
+          'test@example.com',
+          'ryad@marketdz.com',
+          'rdjerrouf@gmail.com',
+          'anyadjerrouf@gmail.com'
+        ]
+
+        const isLegacyAdmin = adminEmails.includes(user.email || '')
+
+        if (!isLegacyAdmin) {
+          console.log('❌ User not in admin emails list')
+          router.push('/')
+          return
+        }
+
+        // Create legacy admin user object
+        const legacyAdmin: AdminUser = {
+          id: 'legacy',
+          user_id: user.id,
+          role: 'admin' as AdminRole,
+          permissions: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_active: true
+        }
+
+        console.log('⚠️ Admin access granted (legacy method - migration needed)')
+        setAdminUser(legacyAdmin)
       }
-
-      // Create legacy admin user object
-      const legacyAdmin: AdminUser = {
-        id: 'legacy',
-        user_id: user.id,
-        role: 'admin' as AdminRole,
-        permissions: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is_active: true
-      }
-
-      console.log('⚠️ Admin access granted (legacy method - migration needed)')
-      setAdminUser(legacyAdmin)
 
     } catch (error) {
       console.error('Error checking admin access:', error)
