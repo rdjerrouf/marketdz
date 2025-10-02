@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/server'
+import { normalizePhoneNumber } from '@/lib/utils'
 
 export async function POST(request: NextRequest) {
   const supabaseAdmin = createSupabaseAdminClient()
@@ -22,6 +23,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Normalize phone number for WhatsApp compatibility
+    const normalizedPhone = phone ? normalizePhoneNumber(phone) : ''
+
+    console.log('Phone normalization:', phone, '->', normalizedPhone)
+
     // Use admin client for signup
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -30,7 +36,7 @@ export async function POST(request: NextRequest) {
       user_metadata: {
         first_name: firstName || '',
         last_name: lastName || '',
-        phone: phone || '',
+        phone: normalizedPhone,
         city: city || '',
         wilaya: wilaya || '',
       },

@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
-import { AdminUser, getAdminUser, createAdminSession, verifyAdminSession } from '@/lib/admin/auth'
+import { AdminUser, AdminRole, getAdminUser, createAdminSession, verifyAdminSession } from '@/lib/admin/auth'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -128,10 +128,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       }
 
       // Create legacy admin user object
-      const legacyAdmin = {
+      const legacyAdmin: AdminUser = {
         id: 'legacy',
         user_id: user.id,
-        role: 'admin',
+        role: 'admin' as AdminRole,
         permissions: {},
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

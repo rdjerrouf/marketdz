@@ -138,15 +138,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Use service role key to bypass RLS policies temporarily
-    const { createClient: createServiceClient } = await import('@supabase/supabase-js');
-    const serviceSupabase = createServiceClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    // Insert message using service role to bypass trigger issues
-    const { data: message, error } = await serviceSupabase
+    // Insert message using the authenticated user's session
+    const { data: message, error } = await supabase
       .from('messages')
       .insert({
         conversation_id: conversationId,
@@ -169,37 +162,38 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Send message error:', error);
-      // Check if error is related to notifications - provide helpful error
-      if (error.message && error.message.includes('notifications')) {
-        console.log('Notification error detected. The message trigger is blocking message creation.');
-        
-        // For now, return a clear error message
-        return NextResponse.json({ 
-          error: 'Unable to send message due to notification system configuration. Please contact support to resolve this issue.',
-          code: 'NOTIFICATION_TRIGGER_ERROR',
-          details: 'The database trigger for message notifications is preventing message creation due to RLS policy conflicts.'
-        }, { status: 503 });
-      } else {
-        return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
-      }
+      console.error('❌ Send message error:', JSON.stringify(error, null, 2));
+      console.error('❌ Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
+
+      // Return detailed error for debugging
+      return NextResponse.json({
+        error: error.message || 'Failed to send message',
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      }, { status: 500 });
     }
 
-    // Update conversation last_message_at and increment unread count using service role
+    // Update conversation last_message_at and increment unread count
     const unreadCountField = conversation.buyer_id === user.id ? 'seller_unread_count' : 'buyer_unread_count';
-    
+
     // Get current unread count and increment it
-    const { data: currentConv } = await serviceSupabase
+    const { data: currentConv } = await supabase
       .from('conversations')
       .select(unreadCountField)
       .eq('id', conversationId)
       .single();
-    
+
     const currentCount = (currentConv as any)?.[unreadCountField] || 0;
-    
-    await serviceSupabase
+
+    await supabase
       .from('conversations')
-      .update({ 
+      .update({
         last_message_at: message.created_at,
         last_message_id: message.id,
         [unreadCountField]: currentCount + 1,

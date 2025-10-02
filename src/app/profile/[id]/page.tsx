@@ -1,7 +1,7 @@
 // src/app/profile/[id]/page.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { useReviews, useCreateReview, useUserRating } from '@/hooks/useReviews'
 import { useUser } from '@/hooks/useUser'
@@ -12,23 +12,24 @@ import { UserProfile } from '@/types'
 import { supabase } from '@/lib/supabase/client'
 
 interface ProfilePageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default function ProfilePage({ params }: ProfilePageProps) {
   const router = useRouter()
   const { user } = useUser()
+  const { id: profileId } = use(params)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [profileLoading, setProfileLoading] = useState(true)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
 
   // Get user's rating and review count
-  const { rating, reviewCount, loading: ratingLoading } = useUserRating(params.id)
+  const { rating, reviewCount, loading: ratingLoading } = useUserRating(profileId)
 
   // Get reviews for this user
   const { data: reviewsData, loading: reviewsLoading, refetch } = useReviews({
-    reviewedId: params.id,
+    reviewedId: profileId,
     page: currentPage,
     limit: 5
   })
@@ -43,7 +44,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', params.id)
+          .eq('id', profileId)
           .single()
 
         if (error) throw error
@@ -57,7 +58,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     }
 
     fetchProfile()
-  }, [params.id, router])
+  }, [profileId, router])
 
   const handleCreateReview = async (reviewData: any) => {
     try {
@@ -74,7 +75,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   }
 
   const formatJoinDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long'
     })
@@ -92,7 +93,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     return null
   }
 
-  const isOwnProfile = user?.id === params.id
+  const isOwnProfile = user?.id === profileId
   const canReview = user && !isOwnProfile
 
   return (
@@ -107,7 +108,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
             <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Retour
+            Back
           </button>
 
           {/* Profile Header */}
@@ -145,14 +146,14 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   <div className="flex items-center space-x-2">
                     <StarRating rating={rating} readonly showValue />
                     <span className="text-white text-sm">
-                      ({reviewCount} avis)
+                      ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
                     </span>
                   </div>
                 </div>
 
                 {/* Join Date */}
                 <p className="text-purple-300 text-sm">
-                  Membre depuis {formatJoinDate(profile.created_at)}
+                  Member since {formatJoinDate(profile.created_at)}
                 </p>
 
                 {/* Review Button */}
@@ -161,7 +162,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     onClick={() => setShowReviewForm(true)}
                     className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                   >
-                    Laisser un avis
+                    Leave a Review
                   </button>
                 )}
               </div>
@@ -172,7 +173,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           {showReviewForm && canReview && (
             <div className="mb-8">
               <ReviewForm
-                reviewedUserId={params.id}
+                reviewedUserId={profileId}
                 onSubmit={handleCreateReview}
                 onCancel={() => setShowReviewForm(false)}
                 isLoading={createLoading}
@@ -183,7 +184,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           {/* Reviews Section */}
           <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-6">
-              Avis ({reviewCount})
+              Reviews ({reviewCount})
             </h2>
 
             {reviewsLoading ? (
@@ -211,19 +212,19 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                       disabled={!reviewsData.pagination.hasPreviousPage}
                       className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-30 transition-all"
                     >
-                      Précédent
+                      Previous
                     </button>
-                    
+
                     <span className="px-4 py-2 text-white">
-                      Page {currentPage} sur {reviewsData.pagination.totalPages}
+                      Page {currentPage} of {reviewsData.pagination.totalPages}
                     </span>
-                    
+
                     <button
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={!reviewsData.pagination.hasNextPage}
                       className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-30 transition-all"
                     >
-                      Suivant
+                      Next
                     </button>
                   </div>
                 )}
@@ -231,9 +232,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
             ) : (
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">📝</div>
-                <h3 className="text-xl font-bold text-white mb-2">Aucun avis</h3>
+                <h3 className="text-xl font-bold text-white mb-2">No Reviews Yet</h3>
                 <p className="text-purple-200">
-                  Cet utilisateur n'a pas encore reçu d'avis.
+                  This user hasn't received any reviews yet.
                 </p>
               </div>
             )}

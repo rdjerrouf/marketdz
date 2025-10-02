@@ -79,7 +79,7 @@ export default function SignUpPage() {
 
     // Phone validation (optional but if provided must be valid)
     if (formData.phone && !isValidAlgerianPhone(formData.phone)) {
-      newErrors.phone = 'Invalid phone number (ex: 0551234567)'
+      newErrors.phone = 'Invalid phone number (ex: 0551234567 or +213551234567)'
     }
 
     // Location validation
@@ -326,6 +326,7 @@ export default function SignUpPage() {
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                 Phone (optional)
+                <span className="text-xs text-gray-500 ml-2">- Will be saved in WhatsApp format</span>
               </label>
               <input
                 type="tel"
@@ -336,9 +337,12 @@ export default function SignUpPage() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.phone ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="0551234567"
+                placeholder="0551234567 or +213551234567"
               />
               {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+              <p className="mt-1 text-xs text-gray-500">
+                📱 Phone will be formatted as +213xxxxxxxxx for WhatsApp compatibility
+              </p>
             </div>
 
             {/* Wilaya */}

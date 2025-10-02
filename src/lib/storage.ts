@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { generateImageVariants, type CompressionResult } from './image-compression'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,6 +10,8 @@ export interface UploadOptions {
   bucket: 'avatars' | 'listing-photos' | 'user-photos'
   listingId?: string
   purpose?: 'avatar' | 'listing' | 'document'
+  variant?: 'original' | 'display' | 'thumbnail'
+  generateVariants?: boolean
 }
 
 export interface UploadResult {
@@ -19,11 +22,34 @@ export interface UploadResult {
     bucket: string
     fileSize: number
     fileType: string
+    variants?: {
+      original?: string
+      display?: string
+      thumbnail?: string
+    }
   }
   error?: {
     message: string
     messageAr: string
     details?: string
+  }
+}
+
+export interface ImageVariants {
+  original: {
+    path: string
+    url: string
+    size: number
+  }
+  display: {
+    path: string
+    url: string
+    size: number
+  }
+  thumbnail: {
+    path: string
+    url: string
+    size: number
   }
 }
 
@@ -250,4 +276,152 @@ export async function moderateContent(
     console.error('Content moderation error:', error)
     return { approved: false, suggestions: ['Content could not be verified'] }
   }
+}
+
+// Upload image with automatic variant generation
+export async function uploadImageWithVariants(
+  file: File,
+  options: UploadOptions
+): Promise<UploadResult & { variants?: ImageVariants }> {
+  try {
+    // Get current session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+    if (sessionError || !session) {
+      return {
+        success: false,
+        error: {
+          message: 'Authentication required',
+          messageAr: 'المصادقة مطلوبة'
+        }
+      }
+    }
+
+    // Generate compressed variants
+    const variants = await generateImageVariants(file)
+
+    // Prepare file uploads for all variants
+    const uploads = [
+      { file: variants.original, variant: 'original' as const },
+      { file: variants.display.file, variant: 'display' as const },
+      { file: variants.thumbnail.file, variant: 'thumbnail' as const }
+    ]
+
+    const uploadResults: ImageVariants = {
+      original: { path: '', url: '', size: 0 },
+      display: { path: '', url: '', size: 0 },
+      thumbnail: { path: '', url: '', size: 0 }
+    }
+
+    // Upload each variant
+    for (const upload of uploads) {
+      const formData = new FormData()
+      formData.append('file', upload.file)
+      formData.append('bucket', options.bucket)
+      formData.append('variant', upload.variant)
+      if (options.listingId) {
+        formData.append('listingId', options.listingId)
+      }
+      if (options.purpose) {
+        formData.append('purpose', options.purpose)
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/secure-file-upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: formData
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        console.error(`Failed to upload ${upload.variant} variant:`, result)
+        continue
+      }
+
+      uploadResults[upload.variant] = {
+        path: result.filePath,
+        url: result.publicUrl,
+        size: upload.file.size
+      }
+    }
+
+    // Return the display variant as the main result
+    return {
+      success: true,
+      data: {
+        filePath: uploadResults.display.path,
+        publicUrl: uploadResults.display.url,
+        bucket: options.bucket,
+        fileSize: uploadResults.display.size,
+        fileType: variants.display.file.type,
+        variants: {
+          original: uploadResults.original.url,
+          display: uploadResults.display.url,
+          thumbnail: uploadResults.thumbnail.url
+        }
+      },
+      variants: uploadResults
+    }
+
+  } catch (error) {
+    console.error('Multi-variant upload error:', error)
+    return {
+      success: false,
+      error: {
+        message: 'Failed to upload image variants',
+        messageAr: 'فشل في رفع متغيرات الصورة',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }
+  }
+}
+
+// Get responsive image URLs for display
+export function getResponsiveImageUrls(baseUrl: string, variants?: { display?: string; thumbnail?: string }): {
+  src: string
+  srcSet: string
+  sizes: string
+} {
+  if (!variants) {
+    return {
+      src: baseUrl,
+      srcSet: baseUrl,
+      sizes: '100vw'
+    }
+  }
+
+  const srcSet = [
+    variants.thumbnail && `${variants.thumbnail} 300w`,
+    variants.display && `${variants.display} 800w`,
+    baseUrl && `${baseUrl} 1200w`
+  ].filter(Boolean).join(', ')
+
+  return {
+    src: variants.display || baseUrl,
+    srcSet: srcSet || baseUrl,
+    sizes: '(max-width: 640px) 300px, (max-width: 1024px) 800px, 1200px'
+  }
+}
+
+// Helper to ensure valid photo URLs for Supabase Storage
+export function fixPhotoUrl(url: string | undefined | null): string {
+  if (!url) return '/images/placeholder.jpg'
+
+  // If already a full URL, return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+
+  // If it's a storage path, convert to public URL
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  return `${supabaseUrl}/storage/v1/object/public/listing-photos/${url}`
+}
+
+// Get public URL for a storage file
+export function getPublicUrl(bucket: string, path: string): string {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  return `${supabaseUrl}/storage/v1/object/public/${bucket}/${path}`
 }

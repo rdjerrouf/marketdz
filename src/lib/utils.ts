@@ -67,10 +67,29 @@ export function isValidAlgerianPhone(phone: string): boolean {
   return phoneRegex.test(phone.replace(/\s/g, ''))
 }
 
+// Normalize phone number to international WhatsApp-compatible format
+export function normalizePhoneNumber(phone: string): string {
+  if (!phone) return ''
+
+  const cleaned = phone.replace(/\D/g, '')
+
+  if (cleaned.startsWith('213')) {
+    // Already international format
+    return `+${cleaned}`
+  } else if (cleaned.startsWith('0') && cleaned.length === 10) {
+    // Convert local format (0551234567) to international (+213551234567)
+    const localNumber = cleaned.substring(1) // Remove leading 0
+    return `+213${localNumber}`
+  }
+
+  // Return as-is if format is not recognized
+  return phone
+}
+
 // Format phone number for display
 export function formatPhoneNumber(phone: string): string {
   const cleaned = phone.replace(/\D/g, '')
-  
+
   if (cleaned.startsWith('213')) {
     // International format
     const number = cleaned.substring(3)
@@ -79,8 +98,21 @@ export function formatPhoneNumber(phone: string): string {
     // Local format
     return `${cleaned.substring(0, 4)} ${cleaned.substring(4, 6)} ${cleaned.substring(6, 8)} ${cleaned.substring(8)}`
   }
-  
+
   return phone
+}
+
+// Generate WhatsApp link from phone number
+export function generateWhatsAppLink(phone: string, message?: string): string {
+  if (!phone) return ''
+
+  const normalizedPhone = normalizePhoneNumber(phone)
+  const cleanPhone = normalizedPhone.replace(/\D/g, '') // Remove all non-digits including +
+
+  const encodedMessage = message ? encodeURIComponent(message) : ''
+  const messageParam = message ? `?text=${encodedMessage}` : ''
+
+  return `https://wa.me/${cleanPhone}${messageParam}`
 }
 
 // Truncate text
@@ -100,9 +132,15 @@ export function fileToBase64(file: File): Promise<string> {
 }
 
 // Fix photo URLs to use the correct Supabase URL for browser access
-export function fixPhotoUrl(url: string): string {
-  if (!url) return url
-  
-  // Replace internal Docker URL with external one accessible from browser
-  return url.replace('http://127.0.0.1:54321', 'http://localhost:54321')
+export function fixPhotoUrl(url: string | undefined | null): string {
+  if (!url) return '/images/placeholder.jpg'
+
+  // If already a full URL, just fix Docker URLs
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url.replace('http://127.0.0.1:54321', 'http://localhost:54321')
+  }
+
+  // If it's a storage path, convert to public URL
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321'
+  return `${supabaseUrl}/storage/v1/object/public/listing-photos/${url}`
 }

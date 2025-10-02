@@ -7,6 +7,8 @@ import { supabase } from '@/lib/supabase/client'
 import { LISTING_CATEGORIES } from '@/lib/constants/categories'
 import { ALGERIA_WILAYAS, getWilayaByName } from '@/lib/constants/algeria'
 import ImageUpload from './ImageUpload'
+import ComingSoonModal from '@/components/premium/ComingSoonModal'
+import { Zap } from 'lucide-react'
 
 interface ListingFormData {
   title: string
@@ -32,6 +34,8 @@ interface ListingFormData {
   application_email?: string
   application_phone?: string
   application_instructions?: string
+  // Service contact fields
+  service_phone?: string
   metadata: {
     brand?: string
     experience?: string
@@ -64,6 +68,7 @@ export default function ListingForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showHotDealModal, setShowHotDealModal] = useState(false)
 
   const [formData, setFormData] = useState<ListingFormData>({
     title: '',
@@ -89,13 +94,15 @@ export default function ListingForm({
     application_email: '',
     application_phone: '',
     application_instructions: '',
+    // Service fields initialization
+    service_phone: '',
     metadata: {},
     ...initialData
   })
 
   const categoryData = LISTING_CATEGORIES[formData.category.toUpperCase() as keyof typeof LISTING_CATEGORIES]
   const requiresImages = formData.category === 'for_sale' || formData.category === 'for_rent'
-  const requiresPrice = formData.category !== 'job'
+  const requiresPrice = formData.category !== 'job' && formData.category !== 'service'
   
   // Get cities for selected wilaya
   const selectedWilaya = getWilayaByName(formData.location_wilaya)
@@ -166,12 +173,21 @@ export default function ListingForm({
         return false
       }
     }
+    // Service contact validation - require phone number
+    if (formData.category === 'service') {
+      if (!formData.service_phone?.trim()) {
+        setError('Phone number is required for service listings')
+        return false
+      }
+    }
     if (requiresImages && formData.photos.length === 0) {
       setError('At least 1 image is required for this category')
       return false
     }
-    if (formData.photos.length > 3) {
-      setError('Maximum 3 images allowed')
+    // Allow 5 photos for rentals, 3 for other categories
+    const maxPhotos = formData.category === 'for_rent' ? 5 : 3
+    if (formData.photos.length > maxPhotos) {
+      setError(`Maximum ${maxPhotos} images allowed${formData.category === 'for_rent' ? ' for rentals' : ''}`)
       return false
     }
     return true
@@ -231,6 +247,8 @@ export default function ListingForm({
           application_email: formData.application_email?.trim() || null,
           application_phone: formData.application_phone?.trim() || null,
           application_instructions: formData.application_instructions?.trim() || null,
+          // Service contact information
+          service_phone: formData.service_phone?.trim() || null,
           metadata: formData.metadata
         })
       })
@@ -433,11 +451,12 @@ export default function ListingForm({
       </div>
 
       {/* Category-Specific Fields */}
-      {(formData.category === 'for_rent' || formData.category === 'job' || formData.category === 'for_sale') && (
+      {(formData.category === 'for_rent' || formData.category === 'job' || formData.category === 'for_sale' || formData.category === 'service') && (
         <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            {formData.category === 'for_rent' ? 'Rental Details' : 
-             formData.category === 'job' ? 'Job Details' : 'Item Details'}
+            {formData.category === 'for_rent' ? 'Rental Details' :
+             formData.category === 'job' ? 'Job Details' :
+             formData.category === 'service' ? 'Service Details' : 'Item Details'}
           </h2>
           
           <div className="space-y-6">
@@ -454,6 +473,7 @@ export default function ListingForm({
                       type="date"
                       value={formData.available_from}
                       onChange={(e) => handleInputChange('available_from', e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
                       className={inputClassName}
                     />
                   </div>
@@ -466,6 +486,7 @@ export default function ListingForm({
                       type="date"
                       value={formData.available_to}
                       onChange={(e) => handleInputChange('available_to', e.target.value)}
+                      min={formData.available_from || new Date().toISOString().split('T')[0]}
                       className={inputClassName}
                     />
                   </div>
@@ -640,6 +661,54 @@ export default function ListingForm({
                 </select>
               </div>
             )}
+
+            {/* Service specific fields */}
+            {formData.category === 'service' && (
+              <div className="space-y-6">
+                <div>
+                  <label htmlFor="service_phone" className={labelClassName}>
+                    Contact Phone Number *
+                  </label>
+                  <input
+                    id="service_phone"
+                    type="tel"
+                    value={formData.service_phone}
+                    onChange={(e) => handleInputChange('service_phone', e.target.value)}
+                    placeholder="+213 XX XX XX XX"
+                    className={inputClassName}
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    This phone number will be visible to potential clients
+                  </p>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <div className="flex items-center mb-3">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-lg font-medium text-blue-900">
+                        Service Pricing
+                      </h3>
+                    </div>
+                  </div>
+                  <p className="text-blue-800 font-medium">
+                    💬 Estimation will be provided after discussion/inspection
+                  </p>
+                  <p className="text-blue-700 text-sm mt-2">
+                    Interested clients will be able to contact you through the platform messaging system or directly at the phone number provided above to discuss your specific services and get a customized quote.
+                  </p>
+                  <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 mt-3">
+                    <p className="text-blue-800 text-sm font-medium">
+                      📞 Remember: Clients will contact you directly for pricing discussions
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -696,8 +765,8 @@ export default function ListingForm({
         </div>
       )}
 
-      {/* Images - Hide for job category */}
-      {formData.category !== 'job' && (
+      {/* Images - Hide for job and service categories */}
+      {formData.category !== 'job' && formData.category !== 'service' && (
         <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Images {requiresImages && <span className="text-red-500">*</span>}
@@ -707,11 +776,65 @@ export default function ListingForm({
             images={formData.photos}
             onImagesChange={(photos) => handleInputChange('photos', photos)}
             category={formData.category}
-            maxImages={3}
+            maxImages={formData.category === 'for_rent' ? 5 : 3}
             required={requiresImages}
           />
         </div>
       )}
+
+      {/* Hot Deal Section - Coming Soon */}
+      <div className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-8 shadow-lg relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-200/30 to-red-200/30 rounded-full blur-2xl"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-red-200/30 to-orange-200/30 rounded-full blur-2xl"></div>
+
+        <div className="relative">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center">
+              <div className="bg-gradient-to-r from-orange-500 to-red-600 p-3 rounded-xl mr-4 shadow-lg">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                  Hot Deal
+                  <span className="ml-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs px-3 py-1 rounded-full font-bold shadow-md">
+                    Coming Soon
+                  </span>
+                </h3>
+                <p className="text-gray-600 mt-1">Boost your listing visibility</p>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-gray-700 mb-6">
+            Mark your listing as a hot deal to get <strong>3x more visibility</strong>, appear at the top of search results, and sell faster with eye-catching badges.
+          </p>
+
+          {/* Disabled Toggle */}
+          <div className="flex items-center justify-between bg-white rounded-lg p-4 border-2 border-gray-200 opacity-60 cursor-not-allowed">
+            <div className="flex items-center">
+              <div className="relative inline-block w-12 h-6 mr-3">
+                <div className="absolute inset-0 bg-gray-300 rounded-full"></div>
+                <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow"></div>
+              </div>
+              <span className="text-gray-600 font-medium">Mark as Hot Deal</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowHotDealModal(true)}
+              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+            >
+              Learn More
+            </button>
+          </div>
+
+          <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <p className="text-sm text-orange-800">
+              <strong>🔥 Premium Feature:</strong> Hot deals will be available soon. Be among the first to boost your listings!
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Submit Buttons */}
       <div className="flex justify-end space-x-4 pt-4">
@@ -737,6 +860,22 @@ export default function ListingForm({
           )}
         </button>
       </div>
+
+      {/* Coming Soon Modal for Hot Deals */}
+      <ComingSoonModal
+        isOpen={showHotDealModal}
+        onClose={() => setShowHotDealModal(false)}
+        featureName="Hot Deals"
+        featureIcon={<Zap className="w-12 h-12 text-white" />}
+        benefits={[
+          'Boost your listings to the top of search results',
+          'Get 3x more visibility and views',
+          'Special hot deal badges and highlights',
+          'Priority placement in homepage carousel',
+          'Sell faster with urgency indicators',
+          'Stand out from regular listings'
+        ]}
+      />
     </form>
   )
 }

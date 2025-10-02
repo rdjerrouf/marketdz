@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, MapPin, Star, X, Eye, Calendar } from 'lucide-react';
+import { fixPhotoUrl } from '@/lib/storage';
 
 interface Listing {
   id: string;
@@ -177,10 +178,10 @@ export default function AdvancedSearchPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">
-            Recherche Avancée
+            Advanced Search
           </h1>
           <p className="text-lg text-white/80">
-            Trouvez exactement ce que vous cherchez avec nos filtres avancés
+            Find exactly what you're looking for with our advanced filters
           </p>
         </div>
 
@@ -197,7 +198,7 @@ export default function AdvancedSearchPage() {
                   handleSearch();
                 }
               }}
-              placeholder="Rechercher des produits, services ou emplois..."
+              placeholder="Search for products, services or jobs..."
               className="w-full pl-10 pr-12 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-lg"
             />
             {query && (
@@ -207,8 +208,8 @@ export default function AdvancedSearchPage() {
                   setShowSuggestions(false);
                 }}
                 className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                title="Effacer la recherche"
-                aria-label="Effacer la recherche"
+                title="Clear search"
+                aria-label="Clear search"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -216,8 +217,8 @@ export default function AdvancedSearchPage() {
             <button
               onClick={handleSearch}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-600"
-              title="Lancer la recherche"
-              aria-label="Lancer la recherche"
+              title="Start search"
+              aria-label="Start search"
             >
               <Search className="w-5 h-5" />
             </button>
@@ -249,7 +250,7 @@ export default function AdvancedSearchPage() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center space-x-2 mb-4">
             <Filter className="w-5 h-5 text-gray-400" />
-            <h2 className="text-lg font-semibold text-gray-900">Filtres de recherche</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Search Filters</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -319,7 +320,7 @@ export default function AdvancedSearchPage() {
 
             <div>
               <label htmlFor="sort-select" className="block text-sm font-medium text-gray-700 mb-2">
-                Trier par
+                Sort by
               </label>
               <select
                 id="sort-select"
@@ -342,7 +343,7 @@ export default function AdvancedSearchPage() {
               className="flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
             >
               <Search className="w-5 h-5" />
-              <span>Rechercher</span>
+              <span>Search</span>
             </button>
           </div>
         </div>
@@ -365,7 +366,7 @@ export default function AdvancedSearchPage() {
                       )}
                     </span>
                   ) : (
-                    <span>Aucun résultat trouvé</span>
+                    <span>No results found</span>
                   )}
                 </div>
                 
@@ -397,10 +398,10 @@ export default function AdvancedSearchPage() {
               <div className="text-center py-12">
                 <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-medium text-gray-900 mb-2">
-                  Aucun résultat trouvé
+                  No results found
                 </h3>
                 <p className="text-gray-500 mb-6">
-                  {query ? `Aucun résultat pour "${query}"` : 'Essayez de modifier vos critères de recherche'}
+                  {query ? `No results for "${query}"` : 'Try modifying your search criteria'}
                 </p>
                 <div className="space-y-2 text-sm text-gray-600">
                   <p>• Vérifiez l'orthographe de vos mots-clés</p>
@@ -419,7 +420,7 @@ export default function AdvancedSearchPage() {
                     <div className="relative h-48 bg-gray-200">
                       {listing.photos && listing.photos.length > 0 ? (
                         <img
-                          src={listing.photos[0]}
+                          src={fixPhotoUrl(listing.photos[0])}
                           alt={listing.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         />

@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (job_type && !['full_time', 'part_time', 'contract', 'freelance', 'internship'].includes(job_type)) {
+    if (job_type && !['full-time', 'part-time', 'contract', 'freelance', 'internship'].includes(job_type)) {
       return NextResponse.json(
         { error: 'Invalid job type' },
         { status: 400 }

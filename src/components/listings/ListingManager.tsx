@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
+import { fixPhotoUrl } from '@/lib/storage'
 import Link from 'next/link'
 
 interface Listing {
@@ -249,7 +250,7 @@ export default function ListingManager({ userId }: ListingManagerProps) {
                   <div className="lg:w-48 h-48 lg:h-32 flex-shrink-0">
                     {listing.photos.length > 0 ? (
                       <img
-                        src={listing.photos[0]}
+                        src={fixPhotoUrl(listing.photos[0])}
                         alt={listing.title}
                         className="w-full h-full object-cover rounded-lg"
                       />

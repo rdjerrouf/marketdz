@@ -1,7 +1,7 @@
 // src/app/browse/page.tsx - Compatible with current API
 'use client'
 
-import { useState, useEffect, useCallback, useMemo, Suspense } from 'react'
+import { useState, useEffect, useCallback, useMemo, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import FavoriteButton from '@/components/common/FavoriteButton'
@@ -57,7 +57,7 @@ interface SearchResponse {
 function BrowsePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -68,6 +68,14 @@ function BrowsePageContent() {
     hasNextPage: false,
     hasPreviousPage: false
   })
+
+  // Add search cache for identical queries
+  const searchCache = useRef<Map<string, { data: SearchResponse; expiresAt: number }>>(new Map())
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null)
+  const abortController = useRef<AbortController | null>(null)
+  const loadMoreThrottle = useRef<number>(0)
+  const CACHE_TTL = 5 * 60 * 1000 // 5 minutes cache
+  const LOAD_MORE_THROTTLE_MS = 1000 // 1 second throttle
 
   const [filters, setFilters] = useState<SearchFilters>({
     query: searchParams.get('search') || searchParams.get('query') || searchParams.get('q') || '',
@@ -105,15 +113,57 @@ function BrowsePageContent() {
     return mapping[sortBy] || 'created_at'
   }
 
-  // Debounced search function
-  const performSearch = useCallback(async (page: number = 1) => {
+  // Create cache key from search parameters (without timestamp for better caching)
+  const createCacheKey = useCallback((searchFilters: SearchFilters, page: number) => {
+    return JSON.stringify({
+      ...searchFilters,
+      page
+    })
+  }, [])
+
+  // Immediate search function (without debounce) for direct calls
+  const performSearchImmediate = useCallback(async (page: number = 1) => {
+    // Cancel any previous request
+    if (abortController.current) {
+      abortController.current.abort()
+    }
+    abortController.current = new AbortController()
+
     setLoading(true)
     setError(null)
 
     try {
+      // Check cache first
+      const cacheKey = createCacheKey(filters, page)
+      const cached = searchCache.current.get(cacheKey)
+
+      if (cached && Date.now() < cached.expiresAt) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Using cached search results')
+        }
+        const data = cached.data
+
+        if (page === 1) {
+          setListings(data.listings || [])
+        } else {
+          setListings(prev => [...prev, ...(data.listings || [])])
+        }
+
+        setPagination({
+          currentPage: data.pagination?.currentPage || page,
+          totalPages: data.pagination?.totalPages || 1,
+          totalItems: data.pagination?.totalItems || 0,
+          hasNextPage: data.pagination?.hasNextPage || false,
+          hasPreviousPage: data.pagination?.hasPreviousPage || false
+        })
+
+        setLoading(false)
+        return
+      }
+
       // Build query parameters to match our API
       const queryParams = new URLSearchParams()
-      
+
       if (filters.query.trim()) queryParams.set('q', filters.query.trim())
       if (filters.category) queryParams.set('category', filters.category)
       if (filters.wilaya) queryParams.set('wilaya', filters.wilaya)
@@ -128,31 +178,47 @@ function BrowsePageContent() {
       queryParams.set('page', page.toString())
       queryParams.set('limit', '20')
 
-      console.log('Searching with params:', queryParams.toString())
+      // Reduced logging for production performance
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Searching with params:', queryParams.toString())
+      }
 
-      const response = await fetch(`/api/search?${queryParams.toString()}`)
-      
+      const response = await fetch(`/api/search?${queryParams.toString()}`, {
+        signal: abortController.current.signal
+      })
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || `Server error: ${response.status}`)
       }
 
       const data: SearchResponse = await response.json()
-      console.log('Search response:', data)
-      // Add this temporarily after line 136 where you log "Search response: Object"
-console.log('Search response details:', JSON.stringify(data, null, 2))
+
+      // Cache the result (only for page 1 to keep cache manageable)
+      if (page === 1) {
+        searchCache.current.set(cacheKey, {
+          data,
+          expiresAt: Date.now() + CACHE_TTL
+        })
+
+        // Clean old cache entries (keep max 50 entries)
+        if (searchCache.current.size > 50) {
+          const oldestKey = searchCache.current.keys().next().value
+          searchCache.current.delete(oldestKey)
+        }
+      }
+
       // Handle successful response
       if (page === 1) {
-        setListings(data.listings || [])  // Added fallback to empty array
+        setListings(data.listings || [])
       } else {
-        // Append results for "load more" functionality
         setListings(prev => [...prev, ...(data.listings || [])])
       }
-      
+
       setPagination({
         currentPage: data.pagination?.currentPage || page,
         totalPages: data.pagination?.totalPages || 1,
-        totalItems: data.pagination?.totalItems || 0,  // Changed from totalResults
+        totalItems: data.pagination?.totalItems || 0,
         hasNextPage: data.pagination?.hasNextPage || false,
         hasPreviousPage: data.pagination?.hasPreviousPage || false
       })
@@ -163,9 +229,14 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
       window.history.replaceState({}, '', newUrl.toString())
 
     } catch (err) {
+      // Don't show error for aborted requests
+      if (err instanceof Error && err.name === 'AbortError') {
+        return
+      }
+
       console.error('Search failed:', err)
       setError(err instanceof Error ? err.message : 'Search failed. Please try again.')
-      
+
       // Reset results on error
       if (page === 1) {
         setListings([])
@@ -180,16 +251,38 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
     } finally {
       setLoading(false)
     }
-  }, [filters])
+  }, [filters, createCacheKey, CACHE_TTL])
+
+  // Debounced search function - 300ms delay as suggested by AI
+  const performSearch = useCallback((page: number = 1) => {
+    // Clear existing timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current)
+    }
+
+    // Set new timer
+    debounceTimer.current = setTimeout(() => {
+      performSearchImmediate(page)
+    }, 300) // 300ms debounce as recommended
+  }, [performSearchImmediate])
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current)
+      }
+    }
+  }, [])
 
   // Load initial results and when filters change
   useEffect(() => {
     performSearch(1)
   }, [performSearch])
 
-  const handleFilterChange = (key: keyof SearchFilters, value: string) => {
+  const handleFilterChange = useCallback((key: keyof SearchFilters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }))
-  }
+  }, [])
 
   const clearFilters = () => {
     setFilters({
@@ -203,11 +296,20 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
     })
   }
 
-  const loadMoreResults = () => {
-    if (!loading && pagination.hasNextPage) {
-      performSearch(pagination.currentPage + 1)
+  const loadMoreResults = useCallback(() => {
+    const now = Date.now()
+
+    // Throttle rapid pagination calls
+    if (now - loadMoreThrottle.current < LOAD_MORE_THROTTLE_MS) {
+      return
     }
-  }
+
+    if (!loading && pagination.hasNextPage) {
+      loadMoreThrottle.current = now
+      // Use immediate search for pagination (no debounce needed)
+      performSearchImmediate(pagination.currentPage + 1)
+    }
+  }, [loading, pagination.hasNextPage, pagination.currentPage, performSearchImmediate, LOAD_MORE_THROTTLE_MS])
 
   const formatPrice = (price: number | null, category: string) => {
     if (!price) return category === 'job' ? 'Salary negotiable' : 'Price negotiable'
@@ -640,23 +742,25 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
           {/* Results Grid - Fixed the error line 512 issue */}
           {!loading && !error && listings &&  (listings || []).length > 0 && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {listings.map((listing) => {
                   const categoryBadge = getCategoryBadge(listing.category)
-                  
+
                   return (
                     <div
                       key={listing.id}
-                      className="border-2 border-gray-200 rounded-lg overflow-hidden hover:shadow-lg hover:border-green-300 transition-all duration-200 cursor-pointer group"
+                      className="group bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl"
                       onClick={() => router.push(`/browse/${listing.id}`)}
                     >
-                      {/* Image */}
-                      <div className="h-48 bg-gray-200 relative overflow-hidden">
+                      {/* Enhanced Image Container */}
+                      <div className="relative h-56 overflow-hidden">
                         {listing.photos && listing.photos.length > 0 ? (
                           <img
                             src={fixPhotoUrl(listing.photos[0])}
                             alt={listing.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            loading="lazy"
+                            decoding="async"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgODBDMTA0LjQxOCA4MCAxMDggODMuNTgyIDEwOCA4OFYxMTJDMTA4IDExNi40MTggMTA0LjQxOCAxMjAgMTAwIDEyMEM5NS41ODIgMTIwIDkyIDExNi40MTggOTIgMTEyVjg4QzkyIDgzLjU4MiA5NS41ODIgODAgMTAwIDgwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
@@ -670,63 +774,72 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
                           </div>
                         )}
 
-                        {/* Badges */}
-                        <div className="absolute top-2 left-2">
-                          <span className={`${categoryBadge.color} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg`}>
-                            {categoryBadge.emoji} {categoryBadge.text}
-                          </span>
+                        {/* Enhanced Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+
+                        {/* Category Badge */}
+                        <div className="absolute top-4 left-4">
+                          <div className={`bg-gradient-to-r ${categoryBadge.color} text-white px-3 py-1 rounded-full text-sm font-medium flex items-center shadow-lg backdrop-blur-sm`}>
+                            <span className="mr-1">{categoryBadge.emoji}</span>
+                            {categoryBadge.text}
+                          </div>
                         </div>
 
-                        <div className="absolute top-2 right-2 flex items-center space-x-2">
-                          <FavoriteButton 
+                        {/* Enhanced Favorite Button */}
+                        <div className="absolute top-4 right-4" onClick={(e) => e.stopPropagation()}>
+                          <FavoriteButton
                             listingId={listing.id}
                             listingOwnerId={listing.user_id}
                             size="sm"
-                            className="bg-white bg-opacity-90 hover:bg-white shadow-lg"
+                            className="backdrop-blur-sm shadow-lg"
                           />
-                          <span className="bg-black bg-opacity-60 text-white px-2 py-1 rounded-full text-xs shadow-lg">
+                        </div>
+
+                        {/* Enhanced Time Badge */}
+                        <div className="absolute bottom-4 right-4">
+                          <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs shadow-lg">
                             {getTimeAgo(listing.created_at)}
-                          </span>
+                          </div>
                         </div>
 
                         {/* Location Badge */}
                         {(listing.city || listing.wilaya) && (
-                          <div className="absolute bottom-2 left-2">
-                            <span className="bg-white bg-opacity-90 text-gray-800 px-2 py-1 rounded-full text-xs font-medium shadow">
-                              {listing.city ? `${listing.city}${listing.wilaya ? `, ${listing.wilaya}` : ''}` : listing.wilaya}
-                            </span>
+                          <div className="absolute bottom-4 left-4">
+                            <div className="bg-white/10 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs flex items-center">
+                              📍 {listing.city ? `${listing.city}${listing.wilaya ? `, ${listing.wilaya}` : ''}` : listing.wilaya}
+                            </div>
                           </div>
                         )}
                       </div>
 
-                      {/* Content */}
-                      <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1 group-hover:text-green-600 transition-colors">
+                      {/* Enhanced Content */}
+                      <div className="p-6">
+                        <h3 className="text-white font-bold text-xl mb-3 line-clamp-1 group-hover:text-purple-300 transition-colors">
                           {listing.title}
                         </h3>
-                        
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed">
+
+                        <p className="text-white/70 text-sm mb-4 line-clamp-2 leading-relaxed">
                           {listing.description}
                         </p>
-                        
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-green-600 text-lg">
+
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
                             {formatPrice(listing.price, listing.category)}
-                          </span>
-                          
+                          </div>
+
                           {listing.search_rank && listing.search_rank > 0 && (
-                            <div className="flex items-center text-xs text-gray-500">
+                            <div className="flex items-center text-xs text-white/70">
                               <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
-                              Match
+                              Top Match
                             </div>
                           )}
                         </div>
 
                         {/* User Info */}
                         {listing.user && (
-                          <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="mt-3 pt-3 border-t border-white/10">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -734,27 +847,29 @@ console.log('Search response details:', JSON.stringify(data, null, 2))
                                   router.push(`/profile/${listing.user.id}`)
                                 }
                               }}
-                              className="flex items-center text-sm text-gray-600 hover:text-purple-600 transition-colors w-full text-left"
+                              className="flex items-center text-sm text-white/70 hover:text-purple-300 transition-colors w-full text-left"
                             >
                               {listing.user.avatar_url ? (
                                 <img
                                   src={listing.user.avatar_url}
                                   alt={`${listing.user.first_name} ${listing.user.last_name}`}
-                                  className="w-6 h-6 rounded-full mr-2"
+                                  className="w-8 h-8 rounded-full mr-2 border-2 border-white/20"
+                                  loading="lazy"
+                                  decoding="async"
                                 />
                               ) : (
-                                <div className="w-6 h-6 rounded-full bg-gray-300 mr-2 flex items-center justify-center">
-                                  <span className="text-xs text-gray-600">
+                                <div className="w-8 h-8 rounded-full bg-white/10 mr-2 flex items-center justify-center border-2 border-white/20">
+                                  <span className="text-xs text-white">
                                     {listing.user.first_name?.[0]}{listing.user.last_name?.[0]}
                                   </span>
                                 </div>
                               )}
                               <div className="flex flex-col flex-1">
-                                <span>By {listing.user.first_name} {listing.user.last_name}</span>
+                                <span className="text-white">By {listing.user.first_name} {listing.user.last_name}</span>
                                 {listing.user.rating > 0 && (
                                   <div className="flex items-center mt-1">
                                     <StarRating rating={listing.user.rating} readonly size="sm" />
-                                    <span className="text-xs text-gray-500 ml-1">
+                                    <span className="text-xs text-white/50 ml-1">
                                       ({listing.user.rating.toFixed(1)})
                                     </span>
                                   </div>

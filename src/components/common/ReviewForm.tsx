@@ -32,15 +32,15 @@ export default function ReviewForm({
     const newErrors: { rating?: string; comment?: string } = {}
 
     if (rating === 0) {
-      newErrors.rating = 'Veuillez sélectionner une note'
+      newErrors.rating = 'Please select a rating'
     }
 
     if (comment.trim().length < 10) {
-      newErrors.comment = 'Le commentaire doit contenir au moins 10 caractères'
+      newErrors.comment = 'Comment must be at least 10 characters long'
     }
 
     if (comment.trim().length > 500) {
-      newErrors.comment = 'Le commentaire ne peut pas dépasser 500 caractères'
+      newErrors.comment = 'Comment cannot exceed 500 characters'
     }
 
     setErrors(newErrors)
@@ -70,11 +70,11 @@ export default function ReviewForm({
     <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Laisser un avis
+          Leave a Review
         </h3>
         {listingTitle && (
           <p className="text-sm text-gray-600">
-            Concernant l'annonce: <span className="font-medium">{listingTitle}</span>
+            Regarding listing: <span className="font-medium">{listingTitle}</span>
           </p>
         )}
       </div>
@@ -83,7 +83,7 @@ export default function ReviewForm({
         {/* Rating */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Note <span className="text-red-500">*</span>
+            Rating <span className="text-red-500">*</span>
           </label>
           <div className="flex items-center space-x-2">
             <StarRating
@@ -105,13 +105,13 @@ export default function ReviewForm({
         {/* Comment */}
         <div>
           <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
-            Commentaire <span className="text-red-500">*</span>
+            Comment <span className="text-red-500">*</span>
           </label>
           <textarea
             id="comment"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Décrivez votre expérience avec cet utilisateur..."
+            placeholder="Describe your experience with this user..."
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-black bg-white placeholder-gray-500"
             maxLength={500}
@@ -134,7 +134,7 @@ export default function ReviewForm({
             disabled={isLoading}
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Annuler
+            Cancel
           </button>
           <button
             type="submit"
@@ -148,7 +148,7 @@ export default function ReviewForm({
               </svg>
             )}
             <span>
-              {isLoading ? 'Publication...' : 'Publier l\'avis'}
+              {isLoading ? 'Submitting...' : 'Submit Review'}
             </span>
           </button>
         </div>

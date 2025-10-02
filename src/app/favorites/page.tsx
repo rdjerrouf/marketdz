@@ -2,22 +2,24 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useFavorites, useAuth } from '@/hooks/useFavorites'
+import { useFavorites } from '@/hooks/useFavorites'
+import { useAuth } from '@/contexts/AuthContext'
 import FavoriteButton from '@/components/common/FavoriteButton'
 import PWAInstallButton from '@/components/PWAInstallButton'
+import { fixPhotoUrl } from '@/lib/storage'
 
 export default function FavoritesPage() {
   const router = useRouter()
-  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [currentPage, setCurrentPage] = useState(1)
   const { data: favoritesData, loading, error, refetch } = useFavorites(currentPage, 20)
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!authLoading && !user) {
       router.push('/signin?redirect=/favorites')
     }
-  }, [isAuthenticated, authLoading, router])
+  }, [user, authLoading, router])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -33,19 +35,19 @@ export default function FavoritesPage() {
     const now = new Date()
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
     
-    if (diffInHours < 1) return 'À l\'instant'
-    if (diffInHours < 24) return `Il y a ${diffInHours}h`
+    if (diffInHours < 1) return 'Just now'
+    if (diffInHours < 24) return `${diffInHours}h ago`
     const diffInDays = Math.floor(diffInHours / 24)
-    if (diffInDays < 7) return `Il y a ${diffInDays}j`
+    if (diffInDays < 7) return `${diffInDays}d ago`
     const diffInWeeks = Math.floor(diffInDays / 7)
-    return `Il y a ${diffInWeeks}sem`
+    return `${diffInWeeks}w ago`
   }
 
   const getCategoryInfo = (category: string) => {
     const categories = {
-      for_sale: { emoji: '🛍️', text: 'À Vendre', color: 'bg-blue-500' },
-      for_rent: { emoji: '🏠', text: 'À Louer', color: 'bg-green-500' },
-      job: { emoji: '💼', text: 'Emploi', color: 'bg-purple-500' },
+      for_sale: { emoji: '🛍️', text: 'For Sale', color: 'bg-blue-500' },
+      for_rent: { emoji: '🏠', text: 'For Rent', color: 'bg-green-500' },
+      job: { emoji: '💼', text: 'Job', color: 'bg-purple-500' },
       service: { emoji: '🔧', text: 'Service', color: 'bg-orange-500' }
     }
     return categories[category as keyof typeof categories] || { emoji: '📦', text: category, color: 'bg-gray-500' }
@@ -59,7 +61,7 @@ export default function FavoritesPage() {
     )
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return null // Will redirect
   }
 
@@ -95,7 +97,7 @@ export default function FavoritesPage() {
         <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-black">
-              ❤️ Mes Favoris
+              ❤️ My Favorites
             </h1>
           </div>
 
@@ -105,34 +107,34 @@ export default function FavoritesPage() {
             </div>
           ) : error ? (
             <div className="bg-red-500 bg-opacity-20 border border-red-500 border-opacity-50 text-red-100 rounded-lg p-4 mb-6">
-              <p className="font-medium">Erreur lors du chargement des favoris</p>
+              <p className="font-medium">Error loading favorites</p>
               <p className="text-sm mt-1">{error}</p>
               <button
                 onClick={refetch}
                 className="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
-                Réessayer
+                Retry
               </button>
             </div>
           ) : !favoritesData || favoritesData.favorites.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">💔</div>
-              <h2 className="text-2xl font-bold text-white mb-2">Aucun favori</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">No favorites</h2>
               <p className="text-purple-200 mb-6">
-                Vous n'avez pas encore ajouté d'annonces à vos favoris.
+                You haven't added any listings to your favorites yet.
               </p>
               <button
                 onClick={() => router.push('/browse')}
                 className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105 font-medium"
               >
-                Parcourir les annonces
+                Browse listings
               </button>
             </div>
           ) : (
             <>
               <div className="mb-6">
                 <p className="text-black">
-                  {favoritesData.pagination.totalItems} annonce{favoritesData.pagination.totalItems > 1 ? 's' : ''} dans vos favoris
+                  {favoritesData.pagination.totalItems} listing{favoritesData.pagination.totalItems > 1 ? 's' : ''} in your favorites
                 </p>
               </div>
 
@@ -150,7 +152,7 @@ export default function FavoritesPage() {
                       <div className="relative">
                         {listing.photos && listing.photos.length > 0 ? (
                           <img
-                            src={listing.photos[0]}
+                            src={fixPhotoUrl(listing.photos[0])}
                             alt={listing.title}
                             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200"
                           />
@@ -233,7 +235,7 @@ export default function FavoritesPage() {
                                 )}
                               </div>
                               <div className="text-sm">
-                                <span className="text-black">Par {listing.user.first_name} {listing.user.last_name}</span>
+                                <span className="text-black">By {listing.user.first_name} {listing.user.last_name}</span>
                               </div>
                             </button>
                           </div>
@@ -252,11 +254,11 @@ export default function FavoritesPage() {
                     disabled={!favoritesData.pagination.hasPreviousPage}
                     className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-30 transition-all"
                   >
-                    Précédent
+                    Previous
                   </button>
                   
                   <span className="px-4 py-2 text-white">
-                    Page {currentPage} sur {favoritesData.pagination.totalPages}
+                    Page {currentPage} of {favoritesData.pagination.totalPages}
                   </span>
                   
                   <button
@@ -264,7 +266,7 @@ export default function FavoritesPage() {
                     disabled={!favoritesData.pagination.hasNextPage}
                     className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-30 transition-all"
                   >
-                    Suivant
+                    Next
                   </button>
                 </div>
               )}

@@ -34,6 +34,7 @@ interface UploadRequest {
   bucket: 'avatars' | 'listing-photos' | 'user-photos'
   listingId?: string
   purpose: 'avatar' | 'listing' | 'document'
+  variant?: 'original' | 'display' | 'thumbnail'
 }
 
 serve(async (req) => {
@@ -84,6 +85,7 @@ serve(async (req) => {
     const bucketType = formData.get('bucket') as string || 'user-photos'
     const listingId = formData.get('listingId') as string
     const purpose = formData.get('purpose') as string || 'user'
+    const variant = formData.get('variant') as string || 'original'
 
     if (!file) {
       return new Response(
@@ -143,16 +145,16 @@ serve(async (req) => {
       )
     }
 
-    // Generate secure file path
+    // Generate secure file path with variant support
     const timestamp = Date.now()
     const randomStr = Math.random().toString(36).substring(2, 8)
     const fileExt = file.name.split('.').pop()
-    
+
     let filePath: string
-    
+
     switch (bucketType) {
       case 'avatars':
-        filePath = `${user.id}/avatar-${timestamp}.${fileExt}`
+        filePath = `${user.id}/${variant}-avatar-${timestamp}.${fileExt}`
         break
       case 'listing-photos':
         if (!listingId) {
@@ -167,18 +169,18 @@ serve(async (req) => {
           .select('user_id')
           .eq('id', listingId)
           .single()
-        
+
         if (!listing || listing.user_id !== user.id) {
           return new Response(
             JSON.stringify({ error: 'Unauthorized: You can only upload photos to your own listings' }),
             { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           )
         }
-        
-        filePath = `${listingId}/${timestamp}-${randomStr}.${fileExt}`
+
+        filePath = `${listingId}/${variant}-${timestamp}-${randomStr}.${fileExt}`
         break
       default:
-        filePath = `${user.id}/${timestamp}-${randomStr}.${fileExt}`
+        filePath = `${user.id}/${variant}-${timestamp}-${randomStr}.${fileExt}`
     }
 
     // Upload file to storage
@@ -231,7 +233,13 @@ serve(async (req) => {
         publicUrl,
         bucket: bucketType,
         fileSize: file.size,
-        fileType: file.type
+        fileType: file.type,
+        variant: variant,
+        compressionInfo: variant !== 'original' ? {
+          optimized: true,
+          variant: variant,
+          originalSize: file.size
+        } : undefined
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

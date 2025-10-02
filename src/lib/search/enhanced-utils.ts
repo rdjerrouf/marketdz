@@ -232,7 +232,8 @@ export class AdvancedSearchEngine {
       category: listing.category,
       wilaya: listing.location_wilaya,
       city: listing.location_city,
-      photos: Array.isArray(listing.photos) ? listing.photos.slice(0, 3) : [],
+      photos: Array.isArray(listing.photos) ?
+        listing.photos.slice(0, listing.category === 'for_rent' ? 5 : 3) : [],
       created_at: listing.created_at,
       user_id: listing.user_id,
       status: listing.status,

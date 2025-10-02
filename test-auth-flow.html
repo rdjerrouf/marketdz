@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth Flow Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Authentication Test</h1>
+
+    <div id="status">Testing...</div>
+
+    <script>
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(
+            'https://vrlzwxoiglzwmhndpolj.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZybHp3eG9pZ2x6d21obmRwb2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjU3Mjg3MDAsImV4cCI6MjA0MTMwNDcwMH0.YvA_AW6TdsHKVuLKZajuAf3gYdoXJgVYJxKg4t6D1_A'
+        );
+
+        async function testAuth() {
+            const statusDiv = document.getElementById('status');
+
+            try {
+                // Test current user
+                const { data: { user }, error } = await supabase.auth.getUser();
+
+                if (error) {
+                    statusDiv.innerHTML = `❌ Auth Error: ${error.message}`;
+                    return;
+                }
+
+                if (!user) {
+                    statusDiv.innerHTML = `⚠️ No user signed in<br>
+                        <strong>Instructions:</strong><br>
+                        1. Go to <a href="http://localhost:3003/signin">http://localhost:3003/signin</a><br>
+                        2. Sign in with test@example.com / password123<br>
+                        3. Return to this page and refresh`;
+                    return;
+                }
+
+                statusDiv.innerHTML = `✅ User signed in: ${user.email}<br>
+                    Testing admin access...`;
+
+                // Test admin API
+                const response = await fetch('http://localhost:3003/api/admin/check-status');
+                const adminData = await response.json();
+
+                if (response.ok && adminData.isAdmin) {
+                    statusDiv.innerHTML += `<br>✅ Admin access confirmed!<br>
+                        Method: ${adminData.method}<br>
+                        Role: ${adminData.adminUser?.role || 'N/A'}<br>
+                        <strong>You can now access: <a href="http://localhost:3003/admin">Admin Panel</a></strong>`;
+                } else {
+                    statusDiv.innerHTML += `<br>❌ Admin access denied: ${adminData.error || 'Unknown error'}`;
+                }
+
+            } catch (error) {
+                statusDiv.innerHTML = `❌ Test failed: ${error.message}`;
+            }
+        }
+
+        // Run test
+        testAuth();
+
+        // Auto refresh every 5 seconds
+        setInterval(testAuth, 5000);
+    </script>
+</body>
+</html>

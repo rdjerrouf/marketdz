@@ -19,12 +19,12 @@ export default function Navigation() {
   };
 
   const navItems = [
-    { href: '/', label: 'Accueil', icon: Home },
-    { href: '/browse', label: 'Parcourir', icon: Search },
-    { href: '/search-advanced', label: 'Recherche avancée', icon: Search },
-    { href: '/add-item', label: 'Publier', icon: Plus },
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/browse', label: 'Browse', icon: Search },
+    { href: '/search-advanced', label: 'Advanced Search', icon: Search },
+    { href: '/add-item', label: 'Post', icon: Plus },
     { href: '/messages', label: 'Messages', icon: MessageCircle },
-    { href: '/profile', label: 'Profil', icon: User },
+    { href: '/profile', label: 'Profile', icon: User },
   ];
 
   return (

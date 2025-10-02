@@ -1,16 +1,15 @@
 // src/app/edit-listing/[id]/page.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useState, useEffect, use } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { Listing } from '@/types'
 import ListingForm from '@/components/listings/ListingForm'
 
-export default function EditListingPage() {
+export default function EditListingPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
-  const params = useParams()
-  const listingId = params.id as string
+  const { id: listingId } = use(params)
   
   const [listing, setListing] = useState<Listing | null>(null)
   const [loading, setLoading] = useState(true)

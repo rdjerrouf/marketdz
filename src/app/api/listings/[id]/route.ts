@@ -99,7 +99,10 @@ export async function PUT(
     if (description !== undefined) updateData.description = description
     if (category !== undefined) updateData.category = category
     if (subcategory !== undefined) updateData.subcategory = subcategory
-    if (price !== undefined) updateData.price = price
+    if (price !== undefined) {
+      // Set price to null for services, keep jobs and other categories as they were
+      updateData.price = category === 'service' ? null : price
+    }
     if (location_city !== undefined) updateData.location_city = location_city
     if (location_wilaya !== undefined) updateData.location_wilaya = location_wilaya
     if (photos !== undefined) updateData.photos = photos

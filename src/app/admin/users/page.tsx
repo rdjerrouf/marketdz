@@ -7,6 +7,7 @@ import { sendPushNotification, NotificationTemplates } from '@/lib/notifications
 
 interface User {
   id: string
+  email?: string | null
   first_name: string
   last_name: string
   phone: string | null
@@ -72,7 +73,8 @@ export default function AdminUsers() {
 
     } catch (error) {
       console.error('Error fetching users:', error)
-      setActionMessage(`❌ Error loading users: ${error.message || error}`)
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      setActionMessage(`❌ Error loading users: ${errorMessage}`)
       setTimeout(() => setActionMessage(null), 5000)
     } finally {
       setLoading(false)
@@ -156,7 +158,8 @@ export default function AdminUsers() {
       fetchUsers()
     } catch (error) {
       console.error('Error updating user:', error)
-      setActionMessage(`❌ Error: ${error.message || error}`)
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      setActionMessage(`❌ Error: ${errorMessage}`)
       setTimeout(() => setActionMessage(null), 5000)
     }
   }
@@ -386,18 +389,18 @@ export default function AdminUsers() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        {user.first_name[0]}{user.last_name[0]}
+                        {(user.first_name?.[0] || '?').toUpperCase()}{(user.last_name?.[0] || '?').toUpperCase()}
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {user.first_name} {user.last_name}
+                          {user.first_name || 'Unknown'} {user.last_name || 'User'}
                         </div>
                         <div className="text-sm text-gray-500">ID: {user.id.slice(0, 8)}...</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.id.slice(-8)}</div>
+                    <div className="text-sm text-gray-900">{user.email || 'No email'}</div>
                     <div className="text-sm text-gray-500">{user.phone || 'No phone'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

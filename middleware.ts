@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
     {
       auth: {
         storageKey: 'marketdz-auth', // Match client-side storage key
-        flowType: 'implicit'
+        flowType: 'pkce' // Match client-side flow type
       },
       cookies: {
         getAll() {
@@ -44,17 +44,26 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Try to refresh the session to ensure proper cookie handling
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error && error.message !== 'Auth session missing!') {
-    console.log('🔧 Middleware: Auth error:', error.message);
-  }
-  
-  if (user) {
-    console.log('🔧 Middleware: User authenticated:', { id: user.id, email: user.email });
-  } else {
-    console.log('🔧 Middleware: No authenticated user');
+  // Try to get user session with proper error handling
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error) {
+      // Only log non-standard auth errors
+      if (!error.message.includes('Auth session missing') &&
+          !error.message.includes('Invalid Refresh Token') &&
+          !error.message.includes('Refresh Token Not Found')) {
+        console.log('🔧 Middleware: Auth error:', error.message);
+      }
+      // Don't process user as authenticated if there's an error
+    } else if (user) {
+      console.log('🔧 Middleware: User authenticated:', { id: user.id.slice(-8), email: user.email });
+    } else {
+      console.log('🔧 Middleware: No authenticated user');
+    }
+  } catch (middlewareError) {
+    // Catch any unexpected errors in auth processing
+    console.log('🔧 Middleware: Unexpected auth error:', middlewareError);
   }
 
   // Add performance monitoring headers

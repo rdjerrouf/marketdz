@@ -23,12 +23,10 @@ export async function GET(request: NextRequest) {
         last_message_at,
         buyer_unread_count,
         seller_unread_count,
-        status,
         created_at,
         updated_at
       `)
       .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
-      .eq('status', 'active')
       .order('last_message_at', { ascending: false });
 
     if (error) {

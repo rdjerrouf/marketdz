@@ -5,7 +5,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
+import { normalizePhoneNumber, generateWhatsAppLink } from '@/lib/utils'
 import PWAInstallButton from '@/components/PWAInstallButton'
+import { fixPhotoUrl } from '@/lib/storage'
 
 interface User {
   id: string
@@ -171,7 +173,7 @@ export default function ProfilePage() {
           first_name: formData.first_name.trim(),
           last_name: formData.last_name.trim(),
           bio: formData.bio.trim(),
-          phone: formData.phone.trim(),
+          phone: normalizePhoneNumber(formData.phone.trim()),
           city: formData.city.trim(),
           wilaya: formData.wilaya
         })
@@ -190,7 +192,7 @@ export default function ProfilePage() {
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
         bio: formData.bio.trim(),
-        phone: formData.phone.trim(),
+        phone: normalizePhoneNumber(formData.phone.trim()),
         city: formData.city.trim(),
         wilaya: formData.wilaya
       } : null)
@@ -524,6 +526,7 @@ export default function ProfilePage() {
                       <div>
                         <label htmlFor="phone" className={labelClassName}>
                           Phone Number
+                          <span className="text-xs text-gray-500 ml-2 font-normal">- Saved in WhatsApp format</span>
                         </label>
                         <input
                           id="phone"
@@ -531,8 +534,11 @@ export default function ProfilePage() {
                           value={formData.phone}
                           onChange={(e) => handleInputChange('phone', e.target.value)}
                           className={inputClassName}
-                          placeholder="+213 XXX XXX XXX"
+                          placeholder="0551234567 or +213551234567"
                         />
+                        <p className="mt-1 text-xs text-gray-500">
+                          📱 Phone numbers are automatically formatted as +213xxxxxxxxx for WhatsApp compatibility
+                        </p>
                       </div>
 
                       <div>
@@ -631,7 +637,31 @@ export default function ProfilePage() {
 
                     <div>
                       <h3 className="font-semibold text-gray-800 mb-2">Phone</h3>
-                      <p className="text-gray-900">{user?.phone || 'Not provided'}</p>
+                      {user?.phone ? (
+                        <div className="space-y-2">
+                          <p className="text-gray-900">{user.phone}</p>
+                          {user.phone && (
+                            <div className="flex gap-2">
+                              <a
+                                href={`tel:${user.phone}`}
+                                className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-200 transition-colors"
+                              >
+                                📞 Call
+                              </a>
+                              <a
+                                href={generateWhatsAppLink(user.phone, `Hi! I saw your profile on MarketDZ.`)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-lg hover:bg-green-200 transition-colors"
+                              >
+                                💬 WhatsApp
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-gray-900">Not provided</p>
+                      )}
                     </div>
 
                     <div>
@@ -689,7 +719,7 @@ export default function ProfilePage() {
                           <div className="h-48 bg-gray-200 relative">
                             {listing.photos && listing.photos.length > 0 ? (
                               <img
-                                src={listing.photos[0]}
+                                src={fixPhotoUrl(listing.photos[0])}
                                 alt={listing.title}
                                 className="w-full h-full object-cover"
                               />

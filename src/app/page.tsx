@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Menu, X, Home, User, MessageCircle, Bell, Zap, Shield, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users } from 'lucide-react'
-import { useUser } from '@/hooks/useUser'
+import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase/client'
+import { fixPhotoUrl } from '@/lib/storage'
+import ComingSoonModal from '@/components/premium/ComingSoonModal'
 
 // Mock data for preview
 const mockListings = [
@@ -71,7 +73,8 @@ const mockListings = [
 ]
 
 export default function CompleteKickAssHomepage() {
-  const { user, profile, loading } = useUser()
+  const { user, loading } = useAuth()
+  const [profile, setProfile] = useState<any>(null)
   const [featuredListings] = useState(mockListings)
   const [stats] = useState({
     totalListings: 15420,
@@ -86,6 +89,37 @@ export default function CompleteKickAssHomepage() {
   const [userFavoritesCount, setUserFavoritesCount] = useState(0)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showInstallButton, setShowInstallButton] = useState(false)
+  const [showComingSoonModal, setShowComingSoonModal] = useState(false)
+  const [showNewTodayModal, setShowNewTodayModal] = useState(false)
+
+  // Fetch user profile when user changes
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) {
+        setProfile(null)
+        return
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching profile:', error)
+          return
+        }
+
+        setProfile(data)
+      } catch (err) {
+        console.error('Profile fetch error:', err)
+      }
+    }
+
+    fetchProfile()
+  }, [user])
 
   // Debug authentication state
   useEffect(() => {
@@ -822,7 +856,10 @@ export default function CompleteKickAssHomepage() {
 
           {/* Enhanced Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-            <div className="bg-gradient-to-br from-green-400/10 to-green-600/10 backdrop-blur-sm rounded-2xl p-8 border border-green-500/20 hover:border-green-400/40 transition-all duration-300 group hover:scale-105 shadow-lg hover:shadow-2xl">
+            <Link
+              href="/browse"
+              className="bg-gradient-to-br from-green-400/10 to-green-600/10 backdrop-blur-sm rounded-2xl p-8 border border-green-500/20 hover:border-green-400/40 transition-all duration-300 group hover:scale-105 shadow-lg hover:shadow-2xl block"
+            >
               <div className="flex items-center justify-between mb-4">
                 <div className="bg-gradient-to-r from-green-400 to-green-600 p-3 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
                   <TrendingUp className="w-8 h-8 text-white" />
@@ -836,11 +873,22 @@ export default function CompleteKickAssHomepage() {
               </div>
               <div className="flex items-center text-green-300 text-sm">
                 <ArrowRight className="w-4 h-4 mr-1 group-hover:translate-x-1 transition-transform" />
-                Growing daily
+                Browse all listings
               </div>
-            </div>
+            </Link>
 
-            <div className="bg-gradient-to-br from-orange-400/10 to-red-600/10 backdrop-blur-sm rounded-2xl p-8 border border-orange-500/20 hover:border-orange-400/40 transition-all duration-300 group hover:scale-105 shadow-lg hover:shadow-2xl">
+            <button
+              onClick={() => setShowComingSoonModal(true)}
+              className="bg-gradient-to-br from-orange-400/10 to-red-600/10 backdrop-blur-sm rounded-2xl p-8 border border-orange-500/20 hover:border-orange-400/40 transition-all duration-300 group hover:scale-105 shadow-lg hover:shadow-2xl w-full text-left cursor-pointer relative overflow-hidden"
+            >
+              {/* Coming Soon Badge */}
+              <div className="absolute top-3 right-3">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs px-2 py-1 rounded-full font-bold flex items-center shadow-lg">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Soon
+                </div>
+              </div>
+
               <div className="flex items-center justify-between mb-4">
                 <div className="bg-gradient-to-r from-orange-400 to-red-600 p-3 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
                   <DollarSign className="w-8 h-8 text-white" />
@@ -857,11 +905,22 @@ export default function CompleteKickAssHomepage() {
               </div>
               <div className="flex items-center text-orange-300 text-sm">
                 <ArrowRight className="w-4 h-4 mr-1 group-hover:translate-x-1 transition-transform" />
-                Limited time
+                Premium Feature
               </div>
-            </div>
+            </button>
 
-            <div className="bg-gradient-to-br from-blue-400/10 to-purple-600/10 backdrop-blur-sm rounded-2xl p-8 border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300 group hover:scale-105 shadow-lg hover:shadow-2xl">
+            <button
+              onClick={() => setShowNewTodayModal(true)}
+              className="bg-gradient-to-br from-blue-400/10 to-purple-600/10 backdrop-blur-sm rounded-2xl p-8 border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300 group hover:scale-105 shadow-lg hover:shadow-2xl w-full text-left cursor-pointer relative overflow-hidden"
+            >
+              {/* Coming Soon Badge */}
+              <div className="absolute top-3 right-3">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs px-2 py-1 rounded-full font-bold flex items-center shadow-lg">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Soon
+                </div>
+              </div>
+
               <div className="flex items-center justify-between mb-4">
                 <div className="bg-gradient-to-r from-blue-400 to-purple-600 p-3 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
                   <Clock className="w-8 h-8 text-white" />
@@ -876,9 +935,9 @@ export default function CompleteKickAssHomepage() {
               </div>
               <div className="flex items-center text-blue-300 text-sm">
                 <ArrowRight className="w-4 h-4 mr-1 group-hover:translate-x-1 transition-transform" />
-                Fresh arrivals
+                Premium Feature
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Enhanced Category Pills */}
@@ -942,7 +1001,7 @@ export default function CompleteKickAssHomepage() {
                     {/* Enhanced Image Container */}
                     <div className="relative h-56 overflow-hidden">
                       <img
-                        src={listing.photos[0]}
+                        src={fixPhotoUrl(listing.photos[0])}
                         alt={listing.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
@@ -1129,6 +1188,36 @@ export default function CompleteKickAssHomepage() {
           </div>
         </div>
       </div>
+
+      {/* Coming Soon Modal for Hot Deals */}
+      <ComingSoonModal
+        isOpen={showComingSoonModal}
+        onClose={() => setShowComingSoonModal(false)}
+        featureName="Hot Deals"
+        featureIcon={<DollarSign className="w-12 h-12 text-white" />}
+        benefits={[
+          'Boost your listings to the top of search results',
+          'Get 3x more visibility and views',
+          'Special hot deal badges and highlights',
+          'Priority placement in homepage carousel',
+          'Sell faster with urgency indicators'
+        ]}
+      />
+
+      {/* Coming Soon Modal for Fresh Arrivals */}
+      <ComingSoonModal
+        isOpen={showNewTodayModal}
+        onClose={() => setShowNewTodayModal(false)}
+        featureName="Fresh Arrivals"
+        featureIcon={<Clock className="w-12 h-12 text-white" />}
+        benefits={[
+          'Get instant notifications for new listings',
+          'Be the first to see fresh arrivals in your categories',
+          'Set custom alerts for specific search criteria',
+          'Never miss a great deal again',
+          'Priority access to newly posted items'
+        ]}
+      />
     </div>
   )
 }

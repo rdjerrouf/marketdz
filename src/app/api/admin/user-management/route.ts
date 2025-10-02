@@ -1,6 +1,6 @@
 // src/app/api/admin/user-management/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { createApiSupabaseClient, createSupabaseAdminClient } from '@/lib/supabase/server'
+import { createApiSupabaseClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,33 +16,23 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Use admin client for database operations to bypass RLS
-    const adminSupabase = createSupabaseAdminClient()
-    const { data: currentAdmin } = await adminSupabase
-      .from('admin_users')
+    // Check admin status using RLS
+    const { data: currentAdmin, error: adminError } = await supabase
+      .from('admin_users' as any)
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)
-      .single()
+      .maybeSingle()
 
-    // Fallback to email-based check for legacy support
-    const adminEmails = [
-      'admin@marketdz.com',
-      'moderator@marketdz.com',
-      'test@example.com',
-      'ryad@marketdz.com',
-      'rdjerrouf@gmail.com',
-      'anyadjerrouf@gmail.com'
-    ]
-
-    const isLegacyAdmin = adminEmails.includes(user.email || '')
-
-    if (!currentAdmin && !isLegacyAdmin) {
+    if (adminError || !currentAdmin || !currentAdmin.id) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }
       )
     }
+
+    // Type assertion for admin user
+    const admin: any = currentAdmin
 
     // Parse query parameters
     const { searchParams } = new URL(request.url)
@@ -54,22 +44,23 @@ export async function GET(request: NextRequest) {
     // Calculate pagination
     const offset = (page - 1) * limit
 
-    // Build query
-    let query = adminSupabase
+    // Build query using RLS (admins can view all profiles)
+    let query = supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, phone, city, wilaya, status, created_at, updated_at', { count: 'exact' })
-      .range(offset, offset + limit - 1)
-      .order('created_at', { ascending: false })
+      .select('id, first_name, last_name, email, phone, city, wilaya, created_at, updated_at, status', { count: 'exact' })
 
-    // Add search filter
+    // Add search if provided
     if (search) {
-      query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`)
+      query = query.or(`email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`)
     }
 
     // Add status filter
     if (status !== 'all') {
       query = query.eq('status', status)
     }
+
+    // Add pagination
+    query = query.range(offset, offset + limit - 1).order('created_at', { ascending: false })
 
     const { data: users, error: usersError, count } = await query
 
@@ -81,19 +72,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get status distribution for dashboard
-    const { data: statusData, error: statusError } = await adminSupabase
+    // Get status counts
+    const { data: statusData } = await supabase
       .from('profiles')
-      .select('status')
+      .select('status', { count: 'exact', head: true })
 
-    let statusCounts = { active: 0, suspended: 0, banned: 0 }
-    if (!statusError && statusData) {
-      statusData.forEach(user => {
-        const userStatus = user.status || 'active'
-        if (userStatus in statusCounts) {
-          statusCounts[userStatus as keyof typeof statusCounts]++
-        }
-      })
+    const statusCounts = {
+      active: count || 0,
+      suspended: 0,
+      banned: 0
     }
 
     return NextResponse.json({
@@ -105,15 +92,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil((count || 0) / limit)
       },
       statusCounts,
-      currentAdmin: currentAdmin || {
-        id: 'legacy',
-        user_id: user.id,
-        role: 'admin',
-        permissions: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is_active: true
-      }
+      currentAdmin
     })
 
   } catch (error) {
@@ -141,28 +120,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use admin client for database operations
-    const adminSupabase = createSupabaseAdminClient()
-    const { data: currentAdmin } = await adminSupabase
-      .from('admin_users')
+    // Check admin status using RLS
+    const { data: currentAdmin, error: adminError } = await supabase
+      .from('admin_users' as any)
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)
-      .single()
+      .maybeSingle()
 
-    // Fallback to email-based check
-    const adminEmails = [
-      'admin@marketdz.com',
-      'moderator@marketdz.com',
-      'test@example.com',
-      'ryad@marketdz.com',
-      'rdjerrouf@gmail.com',
-      'anyadjerrouf@gmail.com'
-    ]
-
-    const isLegacyAdmin = adminEmails.includes(user.email || '')
-
-    if (!currentAdmin && !isLegacyAdmin) {
+    if (adminError || !currentAdmin) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }
@@ -178,7 +144,8 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      const { error: updateError } = await adminSupabase
+      // Update user status using RLS (admins can update profiles)
+      const { error: updateError } = await supabase
         .from('profiles')
         .update({
           status: newStatus,
@@ -194,12 +161,12 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Create audit log entry
+      // Create audit log entry using RLS
       try {
-        await adminSupabase
-          .from('admin_activity_logs')
+        await supabase
+          .from('admin_activity_logs' as any)
           .insert({
-            admin_user_id: currentAdmin?.id || 'legacy',
+            admin_user_id: admin.id,
             action: `user_status_changed`,
             target_type: 'user',
             target_id: userId,

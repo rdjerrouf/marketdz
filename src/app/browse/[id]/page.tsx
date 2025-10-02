@@ -1,8 +1,8 @@
 // src/app/browse/[id]/page.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useState, useEffect, use } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { useUserRating } from '@/hooks/useReviews'
 import StarRating from '@/components/common/StarRating'
@@ -35,10 +35,9 @@ interface Seller {
   created_at: string
 }
 
-export default function ListingDetailsPage() {
+export default function ListingDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
-  const params = useParams()
-  const listingId = params.id as string
+  const { id: listingId } = use(params)
   
   const [listing, setListing] = useState<Listing | null>(null)
   const [seller, setSeller] = useState<Seller | null>(null)
@@ -131,7 +130,11 @@ export default function ListingDetailsPage() {
   }, [listingId])
 
   const formatPrice = (price: number | null, category: string) => {
-    if (!price) return category === 'job' ? 'Salary negotiable' : 'Price negotiable'
+    if (!price) {
+      if (category === 'job') return 'Salary negotiable'
+      if (category === 'service') return 'Quote on request'
+      return 'Price negotiable'
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'DZD',
@@ -383,6 +386,89 @@ export default function ListingDetailsPage() {
                 <div className="text-3xl font-bold text-green-600 mb-4">
                   {formatPrice(listing.price, listing.category)}
                 </div>
+
+                {/* Service Phone Display */}
+                {listing.category === 'service' && (listing as any).metadata?.service_phone && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center justify-center">
+                      <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      <div className="text-center">
+                        <p className="text-sm text-blue-600 font-medium">Direct Contact</p>
+                        <a
+                          href={`tel:${(listing as any).metadata.service_phone}`}
+                          className="text-lg font-bold text-blue-800 hover:text-blue-900 transition-colors"
+                        >
+                          {(listing as any).metadata.service_phone}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Job Application Contact Info */}
+                {listing.category === 'job' && ((listing as any).metadata?.application_email || (listing as any).metadata?.application_phone || (listing as any).metadata?.application_instructions) && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6z" />
+                      </svg>
+                      How to Apply
+                    </h4>
+                    <div className="space-y-2">
+                      {(listing as any).metadata.application_email && (
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                          <a
+                            href={`mailto:${(listing as any).metadata.application_email}`}
+                            className="text-green-700 hover:text-green-800 transition-colors"
+                          >
+                            {(listing as any).metadata.application_email}
+                          </a>
+                        </div>
+                      )}
+                      {(listing as any).metadata.application_phone && (
+                        <div className="space-y-2">
+                          <div className="flex items-center">
+                            <svg className="w-4 h-4 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <span className="text-green-700 font-medium">
+                              {(listing as any).metadata.application_phone}
+                            </span>
+                          </div>
+                          <div className="flex space-x-2">
+                            <a
+                              href={`tel:${(listing as any).metadata.application_phone}`}
+                              className="flex-1 inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-lg hover:bg-green-200 transition-colors"
+                            >
+                              📞 Call
+                            </a>
+                            <a
+                              href={`https://wa.me/${(listing as any).metadata.application_phone.replace(/\D/g, '')}?text=Hi! I'm interested in the ${listing.title} position at ${(listing as any).metadata.company_name || 'your company'}.`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 inline-flex items-center justify-center px-3 py-1 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors"
+                            >
+                              💬 WhatsApp
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                      {(listing as any).metadata.application_instructions && (
+                        <div className="mt-3 pt-3 border-t border-green-200">
+                          <p className="text-sm text-green-700 font-medium mb-1">Application Instructions:</p>
+                          <p className="text-sm text-green-800 whitespace-pre-wrap">
+                            {(listing as any).metadata.application_instructions}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {!isOwner && seller && (
@@ -439,9 +525,9 @@ export default function ListingDetailsPage() {
                             <StarRating rating={sellerRating} readonly size="sm" />
                             <span className="text-sm text-gray-600 ml-2">
                               {sellerRating > 0 ? (
-                                <>({sellerRating.toFixed(1)} - {sellerReviewCount} avis)</>
+                                <>({sellerRating.toFixed(1)} - {sellerReviewCount} reviews)</>
                               ) : (
-                                '(Pas encore d\'avis)'
+                                '(No reviews yet)'
                               )}
                             </span>
                           </div>
@@ -457,13 +543,13 @@ export default function ListingDetailsPage() {
                         onClick={() => router.push(`/profile/${listing?.user_id}`)}
                         className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
                       >
-                        Voir le profil et noter
+                        View profile and rate
                       </button>
                       <button
                         onClick={() => router.push(`/profile/${listing?.user_id}#reviews`)}
                         className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
                       >
-                        Voir les avis
+                        View reviews
                       </button>
                     </div>
                   )}

@@ -108,29 +108,61 @@ export default function ChatPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {messages.slice().reverse().map((message) => {
+                {messages.map((message, index) => {
                   const isMyMessage = message.sender_id === user.id;
-                  
+                  const messageDate = new Date(message.created_at);
+                  const prevMessage = index > 0 ? messages[index - 1] : null;
+                  const prevMessageDate = prevMessage ? new Date(prevMessage.created_at) : null;
+
+                  // Check if we need a date separator
+                  const showDateSeparator = !prevMessageDate ||
+                    messageDate.toDateString() !== prevMessageDate.toDateString();
+
                   return (
-                    <div
-                      key={message.id}
-                      className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-                          isMyMessage
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                            : 'bg-slate-200 dark:bg-white/20 text-slate-800 dark:text-white'
-                        }`}
-                      >
-                        {!isMyMessage && message.sender && (
-                          <div className="text-xs text-purple-600 dark:text-purple-200 mb-1">
-                            {message.sender.first_name} {message.sender.last_name}
+                    <div key={message.id}>
+                      {/* Date Separator */}
+                      {showDateSeparator && (
+                        <div className="flex justify-center my-4">
+                          <div className="px-3 py-1 bg-slate-300 dark:bg-white/30 text-slate-600 dark:text-white text-xs rounded-full">
+                            {messageDate.toDateString() === new Date().toDateString()
+                              ? 'Today'
+                              : messageDate.toLocaleDateString('en-US', {
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })
+                            }
                           </div>
-                        )}
-                        <div className="break-words">{message.content}</div>
-                        <div className={`text-xs mt-1 ${isMyMessage ? 'text-purple-200' : 'text-purple-600 dark:text-purple-300'}`}>
-                          {new Date(message.created_at).toLocaleTimeString()}
+                        </div>
+                      )}
+
+                      {/* Message */}
+                      <div className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
+                        <div
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                            isMyMessage
+                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                              : 'bg-slate-200 dark:bg-white/20 text-slate-800 dark:text-white'
+                          }`}
+                        >
+                          {!isMyMessage && message.sender && (
+                            <div className="text-xs text-purple-600 dark:text-purple-200 mb-1">
+                              {message.sender.first_name} {message.sender.last_name}
+                            </div>
+                          )}
+                          <div className="break-words">{message.content}</div>
+                          <div className={`text-xs mt-1 ${isMyMessage ? 'text-purple-200' : 'text-purple-600 dark:text-purple-300'}`}>
+                            {messageDate.toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })} {messageDate.toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              hour12: true
+                            })}
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -1,13 +1,12 @@
 // src/app/add-item/edit/[id]/page.tsx - Redirect to correct edit listing URL
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, use } from 'react';
 
-export default function RedirectToEditListing() {
-  const params = useParams();
+export default function RedirectToEditListing({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const listingId = params.id as string;
+  const { id: listingId } = use(params);
 
   useEffect(() => {
     // Redirect to the correct edit listing URL

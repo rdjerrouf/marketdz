@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
         listings!inner (
           id,
           title,
-          left(description, 160) as description,
+          description,
           price,
           category,
           location_wilaya,

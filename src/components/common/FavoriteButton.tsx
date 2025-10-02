@@ -3,7 +3,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useFavoriteStatus, useAuth } from '@/hooks/useFavorites';
+import { useFavoriteStatus } from '@/hooks/useFavorites';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface FavoriteButtonProps {
   listingId: string;
@@ -113,8 +114,8 @@ export default function FavoriteButton({
       `}
       title={
         !isAuthenticated 
-          ? 'Connectez-vous pour ajouter aux favoris' 
-          : (isFavorited ? 'Retirer des favoris' : 'Ajouter aux favoris')
+          ? 'Sign in to add to favorites'
+          : (isFavorited ? 'Remove from favorites' : 'Add to favorites')
       }
     >
       {isActive ? (
@@ -139,7 +140,7 @@ export default function FavoriteButton({
       
       {showText && (
         <span className="ml-1 text-sm font-medium">
-          {isFavorited ? 'Favoris' : 'Ajouter'}
+          {isFavorited ? 'Favorited' : 'Add'}
         </span>
       )}
     </button>

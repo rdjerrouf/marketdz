@@ -9,7 +9,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    flowType: 'implicit', // Switch to implicit flow for better Docker compatibility
+    flowType: 'pkce', // Use PKCE flow for better security and reliability
     storageKey: 'marketdz-auth'
   },
   global: {
@@ -19,17 +19,63 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   }
 })
 
-// Add error handling for auth state changes
-supabase.auth.onAuthStateChange((event, session) => {
+// Enhanced error handling for auth state changes
+supabase.auth.onAuthStateChange(async (event, session) => {
+  console.log('🔐 Auth event:', event, session ? 'with session' : 'no session')
+
   if (event === 'TOKEN_REFRESHED') {
-    console.log('Token refreshed successfully')
+    console.log('✅ Token refreshed successfully')
   } else if (event === 'SIGNED_OUT') {
-    console.log('User signed out')
-    // Clear any cached data
-    localStorage.removeItem('supabase.auth.token')
+    console.log('👋 User signed out')
+    // Clear all auth-related storage
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('supabase.auth.token')
+      localStorage.removeItem('marketdz-auth')
+    }
   } else if (event === 'SIGNED_IN') {
-    console.log('User signed in')
+    console.log('🎉 User signed in')
+  } else if (event === 'SESSION_EXPIRED' || event === 'PASSWORD_RECOVERY') {
+    console.log('⚠️ Session expired or password recovery')
+    // Handle session expiry gracefully
+    if (typeof window !== 'undefined') {
+      // Redirect to signin page with current path as redirect
+      const currentPath = window.location.pathname
+      if (currentPath !== '/signin' && currentPath !== '/signup') {
+        window.location.href = `/signin?redirect=${encodeURIComponent(currentPath)}`
+      }
+    }
   }
 })
+
+// Enhanced global error handler for auth errors
+const originalError = console.error
+console.error = (...args) => {
+  const errorMessage = args.join(' ')
+
+  // Handle specific Supabase auth errors silently
+  if (errorMessage.includes('Invalid Refresh Token') ||
+      errorMessage.includes('Refresh Token Not Found') ||
+      errorMessage.includes('AuthApiError') ||
+      (errorMessage.includes('AuthError') && errorMessage.includes('refresh'))) {
+
+    console.log('🔄 Auth error detected - handling silently')
+
+    // Handle auth error directly by signing out
+    supabase.auth.signOut()
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname
+      if (!currentPath.includes('/signin') && !currentPath.includes('/signup')) {
+        setTimeout(() => {
+          window.location.href = '/signin?message=Session expired. Please sign in again.'
+        }, 100)
+      }
+    }
+
+    return // Don't log the error to console to reduce noise
+  }
+
+  // Call original console.error for other errors
+  originalError.apply(console, args)
+}
 
 export type { Database }

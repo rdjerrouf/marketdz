@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { fixPhotoUrl } from '@/lib/storage'
 
 interface ListingWithStats {
   id: string
@@ -337,7 +338,7 @@ export default function UserListings({ userId, isOwnProfile }: UserListingsProps
               <div className="relative h-48 bg-gray-200">
                 {listing.photos.length > 0 ? (
                   <img
-                    src={listing.photos[0]}
+                    src={fixPhotoUrl(listing.photos[0])}
                     alt={listing.title}
                     className="w-full h-full object-cover"
                   />

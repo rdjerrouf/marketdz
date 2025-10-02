@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Filter, MapPin, Star, X, ChevronDown, Heart, Eye, Calendar } from 'lucide-react';
+import { fixPhotoUrl } from '@/lib/storage';
 
 // Type definitions
 interface SearchParams {
@@ -143,7 +144,7 @@ const SimpleAdvancedSearch = () => {
       setResults(data);
     } catch (error) {
       console.error('Search error:', error);
-      setError('Une erreur est survenue lors de la recherche');
+      setError('An error occurred during search');
     } finally {
       setIsLoading(false);
     }
@@ -203,7 +204,7 @@ const SimpleAdvancedSearch = () => {
         {/* Search Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            Recherche avancée
+            Advanced Search
           </h1>
           
           {/* Search Bar */}
@@ -219,7 +220,7 @@ const SimpleAdvancedSearch = () => {
                     handleSearch(searchParams.query);
                   }
                 }}
-                placeholder="Rechercher des produits, services ou emplois..."
+                placeholder="Search for products, services or jobs..."
                 className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-lg"
               />
               {searchParams.query && (
@@ -229,8 +230,8 @@ const SimpleAdvancedSearch = () => {
                     setShowSuggestions(false);
                   }}
                   className="absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  aria-label="Effacer la recherche"
-                  title="Effacer la recherche"
+                  aria-label="Clear search"
+                  title="Clear search"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -238,8 +239,8 @@ const SimpleAdvancedSearch = () => {
               <button
                 onClick={() => handleSearch(searchParams.query)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                aria-label="Rechercher"
-                title="Rechercher"
+                aria-label="Search"
+                title="Search"
               >
                 <Search className="w-4 h-4" />
               </button>
@@ -320,7 +321,7 @@ const SimpleAdvancedSearch = () => {
             value={searchParams.sortBy}
             onChange={(e) => handleFiltersChange({ sortBy: e.target.value })}
             className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            aria-label="Trier par"
+            aria-label="Sort by"
           >
             <option value="created_at">Plus récents</option>
             <option value="price_asc">Prix croissant</option>
@@ -378,7 +379,7 @@ const SimpleAdvancedSearch = () => {
           {error && (
             <div className="text-center py-12">
               <div className="text-red-500 mb-4 text-4xl">❌</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Erreur de recherche</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Search Error</h3>
               <p className="text-gray-600 mb-4">{error}</p>
               <button
                 onClick={() => performSearch(searchParams)}
@@ -394,10 +395,10 @@ const SimpleAdvancedSearch = () => {
             <div className="text-center py-12">
               <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Aucun résultat trouvé
+                No results found
               </h3>
               <p className="text-gray-500">
-                {searchParams.query ? `Aucun résultat pour "${searchParams.query}"` : 'Essayez de modifier vos critères de recherche'}
+                {searchParams.query ? `No results for "${searchParams.query}"` : 'Try modifying your search criteria'}
               </p>
             </div>
           )}
@@ -411,7 +412,7 @@ const SimpleAdvancedSearch = () => {
                   <div className="relative h-48 bg-gray-200">
                     {listing.photos && listing.photos.length > 0 ? (
                       <img
-                        src={listing.photos[0]}
+                        src={fixPhotoUrl(listing.photos[0])}
                         alt={listing.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         loading="lazy"
@@ -447,8 +448,8 @@ const SimpleAdvancedSearch = () => {
                         // Handle favorite logic here
                       }}
                       className="absolute bottom-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all duration-200 group-hover:scale-110"
-                      aria-label="Ajouter aux favoris"
-                      title="Ajouter aux favoris"
+                      aria-label="Add to favorites"
+                      title="Add to favorites"
                     >
                       <Heart className="w-4 h-4 text-gray-600" />
                     </button>

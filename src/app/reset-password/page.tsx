@@ -163,7 +163,7 @@ function ResetPasswordPageContent() {
                 href="/signin"
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Se connecter
+                Sign In
               </Link>
             </div>
           </div>
@@ -219,7 +219,7 @@ function ResetPasswordPageContent() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600"
                 >
-                  {showPassword ? 'Cacher' : 'Voir'}
+                  {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
@@ -231,7 +231,7 @@ function ResetPasswordPageContent() {
             {/* Confirm Password */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirmer le mot de passe
+                Confirm Password
               </label>
               <div className="relative">
                 <input
@@ -251,7 +251,7 @@ function ResetPasswordPageContent() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600"
                 >
-                  {showConfirmPassword ? 'Cacher' : 'Voir'}
+                  {showConfirmPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
               {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
@@ -268,7 +268,7 @@ function ResetPasswordPageContent() {
                     : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                 }`}
               >
-                {isLoading ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
+                {isLoading ? 'Updating...' : 'Update Password'}
               </button>
             </div>
           </form>
@@ -279,7 +279,7 @@ function ResetPasswordPageContent() {
               href="/signin" 
               className="text-sm text-blue-600 hover:text-blue-500"
             >
-              ← Retour à la connexion
+              ← Back to Sign In
             </Link>
           </div>
         </div>

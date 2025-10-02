@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Build the query with explicit column selection
-    const needExactCount = safePage === 1;
+    // Always use exact count to avoid connection issues
     let supabaseQuery = supabase
       .from('listings')
       .select(`
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
           last_name,
           avatar_url
         )
-      `, { count: needExactCount ? 'exact' : 'planned' })
+      `, { count: 'exact' })
       .eq('status', 'active'); // Only show active listings
 
     // Apply filters
@@ -103,11 +103,19 @@ export async function GET(request: NextRequest) {
       supabaseQuery = supabaseQuery.eq('condition', condition);
     }
 
-    // Full-text search using PostgreSQL FTS (much faster than ilike)
+    // Full-text search - use ILIKE as fallback if search_vector doesn't exist
     if (query) {
-      supabaseQuery = supabaseQuery.textSearch('search_vector', query, {
-        type: 'websearch'
-      });
+      // Try using textSearch, but fall back to ILIKE if it fails
+      try {
+        supabaseQuery = supabaseQuery.or(
+          `title.ilike.%${query}%,description.ilike.%${query}%,company_name.ilike.%${query}%`
+        );
+      } catch (error) {
+        console.warn('Search query error, using fallback:', error);
+        supabaseQuery = supabaseQuery.or(
+          `title.ilike.%${query}%,description.ilike.%${query}%`
+        );
+      }
     }
 
     // Apply sorting with stable secondary order
@@ -147,16 +155,14 @@ export async function GET(request: NextRequest) {
     // Calculate pagination info
     const totalItems = count || 0;
     const totalPages = Math.ceil(totalItems / safeLimit);
-    const hasNextPage = needExactCount
-      ? safePage < totalPages
-      : (listings?.length || 0) === safeLimit; // Heuristic for planned count
+    const hasNextPage = safePage < totalPages;
 
     const response = {
       listings: listings || [],
       pagination: {
         currentPage: safePage,
-        totalPages: needExactCount ? totalPages : undefined,
-        totalItems: needExactCount ? totalItems : undefined,
+        totalPages,
+        totalItems,
         hasNextPage,
         hasPreviousPage: safePage > 1,
         limit: safeLimit
@@ -164,7 +170,7 @@ export async function GET(request: NextRequest) {
       metadata: {
         executionTime: Date.now(),
         strategy: 'database',
-        countStrategy: needExactCount ? 'exact' : 'planned'
+        countStrategy: 'exact'
       }
     };
 

@@ -44,6 +44,27 @@
       "description": "Create a new listing",
       "url": "/add-item",
       "icons": [{ "src": "/icons/icon-192x192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Favorites",
+      "short_name": "Favorites",
+      "description": "View your favorite listings",
+      "url": "/favorites",
+      "icons": [{ "src": "/icons/icon-192x192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Messages",
+      "short_name": "Chat",
+      "description": "View your messages",
+      "url": "/chat",
+      "icons": [{ "src": "/icons/icon-192x192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Admin Panel",
+      "short_name": "Admin",
+      "description": "Access admin dashboard",
+      "url": "/admin",
+      "icons": [{ "src": "/icons/icon-192x192.svg", "sizes": "192x192" }]
     }
   ]
 }

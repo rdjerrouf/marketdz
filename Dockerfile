@@ -1,3 +1,4 @@
+
 # Use the official Node.js 20 image as the base image
 FROM node:20-alpine AS base
 
@@ -41,11 +42,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
+
+# Ensure public directory and subdirectories are readable by nextjs user
+RUN chmod -R 755 ./public
+RUN chown -R nextjs:nodejs ./public
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing

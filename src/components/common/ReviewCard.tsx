@@ -75,7 +75,7 @@ export default function ReviewCard({
                     onClick={() => setShowActions(!showActions)}
                     className="p-1 rounded-full hover:bg-gray-100 transition-colors"
                     title="Options"
-                    aria-label="Options du commentaire"
+                    aria-label="Comment options"
                   >
                     <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
@@ -92,7 +92,7 @@ export default function ReviewCard({
                           }}
                           className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         >
-                          Modifier
+                          Edit
                         </button>
                       )}
                       {canDelete && (
@@ -103,7 +103,7 @@ export default function ReviewCard({
                           }}
                           className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                         >
-                          Supprimer
+                          Delete
                         </button>
                       )}
                     </div>
@@ -122,7 +122,7 @@ export default function ReviewCard({
             {/* Associated Listing */}
             {review.listing && (
               <div className="mt-3 p-2 bg-gray-50 rounded-md">
-                <p className="text-xs text-gray-500 mb-1">Concernant l'annonce:</p>
+                <p className="text-xs text-gray-500 mb-1">Regarding listing:</p>
                 <p className="text-sm font-medium text-gray-700">
                   {review.listing.title}
                 </p>
