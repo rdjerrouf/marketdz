@@ -28,12 +28,13 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           console.log('🔧 Middleware: Setting cookies:', cookiesToSet.map(c => c.name));
+          const isProd = process.env.NODE_ENV === 'production'
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value)
             response.cookies.set(name, value, {
               ...options,
-              httpOnly: false,
-              secure: false,
+              httpOnly: true,
+              secure: isProd,
               sameSite: 'lax',
               domain: undefined, // Let browser handle domain automatically
               path: '/'
@@ -83,17 +84,21 @@ export async function middleware(request: NextRequest) {
       let adminCheckMethod = 'none'
 
       try {
-        const { data: adminUser, error: adminError } = await supabase
+        // Lean SELECT 1 query - Supabase AI recommended
+        const { data: adminRows, error: adminError } = await supabase
           .from('admin_users')
-          .select('role, is_active')
+          .select('id')
           .eq('user_id', user.id)
           .eq('is_active', true)
-          .maybeSingle()
+          .in('role', ['super_admin', 'admin', 'moderator'])
+          .limit(1)
 
-        if (!adminError && adminUser) {
+        if (adminError) {
+          console.warn('⚠️ Admin DB check error:', adminError.message, adminError.code)
+        } else if (adminRows && adminRows.length > 0) {
           isAdmin = true
           adminCheckMethod = 'database'
-          console.log('✅ Admin verified via database:', { role: adminUser.role })
+          console.log('✅ Admin verified via database')
         }
       } catch (dbError) {
         console.warn('⚠️ Database admin check failed:', dbError)
