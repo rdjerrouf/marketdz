@@ -143,7 +143,7 @@ export default function CompleteKickAssHomepage() {
         console.log('🏠 HomePage: Fetching listings count for user:', user.id)
         const { count, error } = await supabase
           .from('listings')
-          .select('*', { count: 'exact', head: true })
+          .select('*', { count: 'exact' })
           .eq('user_id', user.id)
           .neq('title', '') // Exclude invalid listings
 

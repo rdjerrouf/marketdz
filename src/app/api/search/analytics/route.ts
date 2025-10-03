@@ -75,7 +75,7 @@ async function getSearchOverview(supabase: any, since: Date) {
   // Total searches
   const { count: totalSearches } = await supabase
     .from('search_analytics')
-    .select('*', { count: 'exact', head: true })
+    .select('*', { count: 'exact' })
     .gte('created_at', since.toISOString());
   
   // Unique users (by IP)
@@ -112,7 +112,7 @@ async function getSearchOverview(supabase: any, since: Date) {
   // Zero-result searches
   const { count: zeroResultSearches } = await supabase
     .from('search_analytics')
-    .select('*', { count: 'exact', head: true })
+    .select('*', { count: 'exact' })
     .gte('created_at', since.toISOString())
     .eq('results_count', 0);
   

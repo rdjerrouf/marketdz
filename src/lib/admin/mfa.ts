@@ -156,13 +156,13 @@ export async function verifyAdminMFA(
   }
   // Check if it's a backup code
   else if (token.length === 8) {
-    const backupCodes = mfa.backup_codes.map(code => decryptData(code))
+    const backupCodes = mfa.backup_codes.map((code: string) => decryptData(code))
     isValid = backupCodes.includes(token)
 
     // If backup code is used, remove it
     if (isValid) {
-      const remainingCodes = backupCodes.filter(code => code !== token)
-      const encryptedRemainingCodes = remainingCodes.map(code => encryptData(code))
+      const remainingCodes = backupCodes.filter((code: string) => code !== token)
+      const encryptedRemainingCodes = remainingCodes.map((code: string) => encryptData(code))
 
       await supabase
         .from('admin_mfa')

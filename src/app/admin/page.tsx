@@ -36,17 +36,17 @@ export default function AdminDashboard() {
       // Fetch total users
       const { count: totalUsers } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'exact' })
 
       // Fetch total listings
       const { count: totalListings } = await supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'exact' })
 
       // Fetch pending listings (using active status for now)
       const { count: pendingListings } = await supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'exact' })
         .eq('status', 'active')
 
       // Fetch recent activity (recent listings)

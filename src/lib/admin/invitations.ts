@@ -286,10 +286,9 @@ export async function cleanupExpiredInvitations(): Promise<number> {
     .update({
       is_active: false,
       notes: 'Expired automatically'
-    })
+    }, { count: 'exact' })
     .lt('expires_at', new Date().toISOString())
     .eq('is_active', true)
-    .select('*', { count: 'exact', head: true })
 
   return count || 0
 }

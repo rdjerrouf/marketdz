@@ -13,11 +13,11 @@ export async function GET() {
     const supabase = getServerSupabase()
     const { count: listingsCount } = await supabase
       .from('listings')
-      .select('*', { count: 'exact', head: true })
+      .select('*', { count: 'exact' })
     
     const { count: activeListingsCount } = await supabase
       .from('listings')
-      .select('*', { count: 'exact', head: true })
+      .select('*', { count: 'exact' })
       .eq('status', 'active')
 
     const duration = Date.now() - start

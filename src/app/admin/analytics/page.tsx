@@ -49,18 +49,18 @@ export default function AdminAnalytics() {
       // Fetch total users - lightweight count
       const { count: totalUsers } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'exact' })
 
       // Fetch total active listings only (use status index)
       const { count: totalListings } = await supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'exact' })
         .eq('status', 'active')
 
       // Fetch recent listings as proxy for active users (cost-effective)
       const { count: activeUsers } = await supabase
         .from('listings')
-        .select('*', { count: 'exact', head: true })
+        .select('*', { count: 'exact' })
         .eq('status', 'active')
         .gte('created_at', startDate.toISOString())
 

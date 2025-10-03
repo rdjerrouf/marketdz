@@ -94,13 +94,13 @@ export default function UserListings({ userId, isOwnProfile }: UserListingsProps
           // Get conversation count
           const { count: conversationCount } = await supabase
             .from('conversations')
-            .select('*', { count: 'exact', head: true })
+            .select('*', { count: 'exact' })
             .eq('listing_id', listing.id)
 
           // Get favorite count
           const { count: favoriteCount } = await supabase
             .from('favorites')
-            .select('*', { count: 'exact', head: true })
+            .select('*', { count: 'exact' })
             .eq('listing_id', listing.id)
 
           return {

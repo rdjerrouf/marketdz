@@ -36,16 +36,8 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     }
   } else if (event === 'SIGNED_IN') {
     console.log('🎉 User signed in')
-  } else if (event === 'SESSION_EXPIRED' || event === 'PASSWORD_RECOVERY') {
-    console.log('⚠️ Session expired or password recovery')
-    // Handle session expiry gracefully
-    if (typeof window !== 'undefined') {
-      // Redirect to signin page with current path as redirect
-      const currentPath = window.location.pathname
-      if (currentPath !== '/signin' && currentPath !== '/signup') {
-        window.location.href = `/signin?redirect=${encodeURIComponent(currentPath)}`
-      }
-    }
+  } else if (event === 'PASSWORD_RECOVERY') {
+    console.log('⚠️ Password recovery initiated')
   }
 })
 
