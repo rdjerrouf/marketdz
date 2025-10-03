@@ -91,6 +91,6 @@ export const config = {
      * - manifest.json (PWA manifest)
      * - images - public images
      */
-    '/((?!_next/static|_next/image|favicon.ico|manifest.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|manifest.json|icon.*\\.png|apple-touch-icon.*\\.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
