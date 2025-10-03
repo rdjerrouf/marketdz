@@ -23,6 +23,7 @@ const KeyIcon = () => <span>🔑</span>
 const LogIcon = () => <span>📋</span>
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  console.log('🔥 ADMIN LAYOUT IS LOADING! This should appear in console!')
   const [user, setUser] = useState<any>(null)
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null)
   const [loading, setLoading] = useState(true)
