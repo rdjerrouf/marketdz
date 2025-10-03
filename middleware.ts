@@ -61,6 +61,16 @@ export async function middleware(request: NextRequest) {
     } else {
       console.log('🔧 Middleware: No authenticated user');
     }
+
+    // Protect admin routes
+    const pathname = request.nextUrl.pathname
+    if (pathname.startsWith('/admin')) {
+      if (!user) {
+        console.log('🔒 Middleware: Redirecting unauthenticated user from /admin to signin')
+        return NextResponse.redirect(new URL('/signin?redirect=/admin', request.url))
+      }
+      console.log('🔒 Middleware: Allowing authenticated user access to /admin')
+    }
   } catch (middlewareError) {
     // Catch any unexpected errors in auth processing
     console.log('🔧 Middleware: Unexpected auth error:', middlewareError);
