@@ -14,6 +14,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+  console.log('🎯 ADMIN PAGE IS LOADING! This should appear in console!')
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalListings: 0,
