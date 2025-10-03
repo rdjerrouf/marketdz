@@ -24,9 +24,10 @@ export default function FavoriteButton({
   onToggle 
 }: FavoriteButtonProps) {
   const { isFavorited, loading, toggleFavorite } = useFavoriteStatus(listingId);
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
   const [isToggling, setIsToggling] = useState(false);
   const router = useRouter();
+  const isAuthenticated = !!user;
 
   // Check if the current user owns this listing
   const isOwnListing = user && listingOwnerId && user.id === listingOwnerId;

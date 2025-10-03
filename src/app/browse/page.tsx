@@ -204,7 +204,9 @@ function BrowsePageContent() {
         // Clean old cache entries (keep max 50 entries)
         if (searchCache.current.size > 50) {
           const oldestKey = searchCache.current.keys().next().value
-          searchCache.current.delete(oldestKey)
+          if (oldestKey) {
+            searchCache.current.delete(oldestKey)
+          }
         }
       }
 

@@ -160,7 +160,7 @@ export function useFavorites(page: number = 1, limit: number = 20) {
       favorites: updatedFavorites,
       pagination: {
         ...data.pagination,
-        totalItems: data.pagination.totalItems ? data.pagination.totalItems - 1 : undefined
+        totalItems: data.pagination.totalItems ? data.pagination.totalItems - 1 : 0
       }
     };
 

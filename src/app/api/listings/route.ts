@@ -228,11 +228,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (category) {
-      query = query.eq('category', category)
+      query = query.eq('category', category as 'for_sale' | 'job' | 'service' | 'for_rent')
     }
 
     if (status) {
-      query = query.eq('status', status)
+      query = query.eq('status', status as 'active' | 'sold' | 'rented' | 'completed' | 'expired')
     }
 
     const { data, error, count } = await query
@@ -266,7 +266,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Add cache headers for public content (if no userId, it's public browsing)
-    const headers = !userId ? {
+    const headers: Record<string, string> = !userId ? {
       'Cache-Control': 'public, max-age=30, s-maxage=60, stale-while-revalidate=120'
     } : {}
 
