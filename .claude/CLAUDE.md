@@ -143,7 +143,8 @@ API routes in `src/app/api/` organized by domain:
 - **Manifest**: `public/manifest.json` with app metadata
 - **Icons**: `public/icons/` with 192x192 and 512x512 SVG icons
 - **Service Worker**: Automatic caching via next-pwa configuration
-- **Config**: `next.config.ts` with PWA setup (temporarily disabled to prevent reload loops)
+- **Config**: `next.config.ts` with PWA setup (currently enabled for beta testing)
+- **Caching Strategy**: NetworkFirst for API routes, CacheFirst for static assets, NetworkOnly for admin/auth routes
 
 ### Testing Architecture
 - **Framework**: Playwright for end-to-end testing across Chromium, Firefox, and WebKit
@@ -183,14 +184,28 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 ### Utility Scripts
 The `scripts/` directory contains specialized utilities:
-- **Mock Data**: `quick-mock-data.js` - Generate test data (test/medium/full modes)
-- **Bulk Data**: `generate-bulk-listings.js` - Generate 2000+ realistic listings for performance testing
-- **Performance Testing**: `improved-performance-test.js` - Enhanced load testing with retry mechanisms
-- **Arabic Search Testing**: `test-arabic-search.js` - Test full-text search functionality
-- **Performance**: `latency-test.js` - Measure application performance
-- **Cloud Optimization**: `apply-cloud-optimization.js` - Apply database optimizations
-- **Database Management**: `apply-triggers.js`, `apply-indexes-simple.js` - Apply performance optimizations
-- **Messaging**: `test-message-notifications.js` - Test real-time notification system
+
+**Data Management:**
+- `setup-complete-test-data.js` - Complete test data setup
+- `create-test-listings-with-photos.js` - Create listings with photo uploads
+- `create-test-users-with-listings.js` - Generate test users with listings
+- `upload-test-photos.js` - Upload test photos to storage
+- `quick-setup.js` - Quick environment setup
+
+**Admin Management:**
+- `create-admin-user.js` - Create new admin user
+- `create-super-admin.js` - Create super admin account
+- `create-first-admin.js` - Initial admin setup
+- `test-admin-api.js` - Test admin API endpoints
+- `test-admin-system.js` - Verify admin system functionality
+- `test-admin-users-page.js` - Test admin UI pages
+
+**Verification & Testing:**
+- `verify-listings.js` - Verify listing data integrity
+- `simple-verify.js` - Quick system verification
+- `check-search-vector.js` - Verify search index status
+- `check-plumbing-listings.js` - Check specific category data
+- `test-rpc-function.js` - Test database RPC functions
 
 ### Common Issues & Solutions
 
@@ -202,8 +217,9 @@ The `scripts/` directory contains specialized utilities:
 **Admin access denied**: Check admin session using `src/lib/admin/` utilities
 **Image upload failures**: Check Edge Function logs and content moderation status
 **Performance issues**: All optimizations completed - now running on production Supabase cloud
-**Database errors**: **RESOLVED** - System migrated to production cloud (2025-09-25)
+**Database errors**: **RESOLVED** - System migrated to production cloud (2025-10-03)
 **Production deployment**: **COMPLETED** - Application running on real Supabase cloud
+**PWA reload loops**: **RESOLVED** - Improved caching strategies with proper NetworkOnly for admin/auth routes
 
 ### Debugging Commands
 ```bash
@@ -258,7 +274,8 @@ node -e "console.log('Production app: http://localhost:3002')"
   - **Query Performance**: 150-300ms (real network latency)
   - **Message Notifications**: 100% working on cloud
   - **507+ User Profiles**: Production-scale testing completed
-  - **Migration Completed**: All Docker issues resolved (2025-09-25)
+  - **Migration Completed**: All Docker issues resolved (2025-10-03)
+  - **PWA Enabled**: Progressive Web App with optimized caching strategies
 
 ### Networking
 - **🚀 PRODUCTION**: `https://vrlzwxoiglzwmhndpolj.supabase.co` (cloud database)
@@ -268,12 +285,17 @@ node -e "console.log('Production app: http://localhost:3002')"
 
 ## Database Migrations & Deployment
 
-### Current Migration Status (2025-09-29)
+### Current Migration Status (2025-10-03)
 The database has been reset with a clean, lean schema approach. Current migrations:
 
 1. `20250929000000_initial_lean_schema.sql` - Core marketplace schema with essential features
 2. `20250929000001_add_full_text_search.sql` - Arabic full-text search implementation
 3. `20250929000002_add_listings_security_optimization.sql` - Security and performance optimizations
+4. `20251001000001_add_hot_deals_support.sql` - Hot deals functionality
+5. `20251001000002_add_admin_system.sql` - Admin system with role-based access
+6. `20251001000004_add_role_based_rls.sql` - Enhanced RLS policies
+7. `20251002000000_pre_migration_cleanup.sql` - Database cleanup
+8. `20251002000001_align_search_with_cloud.sql` - Search optimization for cloud
 
 ### Deploying Migrations to Production
 

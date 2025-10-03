@@ -15,6 +15,7 @@
     "mock:test": "node scripts/quick-mock-data.js test",
     "mock:medium": "node scripts/quick-mock-data.js medium",
     "mock:full": "node scripts/quick-mock-data.js full",
+    "admin:seed": "node scripts/seed-admin-user.js",
     "photos:download": "python3 scripts/download-test-photos.py",
     "photos:upload": "node scripts/upload-test-photos.js",
     "listings:create": "node scripts/create-test-listings-with-photos.js",

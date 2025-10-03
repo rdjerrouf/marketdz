@@ -48,6 +48,14 @@ export async function middleware(request: NextRequest) {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
 
+    // Enhanced logging for authentication status
+    console.log('🔧 Middleware: Auth Status:', {
+      isAuthenticated: !!user,
+      userId: user?.id?.slice(-8) || 'none',
+      email: user?.email || 'none',
+      metadata: user?.user_metadata || 'none'
+    });
+
     if (error) {
       // Only log non-standard auth errors
       if (!error.message.includes('Auth session missing') &&
@@ -69,7 +77,61 @@ export async function middleware(request: NextRequest) {
         console.log('🔒 Middleware: Redirecting unauthenticated user from /admin to signin')
         return NextResponse.redirect(new URL('/signin?redirect=/admin', request.url))
       }
-      console.log('🔒 Middleware: Allowing authenticated user access to /admin')
+
+      // Check admin_users table (proper RBAC - Supabase AI recommended approach)
+      let isAdmin = false
+      let adminCheckMethod = 'none'
+
+      try {
+        const { data: adminUser, error: adminError } = await supabase
+          .from('admin_users')
+          .select('role, is_active')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .maybeSingle()
+
+        if (!adminError && adminUser) {
+          isAdmin = true
+          adminCheckMethod = 'database'
+          console.log('✅ Admin verified via database:', { role: adminUser.role })
+        }
+      } catch (dbError) {
+        console.warn('⚠️ Database admin check failed:', dbError)
+      }
+
+      // Fallback 1: Check user metadata (legacy)
+      if (!isAdmin) {
+        if (user.user_metadata?.role === 'admin' || user.app_metadata?.role === 'admin') {
+          isAdmin = true
+          adminCheckMethod = 'metadata'
+          console.log('✅ Admin verified via metadata')
+        }
+      }
+
+      // Fallback 2: Bootstrap allowlist (TEMPORARY - TODO: REMOVE AFTER SEEDING)
+      if (!isAdmin) {
+        const BOOTSTRAP_ADMINS = ['rdjerrouf@gmail.com', 'anyadjerrouf@gmail.com']
+        const isBootstrapAdmin = BOOTSTRAP_ADMINS.includes(user.email || '') &&
+                                 user.app_metadata?.provider !== 'anonymous'
+
+        if (isBootstrapAdmin) {
+          isAdmin = true
+          adminCheckMethod = 'bootstrap'
+          console.warn('⚠️ BOOTSTRAP: Allowing admin via temporary allowlist:', user.email)
+          console.warn('⚠️ ACTION REQUIRED: Run "node scripts/seed-admin-user.js" and remove bootstrap fallback')
+        }
+      }
+
+      if (!isAdmin) {
+        console.log('🔒 Middleware: User authenticated but not admin, redirecting to homepage:', {
+          email: user.email,
+          metadata: user.user_metadata,
+          appMetadata: user.app_metadata
+        })
+        return NextResponse.redirect(new URL('/', request.url))
+      }
+
+      console.log(`🔒 Middleware: Allowing admin access to /admin (method: ${adminCheckMethod})`)
     }
   } catch (middlewareError) {
     // Catch any unexpected errors in auth processing
@@ -99,8 +161,9 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - manifest.json (PWA manifest)
+     * - icons/ (PWA icons directory)
      * - images - public images
      */
-    '/((?!_next/static|_next/image|favicon.ico|manifest.json|icon.*\\.png|apple-touch-icon.*\\.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|manifest\\.json|icons/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
