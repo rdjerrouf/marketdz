@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { isValidEmail } from '@/lib/utils'
-import { supabase } from '@/lib/supabase/client'
+import { signIn } from './actions'
 import PWAInstallButton from '@/components/PWAInstallButton'
 
 interface FormData {
@@ -83,57 +83,33 @@ function SignInPageContent() {
     setErrors({})
 
     try {
-      // Try Supabase authentication
-      console.log('🔑 Signin: Attempting Supabase authentication for:', formData.email)
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      })
+      // Use server action to sign in (sets HTTP cookies)
+      console.log('🔑 Signin: Attempting server-side authentication for:', formData.email)
 
-      if (error) {
-        console.log('🔑 Signin: Authentication error:', error.message)
-        if (error.message.includes('Invalid login credentials')) {
+      const form = new FormData()
+      form.append('email', formData.email)
+      form.append('password', formData.password)
+      form.append('redirect', searchParams?.get('redirect') || '/')
+
+      const result = await signIn(form)
+
+      if (result?.error) {
+        console.log('🔑 Signin: Authentication error:', result.error)
+        if (result.error.includes('Invalid login credentials')) {
           setErrors({ general: 'Incorrect email or password.' })
         } else {
-          setErrors({ general: error.message })
+          setErrors({ general: result.error })
         }
         return
       }
 
-      if (!data.user) {
-        setErrors({ general: 'Authentication failed' })
-        return
-      }
-
-      console.log('🔑 Signin: Authentication successful, user:', data.user.email)
-      console.log('🔑 Signin: Session:', data.session ? 'exists' : 'null')
-      
-      // Show redirect state
-      setIsRedirecting(true);
-      
-      // Check if user has a redirect parameter
-      const redirect = searchParams?.get('redirect')
-      const targetUrl = redirect || '/'
-      
-      // Wait longer for session to be properly established and cookies to be set
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Try to refresh the session to ensure cookies are set
-      const { data: refreshData } = await supabase.auth.getSession()
-      console.log('🔑 Signin: Session after refresh:', refreshData.session ? 'exists' : 'null')
-      
-      if (refreshData.session) {
-        // Use auth callback route to set server-side cookies
-        console.log('🔑 Signin: Redirecting via auth callback to:', targetUrl)
-        window.location.href = `/api/auth/callback?redirect=${encodeURIComponent(targetUrl)}`
-      } else {
-        console.log('🔑 Signin: Session not properly established, trying router push')
-        router.push(targetUrl)
-      }
+      // Server action will redirect automatically
+      console.log('🔑 Signin: Authentication successful, redirecting...')
+      setIsRedirecting(true)
 
     } catch (error) {
       console.error('Sign in error:', error)
-      setErrors({ general: 'An error occurred. Try test@example.com / password123 to test.' })
+      setErrors({ general: 'An error occurred. Please try again.' })
     } finally {
       setIsLoading(false)
     }
