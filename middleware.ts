@@ -28,16 +28,12 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           console.log('🔧 Middleware: Setting cookies:', cookiesToSet.map(c => c.name));
-          const isProd = process.env.NODE_ENV === 'production'
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value)
             response.cookies.set(name, value, {
               ...options,
-              httpOnly: true,
-              secure: isProd,
-              sameSite: 'lax',
-              domain: undefined, // Let browser handle domain automatically
-              path: '/'
+              path: '/',
+              sameSite: 'lax'
             })
           })
         },
