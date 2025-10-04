@@ -1,7 +1,6 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 
@@ -39,5 +38,8 @@ export async function signIn(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect(redirectTo)
+
+  // Return success and redirect URL instead of calling redirect()
+  // This ensures cookies are committed before redirect
+  return { success: true, redirectTo }
 }

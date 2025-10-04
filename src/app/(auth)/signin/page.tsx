@@ -103,17 +103,15 @@ function SignInPageContent() {
         return
       }
 
-      // Server action will redirect automatically
-      console.log('🔑 Signin: Authentication successful, redirecting...')
-      setIsRedirecting(true)
-
-    } catch (error: any) {
-      // NEXT_REDIRECT is expected - server action is redirecting
-      if (error?.message?.includes('NEXT_REDIRECT')) {
-        console.log('🔑 Signin: Server action redirecting (this is normal)')
+      if (result?.success) {
+        console.log('🔑 Signin: Authentication successful, redirecting to:', result.redirectTo)
         setIsRedirecting(true)
+        // Use window.location.href to ensure cookies are sent with next request
+        window.location.href = result.redirectTo
         return
       }
+
+    } catch (error: any) {
       console.error('Sign in error:', error)
       setErrors({ general: 'An error occurred. Please try again.' })
     } finally {
