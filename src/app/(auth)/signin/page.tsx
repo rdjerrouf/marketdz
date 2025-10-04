@@ -123,9 +123,9 @@ function SignInPageContent() {
       console.log('🔑 Signin: Session after refresh:', refreshData.session ? 'exists' : 'null')
       
       if (refreshData.session) {
-        // Force page reload to ensure auth state is fresh
-        console.log('🔑 Signin: Redirecting to:', targetUrl)
-        window.location.href = targetUrl
+        // Use auth callback route to set server-side cookies
+        console.log('🔑 Signin: Redirecting via auth callback to:', targetUrl)
+        window.location.href = `/api/auth/callback?redirect=${encodeURIComponent(targetUrl)}`
       } else {
         console.log('🔑 Signin: Session not properly established, trying router push')
         router.push(targetUrl)
