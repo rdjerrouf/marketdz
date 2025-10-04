@@ -13,13 +13,9 @@ export async function middleware(request: NextRequest) {
   })
 
   const supabase = createServerClient(
-    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      auth: {
-        storageKey: 'marketdz-auth', // Match client-side storage key
-        flowType: 'pkce' // Match client-side flow type
-      },
       cookies: {
         getAll() {
           const cookies = request.cookies.getAll();
