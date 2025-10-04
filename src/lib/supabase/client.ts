@@ -1,25 +1,11 @@
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 import { Database } from '@/types/database'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Debug logs removed - production ready
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce', // Use PKCE flow for better security and reliability
-    storageKey: 'marketdz-auth'
-  },
-  global: {
-    headers: {
-      'x-docker-env': 'true'
-    }
-  }
-})
+// Use createBrowserClient to work with SSR cookies
+export const supabase = createBrowserClient<Database>(supabaseUrl, supabaseKey)
 
 // Enhanced error handling for auth state changes
 supabase.auth.onAuthStateChange(async (event, session) => {
