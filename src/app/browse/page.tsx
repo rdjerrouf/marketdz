@@ -751,7 +751,7 @@ function BrowsePageContent() {
                   return (
                     <div
                       key={listing.id}
-                      className="group bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl"
+                      className="group bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl"
                       onClick={() => router.push(`/browse/${listing.id}`)}
                     >
                       {/* Enhanced Image Container */}
