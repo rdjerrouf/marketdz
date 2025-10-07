@@ -635,19 +635,19 @@ function BrowsePageContent() {
         </div>
 
         {/* Results Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="bg-gradient-to-br from-slate-800/50 to-purple-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/10">
           {/* Results Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                {loading && pagination.totalItems === 0 ? 'Searching...' : 
-                 error ? 'Search Error' : 
+              <h2 className="text-2xl font-bold text-white">
+                {loading && pagination.totalItems === 0 ? 'Searching...' :
+                 error ? 'Search Error' :
                  `Search Results`}
               </h2>
               {!loading && !error && (
-                <p className="text-gray-600 mt-1">
-                  {pagination.totalItems === 0 ? 
-                    'No listings found' : 
+                <p className="text-white/80 mt-1">
+                  {pagination.totalItems === 0 ?
+                    'No listings found' :
                     `${pagination.totalItems} ${pagination.totalItems === 1 ? 'listing' : 'listings'} found`}
                   {filters.query && ` for "${filters.query}"`}
                 </p>
@@ -656,7 +656,7 @@ function BrowsePageContent() {
 
             {/* Results Info */}
             {!loading && !error && pagination.totalItems > 0 && (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-white/70">
                 Showing {((pagination.currentPage - 1) * 20) + 1}-{Math.min(pagination.currentPage * 20, pagination.totalItems)} of {pagination.totalItems}
               </div>
             )}
