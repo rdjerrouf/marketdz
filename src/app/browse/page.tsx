@@ -635,7 +635,7 @@ function BrowsePageContent() {
         </div>
 
         {/* Results Section */}
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-900/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/10">
+        <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-2xl shadow-xl p-6 border border-white/10">
           {/* Results Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
