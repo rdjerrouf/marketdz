@@ -147,7 +147,7 @@ export default function FavoritesPage() {
                     <div
                       key={favorite.favoriteId}
                       className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl border border-white border-opacity-20 overflow-hidden hover:bg-opacity-20 transition-all duration-200 cursor-pointer group"
-                      onClick={() => router.push(`/listing/${listing.id}`)}
+                      onClick={() => router.push(`/browse/${listing.id}`)}
                     >
                       <div className="relative">
                         {listing.photos && listing.photos.length > 0 ? (

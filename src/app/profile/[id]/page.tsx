@@ -65,6 +65,15 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       await createReview(reviewData)
       setShowReviewForm(false)
       refetch()
+
+      // Redirect back after successful review submission
+      setTimeout(() => {
+        if (window.history.length > 2) {
+          router.back()
+        } else {
+          router.push('/')
+        }
+      }, 1000) // Small delay to show success state
     } catch (error) {
       console.error('Error creating review:', error)
     }

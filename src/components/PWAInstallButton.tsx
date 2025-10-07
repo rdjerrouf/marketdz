@@ -45,22 +45,28 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
       console.log('📱 PWA: Manual trigger - checking install capability');
       if ('serviceWorker' in navigator) {
         if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
-          alert('📱 App is already installed!');
+          alert('✅ Great! MarketDZ is already installed on your device.');
         } else {
-          alert('📱 Use your browser\'s install option:\n\n🖥️ Desktop: Look for install icon in address bar\n📱 Mobile: Use "Add to Home Screen" from browser menu');
+          // More helpful instructions based on platform
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          if (isMobile) {
+            alert('📱 To install MarketDZ:\n\n1. Tap the Share button (⋯ or ⬆️)\n2. Select "Add to Home Screen"\n3. Tap "Add" to confirm\n\nYou\'ll then be able to launch MarketDZ like a native app!');
+          } else {
+            alert('💻 To install MarketDZ:\n\n1. Look for the install icon (⊕) in your browser\'s address bar\n2. Click it and select "Install"\n\nOr use the browser menu and select "Install MarketDZ"');
+          }
         }
       } else {
-        alert('📱 PWA not supported in this browser');
+        alert('⚠️ Your browser doesn\'t support app installation. Please try using Chrome, Edge, or Safari.');
       }
       return;
     }
 
     console.log('📱 PWA: Showing install prompt');
     deferredPrompt.prompt();
-    
+
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`📱 PWA: User response to install prompt: ${outcome}`);
-    
+
     setDeferredPrompt(null);
     setShowInstallButton(false);
   };

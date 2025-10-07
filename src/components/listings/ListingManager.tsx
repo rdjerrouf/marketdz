@@ -180,8 +180,8 @@ export default function ListingManager({ userId }: ListingManagerProps) {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-        <span className="ml-3 text-gray-600">Loading listings...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+        <span className="ml-3 text-white/80">Loading listings...</span>
       </div>
     )
   }
@@ -190,13 +190,13 @@ export default function ListingManager({ userId }: ListingManagerProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-900">My Listings</h2>
+        <h2 className="text-2xl font-bold text-white">My Listings</h2>
         
         <div className="flex flex-col sm:flex-row gap-3">
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            className="px-4 py-2 bg-white text-gray-900 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             aria-label="Filter by listing status"
           >
             <option value="all">All Status</option>
