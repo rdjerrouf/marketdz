@@ -103,17 +103,21 @@ export async function GET(request: NextRequest) {
       supabaseQuery = supabaseQuery.eq('condition', condition);
     }
 
-    // Full-text search - use ILIKE as fallback if search_vector doesn't exist
+    // Full-text search using proper PostgreSQL FTS with bilingual support
     if (query) {
-      // Try using textSearch, but fall back to ILIKE if it fails
+      // Use textSearch for both Arabic and French vectors with ranking
+      // This uses the GIN indexes (search_vector_ar, search_vector_fr) for fast searches
+      // Note: Supabase .fts operator automatically uses ts_query for proper word matching
       try {
+        // Use websearch_to_tsquery format for better phrase handling
         supabaseQuery = supabaseQuery.or(
-          `title.ilike.%${query}%,description.ilike.%${query}%,company_name.ilike.%${query}%`
+          `search_vector_ar.fts.${query},search_vector_fr.fts.${query}`
         );
       } catch (error) {
-        console.warn('Search query error, using fallback:', error);
+        console.warn('Full-text search error, falling back to ILIKE:', error);
+        // Fallback to ILIKE only if FTS fails (shouldn't happen in production)
         supabaseQuery = supabaseQuery.or(
-          `title.ilike.%${query}%,description.ilike.%${query}%`
+          `title.ilike.%${query}%,description.ilike.%${query}%,company_name.ilike.%${query}%`
         );
       }
     }

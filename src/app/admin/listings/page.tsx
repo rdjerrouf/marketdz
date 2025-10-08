@@ -68,7 +68,8 @@ export default function AdminListings() {
       }
 
       if (searchTerm) {
-        query = query.ilike('title', `%${searchTerm}%`)
+        // Use FTS for better performance with bilingual support
+        query = query.or(`search_vector_ar.fts.${searchTerm},search_vector_fr.fts.${searchTerm}`)
       }
 
       const { data, error, count } = await query

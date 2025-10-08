@@ -65,7 +65,8 @@ export async function GET(request: NextRequest) {
       query = query.lte('price', parseInt(maxPrice))
     }
     if (search) {
-      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
+      // Use FTS for better performance with bilingual support
+      query = query.or(`search_vector_ar.fts.${search},search_vector_fr.fts.${search}`)
     }
 
     // Execute query with optimized ordering

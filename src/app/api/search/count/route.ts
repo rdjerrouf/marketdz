@@ -1,10 +1,9 @@
 // src/app/api/search/count/route.ts - Dedicated count endpoint for pagination
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { 
-  escapeSearchQuery, 
+import {
   normalizeSearchQuery,
-  validateSearchParams 
+  validateSearchParams
 } from '@/lib/search/utils';
 import { smartRateLimit } from '@/lib/rate-limit/database';
 
@@ -80,10 +79,10 @@ export async function GET(request: NextRequest) {
       queryBuilder = queryBuilder.lte('price', maxPrice);
     }
     
-    // Text search filter
+    // Text search filter using FTS for better performance
     if (query) {
-      const escapedQuery = escapeSearchQuery(query);
-      queryBuilder = queryBuilder.or(`title.ilike.%${escapedQuery}%,description.ilike.%${escapedQuery}%`);
+      // No need to escape for FTS - it handles special characters
+      queryBuilder = queryBuilder.or(`search_vector_ar.fts.${query},search_vector_fr.fts.${query}`);
     }
 
     const { count, error } = await queryBuilder;
