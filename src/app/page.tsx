@@ -1052,9 +1052,10 @@ export default function CompleteKickAssHomepage() {
                 const isFavorite = favorites.has(listing.id)
 
                 return (
-                  <div
+                  <Link
+                    href={`/browse/${listing.id}`}
                     key={listing.id}
-                    className="group bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl"
+                    className="group bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl block"
                   >
                     {/* Enhanced Image Container */}
                     <div className="relative h-56 overflow-hidden">
@@ -1140,12 +1141,12 @@ export default function CompleteKickAssHomepage() {
                       </div>
 
                       {/* Enhanced Action Button */}
-                      <Link href={`/browse/${listing.id}`} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg hover:shadow-xl group">
+                      <div className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg hover:shadow-xl">
                         View Details
                         <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Link>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 )
               })}
               </div>
