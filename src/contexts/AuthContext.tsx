@@ -87,9 +87,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.log('👋 User signed out')
             setSession(null)
             setUser(null)
+            // Clear all auth-related storage
+            if (typeof localStorage !== 'undefined') {
+              localStorage.removeItem('supabase.auth.token')
+              localStorage.removeItem('marketdz-auth')
+            }
             break
           case 'TOKEN_REFRESHED':
-            console.log('🔄 Token refreshed')
+            console.log('🔄 Token refreshed successfully')
             break
           case 'PASSWORD_RECOVERY':
             console.log('🔑 Password recovery initiated')

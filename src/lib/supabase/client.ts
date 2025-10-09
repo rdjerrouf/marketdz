@@ -5,27 +5,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 // Use createBrowserClient to work with SSR cookies
+// Note: Auth state changes are handled in AuthContext.tsx to avoid duplicate listeners
 export const supabase = createBrowserClient<Database>(supabaseUrl, supabaseKey)
-
-// Enhanced error handling for auth state changes
-supabase.auth.onAuthStateChange(async (event, session) => {
-  console.log('🔐 Auth event:', event, session ? 'with session' : 'no session')
-
-  if (event === 'TOKEN_REFRESHED') {
-    console.log('✅ Token refreshed successfully')
-  } else if (event === 'SIGNED_OUT') {
-    console.log('👋 User signed out')
-    // Clear all auth-related storage
-    if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem('supabase.auth.token')
-      localStorage.removeItem('marketdz-auth')
-    }
-  } else if (event === 'SIGNED_IN') {
-    console.log('🎉 User signed in')
-  } else if (event === 'PASSWORD_RECOVERY') {
-    console.log('⚠️ Password recovery initiated')
-  }
-})
 
 // Enhanced global error handler for auth errors
 const originalError = console.error
