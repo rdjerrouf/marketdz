@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import { fixPhotoUrl } from '@/lib/storage'
 import ComingSoonModal from '@/components/premium/ComingSoonModal'
+import MobileListingCard from '@/components/common/MobileListingCard'
 
 // Mock data for preview
 const mockListings = [
@@ -15,9 +16,10 @@ const mockListings = [
     title: 'iPhone 14 Pro Max - Like New',
     description: 'Excellent condition iPhone 14 Pro Max 256GB Space Black. Original box and accessories included.',
     price: 180000,
-    category: 'for_sale',
+    category: 'for_sale' as const,
     photos: ['https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop'],
     created_at: '2025-01-15T10:00:00Z',
+    status: 'active',
     user_id: '1'
   },
   {
@@ -25,9 +27,10 @@ const mockListings = [
     title: 'Luxury Apartment for Rent',
     description: 'Modern 3-bedroom apartment with sea view, fully furnished, high-end finishes.',
     price: 85000,
-    category: 'for_rent',
+    category: 'for_rent' as const,
     photos: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop'],
     created_at: '2025-01-14T15:30:00Z',
+    status: 'active',
     user_id: '2'
   },
   {
@@ -35,9 +38,10 @@ const mockListings = [
     title: 'Senior React Developer',
     description: 'Join our tech team! Remote work, competitive salary, equity options. 5+ years experience required.',
     price: 250000,
-    category: 'job',
+    category: 'job' as const,
     photos: ['https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=300&fit=crop'],
     created_at: '2025-01-13T09:15:00Z',
+    status: 'active',
     user_id: '3'
   },
   {
@@ -45,9 +49,10 @@ const mockListings = [
     title: 'Professional Photography Service',
     description: 'Wedding, events, portraits. Professional equipment, 10+ years experience.',
     price: 15000,
-    category: 'service',
+    category: 'service' as const,
     photos: ['https://images.unsplash.com/photo-1554048612-b6a482b224bd?w=400&h=300&fit=crop'],
     created_at: '2025-01-12T14:20:00Z',
+    status: 'active',
     user_id: '4'
   },
   {
@@ -55,9 +60,10 @@ const mockListings = [
     title: 'Gaming Setup Complete',
     description: 'High-end gaming PC with RTX 4080, 32GB RAM, mechanical keyboard, and 4K monitor.',
     price: 320000,
-    category: 'for_sale',
+    category: 'for_sale' as const,
     photos: ['https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&h=300&fit=crop'],
     created_at: '2025-01-11T20:45:00Z',
+    status: 'active',
     user_id: '5'
   },
   {
@@ -65,9 +71,10 @@ const mockListings = [
     title: 'Digital Marketing Expert',
     description: 'Boost your online presence with proven SEO, social media, and content strategies.',
     price: 25000,
-    category: 'service',
+    category: 'service' as const,
     photos: ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop'],
     created_at: '2025-01-10T11:30:00Z',
+    status: 'active',
     user_id: '6'
   }
 ]
@@ -988,11 +995,22 @@ export default function CompleteKickAssHomepage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Mobile Layout - Only visible on screens < 768px or PWA standalone */}
+            <div className="md:hidden grid grid-cols-1 gap-6">
+              {featuredListings.map((listing) => (
+                <MobileListingCard
+                  key={listing.id}
+                  listing={listing}
+                />
+              ))}
+            </div>
+
+            {/* Desktop Layout - Only visible on screens >= 768px */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredListings.map((listing, index) => {
                 const badge = getCategoryBadge(listing.category)
                 const isFavorite = favorites.has(listing.id)
-                
+
                 return (
                   <div
                     key={listing.id}
@@ -1005,10 +1023,10 @@ export default function CompleteKickAssHomepage() {
                         alt={listing.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
-                      
+
                       {/* Enhanced Gradient Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-                      
+
                       {/* Category Badge */}
                       <div className="absolute top-4 left-4">
                         <div className={`bg-gradient-to-r ${badge.color} text-white px-3 py-1 rounded-full text-sm font-medium flex items-center shadow-lg backdrop-blur-sm`}>
@@ -1024,8 +1042,8 @@ export default function CompleteKickAssHomepage() {
                           toggleFavorite(listing.id)
                         }}
                         className={`absolute top-4 right-4 p-2 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg ${
-                          isFavorite 
-                            ? 'bg-red-500 text-white scale-110 animate-pulse' 
+                          isFavorite
+                            ? 'bg-red-500 text-white scale-110 animate-pulse'
                             : 'bg-white/20 text-white hover:bg-white/30 hover:scale-110'
                         }`}
                         aria-label={isFavorite ? `Remove ${listing.title} from favorites` : `Add ${listing.title} to favorites`}
@@ -1066,11 +1084,11 @@ export default function CompleteKickAssHomepage() {
                       <h3 className="text-white font-bold text-xl mb-3 line-clamp-1 group-hover:text-purple-300 transition-colors">
                         {listing.title}
                       </h3>
-                      
+
                       <p className="text-white/70 text-sm mb-4 line-clamp-2 leading-relaxed">
                         {listing.description}
                       </p>
-                      
+
                       <div className="flex items-center justify-between mb-4">
                         <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
                           {formatPrice(listing.price, listing.category)}
@@ -1080,7 +1098,7 @@ export default function CompleteKickAssHomepage() {
                           {5 + (parseInt(listing.id) * 23) % 15} interested
                         </div>
                       </div>
-                      
+
                       {/* Enhanced Action Button */}
                       <Link href={`/browse/${listing.id}`} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg hover:shadow-xl group">
                         View Details

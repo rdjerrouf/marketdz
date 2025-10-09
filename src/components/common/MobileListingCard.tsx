@@ -1,0 +1,257 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { Heart, Clock, MapPin, DollarSign, Home, User, Zap } from 'lucide-react'
+import FavoriteButton from './FavoriteButton'
+import StarRating from './StarRating'
+import { fixPhotoUrl } from '@/lib/utils'
+
+interface Listing {
+  id: string
+  title: string
+  description: string
+  price: number | null
+  category: 'for_sale' | 'job' | 'service' | 'for_rent'
+  photos: string[]
+  created_at: string
+  status: string
+  user_id: string
+  wilaya?: string
+  city?: string
+  search_rank?: number
+  user?: {
+    id: string
+    first_name: string
+    last_name: string
+    avatar_url: string
+    rating: number
+  } | null
+}
+
+interface MobileListingCardProps {
+  listing: Listing
+  onClick?: () => void
+}
+
+export default function MobileListingCard({ listing, onClick }: MobileListingCardProps) {
+  const router = useRouter()
+
+  const formatPrice = (price: number | null, category: string): string => {
+    if (!price) return category === 'job' ? 'Salary negotiable' : 'Price negotiable'
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'DZD',
+      minimumFractionDigits: 0
+    }).format(price)
+  }
+
+  const getCategoryConfig = (category: string) => {
+    const configs = {
+      'for_sale': {
+        text: 'For Sale',
+        color: 'from-emerald-400 to-emerald-600',
+        bgColor: 'bg-emerald-500',
+        icon: DollarSign
+      },
+      'for_rent': {
+        text: 'For Rent',
+        color: 'from-blue-400 to-blue-600',
+        bgColor: 'bg-blue-500',
+        icon: Home
+      },
+      'job': {
+        text: 'Jobs',
+        color: 'from-purple-400 to-purple-600',
+        bgColor: 'bg-purple-500',
+        icon: User
+      },
+      'service': {
+        text: 'Services',
+        color: 'from-orange-400 to-orange-600',
+        bgColor: 'bg-orange-500',
+        icon: Zap
+      }
+    }
+    return configs[category as keyof typeof configs] || {
+      text: category,
+      color: 'from-gray-400 to-gray-600',
+      bgColor: 'bg-gray-500',
+      icon: DollarSign
+    }
+  }
+
+  const getTimeAgo = (dateString: string): string => {
+    const now = new Date()
+    const date = new Date(dateString)
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
+
+    if (diffInHours < 1) return 'Just now'
+    if (diffInHours < 24) return `${diffInHours}h ago`
+    const diffInDays = Math.floor(diffInHours / 24)
+    if (diffInDays < 7) return `${diffInDays}d ago`
+    return date.toLocaleDateString()
+  }
+
+  const getDefaultImage = (category: string) => {
+    const defaults: Record<string, string> = {
+      job: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJqb2JHcmFkIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I2E4NTVmNztzdG9wLW9wYWNpdHk6MSIgLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM3YzNhZWQ7c3RvcC1vcGFjaXR5OjEiIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9InVybCgja29iR3JhZCkiLz48cGF0aCBkPSJNMjAwIDgwQzE3NSA4MCAxNTUgMTAwIDE1NSAxMjVMMTU1IDE4MEMxNTUgMTg1IDE2MCAxOTAgMTY1IDE5MEwyMzUgMTkwQzI0MCAxOTAgMjQ1IDE4NSAyNDUgMTgwTDI0NSAxMjVDMjQ1IDEwMCAyMjUgODAgMjAwIDgwWiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4zIi8+PHBhdGggZD0iTTE3MCAxMjBMMTcwIDEwNUMxNzAgOTUgMTc4IDg3IDE4OCA4N0wyMTIgODdDMjIyIDg3IDIzMCA5NSAyMzAgMTA1TDIzMCAxMjAiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNzAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iODAiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+SvDwvdGV4dD48L3N2Zz4=',
+      service: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJzZXJ2aWNlR3JhZCIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmOTdiMTY7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZWE1ODBjO3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSJ1cmwoI3NlcnZpY2VHcmFkKSIvPjxwYXRoIGQ9Ik0xODAgOTBMMTgwIDE4MEwxNjAgMTgwQzE1MCAxODAgMTQwIDE3MCAxNDAgMTYwTDE0MCAxMTBDMTQwIDEwMCAxNTAgOTAgMTYwIDkwTDE4MCA5MFoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuMyIvPjxjaXJjbGUgY3g9IjE3MCIgY3k9IjEwMCIgcj0iMTAiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuMyIvPjxwYXRoIGQ9Ik0yMjAgOTBMMjQwIDEyMEwyMjAgMTUwTDIwMCAxMjBMMjIwIDkwWiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4zIi8+PHRleHQgeD0iNTAlIiB5PSI3MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI4MCIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC45IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7wn5KnPC90ZXh0Pjwvc3ZnPg=='
+    }
+    return defaults[category] || null
+  }
+
+  const categoryConfig = getCategoryConfig(listing.category)
+  const CategoryIcon = categoryConfig.icon
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick()
+    } else {
+      router.push(`/browse/${listing.id}`)
+    }
+  }
+
+  const handleUserClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (listing.user?.id) {
+      router.push(`/profile/${listing.user.id}`)
+    }
+  }
+
+  return (
+    <div
+      onClick={handleClick}
+      className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300 active:scale-95 cursor-pointer shadow-xl"
+    >
+      {/* Large Image Container - Mobile Optimized */}
+      <div className="relative h-64 overflow-hidden">
+        {listing.photos && listing.photos.length > 0 ? (
+          <img
+            src={fixPhotoUrl(listing.photos[0])}
+            alt={listing.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement
+              const defaultImg = getDefaultImage(listing.category)
+              if (defaultImg) {
+                target.src = defaultImg
+              }
+            }}
+          />
+        ) : getDefaultImage(listing.category) ? (
+          <img
+            src={getDefaultImage(listing.category)!}
+            alt={listing.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-700 to-gray-800">
+            <CategoryIcon className="w-16 h-16 text-white/30" />
+          </div>
+        )}
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+        {/* Category Badge - Top Left */}
+        <div className="absolute top-4 left-4">
+          <div className={`bg-gradient-to-r ${categoryConfig.color} text-white px-4 py-2 rounded-2xl text-sm font-bold flex items-center shadow-lg`}>
+            <CategoryIcon className="w-5 h-5 mr-2" />
+            {categoryConfig.text}
+          </div>
+        </div>
+
+        {/* Favorite Button - Top Right */}
+        <div className="absolute top-4 right-4" onClick={(e) => e.stopPropagation()}>
+          <FavoriteButton
+            listingId={listing.id}
+            listingOwnerId={listing.user_id}
+            size="lg"
+            className="backdrop-blur-sm shadow-lg"
+          />
+        </div>
+
+        {/* Location Badge - Bottom Left */}
+        {(listing.city || listing.wilaya) && (
+          <div className="absolute bottom-4 left-4">
+            <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-xl text-sm flex items-center shadow-lg">
+              <MapPin className="w-4 h-4 mr-2" />
+              {listing.city ? `${listing.city}${listing.wilaya ? `, ${listing.wilaya}` : ''}` : listing.wilaya}
+            </div>
+          </div>
+        )}
+
+        {/* Time Badge - Bottom Right */}
+        <div className="absolute bottom-4 right-4">
+          <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-xl text-sm flex items-center shadow-lg">
+            <Clock className="w-4 h-4 mr-2" />
+            {getTimeAgo(listing.created_at)}
+          </div>
+        </div>
+      </div>
+
+      {/* Content Section - Mobile Optimized with More Padding */}
+      <div className="p-6">
+        {/* Title - Larger for Mobile */}
+        <h3 className="text-white font-bold text-2xl mb-3 line-clamp-2 leading-tight">
+          {listing.title}
+        </h3>
+
+        {/* Description - Larger for Mobile */}
+        <p className="text-white/70 text-base mb-4 line-clamp-3 leading-relaxed">
+          {listing.description}
+        </p>
+
+        {/* Price - Prominent */}
+        <div className="mb-5">
+          <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
+            {formatPrice(listing.price, listing.category)}
+          </div>
+        </div>
+
+        {/* User Info - Touch Friendly */}
+        {listing.user && (
+          <div className="pt-4 border-t border-white/10">
+            <button
+              onClick={handleUserClick}
+              className="flex items-center w-full text-left p-3 -mx-3 rounded-xl hover:bg-white/5 transition-colors active:scale-95"
+            >
+              {listing.user.avatar_url ? (
+                <img
+                  src={listing.user.avatar_url}
+                  alt={`${listing.user.first_name} ${listing.user.last_name}`}
+                  className="w-12 h-12 rounded-full mr-3 border-2 border-white/20"
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mr-3 flex items-center justify-center border-2 border-white/20 shadow-lg">
+                  <span className="text-white font-bold text-lg">
+                    {listing.user.first_name?.[0]}{listing.user.last_name?.[0]}
+                  </span>
+                </div>
+              )}
+              <div className="flex flex-col flex-1">
+                <span className="text-white font-semibold text-base">
+                  {listing.user.first_name} {listing.user.last_name}
+                </span>
+                {listing.user.rating > 0 && (
+                  <div className="flex items-center mt-1">
+                    <StarRating rating={listing.user.rating} readonly size="sm" />
+                    <span className="text-sm text-white/60 ml-2">
+                      ({listing.user.rating.toFixed(1)})
+                    </span>
+                  </div>
+                )}
+              </div>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

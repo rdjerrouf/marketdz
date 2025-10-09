@@ -7,6 +7,7 @@ import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import FavoriteButton from '@/components/common/FavoriteButton'
 import StarRating from '@/components/common/StarRating'
 import PWAInstallButton from '@/components/PWAInstallButton'
+import MobileListingCard from '@/components/common/MobileListingCard'
 import { fixPhotoUrl } from '@/lib/utils'
 
 interface Listing {
@@ -750,10 +751,22 @@ function BrowsePageContent() {
             </div>
           )}
 
-          {/* Results Grid - Fixed the error line 512 issue */}
+          {/* Results Grid - Responsive Mobile/Desktop Layout */}
           {!loading && !error && listings &&  (listings || []).length > 0 && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+              {/* Mobile Layout - Only visible on screens < 768px */}
+              <div className="md:hidden grid grid-cols-1 gap-6">
+                {listings.map((listing) => (
+                  <MobileListingCard
+                    key={listing.id}
+                    listing={listing}
+                    onClick={() => router.push(`/browse/${listing.id}`)}
+                  />
+                ))}
+              </div>
+
+              {/* Desktop Layout - Only visible on screens >= 768px */}
+              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                 {listings.map((listing) => {
                   const categoryBadge = getCategoryBadge(listing.category)
 
