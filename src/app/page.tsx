@@ -9,84 +9,15 @@ import { fixPhotoUrl } from '@/lib/storage'
 import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import MobileListingCard from '@/components/common/MobileListingCard'
 
-// Mock data for preview
-const mockListings = [
-  {
-    id: '1',
-    title: 'iPhone 14 Pro Max - Like New',
-    description: 'Excellent condition iPhone 14 Pro Max 256GB Space Black. Original box and accessories included.',
-    price: 180000,
-    category: 'for_sale' as const,
-    photos: ['https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop'],
-    created_at: '2025-01-15T10:00:00Z',
-    status: 'active',
-    user_id: '1'
-  },
-  {
-    id: '2',
-    title: 'Luxury Apartment for Rent',
-    description: 'Modern 3-bedroom apartment with sea view, fully furnished, high-end finishes.',
-    price: 85000,
-    category: 'for_rent' as const,
-    photos: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop'],
-    created_at: '2025-01-14T15:30:00Z',
-    status: 'active',
-    user_id: '2'
-  },
-  {
-    id: '3',
-    title: 'Senior React Developer',
-    description: 'Join our tech team! Remote work, competitive salary, equity options. 5+ years experience required.',
-    price: 250000,
-    category: 'job' as const,
-    photos: ['https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=300&fit=crop'],
-    created_at: '2025-01-13T09:15:00Z',
-    status: 'active',
-    user_id: '3'
-  },
-  {
-    id: '4',
-    title: 'Professional Photography Service',
-    description: 'Wedding, events, portraits. Professional equipment, 10+ years experience.',
-    price: 15000,
-    category: 'service' as const,
-    photos: ['https://images.unsplash.com/photo-1554048612-b6a482b224bd?w=400&h=300&fit=crop'],
-    created_at: '2025-01-12T14:20:00Z',
-    status: 'active',
-    user_id: '4'
-  },
-  {
-    id: '5',
-    title: 'Gaming Setup Complete',
-    description: 'High-end gaming PC with RTX 4080, 32GB RAM, mechanical keyboard, and 4K monitor.',
-    price: 320000,
-    category: 'for_sale' as const,
-    photos: ['https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&h=300&fit=crop'],
-    created_at: '2025-01-11T20:45:00Z',
-    status: 'active',
-    user_id: '5'
-  },
-  {
-    id: '6',
-    title: 'Digital Marketing Expert',
-    description: 'Boost your online presence with proven SEO, social media, and content strategies.',
-    price: 25000,
-    category: 'service' as const,
-    photos: ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop'],
-    created_at: '2025-01-10T11:30:00Z',
-    status: 'active',
-    user_id: '6'
-  }
-]
-
 export default function CompleteKickAssHomepage() {
   const { user, loading } = useAuth()
   const [profile, setProfile] = useState<any>(null)
-  const [featuredListings] = useState(mockListings)
-  const [stats] = useState({
-    totalListings: 15420,
-    hotDeals: 342,
-    newToday: 28
+  const [featuredListings, setFeaturedListings] = useState<any[]>([])
+  const [listingsLoading, setListingsLoading] = useState(true)
+  const [stats, setStats] = useState({
+    totalListings: 0,
+    hotDeals: 0,
+    newToday: 0
   })
   const [searchQuery, setSearchQuery] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -210,6 +141,79 @@ export default function CompleteKickAssHomepage() {
 
     fetchUserFavoritesCount()
   }, [user])
+
+  // Fetch featured listings and stats
+  useEffect(() => {
+    const fetchFeaturedListings = async () => {
+      try {
+        setListingsLoading(true)
+
+        // Fetch recent active listings with user info
+        const { data: listings, error } = await supabase
+          .from('listings')
+          .select(`
+            id,
+            title,
+            description,
+            price,
+            category,
+            photos,
+            created_at,
+            status,
+            user_id,
+            wilaya,
+            city,
+            user:profiles(
+              id,
+              first_name,
+              last_name,
+              avatar_url,
+              rating
+            )
+          `)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(9)
+
+        if (error) {
+          console.error('🏠 HomePage: Error fetching listings:', error)
+          setFeaturedListings([])
+        } else {
+          setFeaturedListings(listings || [])
+          console.log('🏠 HomePage: Fetched', listings?.length || 0, 'featured listings')
+        }
+
+        // Fetch total listings count
+        const { count: totalCount } = await supabase
+          .from('listings')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'active')
+
+        // Fetch listings created today
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const { count: todayCount } = await supabase
+          .from('listings')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'active')
+          .gte('created_at', today.toISOString())
+
+        setStats({
+          totalListings: totalCount || 0,
+          hotDeals: 0, // Will be implemented with hot_deals feature
+          newToday: todayCount || 0
+        })
+
+      } catch (err) {
+        console.error('🏠 HomePage: Error:', err)
+        setFeaturedListings([])
+      } finally {
+        setListingsLoading(false)
+      }
+    }
+
+    fetchFeaturedListings()
+  }, [])
 
   // Auto-rotate hero images
   useEffect(() => {
@@ -968,7 +972,11 @@ export default function CompleteKickAssHomepage() {
                   <Star className="w-8 h-8 mr-3 text-yellow-400" />
                   Featured Listings
                 </h2>
-                <p className="text-white/60">Handpicked deals you don't want to miss</p>
+                <p className="text-white/60">
+                  {listingsLoading ? 'Loading latest listings...' :
+                   featuredListings.length === 0 ? 'No listings available yet' :
+                   `${featuredListings.length} recent ${featuredListings.length === 1 ? 'listing' : 'listings'}`}
+                </p>
               </div>
               <Link href="/browse" className="flex items-center text-purple-400 hover:text-purple-300 font-medium transition-colors group">
                 View All
@@ -976,19 +984,71 @@ export default function CompleteKickAssHomepage() {
               </Link>
             </div>
 
+            {/* Loading State */}
+            {listingsLoading && (
+              <>
+                {/* Mobile Loading - 2 columns */}
+                <div className="md:hidden grid grid-cols-2 gap-3">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="animate-pulse bg-white/5 rounded-2xl overflow-hidden">
+                      <div className="h-40 bg-white/10"></div>
+                      <div className="p-3 space-y-2">
+                        <div className="h-4 bg-white/10 rounded w-3/4"></div>
+                        <div className="h-3 bg-white/10 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Desktop Loading - 3 columns */}
+                <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="animate-pulse bg-white/5 rounded-3xl overflow-hidden">
+                      <div className="h-56 bg-white/10"></div>
+                      <div className="p-6 space-y-3">
+                        <div className="h-6 bg-white/10 rounded w-3/4"></div>
+                        <div className="h-4 bg-white/10 rounded w-full"></div>
+                        <div className="h-4 bg-white/10 rounded w-2/3"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Empty State */}
+            {!listingsLoading && featuredListings.length === 0 && (
+              <div className="text-center py-16">
+                <div className="bg-white/5 rounded-3xl p-12 max-w-md mx-auto">
+                  <Star className="w-16 h-16 text-white/30 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-white mb-2">No Listings Yet</h3>
+                  <p className="text-white/60 mb-6">Be the first to create a listing!</p>
+                  <Link
+                    href="/add-item"
+                    className="inline-flex items-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Create Listing
+                  </Link>
+                </div>
+              </div>
+            )}
+
             {/* Mobile Layout - 2 columns for 4 listings on screen - Only visible on screens < 768px or PWA standalone */}
-            <div className="md:hidden grid grid-cols-2 gap-3">
-              {featuredListings.map((listing) => (
-                <MobileListingCard
-                  key={listing.id}
-                  listing={listing}
-                />
-              ))}
-            </div>
+            {!listingsLoading && featuredListings.length > 0 && (
+              <div className="md:hidden grid grid-cols-2 gap-3">
+                {featuredListings.map((listing) => (
+                  <MobileListingCard
+                    key={listing.id}
+                    listing={listing}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Desktop Layout - Only visible on screens >= 768px */}
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredListings.map((listing, index) => {
+            {!listingsLoading && featuredListings.length > 0 && (
+              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredListings.map((listing, index) => {
                 const badge = getCategoryBadge(listing.category)
                 const isFavorite = favorites.has(listing.id)
 
@@ -1089,7 +1149,8 @@ export default function CompleteKickAssHomepage() {
                   </div>
                 )
               })}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Enhanced Call to Action Section */}
