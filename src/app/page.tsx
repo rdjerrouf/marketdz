@@ -149,20 +149,11 @@ export default function CompleteKickAssHomepage() {
         setListingsLoading(true)
 
         // Fetch recent active listings with user info
+        // Note: Using left join to include listings even if profile is missing
         const { data: listings, error } = await supabase
           .from('listings')
           .select(`
-            id,
-            title,
-            description,
-            price,
-            category,
-            photos,
-            created_at,
-            status,
-            user_id,
-            wilaya,
-            city,
+            *,
             user:profiles(
               id,
               first_name,
@@ -177,10 +168,18 @@ export default function CompleteKickAssHomepage() {
 
         if (error) {
           console.error('🏠 HomePage: Error fetching listings:', error)
+          console.error('🏠 HomePage: Error details:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          })
           setFeaturedListings([])
         } else {
-          setFeaturedListings(listings || [])
+          console.log('🏠 HomePage: Query successful!')
           console.log('🏠 HomePage: Fetched', listings?.length || 0, 'featured listings')
+          console.log('🏠 HomePage: Listings data:', listings)
+          setFeaturedListings(listings || [])
         }
 
         // Fetch total listings count
