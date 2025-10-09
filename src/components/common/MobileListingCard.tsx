@@ -121,10 +121,10 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
   return (
     <div
       onClick={handleClick}
-      className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300 active:scale-95 cursor-pointer shadow-xl"
+      className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300 active:scale-95 cursor-pointer shadow-xl"
     >
-      {/* Large Image Container - Mobile Optimized */}
-      <div className="relative h-64 overflow-hidden">
+      {/* Compact Image Container - Mobile Optimized for 2x2 Grid */}
+      <div className="relative h-40 overflow-hidden">
         {listing.photos && listing.photos.length > 0 ? (
           <img
             src={fixPhotoUrl(listing.photos[0])}
@@ -157,98 +157,52 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
 
-        {/* Category Badge - Top Left */}
-        <div className="absolute top-4 left-4">
-          <div className={`bg-gradient-to-r ${categoryConfig.color} text-white px-4 py-2 rounded-2xl text-sm font-bold flex items-center shadow-lg`}>
-            <CategoryIcon className="w-5 h-5 mr-2" />
-            {categoryConfig.text}
+        {/* Category Badge - Top Left - Compact */}
+        <div className="absolute top-2 left-2">
+          <div className={`bg-gradient-to-r ${categoryConfig.color} text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center shadow-lg`}>
+            <CategoryIcon className="w-3 h-3 mr-1" />
+            <span className="hidden sm:inline">{categoryConfig.text}</span>
           </div>
         </div>
 
-        {/* Favorite Button - Top Right */}
-        <div className="absolute top-4 right-4" onClick={(e) => e.stopPropagation()}>
+        {/* Favorite Button - Top Right - Compact */}
+        <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
           <FavoriteButton
             listingId={listing.id}
             listingOwnerId={listing.user_id}
-            size="lg"
+            size="sm"
             className="backdrop-blur-sm shadow-lg"
           />
         </div>
 
-        {/* Location Badge - Bottom Left */}
-        {(listing.city || listing.wilaya) && (
-          <div className="absolute bottom-4 left-4">
-            <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-xl text-sm flex items-center shadow-lg">
-              <MapPin className="w-4 h-4 mr-2" />
-              {listing.city ? `${listing.city}${listing.wilaya ? `, ${listing.wilaya}` : ''}` : listing.wilaya}
-            </div>
-          </div>
-        )}
-
-        {/* Time Badge - Bottom Right */}
-        <div className="absolute bottom-4 right-4">
-          <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-xl text-sm flex items-center shadow-lg">
-            <Clock className="w-4 h-4 mr-2" />
-            {getTimeAgo(listing.created_at)}
+        {/* Time Badge - Bottom Right - Compact */}
+        <div className="absolute bottom-2 right-2">
+          <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs flex items-center shadow-lg">
+            <Clock className="w-3 h-3 mr-1" />
+            <span className="text-[10px]">{getTimeAgo(listing.created_at)}</span>
           </div>
         </div>
       </div>
 
-      {/* Content Section - Mobile Optimized with More Padding */}
-      <div className="p-6">
-        {/* Title - Larger for Mobile */}
-        <h3 className="text-white font-bold text-2xl mb-3 line-clamp-2 leading-tight">
+      {/* Content Section - Compact for 2-Column Grid */}
+      <div className="p-3">
+        {/* Title - Compact */}
+        <h3 className="text-white font-bold text-sm mb-2 line-clamp-2 leading-tight">
           {listing.title}
         </h3>
 
-        {/* Description - Larger for Mobile */}
-        <p className="text-white/70 text-base mb-4 line-clamp-3 leading-relaxed">
-          {listing.description}
-        </p>
-
-        {/* Price - Prominent */}
-        <div className="mb-5">
-          <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
+        {/* Price - Compact but Visible */}
+        <div className="mb-2">
+          <div className="text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
             {formatPrice(listing.price, listing.category)}
           </div>
         </div>
 
-        {/* User Info - Touch Friendly */}
-        {listing.user && (
-          <div className="pt-4 border-t border-white/10">
-            <button
-              onClick={handleUserClick}
-              className="flex items-center w-full text-left p-3 -mx-3 rounded-xl hover:bg-white/5 transition-colors active:scale-95"
-            >
-              {listing.user.avatar_url ? (
-                <img
-                  src={listing.user.avatar_url}
-                  alt={`${listing.user.first_name} ${listing.user.last_name}`}
-                  className="w-12 h-12 rounded-full mr-3 border-2 border-white/20"
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mr-3 flex items-center justify-center border-2 border-white/20 shadow-lg">
-                  <span className="text-white font-bold text-lg">
-                    {listing.user.first_name?.[0]}{listing.user.last_name?.[0]}
-                  </span>
-                </div>
-              )}
-              <div className="flex flex-col flex-1">
-                <span className="text-white font-semibold text-base">
-                  {listing.user.first_name} {listing.user.last_name}
-                </span>
-                {listing.user.rating > 0 && (
-                  <div className="flex items-center mt-1">
-                    <StarRating rating={listing.user.rating} readonly size="sm" />
-                    <span className="text-sm text-white/60 ml-2">
-                      ({listing.user.rating.toFixed(1)})
-                    </span>
-                  </div>
-                )}
-              </div>
-            </button>
+        {/* Location - Compact */}
+        {(listing.city || listing.wilaya) && (
+          <div className="flex items-center text-white/60 text-xs mb-2">
+            <MapPin className="w-3 h-3 mr-1" />
+            <span className="truncate">{listing.city || listing.wilaya}</span>
           </div>
         )}
       </div>

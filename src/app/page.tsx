@@ -995,8 +995,8 @@ export default function CompleteKickAssHomepage() {
               </Link>
             </div>
 
-            {/* Mobile Layout - Only visible on screens < 768px or PWA standalone */}
-            <div className="md:hidden grid grid-cols-1 gap-6">
+            {/* Mobile Layout - 2 columns for 4 listings on screen - Only visible on screens < 768px or PWA standalone */}
+            <div className="md:hidden grid grid-cols-2 gap-3">
               {featuredListings.map((listing) => (
                 <MobileListingCard
                   key={listing.id}
