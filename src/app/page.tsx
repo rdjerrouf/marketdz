@@ -246,6 +246,10 @@ export default function CompleteKickAssHomepage() {
     if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
       console.log('📱 PWA: App is running in standalone mode')
       setShowInstallButton(false)
+    } else {
+      // Not installed - show install button immediately for testing
+      // This helps when beforeinstallprompt hasn't fired yet
+      setShowInstallButton(true)
     }
 
     return () => {
@@ -335,27 +339,34 @@ export default function CompleteKickAssHomepage() {
 
   const handleInstallPWA = async () => {
     if (!deferredPrompt) {
-      console.log('📱 PWA: No deferred prompt available')
+      console.log('📱 PWA: No deferred prompt available - using fallback')
+      // Check if already installed
+      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+        alert('📱 App is already installed!')
+        return
+      }
+      // Show instructions for manual install
+      alert('📱 To install:\n\n1. Tap the menu (⋮) in your browser\n2. Select "Add to Home screen" or "Install app"\n3. Enjoy the app!')
       return
     }
 
     console.log('📱 PWA: Showing install prompt')
     // Show the install prompt
     deferredPrompt.prompt()
-    
+
     // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice
     console.log(`📱 PWA: User response to install prompt: ${outcome}`)
-    
+
     if (outcome === 'accepted') {
       console.log('📱 PWA: User accepted the install prompt')
+      setShowInstallButton(false)
     } else {
       console.log('📱 PWA: User dismissed the install prompt')
     }
-    
+
     // Clear the deferredPrompt variable
     setDeferredPrompt(null)
-    setShowInstallButton(false)
   }
 
   const heroImages = [
@@ -499,29 +510,22 @@ export default function CompleteKickAssHomepage() {
                 {user ? (
                   <>
                     {/* PWA Download Button - Mobile Signed-in */}
-                    <button 
-                      className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20"
-                      onClick={deferredPrompt ? handleInstallPWA : () => {
-                        console.log('📱 PWA: Mobile manual trigger')
-                        if ('serviceWorker' in navigator) {
-                          if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
-                            alert('📱 App is already installed!')
-                          } else {
-                            alert('📱 Use "Add to Home Screen" from your browser menu to install the app!')
-                          }
-                        } else {
-                          alert('📱 PWA not supported in this browser')
-                        }
-                      }}
-                    >
-                      <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      <span className="font-medium">Install App</span>
-                      <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
-                        {deferredPrompt ? 'PWA' : 'TEST'}
-                      </div>
-                    </button>
+                    {showInstallButton && (
+                      <button
+                        className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20"
+                        onClick={handleInstallPWA}
+                      >
+                        <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        <span className="font-medium">Install App</span>
+                        {deferredPrompt && (
+                          <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
+                            READY
+                          </div>
+                        )}
+                      </button>
+                    )}
                     <button
                       onClick={handleSignOut}
                       className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-red-500/10 hover:text-red-300 transition-all duration-300 border border-red-500/20"
@@ -547,29 +551,22 @@ export default function CompleteKickAssHomepage() {
                       <span className="font-medium">Register</span>
                     </Link>
                     {/* PWA Download Button - Mobile */}
-                    <button 
-                      className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20"
-                      onClick={deferredPrompt ? handleInstallPWA : () => {
-                        console.log('📱 PWA: Mobile manual trigger')
-                        if ('serviceWorker' in navigator) {
-                          if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
-                            alert('📱 App is already installed!')
-                          } else {
-                            alert('📱 Use "Add to Home Screen" from your browser menu to install the app!')
-                          }
-                        } else {
-                          alert('📱 PWA not supported in this browser')
-                        }
-                      }}
-                    >
+                    {showInstallButton && (
+                      <button
+                        className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20"
+                        onClick={handleInstallPWA}
+                      >
                         <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                         <span className="font-medium">Install App</span>
-                        <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
-                          {deferredPrompt ? 'PWA' : 'TEST'}
-                        </div>
+                        {deferredPrompt && (
+                          <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
+                            READY
+                          </div>
+                        )}
                       </button>
+                    )}
                   </>
                 )}
               </div>
@@ -681,31 +678,23 @@ export default function CompleteKickAssHomepage() {
                   </div>
                 </div>
                 {/* PWA Download Button for Signed-in Users */}
-                <button 
-                  id="pwa-install-button-signed-in"
-                  className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20 group mb-3"
-                  onClick={deferredPrompt ? handleInstallPWA : () => {
-                    console.log('📱 PWA: Manual trigger - checking install capability')
-                    if ('serviceWorker' in navigator) {
-                      // Check if already installed
-                      if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
-                        alert('📱 App is already installed!')
-                      } else {
-                        alert('📱 Use your browser\'s install option:\n\n🖥️ Desktop: Look for install icon in address bar\n📱 Mobile: Use "Add to Home Screen" from browser menu')
-                      }
-                    } else {
-                      alert('📱 PWA not supported in this browser')
-                    }
-                  }}
-                >
-                  <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                  <span className="font-medium">Install App</span>
-                  <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
-                    {deferredPrompt ? 'PWA' : 'TEST'}
-                  </div>
-                </button>
+                {showInstallButton && (
+                  <button
+                    id="pwa-install-button-signed-in"
+                    className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20 group mb-3"
+                    onClick={handleInstallPWA}
+                  >
+                    <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span className="font-medium">Install App</span>
+                    {deferredPrompt && (
+                      <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
+                        READY
+                      </div>
+                    )}
+                  </button>
+                )}
                 {/* Sign Out Button */}
                 <button
                   onClick={handleSignOut}
@@ -742,32 +731,24 @@ export default function CompleteKickAssHomepage() {
                   <span className="font-medium">Register</span>
                   <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </Link>
-                {/* PWA Download Button - Always show for testing */}
-                <button 
-                  id="pwa-install-button"
-                  className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20 group"
-                  onClick={deferredPrompt ? handleInstallPWA : () => {
-                    console.log('📱 PWA: Manual trigger - checking install capability')
-                    if ('serviceWorker' in navigator) {
-                      // Check if already installed
-                      if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
-                        alert('📱 App is already installed!')
-                      } else {
-                        alert('📱 Use your browser\'s install option:\n\n🖥️ Desktop: Look for install icon in address bar\n📱 Mobile: Use "Add to Home Screen" from browser menu')
-                      }
-                    } else {
-                      alert('📱 PWA not supported in this browser')
-                    }
-                  }}
-                >
-                  <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                  <span className="font-medium">Install App</span>
-                  <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
-                    {deferredPrompt ? 'PWA' : 'TEST'}
-                  </div>
-                </button>
+                {/* PWA Download Button */}
+                {showInstallButton && (
+                  <button
+                    id="pwa-install-button"
+                    className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20 group"
+                    onClick={handleInstallPWA}
+                  >
+                    <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span className="font-medium">Install App</span>
+                    {deferredPrompt && (
+                      <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
+                        READY
+                      </div>
+                    )}
+                  </button>
+                )}
               </>
             )}
           </div>
