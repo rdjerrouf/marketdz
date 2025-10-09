@@ -1155,19 +1155,19 @@ export default function CompleteKickAssHomepage() {
           {/* Enhanced Call to Action Section */}
           <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-3xl p-12 border border-purple-500/30 text-center mb-16 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <div className="max-w-3xl mx-auto">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-2xl w-fit mx-auto mb-6 shadow-lg hover:scale-110 transition-transform">
+              <Link href="/add-item" className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-2xl w-fit mx-auto mb-6 shadow-lg hover:scale-110 transition-transform block cursor-pointer">
                 <Plus className="w-12 h-12 text-white" />
-              </div>
+              </Link>
               <h2 className="text-4xl font-bold text-white mb-6">
-                Ready to Start Selling?
+                Ready to Post Your Listing?
               </h2>
               <p className="text-xl text-white/80 mb-8 leading-relaxed">
-                Join thousands of sellers already making money on MarketDZ. List your items in minutes and reach millions of potential buyers across Algeria.
+                Join thousands of users on MarketDZ. Post items for sale, rentals, jobs, or services in minutes and reach millions of people across Algeria.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/add-item" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-xl hover:shadow-2xl">
                   <Plus className="w-6 h-6 mr-3" />
-                  Create Your First Listing
+                  Create Your Listing
                 </Link>
                 <Link href="/help" className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold hover:bg-white/20 transition-all duration-300 border border-white/20 flex items-center justify-center shadow-lg hover:shadow-xl">
                   <Award className="w-6 h-6 mr-3" />
