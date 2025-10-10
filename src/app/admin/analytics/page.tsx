@@ -72,7 +72,7 @@ export default function AdminAnalytics() {
         .gte('created_at', startDate.toISOString())
         .limit(1000) // Hard limit for cost control
 
-      const categoryStats = categoryData?.reduce((acc: Record<string, number>, item) => {
+      const categoryStats = categoryData?.reduce((acc: Record<string, number>, item: { category: string }) => {
         acc[item.category] = (acc[item.category] || 0) + 1
         return acc
       }, {}) || {}
