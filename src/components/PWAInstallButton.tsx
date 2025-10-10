@@ -34,6 +34,13 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
     if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
       console.log('📱 PWA: App is running in standalone mode');
       setShowInstallButton(false);
+    } else {
+      // For iOS Safari, manually show install button since it doesn't fire beforeinstallprompt
+      const browserInfo = detectBrowserInfo();
+      if (browserInfo.platform === 'ios' && browserInfo.currentBrowser === 'safari') {
+        console.log('📱 PWA: iOS Safari detected - showing install button');
+        setShowInstallButton(true);
+      }
     }
 
     return () => {

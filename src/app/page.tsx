@@ -9,6 +9,7 @@ import { fixPhotoUrl } from '@/lib/storage'
 import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import MobileListingCard from '@/components/common/MobileListingCard'
 import BrowserGuidanceBanner from '@/components/BrowserGuidanceBanner'
+import { detectBrowserInfo } from '@/lib/browser-detection'
 
 export default function CompleteKickAssHomepage() {
   const { user, loading } = useAuth()
@@ -263,8 +264,15 @@ export default function CompleteKickAssHomepage() {
       setShowInstallButton(false)
     } else {
       // Not installed - let beforeinstallprompt event control visibility
-      // Only show button when browser indicates PWA is installable
-      setShowInstallButton(false)
+      // Exception: For iOS Safari, manually show install button
+      const browserInfo = detectBrowserInfo()
+      if (browserInfo.platform === 'ios' && browserInfo.currentBrowser === 'safari') {
+        console.log('📱 PWA: iOS Safari detected - showing install button')
+        setShowInstallButton(true)
+      } else {
+        // For other browsers, only show when beforeinstallprompt fires
+        setShowInstallButton(false)
+      }
     }
 
     return () => {
@@ -353,20 +361,23 @@ export default function CompleteKickAssHomepage() {
   }
 
   const handleInstallPWA = async () => {
-    if (!deferredPrompt) {
-      console.log('📱 PWA: No deferred prompt available - using fallback')
-      // Check if already installed
-      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-        alert('📱 App is already installed!')
-        return
-      }
-      // Show instructions for manual install
-      alert('📱 To install:\n\n1. Tap the menu (⋮) in your browser\n2. Select "Add to Home screen" or "Install app"\n3. Enjoy the app!')
+    const browserInfo = detectBrowserInfo()
+
+    // Check if already installed
+    if (browserInfo.isInstalled) {
+      alert('✅ MarketDZ is already installed on your device!')
       return
     }
 
+    // If no deferred prompt, show platform-specific instructions
+    if (!deferredPrompt) {
+      console.log('📱 PWA: Manual trigger - showing instructions')
+      alert(browserInfo.installInstructions || '⚠️ Your browser doesn\'t support app installation. Please try using Chrome, Edge, or Safari.')
+      return
+    }
+
+    // Show native install prompt (Chrome/Edge on Android)
     console.log('📱 PWA: Showing install prompt')
-    // Show the install prompt
     deferredPrompt.prompt()
 
     // Wait for the user to respond to the prompt
