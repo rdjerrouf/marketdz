@@ -29,8 +29,8 @@ export interface Conversation {
   id: string;
   buyer_id: string;
   seller_id: string;
-  listing_id?: string;
-  last_message_id?: string;
+  listing_id: string | null;
+  last_message_id: string | null;
   last_message_at: string;
   buyer_unread_count: number;
   seller_unread_count: number;
