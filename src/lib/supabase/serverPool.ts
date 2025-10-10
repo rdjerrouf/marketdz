@@ -72,11 +72,11 @@ export const extractJWTFromRequest = (request: Request): string | null => {
 export const checkConnectionHealth = async () => {
   try {
     const supabase = getServerSupabase()
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('profiles')
       .select('id')
       .limit(1)
-    
+
     return { healthy: !error, error: error?.message }
   } catch (error) {
     return { healthy: false, error: String(error) }

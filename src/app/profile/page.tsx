@@ -30,6 +30,7 @@ interface Listing {
   photos: string[]
   created_at: string
   status: string
+  user_id: string
 }
 
 export default function ProfilePage() {
