@@ -1,12 +1,24 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient, SupabaseClient } from '@supabase/ssr'
 import { Database } from '@/types/database'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Use createBrowserClient to work with SSR cookies
+// Singleton instance - only create once globally
+let supabaseInstance: SupabaseClient<Database> | null = null
+
+// Get or create the Supabase client instance
+function getSupabaseClient(): SupabaseClient<Database> {
+  if (!supabaseInstance) {
+    supabaseInstance = createBrowserClient<Database>(supabaseUrl, supabaseKey)
+    console.log('✅ Supabase client instance created')
+  }
+  return supabaseInstance
+}
+
+// Export the singleton instance
 // Note: Auth state changes are handled in AuthContext.tsx to avoid duplicate listeners
-export const supabase = createBrowserClient<Database>(supabaseUrl, supabaseKey)
+export const supabase = getSupabaseClient()
 
 // Enhanced global error handler for auth errors
 const originalError = console.error
