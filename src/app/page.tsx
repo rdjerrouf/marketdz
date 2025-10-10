@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase/client'
 import { fixPhotoUrl } from '@/lib/storage'
 import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import MobileListingCard from '@/components/common/MobileListingCard'
+import BrowserGuidanceBanner from '@/components/BrowserGuidanceBanner'
 
 export default function CompleteKickAssHomepage() {
   const { user, loading } = useAuth()
@@ -261,9 +262,9 @@ export default function CompleteKickAssHomepage() {
       console.log('📱 PWA: App is running in standalone mode')
       setShowInstallButton(false)
     } else {
-      // Not installed - show install button immediately for testing
-      // This helps when beforeinstallprompt hasn't fired yet
-      setShowInstallButton(true)
+      // Not installed - let beforeinstallprompt event control visibility
+      // Only show button when browser indicates PWA is installable
+      setShowInstallButton(false)
     }
 
     return () => {
@@ -449,6 +450,8 @@ export default function CompleteKickAssHomepage() {
             {sidebarOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
           </button>
         </div>
+        {/* Browser Guidance Banner - between header and content */}
+        <BrowserGuidanceBanner />
       </div>
 
       {/* Enhanced Mobile Sidebar */}
