@@ -159,6 +159,75 @@ API routes in `src/app/api/` organized by domain:
 - **Source Maps**: Disabled in production (`productionBrowserSourceMaps: false`)
 - **Standalone Output**: Optimized for Docker deployment
 
+### Mobile UI Architecture (2025-10-09)
+- **MobileListingCard Component**: `src/components/common/MobileListingCard.tsx`
+  - 2-column grid layout optimized for PWA/mobile app
+  - Compact design showing 4 listings on screen at once
+  - Touch-friendly with category badges and icons
+  - Separate from desktop layout using Tailwind breakpoints
+- **Responsive Layouts**:
+  - Mobile: 2-column grid (`grid-cols-2`) via `md:hidden`
+  - Desktop: 3-column grid (`lg:grid-cols-3`) via `hidden md:grid`
+- **Implementation**: Home page (`src/app/page.tsx`) and Browse page (`src/app/browse/page.tsx`)
+
+## Recent Critical Fixes (2025-10-09)
+
+### ✅ TypeScript Strict Mode Compliance
+**Issue**: Vercel builds failing due to implicit `any` types in callbacks after Supabase client refactoring.
+
+**Files Fixed**:
+- `src/hooks/useMessages.ts` - Added `RealtimePostgresChangesPayload<T>` types to all realtime subscriptions
+- `src/hooks/useRealtime.ts` - Fixed 4 realtime callback parameters and 3 notification filter callbacks
+- `src/contexts/AuthContext.tsx` - Added `AuthChangeEvent` type to auth listener
+- `src/components/profile/UserReviews.tsx` - Fixed `reduce` and `forEach` callbacks
+- `src/app/admin/analytics/page.tsx` - Fixed category stats callback
+- `src/app/profile/page.tsx` - Added `user_id` to Listing interface
+
+**Type Corrections**:
+- Changed `listing_id?: string` to `listing_id: string | null` (database returns `null`, not `undefined`)
+- Changed `avatar_url?: string` to `avatar_url: string | null` across all interfaces
+- Pattern: Database nullables use `T | null`, not optional `T?` which means `T | undefined`
+
+### ✅ Multiple GoTrueClient Instances Warning RESOLVED
+**Issue**: "Multiple GoTrueClient instances detected" warning in browser console.
+
+**Root Cause**: Three separate `onAuthStateChange` listeners were running simultaneously:
+1. `AuthContext.tsx` - ✅ Keep (single source of truth)
+2. `useAuth.ts` - ❌ Removed (now re-exports from AuthContext)
+3. `useUser.ts` - ❌ Removed listener (now consumes from AuthContext)
+
+**Solution**:
+- `src/hooks/useUser.ts` - Refactored to consume user from `AuthContext` instead of creating own listener
+- `src/hooks/useAuth.ts` - Replaced entire implementation with re-export from `AuthContext`
+- `src/lib/supabase/client.ts` - Singleton pattern with `SupabaseClient` type from `@supabase/supabase-js`
+
+**Result**: Only ONE auth listener exists in the entire app (in AuthContext), eliminating the warning.
+
+### ✅ Supabase Client Singleton Pattern
+**Implementation** (`src/lib/supabase/client.ts`):
+```typescript
+let supabaseInstance: SupabaseClient<Database> | null = null
+
+function getSupabaseClient(): SupabaseClient<Database> {
+  if (!supabaseInstance) {
+    supabaseInstance = createBrowserClient<Database>(supabaseUrl, supabaseKey)
+    console.log('✅ Supabase client instance created')
+  }
+  return supabaseInstance
+}
+
+export const supabase = getSupabaseClient()
+```
+
+**Key Points**:
+- Import `SupabaseClient` from `@supabase/supabase-js`, NOT from `@supabase/ssr`
+- Only ONE Supabase client instance created globally
+- All imports use the same singleton instance
+- Prevents multiple auth listener warnings
+
+### Known Minor Issues
+- **Missing placeholder image**: `/public/images/placeholder.jpg` referenced in `src/lib/storage.ts` and `src/lib/utils.ts` but file doesn't exist (causes 404s in console, doesn't break functionality)
+
 ## Environment Setup
 
 ### File Structure
@@ -220,6 +289,8 @@ The `scripts/` directory contains specialized utilities:
 **Database errors**: **RESOLVED** - System migrated to production cloud (2025-10-03)
 **Production deployment**: **COMPLETED** - Application running on real Supabase cloud
 **PWA reload loops**: **RESOLVED** - Improved caching strategies with proper NetworkOnly for admin/auth routes
+**TypeScript build errors**: **RESOLVED (2025-10-09)** - All implicit `any` types fixed, see "Recent Critical Fixes" section
+**Multiple GoTrueClient warning**: **RESOLVED (2025-10-09)** - Consolidated to single auth listener in AuthContext, see "Recent Critical Fixes" section
 
 ### Debugging Commands
 ```bash
