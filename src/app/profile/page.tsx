@@ -125,7 +125,7 @@ export default function ProfilePage() {
           
           console.log('🔍 Profile: Found listings:', listings?.length || 0)
           console.log('🔍 Profile: Valid listings after filtering:', validListings.length)
-          console.log('🔍 Profile: Listings data:', validListings.map(l => ({
+          console.log('🔍 Profile: Listings data:', validListings.map((l: Listing) => ({
             id: l.id,
             title: l.title,
             user_id: l.user_id,
