@@ -455,7 +455,7 @@ export default function CompleteKickAssHomepage() {
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)}>
           <div
-            className={`fixed left-0 top-0 bottom-0 ${isPWA ? 'w-64' : 'w-80'} bg-black/30 backdrop-blur-xl border-r border-white/10 p-6`}
+            className={`fixed left-0 top-0 bottom-0 ${isPWA ? 'w-44' : 'w-80'} bg-black/30 backdrop-blur-xl border-r border-white/10 p-4`}
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center mb-8 mt-16">
