@@ -394,9 +394,10 @@ export const useMessages = (conversationId?: string) => {
 
       if (profileError) throw profileError;
 
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      type ProfileData = { id: string; first_name: string; last_name: string; avatar_url?: string };
+      const profileMap = new Map(profiles?.map((p: ProfileData) => [p.id, p]) || []);
 
-      const processedConversations = (conversations || []).map(conv => ({
+      const processedConversations = (conversations || []).map((conv: Conversation) => ({
         ...conv,
         other_user: profileMap.get(conv.buyer_id === user.id ? conv.seller_id : conv.buyer_id)
       }));
