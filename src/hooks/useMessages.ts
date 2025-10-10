@@ -432,10 +432,11 @@ export const useMessages = (conversationId?: string) => {
             // Fetch the complete conversation data
             fetchConversations();
           } else if (payload.eventType === 'UPDATE') {
-            setConversations(prev => 
-              prev.map(conv => 
-                conv.id === payload.new.id 
-                  ? { ...conv, ...payload.new } as Conversation
+            const updatedConv = payload.new as Conversation;
+            setConversations(prev =>
+              prev.map(conv =>
+                conv.id === updatedConv.id
+                  ? { ...conv, ...updatedConv } as Conversation
                   : conv
               )
             );
@@ -467,6 +468,7 @@ export const useMessages = (conversationId?: string) => {
         },
         async (payload: RealtimePostgresChangesPayload<Message>) => {
           // Fetch complete message data
+          const newMessage = payload.new as Message;
           const { data: message, error } = await supabase
             .from('messages')
             .select(`
@@ -485,7 +487,7 @@ export const useMessages = (conversationId?: string) => {
                 avatar_url
               )
             `)
-            .eq('id', payload.new.id)
+            .eq('id', newMessage.id)
             .single();
 
           if (!error && message) {
