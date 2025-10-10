@@ -52,6 +52,17 @@ export default function AddItemPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isPWA, setIsPWA] = useState(false)
+
+  // Detect if running as PWA
+  useEffect(() => {
+    const checkPWA = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      const isIOSPWA = (window.navigator as any).standalone === true
+      setIsPWA(isStandalone || isIOSPWA)
+    }
+    checkPWA()
+  }, [])
 
   // Check authentication
   useEffect(() => {
@@ -181,8 +192,8 @@ export default function AddItemPage() {
 
       <div className="relative z-10 flex">
       {/* Sidebar Navigation */}
-      <div className="w-64 bg-black/20 backdrop-blur-lg border-r border-white/10">
-        <div className="p-6">
+      <div className={`${isPWA ? 'w-44' : 'w-64'} bg-black/20 backdrop-blur-lg border-r border-white/10`}>
+        <div className={isPWA ? 'p-4' : 'p-6'}>
           {/* Logo */}
           <div className="flex items-center mb-8">
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3 relative">
