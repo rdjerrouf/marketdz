@@ -44,18 +44,25 @@ export function detectBrowserInfo(): BrowserInfo {
     : 'other'
 
   // Detect current browser
-  const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent)
-  const isChrome = /chrome/i.test(userAgent) && !/edg/i.test(userAgent)
-  const isEdge = /edg/i.test(userAgent)
-  const isFirefox = /firefox/i.test(userAgent)
+  // iOS browsers: Check for CriOS (Chrome), FxiOS (Firefox), EdgiOS (Edge)
+  const isIOSChrome = isIOS && /CriOS/i.test(userAgent)
+  const isIOSFirefox = isIOS && /FxiOS/i.test(userAgent)
+  const isIOSEdge = isIOS && /EdgiOS/i.test(userAgent)
+  const isIOSSafari = isIOS && !isIOSChrome && !isIOSFirefox && !isIOSEdge && /Safari/i.test(userAgent)
+
+  // Desktop/Android browsers
+  const isChrome = !isIOS && /chrome/i.test(userAgent) && !/edg/i.test(userAgent)
+  const isEdge = !isIOS && /edg/i.test(userAgent)
+  const isFirefox = !isIOS && /firefox/i.test(userAgent)
+  const isSafari = (isIOSSafari || (!isIOS && /^((?!chrome|android).)*safari/i.test(userAgent)))
 
   const currentBrowser: BrowserInfo['currentBrowser'] = isSafari
     ? 'safari'
-    : isChrome
+    : (isChrome || isIOSChrome)
     ? 'chrome'
-    : isEdge
+    : (isEdge || isIOSEdge)
     ? 'edge'
-    : isFirefox
+    : (isFirefox || isIOSFirefox)
     ? 'firefox'
     : 'other'
 
@@ -121,6 +128,16 @@ Chrome provides the easiest way to install apps on Android.`
 
 Or use your browser menu and select "Install MarketDZ"`
   }
+
+  // Debug logging
+  console.log('🔍 Browser Detection:', {
+    platform,
+    currentBrowser,
+    isOptimalBrowser,
+    isInstalled,
+    needsBrowserSwitch,
+    userAgent: userAgent.substring(0, 100) + '...'
+  })
 
   return {
     platform,
