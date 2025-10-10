@@ -115,7 +115,7 @@ export default function ProfilePage() {
           console.error('Error fetching listings:', listingsError)
         } else {
           // Additional client-side filtering to ensure data integrity
-          const validListings = (listings || []).filter(listing => 
+          const validListings = (listings || []).filter((listing: Listing) =>
             listing.user_id === session.user.id && // Double-check user_id match
             listing.title && // Must have a title
             listing.title.trim().length > 0 && // Title must not be empty
