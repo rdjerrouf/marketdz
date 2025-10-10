@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { useUser } from './useUser'
 
 // Types
@@ -70,7 +71,7 @@ export const useRealtimeMessages = (conversationId: string | null) => {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`,
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<Message>) => {
           const newMessage = payload.new as Message
           setMessages(prev => [...prev, newMessage])
         }
@@ -165,11 +166,12 @@ export const useRealtimeConversations = () => {
           table: 'conversations',
           filter: `buyer_id.eq.${user.id}`,
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<Conversation>) => {
           if (payload.eventType === 'UPDATE') {
-            setConversations(prev => 
-              prev.map(conv => 
-                conv.id === payload.new.id ? { ...conv, ...payload.new } : conv
+            const updatedConv = payload.new as Conversation
+            setConversations(prev =>
+              prev.map(conv =>
+                conv.id === updatedConv.id ? { ...conv, ...updatedConv } : conv
               )
             )
           }
@@ -179,15 +181,16 @@ export const useRealtimeConversations = () => {
         'postgres_changes',
         {
           event: '*',
-          schema: 'public', 
+          schema: 'public',
           table: 'conversations',
           filter: `seller_id.eq.${user.id}`,
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<Conversation>) => {
           if (payload.eventType === 'UPDATE') {
+            const updatedConv = payload.new as Conversation
             setConversations(prev =>
               prev.map(conv =>
-                conv.id === payload.new.id ? { ...conv, ...payload.new } : conv
+                conv.id === updatedConv.id ? { ...conv, ...updatedConv } : conv
               )
             )
           }
@@ -292,7 +295,7 @@ export const useRealtimeNotifications = () => {
           table: 'notifications',
           filter: `user_id=eq.${user.id}`,
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<any>) => {
           const newNotification = payload.new
           setNotifications(prev => [newNotification, ...prev])
           setUnreadCount(prev => prev + 1)
