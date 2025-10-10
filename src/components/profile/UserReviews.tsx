@@ -96,10 +96,10 @@ export default function UserReviews({ userId, currentUserId }: UserReviewsProps)
 
       if (statsData && statsData.length > 0) {
         const totalReviews = statsData.length
-        const averageRating = statsData.reduce((sum, review) => sum + review.rating, 0) / totalReviews
-        
+        const averageRating = statsData.reduce((sum: number, review: { rating: number }) => sum + review.rating, 0) / totalReviews
+
         const ratingBreakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
-        statsData.forEach(review => {
+        statsData.forEach((review: { rating: number }) => {
           ratingBreakdown[review.rating as keyof typeof ratingBreakdown]++
         })
 
