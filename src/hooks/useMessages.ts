@@ -21,7 +21,7 @@ export interface Message {
     id: string;
     first_name: string;
     last_name: string;
-    avatar_url?: string;
+    avatar_url: string | null;
   };
 }
 
@@ -42,7 +42,7 @@ export interface Conversation {
     id: string;
     first_name: string;
     last_name: string;
-    avatar_url?: string;
+    avatar_url: string | null;
   };
 }
 
@@ -395,7 +395,7 @@ export const useMessages = (conversationId?: string) => {
 
       if (profileError) throw profileError;
 
-      type ProfileData = { id: string; first_name: string; last_name: string; avatar_url?: string };
+      type ProfileData = { id: string; first_name: string; last_name: string; avatar_url: string | null };
       const profileMap = new Map(profiles?.map((p: ProfileData) => [p.id, p]) || []);
 
       const processedConversations = (conversations || []).map((conv: Conversation) => ({
