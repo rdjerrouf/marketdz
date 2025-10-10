@@ -273,7 +273,7 @@ export const useRealtimeNotifications = () => {
 
       if (!error && data) {
         setNotifications(data)
-        setUnreadCount(data.filter(n => !n.read_at).length)
+        setUnreadCount(data.filter((n: any) => !n.read_at).length)
       }
       setLoading(false)
     }
@@ -315,7 +315,7 @@ export const useRealtimeNotifications = () => {
 
     if (!error) {
       setNotifications(prev =>
-        prev.map(n =>
+        prev.map((n: any) =>
           n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
         )
       )
@@ -328,7 +328,7 @@ export const useRealtimeNotifications = () => {
 
     if (!error) {
       setNotifications(prev =>
-        prev.map(n => ({ ...n, read_at: n.read_at || new Date().toISOString() }))
+        prev.map((n: any) => ({ ...n, read_at: n.read_at || new Date().toISOString() }))
       )
       setUnreadCount(0)
     }
