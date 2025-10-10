@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { useUser } from './useUser';
 
 export interface Message {
@@ -426,7 +427,7 @@ export const useMessages = (conversationId?: string) => {
           table: 'conversations',
           filter: `or(buyer_id.eq.${user.id},seller_id.eq.${user.id})`
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<Conversation>) => {
           if (payload.eventType === 'INSERT') {
             // Fetch the complete conversation data
             fetchConversations();
@@ -464,7 +465,7 @@ export const useMessages = (conversationId?: string) => {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`
         },
-        async (payload) => {
+        async (payload: RealtimePostgresChangesPayload<Message>) => {
           // Fetch complete message data
           const { data: message, error } = await supabase
             .from('messages')
