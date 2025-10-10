@@ -237,6 +237,15 @@ export default function CompleteKickAssHomepage() {
 
   // PWA Install functionality
   useEffect(() => {
+    const browserInfo = detectBrowserInfo()
+
+    // Hide button if already installed
+    if (browserInfo.isInstalled) {
+      console.log('📱 PWA: App is already installed')
+      setShowInstallButton(false)
+      return
+    }
+
     const handleBeforeInstallPrompt = (e: any) => {
       console.log('📱 PWA: beforeinstallprompt event fired')
       // Prevent the mini-infobar from appearing on mobile
@@ -258,21 +267,10 @@ export default function CompleteKickAssHomepage() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
 
-    // Check if app is already installed
-    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-      console.log('📱 PWA: App is running in standalone mode')
-      setShowInstallButton(false)
-    } else {
-      // Not installed - let beforeinstallprompt event control visibility
-      // Exception: For iOS Safari, manually show install button
-      const browserInfo = detectBrowserInfo()
-      if (browserInfo.platform === 'ios' && browserInfo.currentBrowser === 'safari') {
-        console.log('📱 PWA: iOS Safari detected - showing install button')
-        setShowInstallButton(true)
-      } else {
-        // For other browsers, only show when beforeinstallprompt fires
-        setShowInstallButton(false)
-      }
+    // Show button for iOS Safari (doesn't fire beforeinstallprompt)
+    if (browserInfo.platform === 'ios' && browserInfo.currentBrowser === 'safari') {
+      console.log('📱 PWA: iOS Safari detected - showing install button')
+      setShowInstallButton(true)
     }
 
     return () => {

@@ -14,6 +14,15 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
   const [showInstallButton, setShowInstallButton] = useState(false);
 
   useEffect(() => {
+    const browserInfo = detectBrowserInfo();
+
+    // Hide button if already installed
+    if (browserInfo.isInstalled) {
+      console.log('📱 PWA: App is already installed');
+      setShowInstallButton(false);
+      return;
+    }
+
     const handleBeforeInstallPrompt = (e: any) => {
       console.log('📱 PWA: beforeinstallprompt event fired');
       e.preventDefault();
@@ -30,17 +39,10 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Check if app is already installed
-    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-      console.log('📱 PWA: App is running in standalone mode');
-      setShowInstallButton(false);
-    } else {
-      // For iOS Safari, manually show install button since it doesn't fire beforeinstallprompt
-      const browserInfo = detectBrowserInfo();
-      if (browserInfo.platform === 'ios' && browserInfo.currentBrowser === 'safari') {
-        console.log('📱 PWA: iOS Safari detected - showing install button');
-        setShowInstallButton(true);
-      }
+    // Show button for iOS Safari (doesn't fire beforeinstallprompt)
+    if (browserInfo.platform === 'ios' && browserInfo.currentBrowser === 'safari') {
+      console.log('📱 PWA: iOS Safari detected - showing install button');
+      setShowInstallButton(true);
     }
 
     return () => {

@@ -28,11 +28,11 @@ export function detectBrowserInfo(): BrowserInfo {
     }
   }
 
-  const userAgent = navigator.userAgent
+  const userAgent = navigator.userAgent.toLowerCase()
 
-  // Detect platform
-  const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
-  const isAndroid = /Android/.test(userAgent)
+  // Detect platform first
+  const isIOS = /iphone|ipad|ipod/.test(userAgent) && !(window as any).MSStream
+  const isAndroid = /android/.test(userAgent)
   const isDesktop = !isIOS && !isAndroid
 
   const platform: BrowserInfo['platform'] = isIOS
@@ -43,42 +43,57 @@ export function detectBrowserInfo(): BrowserInfo {
     ? 'desktop'
     : 'other'
 
-  // Detect current browser
-  // iOS browsers: Check for CriOS (Chrome), FxiOS (Firefox), EdgiOS (Edge)
-  const isIOSChrome = isIOS && /CriOS/i.test(userAgent)
-  const isIOSFirefox = isIOS && /FxiOS/i.test(userAgent)
-  const isIOSEdge = isIOS && /EdgiOS/i.test(userAgent)
-  const isIOSSafari = isIOS && !isIOSChrome && !isIOSFirefox && !isIOSEdge && /Safari/i.test(userAgent)
+  // CRITICAL: Check if already installed BEFORE browser detection
+  // Use BOTH methods (industry best practice)
+  const isInstalled =
+    (navigator as any).standalone === true || // iOS-specific (works since iOS 2.0)
+    window.matchMedia('(display-mode: standalone)').matches // Cross-platform
 
-  // Desktop/Android browsers
-  const isChrome = !isIOS && /chrome/i.test(userAgent) && !/edg/i.test(userAgent)
-  const isEdge = !isIOS && /edg/i.test(userAgent)
-  const isFirefox = !isIOS && /firefox/i.test(userAgent)
-  const isSafari = (isIOSSafari || (!isIOS && /^((?!chrome|android).)*safari/i.test(userAgent)))
+  // Detect browser in CORRECT ORDER (most specific first)
+  let currentBrowser: BrowserInfo['currentBrowser'] = 'other'
 
-  const currentBrowser: BrowserInfo['currentBrowser'] = isSafari
-    ? 'safari'
-    : (isChrome || isIOSChrome)
-    ? 'chrome'
-    : (isEdge || isIOSEdge)
-    ? 'edge'
-    : (isFirefox || isIOSFirefox)
-    ? 'firefox'
-    : 'other'
+  if (isIOS) {
+    // iOS browser detection - check specific markers FIRST
+    if (/crios/.test(userAgent)) {
+      currentBrowser = 'chrome' // iOS Chrome
+    } else if (/fxios/.test(userAgent)) {
+      currentBrowser = 'firefox' // iOS Firefox
+    } else if (/edgios/.test(userAgent)) {
+      currentBrowser = 'edge' // iOS Edge
+    } else if (/safari/.test(userAgent) && !/crios|fxios|edgios/.test(userAgent)) {
+      // iOS Safari - MUST NOT contain other browser markers
+      currentBrowser = 'safari'
+    }
+  } else if (isAndroid) {
+    // Android browser detection
+    if (/edg/.test(userAgent)) {
+      currentBrowser = 'edge'
+    } else if (/chrome/.test(userAgent) && !/edg/.test(userAgent)) {
+      currentBrowser = 'chrome'
+    } else if (/firefox/.test(userAgent)) {
+      currentBrowser = 'firefox'
+    }
+  } else {
+    // Desktop browser detection
+    if (/edg/.test(userAgent)) {
+      currentBrowser = 'edge'
+    } else if (/chrome/.test(userAgent) && !/edg/.test(userAgent)) {
+      currentBrowser = 'chrome'
+    } else if (/firefox/.test(userAgent)) {
+      currentBrowser = 'firefox'
+    } else if (/safari/.test(userAgent) && !/chrome/.test(userAgent)) {
+      currentBrowser = 'safari'
+    }
+  }
 
   // Determine recommended browser based on platform
   const recommendedBrowser: BrowserInfo['recommendedBrowser'] = isIOS ? 'safari' : 'chrome'
 
   // Check if user is on optimal browser
   const isOptimalBrowser =
-    (isIOS && isSafari) ||
-    (isAndroid && isChrome) ||
-    (isDesktop && (isChrome || isEdge))
-
-  // Check if PWA is already installed
-  const isInstalled =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    (navigator as any).standalone === true
+    (isIOS && currentBrowser === 'safari') ||
+    (isAndroid && currentBrowser === 'chrome') ||
+    (isDesktop && (currentBrowser === 'chrome' || currentBrowser === 'edge'))
 
   // Determine if user needs to switch browsers
   const needsBrowserSwitch = !isOptimalBrowser && !isInstalled && (isIOS || isAndroid)
@@ -86,7 +101,7 @@ export function detectBrowserInfo(): BrowserInfo {
   // Platform-specific install instructions
   let installInstructions = ''
 
-  if (isIOS && isSafari) {
+  if (isIOS && currentBrowser === 'safari') {
     installInstructions = `To install MarketDZ:
 
 1. Tap the Share button ⬆️ at the bottom
@@ -94,7 +109,7 @@ export function detectBrowserInfo(): BrowserInfo {
 3. Tap "Add"
 
 You'll have MarketDZ like a native app! 🎉`
-  } else if (isIOS && !isSafari) {
+  } else if (isIOS && currentBrowser !== 'safari') {
     installInstructions = `For easy installation, please open this page in Safari:
 
 1. Copy the link below
@@ -103,7 +118,7 @@ You'll have MarketDZ like a native app! 🎉`
 4. Tap Share ⬆️ → "Add to Home Screen"
 
 Safari is required for installing apps on iPhone.`
-  } else if (isAndroid && isChrome) {
+  } else if (isAndroid && currentBrowser === 'chrome') {
     installInstructions = `To install MarketDZ:
 
 1. Tap the menu (⋮) button
@@ -111,7 +126,7 @@ Safari is required for installing apps on iPhone.`
 3. Tap "Install"
 
 Or simply tap the "Install App" button when prompted!`
-  } else if (isAndroid && !isChrome) {
+  } else if (isAndroid && currentBrowser !== 'chrome') {
     installInstructions = `For the best installation experience, please open this page in Chrome:
 
 1. Copy the link below
