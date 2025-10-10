@@ -29,6 +29,17 @@ export default function CompleteKickAssHomepage() {
   const [showInstallButton, setShowInstallButton] = useState(false)
   const [showComingSoonModal, setShowComingSoonModal] = useState(false)
   const [showNewTodayModal, setShowNewTodayModal] = useState(false)
+  const [isPWA, setIsPWA] = useState(false)
+
+  // Detect if running as PWA
+  useEffect(() => {
+    const checkPWA = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      const isIOSPWA = (window.navigator as any).standalone === true
+      setIsPWA(isStandalone || isIOSPWA)
+    }
+    checkPWA()
+  }, [])
 
   // Fetch user profile when user changes
   useEffect(() => {
@@ -443,8 +454,8 @@ export default function CompleteKickAssHomepage() {
       {/* Enhanced Mobile Sidebar */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)}>
-          <div 
-            className="fixed left-0 top-0 bottom-0 w-80 bg-black/30 backdrop-blur-xl border-r border-white/10 p-6"
+          <div
+            className={`fixed left-0 top-0 bottom-0 ${isPWA ? 'w-64' : 'w-80'} bg-black/30 backdrop-blur-xl border-r border-white/10 p-6`}
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center mb-8 mt-16">
