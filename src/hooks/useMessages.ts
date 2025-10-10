@@ -382,7 +382,7 @@ export const useMessages = (conversationId?: string) => {
 
       // Fetch other user profiles separately
       const userIds = new Set<string>();
-      (conversations || []).forEach(conv => {
+      (conversations || []).forEach((conv: Conversation) => {
         if (conv.buyer_id !== user.id) userIds.add(conv.buyer_id);
         if (conv.seller_id !== user.id) userIds.add(conv.seller_id);
       });
