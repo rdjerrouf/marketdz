@@ -202,18 +202,19 @@ export default function CompleteKickAssHomepage() {
           .eq('status', 'active')
 
         // Fetch listings created today
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        const { count: todayCount } = await supabase
-          .from('listings')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'active')
-          .gte('created_at', today.toISOString())
+        // NOTE: Disabled for now - Fresh Arrivals is a premium coming soon feature
+        // const today = new Date()
+        // today.setHours(0, 0, 0, 0)
+        // const { count: todayCount } = await supabase
+        //   .from('listings')
+        //   .select('*', { count: 'exact', head: true })
+        //   .eq('status', 'active')
+        //   .gte('created_at', today.toISOString())
 
         setStats({
           totalListings: totalCount || 0,
           hotDeals: 0, // Will be implemented with hot_deals feature
-          newToday: todayCount || 0
+          newToday: 0 // Disabled - premium coming soon feature
         })
 
       } catch (err) {
