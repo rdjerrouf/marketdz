@@ -145,13 +145,16 @@ Or use your browser menu and select "Install MarketDZ"`
   }
 
   // Debug logging
-  console.log('🔍 Browser Detection:', {
+  console.log('🔍 Browser Detection FULL:', {
     platform,
     currentBrowser,
+    recommendedBrowser,
     isOptimalBrowser,
     isInstalled,
     needsBrowserSwitch,
-    userAgent: userAgent.substring(0, 100) + '...'
+    'userAgent (full)': userAgent,
+    'navigator.standalone': (navigator as any).standalone,
+    'matchMedia standalone': window.matchMedia('(display-mode: standalone)').matches
   })
 
   return {

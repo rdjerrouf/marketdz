@@ -17,9 +17,11 @@ export default function BrowserGuidanceBanner() {
   useEffect(() => {
     // Check if banner was dismissed recently
     const dismissedUntil = localStorage.getItem(DISMISSAL_KEY)
+    console.log('🎯 BrowserGuidanceBanner: dismissedUntil =', dismissedUntil)
     if (dismissedUntil) {
       const dismissedTime = parseInt(dismissedUntil, 10)
       if (Date.now() < dismissedTime) {
+        console.log('🎯 BrowserGuidanceBanner: Banner was dismissed, hiding')
         setIsVisible(false)
         return
       }
@@ -27,11 +29,16 @@ export default function BrowserGuidanceBanner() {
 
     // Detect browser and platform
     const browserInfo = detectBrowserInfo()
+    console.log('🎯 BrowserGuidanceBanner: browserInfo =', browserInfo)
 
     // Only show banner if user needs to switch browsers
     if (browserInfo.needsBrowserSwitch) {
-      setMessage(getBrowserSwitchMessage(browserInfo))
+      const message = getBrowserSwitchMessage(browserInfo)
+      console.log('🎯 BrowserGuidanceBanner: SHOWING BANNER with message:', message)
+      setMessage(message)
       setIsVisible(true)
+    } else {
+      console.log('🎯 BrowserGuidanceBanner: NOT showing banner - needsBrowserSwitch is false')
     }
 
     // Check if Web Share API is available

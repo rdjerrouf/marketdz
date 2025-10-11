@@ -238,16 +238,17 @@ export default function CompleteKickAssHomepage() {
   // PWA Install functionality
   useEffect(() => {
     const browserInfo = detectBrowserInfo()
+    console.log('📱 HomePage: browserInfo =', browserInfo)
 
     // Hide button if already installed
     if (browserInfo.isInstalled) {
-      console.log('📱 PWA: App is already installed')
+      console.log('📱 HomePage: App is already installed - HIDING button')
       setShowInstallButton(false)
       return
     }
 
     const handleBeforeInstallPrompt = (e: any) => {
-      console.log('📱 PWA: beforeinstallprompt event fired')
+      console.log('📱 HomePage: beforeinstallprompt event fired')
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault()
       // Stash the event so it can be triggered later
@@ -257,7 +258,7 @@ export default function CompleteKickAssHomepage() {
     }
 
     const handleAppInstalled = () => {
-      console.log('📱 PWA: App was installed')
+      console.log('📱 HomePage: App was installed')
       // Hide install button
       setShowInstallButton(false)
       setDeferredPrompt(null)
@@ -269,8 +270,10 @@ export default function CompleteKickAssHomepage() {
 
     // Show button for iOS Safari (doesn't fire beforeinstallprompt)
     if (browserInfo.platform === 'ios' && browserInfo.currentBrowser === 'safari') {
-      console.log('📱 PWA: iOS Safari detected - showing install button')
+      console.log('📱 HomePage: iOS Safari detected - SHOWING install button')
       setShowInstallButton(true)
+    } else {
+      console.log('📱 HomePage: NOT iOS Safari - platform:', browserInfo.platform, 'browser:', browserInfo.currentBrowser)
     }
 
     return () => {
