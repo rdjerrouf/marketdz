@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const withPWA = require('next-pwa');
 
+import type { Configuration } from 'webpack';
+
 const nextConfig = {
   output: 'standalone', // Enable for Docker deployment
   images: {
@@ -12,7 +14,7 @@ const nextConfig = {
     ],
   },
   // Exclude Supabase functions from build
-  webpack: (config) => {
+  webpack: (config: Configuration) => {
     return config;
   },
   // External packages for server components
