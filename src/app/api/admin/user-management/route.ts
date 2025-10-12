@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Check admin status using RLS
     const { data: currentAdmin, error: adminError } = await supabase
-      .from('admin_users')
+      .from('admin_users' as any)
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
 
     // Check admin status using RLS
     const { data: currentAdmin, error: adminError } = await supabase
-      .from('admin_users')
+      .from('admin_users' as any)
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)

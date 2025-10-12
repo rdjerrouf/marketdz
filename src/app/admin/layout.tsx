@@ -115,7 +115,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       console.log('🔄 API failed, checking admin_users table directly...')
 
       try {
-        const { data: adminRecord, error: dbError } = await supabase
+        // admin_users table is not in generated types, requires type assertion
+        const { data: adminRecord, error: dbError } = await (supabase as any)
           .from('admin_users')
           .select('*')
           .eq('user_id', user.id)
