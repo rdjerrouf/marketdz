@@ -443,8 +443,8 @@ export default function CompleteKickAssHomepage() {
       {/* Enhanced Mobile Sidebar */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)}>
-          <div 
-            className="fixed left-0 top-0 bottom-0 w-80 bg-black/30 backdrop-blur-xl border-r border-white/10 p-6"
+          <div
+            className="fixed left-0 top-0 bottom-0 w-52 bg-black/30 backdrop-blur-xl border-r border-white/10 p-6"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center mb-8 mt-16">
@@ -579,8 +579,8 @@ export default function CompleteKickAssHomepage() {
       )}
 
       {/* Enhanced Desktop Sidebar */}
-      <div className="hidden lg:flex w-80 fixed left-0 top-0 bottom-0 bg-black/20 backdrop-blur-xl border-r border-white/10">
-        <div className="p-8 flex flex-col h-full">
+      <div className="hidden lg:flex w-52 fixed left-0 top-0 bottom-0 bg-black/20 backdrop-blur-xl border-r border-white/10">
+        <div className="p-6 flex flex-col h-full">
           {/* Enhanced Logo */}
           <div className="flex items-center mb-12">
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-2xl mr-4 relative">
@@ -591,7 +591,7 @@ export default function CompleteKickAssHomepage() {
             <div>
               <h1 className="text-white text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">MarketDZ</h1>
               <p className="text-white/60 text-sm flex items-center">
-                <Sparkles className="w-3 h-3 mr-1" />
+                <span className="mr-1 text-base">🇩🇿</span>
                 Algeria's Premier
               </p>
             </div>
@@ -759,7 +759,7 @@ export default function CompleteKickAssHomepage() {
       </div>
 
       {/* Main Content */}
-      <div className="lg:ml-80 min-h-screen">
+      <div className="lg:ml-52 min-h-screen">
         <div className="p-8 pt-24 lg:pt-8">
           {/* Enhanced Hero Section */}
           <div className="relative mb-16 rounded-3xl overflow-hidden shadow-2xl">
