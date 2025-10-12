@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     // Use admin client for database operations to bypass RLS
     const adminSupabase = createSupabaseAdminClient()
     const { data: currentAdmin } = await adminSupabase
-      .from('admin_users' as any)
+      .from('admin_users')
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     // Get all admin users
     const { data: adminUsers, error: adminError } = await adminSupabase
-      .from('admin_users' as any)
+      .from('admin_users')
       .select(`
         *,
         profiles:user_id (
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     // Use admin client for database operations to bypass RLS
     const adminSupabase = createSupabaseAdminClient()
     const { data: currentAdmin } = await adminSupabase
-      .from('admin_users' as any)
+      .from('admin_users')
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
         }
 
         const { error: promoteError } = await adminSupabase
-          .from('admin_users' as any)
+          .from('admin_users')
           .insert({
             user_id: userId,
             role: role,
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
         }
 
         const { error: updateError } = await adminSupabase
-          .from('admin_users' as any)
+          .from('admin_users')
           .update({ role: newRole })
           .eq('id', adminUserId)
 
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
         }
 
         const { error: deactivateError } = await adminSupabase
-          .from('admin_users' as any)
+          .from('admin_users')
           .update({ is_active: false })
           .eq('id', adminUserId)
 

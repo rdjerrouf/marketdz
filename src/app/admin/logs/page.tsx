@@ -10,7 +10,7 @@ interface ActivityLog {
   action: string
   resource_type: string
   resource_id?: string
-  details?: any
+  details?: Record<string, unknown> | null
   ip_address?: string
   user_agent?: string
   status: 'success' | 'failed' | 'pending'

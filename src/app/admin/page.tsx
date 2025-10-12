@@ -10,7 +10,7 @@ interface DashboardStats {
   pendingListings: number
   totalRevenue: number
   monthlyActiveUsers: number
-  recentActivity: any[]
+  recentActivity: Array<Record<string, unknown>>
 }
 
 export default function AdminDashboard() {

@@ -3,6 +3,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { smartRateLimit } from '@/lib/rate-limit/database';
 
+interface FavoriteWithListing {
+  id: string
+  created_at: string
+  listing_id: string
+  listings: {
+    id: string
+    title: string
+    description: string | null
+    price: number | null
+    category: string
+    location_wilaya: string
+    location_city: string
+    photos: string[]
+    created_at: string
+    user_id: string
+    status: string
+    profiles: {
+      first_name: string
+      last_name: string
+      avatar_url: string | null
+    } | null
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Enhanced rate limiting: per-user when authenticated, fallback to per-IP
@@ -88,7 +112,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform the data
-    const transformedFavorites = (favorites || []).map((fav: any) => ({
+    const transformedFavorites = (favorites || []).map((fav: FavoriteWithListing) => ({
       favoriteId: fav.id,
       favoritedAt: fav.created_at,
       listing: {

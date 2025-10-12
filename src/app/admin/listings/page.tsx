@@ -88,7 +88,7 @@ export default function AdminListings() {
 
   const handleListingAction = async (listingId: string, action: 'approve' | 'reject' | 'delete') => {
     try {
-      const updateData: any = {}
+      const updateData: Partial<Pick<Listing, 'status'>> = {}
       
       switch (action) {
         case 'approve':

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Use RLS-protected query to check admin status
     const { data: adminUser, error: adminError } = await supabase
-      .from('admin_users' as any)
+      .from('admin_users')
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)

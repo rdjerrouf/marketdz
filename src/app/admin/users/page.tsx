@@ -302,7 +302,7 @@ export default function AdminUsers() {
             <select
               id="status-filter"
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'suspended' | 'banned')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               disabled={users.length > 0 && !users[0]?.status}
             >

@@ -118,7 +118,7 @@ export default function AdminSettings() {
     }
   }
 
-  const handlePlatformChange = (key: keyof PlatformSettings, value: any) => {
+  const handlePlatformChange = (key: keyof PlatformSettings, value: PlatformSettings[keyof PlatformSettings]) => {
     setPlatformSettings(prev => ({ ...prev, [key]: value }))
   }
 
