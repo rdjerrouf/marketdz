@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { AdminUser, AdminRole, getAdminUser, createAdminSession, verifyAdminSession } from '@/lib/admin/auth'
+import type { User } from '@supabase/supabase-js'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -24,7 +25,7 @@ const LogIcon = () => <span>📋</span>
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   console.log('🔥 ADMIN LAYOUT IS LOADING! This should appear in console!')
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -114,7 +115,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       console.log('🔄 API failed, checking admin_users table directly...')
 
       try {
-        const { data: adminRecord, error: dbError } = await (supabase as any)
+        const { data: adminRecord, error: dbError } = await supabase
           .from('admin_users')
           .select('*')
           .eq('user_id', user.id)

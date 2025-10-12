@@ -58,7 +58,7 @@ export default function AddItemPage() {
   useEffect(() => {
     const checkPWA = () => {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-      const isIOSPWA = (window.navigator as any).standalone === true
+      const isIOSPWA = 'standalone' in window.navigator && (window.navigator as { standalone?: boolean }).standalone === true
       setIsPWA(isStandalone || isIOSPWA)
     }
     checkPWA()
@@ -76,10 +76,12 @@ export default function AddItemPage() {
           setTimeout(() => reject(new Error('Session check timeout')), 5000)
         )
         
-        const { data: { session }, error: sessionError } = await Promise.race([
-          sessionPromise, 
+        const result = await Promise.race([
+          sessionPromise,
           timeoutPromise
-        ]) as any
+        ])
+
+        const { data: { session }, error: sessionError } = result as Awaited<typeof sessionPromise>
         
         if (sessionError) {
           console.error('❌ Session error:', sessionError)

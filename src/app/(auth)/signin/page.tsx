@@ -111,7 +111,7 @@ function SignInPageContent() {
         return
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign in error:', error)
       setErrors({ general: 'An error occurred. Please try again.' })
     } finally {

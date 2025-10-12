@@ -17,7 +17,7 @@ interface Listing {
   created_at: string
   user_id: string
   photos: string[]
-  metadata: any
+  metadata: Record<string, unknown> | null
   profiles?: {
     first_name: string
     last_name: string
@@ -26,7 +26,7 @@ interface Listing {
 }
 
 export default function AdminListings() {
-  const [listings, setListings] = useState<any[]>([])
+  const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'sold' | 'expired' | 'rented' | 'completed'>('all')

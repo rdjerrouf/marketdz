@@ -90,7 +90,7 @@ export default function AdminAnalytics() {
         .gte('created_at', startDate.toISOString())
         .limit(1000) // Hard limit for cost control
 
-      const locationStats = locationData?.reduce((acc: Record<string, number>, item: any) => {
+      const locationStats = locationData?.reduce((acc: Record<string, number>, item: { location_wilaya?: string }) => {
         if (item.location_wilaya) {
           acc[item.location_wilaya] = (acc[item.location_wilaya] || 0) + 1
         }
@@ -204,7 +204,7 @@ export default function AdminAnalytics() {
           <label className="text-sm text-gray-600">Time Range:</label>
           <select
             value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value as any)}
+            onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d' | '1y')}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           >
             <option value="7d">Last 7 days</option>

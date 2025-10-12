@@ -12,7 +12,7 @@ const nextConfig = {
     ],
   },
   // Exclude Supabase functions from build
-  webpack: (config: any) => {
+  webpack: (config) => {
     return config;
   },
   // External packages for server components
