@@ -1255,7 +1255,7 @@ export default function CompleteKickAssHomepage() {
           </div>
 
           {/* Enhanced Footer Section */}
-          <div className="text-center py-12 border-t border-white/10">
+          <div className="text-center py-12 border-t border-white/10 relative z-10">
             <div className="flex items-center justify-center mb-4">
               <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3">
                 <Shield className="w-6 h-6 text-white" />
