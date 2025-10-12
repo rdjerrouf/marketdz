@@ -2,9 +2,9 @@
 
 ## Summary
 - **Started with**: 189 `@typescript-eslint/no-explicit-any` warnings
-- **Current**: 162 warnings
-- **Fixed**: 27 net warnings (41 targeted fixes, 14 reverted for legitimate reasons)
-- **Remaining**: 162 warnings to fix
+- **Current**: 136 warnings
+- **Fixed**: 53 net warnings (67 targeted fixes, 14 reverted for legitimate reasons)
+- **Remaining**: 136 warnings to fix
 
 **Note**: Some `as any` uses are legitimate (admin_users table, complex Supabase types).
 Not all warnings should or can be removed.
@@ -61,7 +61,38 @@ Fixed 21 warnings (reduced total by 21):
 
 **Total warnings fixed**: 21 (many fixes addressed multiple warnings)
 
-**Commit**: (pending) - "Fix third batch of TypeScript 'any' warnings - Batch 3"
+**Commit**: `a191273` - "Fix third batch of TypeScript 'any' warnings - Batch 3"
+
+## Batch 4 - Completed ✅
+Fixed 26 warnings (reduced total by 26):
+
+**lib/search/enhanced-utils.ts (14 warnings fixed):**
+1. Added `SearchListing` interface for proper listing types
+2. Changed `listings: any[]` to `listings: SearchListing[]`
+3. Changed `filters: Record<string, any>` to `Record<string, unknown>`
+4. Changed `private supabase: any` to `SupabaseClient<Database>` (2 instances)
+5. Changed queryBuilder parameters from `any` to `unknown` with type assertions (3 methods)
+6. Changed `formatSearchResult` metadata parameter from `any` to explicit type
+7. Fixed `transformListings` method with proper type assertions for listing data
+8. Fixed forEach callback in autocomplete suggestions from `listing: any` to `unknown`
+
+**api/admin/users/route.ts (5 warnings fixed, 6 legitimate):**
+1. Created `AdminUser` interface for admin_users table data
+2. Cast currentAdmin properly on fetch (2 instances in GET and POST)
+3. Removed `(currentAdmin as any).role` casts (3 instances)
+4. Removed `(currentAdmin as any).id` and `.user_id` casts (2 instances)
+5. Note: 6 `.from('admin_users' as any)` remain - these are LEGITIMATE for tables not in schema
+
+**lib/latency.ts (7 warnings fixed):**
+1. Created `NetworkInformation` interface for browser connection API
+2. Created `NavigatorWithConnection` interface extending Navigator
+3. Created `PerformanceResourceTimingWithSize` interface
+4. Created `SlowNavigationMetrics` and `SlowResourceMetrics` interfaces
+5. Created `OptimizationRecommendation` interface
+6. Fixed navigator.connection accesses (2 instances)
+7. Fixed all method signatures using new interfaces (4 methods)
+
+**Commit**: (pending) - "Fix fourth batch of TypeScript 'any' warnings - Batch 4"
 
 ### Build Issues & Resolutions ⚠️
 
@@ -212,8 +243,9 @@ https://vercel.com/rdjerrouf/marketdz
 Latest commits pushed:
 - `ab8fed7` - Batch 1 (10 fixes, reduced by 6 warnings)
 - `b8f825f` - Batch 2 (10 fixes, reduced by 10 warnings)
-- (pending) - Batch 3 (17 fixes, reduced by 21 warnings)
+- `a191273` - Batch 3 (17 fixes, reduced by 21 warnings)
+- (pending) - Batch 4 (26 fixes, reduced by 26 warnings)
 
 ---
 *Last updated: 2025-10-12*
-*Next batch scheduled: Batch 4 - API routes and utilities*
+*Next batch scheduled: Batch 5 - Remaining files (home page, browse page, etc.)*

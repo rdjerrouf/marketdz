@@ -1,5 +1,7 @@
 // src/lib/search/enhanced-utils.ts - Production-grade search enhancements
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/supabase';
 
 export interface SearchAnalytics {
   query: string;
@@ -26,8 +28,33 @@ export interface SearchParams {
   strategy?: 'ilike' | 'trigram' | 'fulltext';
 }
 
+interface SearchListing {
+  id: string;
+  title: string;
+  description: string | null;
+  price: number | null;
+  category: string;
+  wilaya: string;
+  city: string;
+  photos: string[];
+  created_at: string;
+  user_id: string;
+  status: string;
+  view_count: number;
+  user: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    avatar_url: string | null;
+    city: string | null;
+    wilaya: string | null;
+    rating: number | null;
+    review_count: number | null;
+  } | null;
+}
+
 export interface SearchResult {
-  listings: any[];
+  listings: SearchListing[];
   pagination: {
     currentPage: number;
     totalPages: number;
@@ -36,7 +63,7 @@ export interface SearchResult {
     hasPreviousPage: boolean;
     hasCount: boolean;
   };
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
   metadata?: {
     strategy: string;
     executionTime: number;
@@ -46,9 +73,9 @@ export interface SearchResult {
 
 // Enhanced search with multiple strategies
 export class AdvancedSearchEngine {
-  private supabase: any;
-  
-  constructor(supabase: any) {
+  private supabase: SupabaseClient<Database>;
+
+  constructor(supabase: SupabaseClient<Database>) {
     this.supabase = supabase;
   }
 
@@ -130,27 +157,29 @@ export class AdvancedSearchEngine {
     }
   }
 
-  private applyFilters(queryBuilder: any, params: SearchParams) {
+  private applyFilters(queryBuilder: unknown, params: SearchParams): unknown {
+    let builder = queryBuilder as Record<string, (arg: string | number) => unknown>;
+
     if (params.category) {
-      queryBuilder = queryBuilder.eq('category', params.category);
+      builder = builder.eq('category', params.category) as typeof builder;
     }
     if (params.wilaya) {
-      queryBuilder = queryBuilder.eq('location_wilaya', params.wilaya);
+      builder = builder.eq('location_wilaya', params.wilaya) as typeof builder;
     }
     if (params.city) {
-      queryBuilder = queryBuilder.eq('location_city', params.city);
+      builder = builder.eq('location_city', params.city) as typeof builder;
     }
     if (params.minPrice !== undefined) {
-      queryBuilder = queryBuilder.gte('price', params.minPrice);
+      builder = builder.gte('price', params.minPrice) as typeof builder;
     }
     if (params.maxPrice !== undefined) {
-      queryBuilder = queryBuilder.lte('price', params.maxPrice);
+      builder = builder.lte('price', params.maxPrice) as typeof builder;
     }
-    
-    return queryBuilder;
+
+    return builder;
   }
 
-  private applySearchStrategy(queryBuilder: any, query: string, strategy: string) {
+  private applySearchStrategy(queryBuilder: unknown, query: string, strategy: string): unknown {
     const escapedQuery = this.escapeSearchQuery(query);
     
     switch (strategy) {
@@ -170,7 +199,7 @@ export class AdvancedSearchEngine {
     }
   }
 
-  private applySorting(queryBuilder: any, params: SearchParams) {
+  private applySorting(queryBuilder: unknown, params: SearchParams): unknown {
     const sortBy = params.sortBy || 'created_at';
     
     switch (sortBy) {
@@ -194,7 +223,7 @@ export class AdvancedSearchEngine {
     }
   }
 
-  private formatSearchResult(listings: any[], count: number | null, params: SearchParams, metadata: any): SearchResult {
+  private formatSearchResult(listings: unknown[], count: number | null, params: SearchParams, metadata: { strategy: string; executionTime: number }): SearchResult {
     const page = params.page || 1;
     const limit = params.limit || 20;
     const totalItems = count || 0;
@@ -223,32 +252,37 @@ export class AdvancedSearchEngine {
     };
   }
 
-  private transformListings(listings: any[]) {
-    return listings.map((listing: any) => ({
-      id: listing.id,
-      title: listing.title,
-      description: listing.description,
-      price: listing.price,
-      category: listing.category,
-      wilaya: listing.location_wilaya,
-      city: listing.location_city,
-      photos: Array.isArray(listing.photos) ?
-        listing.photos.slice(0, listing.category === 'for_rent' ? 5 : 3) : [],
-      created_at: listing.created_at,
-      user_id: listing.user_id,
-      status: listing.status,
-      view_count: 0, // Placeholder until views_count column is added
-      user: listing.profiles ? {
-        id: listing.profiles.id,
-        first_name: listing.profiles.first_name,
-        last_name: listing.profiles.last_name,
-        avatar_url: listing.profiles.avatar_url,
-        city: listing.profiles.city,
-        wilaya: listing.profiles.wilaya,
-        rating: listing.profiles.rating,
-        review_count: listing.profiles.review_count
-      } : null
-    }));
+  private transformListings(listings: unknown[]): SearchListing[] {
+    return listings.map((listing: unknown) => {
+      const l = listing as Record<string, unknown>;
+      const profiles = l.profiles as Record<string, unknown> | undefined;
+
+      return {
+        id: l.id as string,
+        title: l.title as string,
+        description: l.description as string | null,
+        price: l.price as number | null,
+        category: l.category as string,
+        wilaya: l.location_wilaya as string,
+        city: l.location_city as string,
+        photos: Array.isArray(l.photos) ?
+          (l.photos as string[]).slice(0, l.category === 'for_rent' ? 5 : 3) : [],
+        created_at: l.created_at as string,
+        user_id: l.user_id as string,
+        status: l.status as string,
+        view_count: 0, // Placeholder until views_count column is added
+        user: profiles ? {
+          id: profiles.id as string,
+          first_name: profiles.first_name as string,
+          last_name: profiles.last_name as string,
+          avatar_url: profiles.avatar_url as string | null,
+          city: profiles.city as string | null,
+          wilaya: profiles.wilaya as string | null,
+          rating: profiles.rating as number | null,
+          review_count: profiles.review_count as number | null
+        } : null
+      };
+    });
   }
 
   private escapeSearchQuery(query: string): string {
@@ -268,9 +302,9 @@ export class AdvancedSearchEngine {
 
 // Enhanced search suggestions with machine learning potential
 export class SearchSuggestionEngine {
-  private supabase: any;
-  
-  constructor(supabase: any) {
+  private supabase: SupabaseClient<Database>;
+
+  constructor(supabase: SupabaseClient<Database>) {
     this.supabase = supabase;
   }
 
@@ -290,8 +324,9 @@ export class SearchSuggestionEngine {
 
       // Extract unique words from titles
       const suggestions = new Set<string>();
-      data?.forEach((listing: any) => {
-        const words = listing.title.toLowerCase().split(/\s+/);
+      data?.forEach((listing: unknown) => {
+        const l = listing as { title: string };
+        const words = l.title.toLowerCase().split(/\s+/);
         words.forEach((word: string) => {
           if (word.includes(query.toLowerCase()) && word.length > 2) {
             suggestions.add(word);

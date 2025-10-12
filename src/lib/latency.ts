@@ -7,6 +7,44 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+interface NetworkInformation {
+  type?: string;
+  downlink?: number;
+  effectiveType?: string;
+}
+
+interface NavigatorWithConnection extends Navigator {
+  connection?: NetworkInformation;
+  mozConnection?: NetworkInformation;
+}
+
+interface PerformanceResourceTimingWithSize extends PerformanceResourceTiming {
+  transferSize?: number;
+}
+
+interface SlowNavigationMetrics {
+  dns_lookup: number;
+  tcp_connection: number;
+  ssl_negotiation: number;
+  server_response: number;
+  dom_processing: number;
+  total_load_time: number;
+}
+
+interface SlowResourceMetrics {
+  type: string;
+  url: string;
+  duration: number;
+  size: number;
+}
+
+interface OptimizationRecommendation {
+  priority: 'high' | 'medium' | 'low';
+  area: string;
+  suggestion: string;
+  arabic_suggestion: string;
+}
+
 interface PerformanceMetrics {
   database_ms: number
   storage_ms: number
@@ -43,9 +81,10 @@ class LatencyOptimizer {
   // Detect if user is in Algeria and their network conditions
   private async detectAlgeriaContext(): Promise<AlgeriaOptimizations> {
     const isMobile = /mobile|android|iphone/i.test(navigator.userAgent)
-    
+
     // Estimate connection quality
-    const connection = (navigator as any).connection || (navigator as any).mozConnection
+    const nav = navigator as NavigatorWithConnection;
+    const connection = nav.connection || nav.mozConnection
     let estimatedBandwidth: 'fast' | 'medium' | 'slow' = 'medium'
     let connectionType: 'wifi' | 'cellular' | 'unknown' = 'unknown'
 
@@ -243,7 +282,7 @@ class LatencyOptimizer {
         type: resourceType,
         url: entry.name,
         duration: entry.duration,
-        size: (entry as any).transferSize || 0
+        size: (entry as PerformanceResourceTimingWithSize).transferSize || 0
       })
     }
   }
@@ -257,12 +296,7 @@ class LatencyOptimizer {
   }
 
   // Get optimization recommendations based on current performance
-  getOptimizationRecommendations(): {
-    priority: 'high' | 'medium' | 'low'
-    area: string
-    suggestion: string
-    arabic_suggestion: string
-  }[] {
+  getOptimizationRecommendations(): OptimizationRecommendation[] {
     if (!this.metrics || !this.algeriaOptimizations) return []
 
     const recommendations = []
@@ -358,12 +392,12 @@ class LatencyOptimizer {
     }
   }
 
-  private async reportSlowNavigation(metrics: any) {
+  private async reportSlowNavigation(metrics: SlowNavigationMetrics) {
     // Report slow page loads for analysis
     console.warn('Slow navigation detected for Algeria user:', metrics)
   }
 
-  private async reportSlowResource(resource: any) {
+  private async reportSlowResource(resource: SlowResourceMetrics) {
     // Report slow resource loading
     console.warn('Slow resource detected:', resource)
   }
@@ -393,7 +427,8 @@ export function isAlgerianUser(): boolean {
 }
 
 export function getRecommendedImageQuality(): 'high' | 'medium' | 'low' {
-  const connection = (navigator as any).connection
+  const nav = navigator as NavigatorWithConnection;
+  const connection = nav.connection
   const isMobile = /mobile|android|iphone/i.test(navigator.userAgent)
   
   if (!connection) return isMobile ? 'medium' : 'high'
@@ -403,10 +438,10 @@ export function getRecommendedImageQuality(): 'high' | 'medium' | 'low' {
   return 'low'
 }
 
-// Hook for React components  
+// Hook for React components
 export function useLatencyOptimization() {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null)
-  const [recommendations, setRecommendations] = useState<any[]>([])
+  const [recommendations, setRecommendations] = useState<OptimizationRecommendation[]>([])
 
   useEffect(() => {
     // Measure performance on component mount
