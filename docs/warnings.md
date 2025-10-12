@@ -41,7 +41,9 @@ Fixed 10 targeted warnings (reduced total by 16):
 
 ### Build Issues & Resolutions ⚠️
 
-After pushing batch 1 & 2 fixes, encountered 3 build failures in Vercel:
+After pushing batch 1 & 2 fixes, encountered **6 consecutive build failures** in Vercel:
+
+**The Pattern**: Most issues stem from Supabase's generated types not recognizing nested relationships or tables outside the public schema.
 
 **Issue 1** - Webpack Config Implicit Any (commit `55cfcbc`):
 - **Error**: "Parameter 'config' implicitly has an 'any' type"
@@ -74,6 +76,13 @@ After pushing batch 1 & 2 fixes, encountered 3 build failures in Vercel:
 - **Fix**: Created proper `ActivityItem` interface with specific fields ✅
 - **File**: admin/page.tsx
 - **Result**: **This is the RIGHT fix!** Proper types instead of `any`
+
+**Issue 6** - Favorites API Nested Query (commit `8cd56dc`):
+- **Error**: "Types of property 'listings' are incompatible"
+- **Cause**: `FavoriteWithListing` interface fights Supabase generated types
+- **Fix**: Use `unknown` with type assertion pattern
+- **File**: api/favorites/route.ts
+- **Pattern**: Same as Issue #2 - this is becoming the standard approach
 
 ### Lessons Learned 📚
 
