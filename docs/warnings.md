@@ -68,6 +68,13 @@ After pushing batch 1 & 2 fixes, encountered 3 build failures in Vercel:
 - **File**: admin/listings/page.tsx
 - **Reason**: Supabase generated types don't track nested relationships properly
 
+**Issue 5** - React Keys Need Proper Types (commit `5d6d5e8`):
+- **Error**: "Type 'unknown' is not assignable to type 'Key'"
+- **Cause**: `Record<string, unknown>` items can't be used as React keys
+- **Fix**: Created proper `ActivityItem` interface with specific fields ✅
+- **File**: admin/page.tsx
+- **Result**: **This is the RIGHT fix!** Proper types instead of `any`
+
 ### Lessons Learned 📚
 
 1. **Not all `any` types can be removed safely** - Some are legitimate:
@@ -88,6 +95,20 @@ After pushing batch 1 & 2 fixes, encountered 3 build failures in Vercel:
    ```
 
 3. **Test builds locally before pushing** - Prevents Vercel build failures
+
+4. **When to create proper interfaces vs. using `any`**:
+   ```typescript
+   // ✅ CAN be properly typed - create interface
+   interface ActivityItem {
+     id: string
+     title: string
+     profiles?: { first_name: string }
+   }
+
+   // ❌ CAN'T be properly typed - use 'as any'
+   // - Tables not in schema (admin_users)
+   // - Complex nested Supabase relationships
+   ```
 
 ## Remaining Warnings by Category
 
