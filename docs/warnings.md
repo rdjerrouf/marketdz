@@ -61,10 +61,18 @@ After pushing batch 1 & 2 fixes, encountered 3 build failures in Vercel:
 - **Files**: admin/layout.tsx, api/admin/check-status, user-management, users
 - **Reason**: Admin tables are intentionally excluded from generated types
 
+**Issue 4** - Nested Supabase Relationships (commit `44a368d`):
+- **Error**: "Type missing location_city and location_wilaya properties"
+- **Cause**: Nested `profiles:user_id` relationship not in generated types
+- **Fix**: Cast query result as `any` before setState
+- **File**: admin/listings/page.tsx
+- **Reason**: Supabase generated types don't track nested relationships properly
+
 ### Lessons Learned 📚
 
 1. **Not all `any` types can be removed safely** - Some are legitimate:
    - Tables not in generated schema (admin_users)
+   - Nested Supabase relationships (profiles:user_id)
    - Complex generated types that fight explicit types
 
 2. **Use `unknown` instead of explicit types for Supabase queries**:
