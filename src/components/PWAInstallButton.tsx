@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { detectBrowserInfo } from '@/lib/browser-detection';
+import toast from 'react-hot-toast';
 
 interface PWAInstallButtonProps {
   className?: string;
@@ -12,15 +14,25 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
   const [showInstallButton, setShowInstallButton] = useState(false);
 
   useEffect(() => {
+    const browserInfo = detectBrowserInfo();
+    console.log('📱 PWAInstallButton: browserInfo =', browserInfo);
+
+    // Hide button if already installed
+    if (browserInfo.isInstalled) {
+      console.log('📱 PWAInstallButton: App is already installed - HIDING button');
+      setShowInstallButton(false);
+      return;
+    }
+
     const handleBeforeInstallPrompt = (e: any) => {
-      console.log('📱 PWA: beforeinstallprompt event fired');
+      console.log('📱 PWAInstallButton: beforeinstallprompt event fired');
       e.preventDefault();
       setDeferredPrompt(e);
       setShowInstallButton(true);
     };
 
     const handleAppInstalled = () => {
-      console.log('📱 PWA: App was installed');
+      console.log('📱 PWAInstallButton: App was installed');
       setShowInstallButton(false);
       setDeferredPrompt(null);
     };
@@ -28,10 +40,12 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Check if app is already installed
-    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-      console.log('📱 PWA: App is running in standalone mode');
-      setShowInstallButton(false);
+    // Show button for iOS Safari (doesn't fire beforeinstallprompt)
+    if (browserInfo.platform === 'ios' && browserInfo.currentBrowser === 'safari') {
+      console.log('📱 PWAInstallButton: iOS Safari detected - SHOWING install button');
+      setShowInstallButton(true);
+    } else {
+      console.log('📱 PWAInstallButton: NOT iOS Safari - platform:', browserInfo.platform, 'browser:', browserInfo.currentBrowser);
     }
 
     return () => {
@@ -41,31 +55,33 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
   }, []);
 
   const handleInstallPWA = async () => {
-    if (!deferredPrompt) {
-      console.log('📱 PWA: Manual trigger - checking install capability');
-      if ('serviceWorker' in navigator) {
-        if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
-          alert('✅ Great! MarketDZ is already installed on your device.');
-        } else {
-          // More helpful instructions based on platform
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-          if (isMobile) {
-            alert('📱 To install MarketDZ:\n\n1. Tap the Share button (⋯ or ⬆️)\n2. Select "Add to Home Screen"\n3. Tap "Add" to confirm\n\nYou\'ll then be able to launch MarketDZ like a native app!');
-          } else {
-            alert('💻 To install MarketDZ:\n\n1. Look for the install icon (⊕) in your browser\'s address bar\n2. Click it and select "Install"\n\nOr use the browser menu and select "Install MarketDZ"');
-          }
-        }
-      } else {
-        alert('⚠️ Your browser doesn\'t support app installation. Please try using Chrome, Edge, or Safari.');
-      }
+    const browserInfo = detectBrowserInfo();
+
+    // Check if already installed
+    if (browserInfo.isInstalled) {
+      toast.success('✅ MarketDZ is already installed on your device!');
       return;
     }
 
+    // If no deferred prompt, show platform-specific instructions
+    if (!deferredPrompt) {
+      console.log('📱 PWA: Manual trigger - showing instructions');
+
+      // Show custom alert with platform-specific instructions
+      alert(browserInfo.installInstructions || '⚠️ Your browser doesn\'t support app installation. Please try using Chrome, Edge, or Safari.');
+      return;
+    }
+
+    // Show native install prompt (Chrome/Edge on Android)
     console.log('📱 PWA: Showing install prompt');
     deferredPrompt.prompt();
 
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`📱 PWA: User response to install prompt: ${outcome}`);
+
+    if (outcome === 'accepted') {
+      toast.success('🎉 Thanks for installing MarketDZ!');
+    }
 
     setDeferredPrompt(null);
     setShowInstallButton(false);
@@ -85,8 +101,11 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
     }
   };
 
+  // Don't show button if already installed
+  if (!showInstallButton) return null;
+
   return (
-    <button 
+    <button
       className={`${getButtonClasses()} ${className}`}
       onClick={handleInstallPWA}
     >
@@ -94,9 +113,9 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
       </svg>
       <span className="font-medium">Install App</span>
-      {variant !== 'compact' && (
+      {variant !== 'compact' && deferredPrompt && (
         <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
-          {deferredPrompt ? 'PWA' : 'TEST'}
+          READY
         </div>
       )}
     </button>

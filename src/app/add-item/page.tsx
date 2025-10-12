@@ -52,6 +52,17 @@ export default function AddItemPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isPWA, setIsPWA] = useState(false)
+
+  // Detect if running as PWA
+  useEffect(() => {
+    const checkPWA = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      const isIOSPWA = (window.navigator as any).standalone === true
+      setIsPWA(isStandalone || isIOSPWA)
+    }
+    checkPWA()
+  }, [])
 
   // Check authentication
   useEffect(() => {
@@ -180,9 +191,9 @@ export default function AddItemPage() {
       </div>
 
       <div className="relative z-10 flex">
-      {/* Sidebar Navigation */}
-      <div className="w-64 bg-black/20 backdrop-blur-lg border-r border-white/10">
-        <div className="p-6">
+      {/* Sidebar Navigation - Hidden on mobile/PWA, visible on desktop */}
+      <div className={`hidden lg:block ${isPWA ? 'lg:w-44' : 'lg:w-64'} bg-black/20 backdrop-blur-lg border-r border-white/10`}>
+        <div className={isPWA ? 'p-4' : 'p-6'}>
           {/* Logo */}
           <div className="flex items-center mb-8">
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3 relative">
@@ -343,6 +354,29 @@ export default function AddItemPage() {
 
       {/* Main Content */}
       <div className="flex-1 p-8 overflow-auto">
+        {/* Mobile Header - Only visible when sidebar is hidden */}
+        <div className="lg:hidden mb-6">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center text-white/80 hover:text-white transition-colors group"
+            >
+              <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="font-medium">Back</span>
+            </button>
+            <div className="flex items-center">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-2 relative">
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <h1 className="text-white text-lg font-bold">MarketDZ</h1>
+            </div>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-12 relative">
           <div className="absolute top-0 right-0">

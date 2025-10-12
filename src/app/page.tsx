@@ -8,6 +8,8 @@ import { supabase } from '@/lib/supabase/client'
 import { fixPhotoUrl } from '@/lib/storage'
 import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import MobileListingCard from '@/components/common/MobileListingCard'
+import BrowserGuidanceBanner from '@/components/BrowserGuidanceBanner'
+import { detectBrowserInfo } from '@/lib/browser-detection'
 
 export default function CompleteKickAssHomepage() {
   const { user, loading } = useAuth()
@@ -29,6 +31,17 @@ export default function CompleteKickAssHomepage() {
   const [showInstallButton, setShowInstallButton] = useState(false)
   const [showComingSoonModal, setShowComingSoonModal] = useState(false)
   const [showNewTodayModal, setShowNewTodayModal] = useState(false)
+  const [isPWA, setIsPWA] = useState(false)
+
+  // Detect if running as PWA
+  useEffect(() => {
+    const checkPWA = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      const isIOSPWA = (window.navigator as any).standalone === true
+      setIsPWA(isStandalone || isIOSPWA)
+    }
+    checkPWA()
+  }, [])
 
   // Fetch user profile when user changes
   useEffect(() => {
@@ -189,18 +202,19 @@ export default function CompleteKickAssHomepage() {
           .eq('status', 'active')
 
         // Fetch listings created today
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        const { count: todayCount } = await supabase
-          .from('listings')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'active')
-          .gte('created_at', today.toISOString())
+        // NOTE: Disabled for now - Fresh Arrivals is a premium coming soon feature
+        // const today = new Date()
+        // today.setHours(0, 0, 0, 0)
+        // const { count: todayCount } = await supabase
+        //   .from('listings')
+        //   .select('*', { count: 'exact', head: true })
+        //   .eq('status', 'active')
+        //   .gte('created_at', today.toISOString())
 
         setStats({
           totalListings: totalCount || 0,
           hotDeals: 0, // Will be implemented with hot_deals feature
-          newToday: todayCount || 0
+          newToday: 0 // Disabled - premium coming soon feature
         })
 
       } catch (err) {
@@ -224,8 +238,18 @@ export default function CompleteKickAssHomepage() {
 
   // PWA Install functionality
   useEffect(() => {
+    const browserInfo = detectBrowserInfo()
+    console.log('📱 HomePage: browserInfo =', browserInfo)
+
+    // Hide button if already installed
+    if (browserInfo.isInstalled) {
+      console.log('📱 HomePage: App is already installed - HIDING button')
+      setShowInstallButton(false)
+      return
+    }
+
     const handleBeforeInstallPrompt = (e: any) => {
-      console.log('📱 PWA: beforeinstallprompt event fired')
+      console.log('📱 HomePage: beforeinstallprompt event fired')
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault()
       // Stash the event so it can be triggered later
@@ -235,7 +259,7 @@ export default function CompleteKickAssHomepage() {
     }
 
     const handleAppInstalled = () => {
-      console.log('📱 PWA: App was installed')
+      console.log('📱 HomePage: App was installed')
       // Hide install button
       setShowInstallButton(false)
       setDeferredPrompt(null)
@@ -245,14 +269,12 @@ export default function CompleteKickAssHomepage() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
 
-    // Check if app is already installed
-    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-      console.log('📱 PWA: App is running in standalone mode')
-      setShowInstallButton(false)
-    } else {
-      // Not installed - show install button immediately for testing
-      // This helps when beforeinstallprompt hasn't fired yet
+    // Show button for iOS Safari (doesn't fire beforeinstallprompt)
+    if (browserInfo.platform === 'ios' && browserInfo.currentBrowser === 'safari') {
+      console.log('📱 HomePage: iOS Safari detected - SHOWING install button')
       setShowInstallButton(true)
+    } else {
+      console.log('📱 HomePage: NOT iOS Safari - platform:', browserInfo.platform, 'browser:', browserInfo.currentBrowser)
     }
 
     return () => {
@@ -341,20 +363,23 @@ export default function CompleteKickAssHomepage() {
   }
 
   const handleInstallPWA = async () => {
-    if (!deferredPrompt) {
-      console.log('📱 PWA: No deferred prompt available - using fallback')
-      // Check if already installed
-      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-        alert('📱 App is already installed!')
-        return
-      }
-      // Show instructions for manual install
-      alert('📱 To install:\n\n1. Tap the menu (⋮) in your browser\n2. Select "Add to Home screen" or "Install app"\n3. Enjoy the app!')
+    const browserInfo = detectBrowserInfo()
+
+    // Check if already installed
+    if (browserInfo.isInstalled) {
+      alert('✅ MarketDZ is already installed on your device!')
       return
     }
 
+    // If no deferred prompt, show platform-specific instructions
+    if (!deferredPrompt) {
+      console.log('📱 PWA: Manual trigger - showing instructions')
+      alert(browserInfo.installInstructions || '⚠️ Your browser doesn\'t support app installation. Please try using Chrome, Edge, or Safari.')
+      return
+    }
+
+    // Show native install prompt (Chrome/Edge on Android)
     console.log('📱 PWA: Showing install prompt')
-    // Show the install prompt
     deferredPrompt.prompt()
 
     // Wait for the user to respond to the prompt
@@ -438,13 +463,15 @@ export default function CompleteKickAssHomepage() {
             {sidebarOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
           </button>
         </div>
+        {/* Browser Guidance Banner - between header and content */}
+        <BrowserGuidanceBanner />
       </div>
 
       {/* Enhanced Mobile Sidebar */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)}>
           <div
-            className="fixed left-0 top-0 bottom-0 w-52 bg-black/30 backdrop-blur-xl border-r border-white/10 p-6"
+            className={`fixed left-0 top-0 bottom-0 ${isPWA ? 'w-44' : 'w-52'} bg-black/30 backdrop-blur-xl border-r border-white/10 p-4`}
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center mb-8 mt-16">
