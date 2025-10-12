@@ -76,7 +76,8 @@ export default function AdminListings() {
 
       if (error) throw error
 
-      setListings(data || [])
+      // Type assertion needed - Supabase generated types don't recognize nested profiles relationship
+      setListings((data as any) || [])
       setTotalPages(Math.ceil((count || 0) / listingsPerPage))
 
     } catch (error) {
