@@ -112,32 +112,35 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform the data
-    const transformedFavorites = (favorites || []).map((fav: FavoriteWithListing) => ({
-      favoriteId: fav.id,
-      favoritedAt: fav.created_at,
+    // Use unknown type with assertion - Supabase generated types don't recognize nested listings relationship
+    const transformedFavorites = (favorites || []).map((fav: unknown) => {
+      const typedFav = fav as FavoriteWithListing
+      return ({
+      favoriteId: typedFav.id,
+      favoritedAt: typedFav.created_at,
       listing: {
-        id: fav.listings.id,
-        title: fav.listings.title,
-        description: fav.listings.description,
-        price: fav.listings.price,
-        category: fav.listings.category,
-        wilaya: fav.listings.location_wilaya,
-        city: fav.listings.location_city,
-        photos: Array.isArray(fav.listings.photos) ? fav.listings.photos.slice(0, 3) : [],
-        created_at: fav.listings.created_at,
-        user_id: fav.listings.user_id,
-        status: fav.listings.status,
-        user: fav.listings.profiles ? {
-          id: fav.listings.user_id, // Use listing's user_id since we don't select profiles.id
-          first_name: fav.listings.profiles.first_name,
-          last_name: fav.listings.profiles.last_name,
-          avatar_url: fav.listings.profiles.avatar_url,
+        id: typedFav.listings.id,
+        title: typedFav.listings.title,
+        description: typedFav.listings.description,
+        price: typedFav.listings.price,
+        category: typedFav.listings.category,
+        wilaya: typedFav.listings.location_wilaya,
+        city: typedFav.listings.location_city,
+        photos: Array.isArray(typedFav.listings.photos) ? typedFav.listings.photos.slice(0, 3) : [],
+        created_at: typedFav.listings.created_at,
+        user_id: typedFav.listings.user_id,
+        status: typedFav.listings.status,
+        user: typedFav.listings.profiles ? {
+          id: typedFav.listings.user_id, // Use listing's user_id since we don't select profiles.id
+          first_name: typedFav.listings.profiles.first_name,
+          last_name: typedFav.listings.profiles.last_name,
+          avatar_url: typedFav.listings.profiles.avatar_url,
           city: null, // Removed to reduce data transfer
           wilaya: null, // Removed to reduce data transfer
           rating: null // Removed to reduce data transfer
         } : null
       }
-    }));
+    })});
 
     // Calculate pagination with smart count strategy
     const totalItems = typeof count === 'number' ? count : undefined;
