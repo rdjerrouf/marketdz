@@ -19,6 +19,7 @@ interface Listing {
   created_at: string
   status: string
   user_id: string
+  metadata: Record<string, unknown> | null
 }
 
 interface User {
@@ -388,7 +389,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                 </div>
 
                 {/* Service Phone Display */}
-                {listing.category === 'service' && (listing as any).metadata?.service_phone && (
+                {listing.category === 'service' && listing.metadata?.service_phone && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <div className="flex items-center justify-center">
                       <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -397,10 +398,10 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                       <div className="text-center">
                         <p className="text-sm text-blue-600 font-medium">Direct Contact</p>
                         <a
-                          href={`tel:${(listing as any).metadata.service_phone}`}
+                          href={`tel:${listing.metadata.service_phone as string}`}
                           className="text-lg font-bold text-blue-800 hover:text-blue-900 transition-colors"
                         >
-                          {(listing as any).metadata.service_phone}
+                          {listing.metadata.service_phone as string}
                         </a>
                       </div>
                     </div>
@@ -408,7 +409,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                 )}
 
                 {/* Job Application Contact Info */}
-                {listing.category === 'job' && ((listing as any).metadata?.application_email || (listing as any).metadata?.application_phone || (listing as any).metadata?.application_instructions) && (
+                {listing.category === 'job' && listing.metadata && (listing.metadata.application_email || listing.metadata.application_phone || listing.metadata.application_instructions) && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                     <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center">
                       <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -417,38 +418,38 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                       How to Apply
                     </h4>
                     <div className="space-y-2">
-                      {(listing as any).metadata.application_email && (
+                      {listing.metadata.application_email && (
                         <div className="flex items-center">
                           <svg className="w-4 h-4 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
                           <a
-                            href={`mailto:${(listing as any).metadata.application_email}`}
+                            href={`mailto:${listing.metadata.application_email as string}`}
                             className="text-green-700 hover:text-green-800 transition-colors"
                           >
-                            {(listing as any).metadata.application_email}
+                            {listing.metadata.application_email as string}
                           </a>
                         </div>
                       )}
-                      {(listing as any).metadata.application_phone && (
+                      {listing.metadata.application_phone && (
                         <div className="space-y-2">
                           <div className="flex items-center">
                             <svg className="w-4 h-4 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                             </svg>
                             <span className="text-green-700 font-medium">
-                              {(listing as any).metadata.application_phone}
+                              {listing.metadata.application_phone as string}
                             </span>
                           </div>
                           <div className="flex space-x-2">
                             <a
-                              href={`tel:${(listing as any).metadata.application_phone}`}
+                              href={`tel:${listing.metadata.application_phone as string}`}
                               className="flex-1 inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-lg hover:bg-green-200 transition-colors"
                             >
                               📞 Call
                             </a>
                             <a
-                              href={`https://wa.me/${(listing as any).metadata.application_phone.replace(/\D/g, '')}?text=Hi! I'm interested in the ${listing.title} position at ${(listing as any).metadata.company_name || 'your company'}.`}
+                              href={`https://wa.me/${(listing.metadata.application_phone as string).replace(/\D/g, '')}?text=Hi! I'm interested in the ${listing.title} position at ${(listing.metadata.company_name as string) || 'your company'}.`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex-1 inline-flex items-center justify-center px-3 py-1 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors"
@@ -458,11 +459,11 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                           </div>
                         </div>
                       )}
-                      {(listing as any).metadata.application_instructions && (
+                      {listing.metadata.application_instructions && (
                         <div className="mt-3 pt-3 border-t border-green-200">
                           <p className="text-sm text-green-700 font-medium mb-1">Application Instructions:</p>
                           <p className="text-sm text-green-800 whitespace-pre-wrap">
-                            {(listing as any).metadata.application_instructions}
+                            {listing.metadata.application_instructions as string}
                           </p>
                         </div>
                       )}

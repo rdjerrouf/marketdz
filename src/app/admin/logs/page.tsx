@@ -289,7 +289,7 @@ export default function AdminLogsPage() {
                 <label className="text-sm font-medium text-gray-700">Status:</label>
                 <select
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value as any)}
+                  onChange={(e) => setFilter(e.target.value as 'all' | 'success' | 'failed' | 'pending')}
                   className="border border-gray-300 rounded px-3 py-1 text-sm"
                 >
                   <option value="all">All</option>
@@ -304,7 +304,7 @@ export default function AdminLogsPage() {
                 <label className="text-sm font-medium text-gray-700">Resource:</label>
                 <select
                   value={resourceFilter}
-                  onChange={(e) => setResourceFilter(e.target.value as any)}
+                  onChange={(e) => setResourceFilter(e.target.value as 'all' | 'users' | 'listings' | 'admin' | 'auth')}
                   className="border border-gray-300 rounded px-3 py-1 text-sm"
                 >
                   <option value="all">All</option>
@@ -320,7 +320,7 @@ export default function AdminLogsPage() {
                 <label className="text-sm font-medium text-gray-700">Time:</label>
                 <select
                   value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value as any)}
+                  onChange={(e) => setDateFilter(e.target.value as 'today' | 'week' | 'month' | 'all')}
                   className="border border-gray-300 rounded px-3 py-1 text-sm"
                 >
                   <option value="today">Today</option>

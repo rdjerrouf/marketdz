@@ -52,7 +52,7 @@ interface SearchResponse {
     hasNextPage: boolean
     hasPreviousPage: boolean
   }
-  filters: any
+  filters: Record<string, unknown>
 }
 
 function BrowsePageContent() {

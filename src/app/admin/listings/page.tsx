@@ -252,14 +252,15 @@ export default function AdminListings() {
             <select
               id="status-filter"
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'sold' | 'expired' | 'rented' | 'completed')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               <option value="all">All Listings</option>
               <option value="active">Active</option>
-              <option value="pending">Pending</option>
               <option value="sold">Sold</option>
               <option value="expired">Expired</option>
+              <option value="rented">Rented</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
         </div>
@@ -359,7 +360,7 @@ export default function AdminListings() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-                      {(listing.status as any) === 'pending' && (
+                      {listing.status === 'active' && (
                         <>
                           <button
                             onClick={() => handleListingAction(listing.id, 'approve')}

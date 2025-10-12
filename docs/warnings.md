@@ -2,9 +2,9 @@
 
 ## Summary
 - **Started with**: 189 `@typescript-eslint/no-explicit-any` warnings
-- **Current**: 183 warnings
-- **Fixed**: 6 net warnings (20 targeted fixes, 14 reverted for legitimate reasons)
-- **Remaining**: 183 warnings to fix
+- **Current**: 162 warnings
+- **Fixed**: 27 net warnings (41 targeted fixes, 14 reverted for legitimate reasons)
+- **Remaining**: 162 warnings to fix
 
 **Note**: Some `as any` uses are legitimate (admin_users table, complex Supabase types).
 Not all warnings should or can be removed.
@@ -38,6 +38,30 @@ Fixed 10 targeted warnings (reduced total by 16):
 10. `api/favorites:91` - Added `FavoriteWithListing` interface
 
 **Commit**: `b8f825f` - "Fix second batch of 10 TypeScript 'any' warnings"
+
+## Batch 3 - Completed ✅
+Fixed 21 warnings (reduced total by 21):
+1. `admin/listings:254` - Changed filter select cast from `as any` to explicit union type
+2. `admin/listings:32` - Updated filterStatus state type to match select options (added 'pending')
+3. `admin/listings:362` - Removed `as any` cast from status comparison (changed 'pending' to 'active')
+4. `admin/logs:292` - Changed status filter cast to explicit union type
+5. `admin/logs:307` - Changed resource filter cast to explicit union type
+6. `admin/logs:323` - Changed date filter cast to explicit union type
+7. `browse/[id]:22` - Added `metadata: Record<string, unknown> | null` to Listing interface
+8. `browse/[id]:392` - Removed `as any` from service_phone condition check
+9. `browse/[id]:401` - Changed to `listing.metadata.service_phone as string`
+10. `browse/[id]:404` - Changed to `listing.metadata.service_phone as string`
+11. `browse/[id]:412` - Removed `as any` from job metadata condition checks (3 properties)
+12. `browse/[id]:421-430` - Fixed application_email metadata access (2 instances)
+13. `browse/[id]:434-441` - Fixed application_phone metadata access (3 instances)
+14. `browse/[id]:446` - Fixed application_phone in tel: link
+15. `browse/[id]:452` - Fixed application_phone in WhatsApp link (2 casts)
+16. `browse/[id]:462-466` - Fixed application_instructions metadata access (2 instances)
+17. `browse/page:55` - Changed SearchResponse filters from `any` to `Record<string, unknown>`
+
+**Total warnings fixed**: 21 (many fixes addressed multiple warnings)
+
+**Commit**: (pending) - "Fix third batch of TypeScript 'any' warnings - Batch 3"
 
 ### Build Issues & Resolutions ⚠️
 
@@ -160,17 +184,17 @@ After pushing batch 1 & 2 fixes, encountered **6 consecutive build failures** in
 
 ## Next Steps
 
-**Batch 3** should target:
-1. `admin/listings/page.tsx:254` - Update handler type
-2. `admin/listings/page.tsx:361` - Delete handler type
-3. `admin/logs/page.tsx:292` - Filter handler
-4. `admin/logs/page.tsx:307` - Sort handler
-5. `admin/logs/page.tsx:323` - Action handler
-6. `browse/[id]/page.tsx:391` - Review submission
-7. `browse/[id]/page.tsx:400` - Listing data
-8. `browse/[id]/page.tsx:403` - User data
-9. `browse/[id]/page.tsx:411` - Multiple handlers
-10. `browse/page.tsx:55` - Search params
+**Batch 4** should target:
+1. `browse/[id]/page.tsx` - Remaining warnings (check current line numbers)
+2. `browse/page.tsx` - Additional warnings (check current line numbers)
+3. `api/admin/user-management/route.ts` - 6 warnings
+4. `api/admin/users/route.ts` - 10 warnings
+5. `api/listings/route.ts` - 2 warnings
+6. `api/messages/[conversationId]/route.ts` - 3 warnings
+7. `api/search/analytics/route.ts` - 6 warnings
+8. `lib/search/enhanced-utils.ts` - 14 warnings
+9. `lib/latency.ts` - 7 warnings
+10. `lib/notifications/push.ts` - 7 warnings
 
 ## Testing Notes
 
@@ -186,9 +210,10 @@ Push triggers automatic Vercel deployment. Monitor at:
 https://vercel.com/rdjerrouf/marketdz
 
 Latest commits pushed:
-- `ab8fed7` - Batch 1 (10 fixes)
-- `b8f825f` - Batch 2 (10 fixes)
+- `ab8fed7` - Batch 1 (10 fixes, reduced by 6 warnings)
+- `b8f825f` - Batch 2 (10 fixes, reduced by 10 warnings)
+- (pending) - Batch 3 (17 fixes, reduced by 21 warnings)
 
 ---
 *Last updated: 2025-10-12*
-*Next batch scheduled: When requested by user*
+*Next batch scheduled: Batch 4 - API routes and utilities*
