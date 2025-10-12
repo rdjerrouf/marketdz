@@ -18,10 +18,6 @@ interface NavigatorWithConnection extends Navigator {
   mozConnection?: NetworkInformation;
 }
 
-interface PerformanceResourceTimingWithSize extends PerformanceResourceTiming {
-  transferSize?: number;
-}
-
 interface SlowNavigationMetrics {
   dns_lookup: number;
   tcp_connection: number;
@@ -282,7 +278,7 @@ class LatencyOptimizer {
         type: resourceType,
         url: entry.name,
         duration: entry.duration,
-        size: (entry as PerformanceResourceTimingWithSize).transferSize || 0
+        size: entry.transferSize || 0
       })
     }
   }

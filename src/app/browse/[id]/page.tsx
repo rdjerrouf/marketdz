@@ -100,7 +100,10 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
         }
 
         console.log('Listing data:', listingData)
-        setListing(listingData)
+        setListing({
+          ...listingData,
+          metadata: listingData.metadata as Record<string, unknown> | null
+        })
 
         // Fetch seller profile
         const { data: sellerData, error: sellerError } = await supabase
@@ -388,7 +391,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                 </div>
 
                 {/* Service Phone Display */}
-                {listing.category === 'service' && listing.metadata?.service_phone && (
+                {listing.category === 'service' && !!listing.metadata?.service_phone && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <div className="flex items-center justify-center">
                       <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -408,7 +411,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                 )}
 
                 {/* Job Application Contact Info */}
-                {listing.category === 'job' && listing.metadata && (listing.metadata.application_email || listing.metadata.application_phone || listing.metadata.application_instructions) && (
+                {listing.category === 'job' && listing.metadata && (!!listing.metadata.application_email || !!listing.metadata.application_phone || !!listing.metadata.application_instructions) && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                     <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center">
                       <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -417,7 +420,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                       How to Apply
                     </h4>
                     <div className="space-y-2">
-                      {listing.metadata.application_email && (
+                      {!!listing.metadata.application_email && (
                         <div className="flex items-center">
                           <svg className="w-4 h-4 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -430,7 +433,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                           </a>
                         </div>
                       )}
-                      {listing.metadata.application_phone && (
+                      {!!listing.metadata.application_phone && (
                         <div className="space-y-2">
                           <div className="flex items-center">
                             <svg className="w-4 h-4 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -458,7 +461,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                           </div>
                         </div>
                       )}
-                      {listing.metadata.application_instructions && (
+                      {!!listing.metadata.application_instructions && (
                         <div className="mt-3 pt-3 border-t border-green-200">
                           <p className="text-sm text-green-700 font-medium mb-1">Application Instructions:</p>
                           <p className="text-sm text-green-800 whitespace-pre-wrap">

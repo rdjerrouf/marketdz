@@ -18,6 +18,7 @@ interface Profile {
   avatar_url: string | null;
   city: string | null;
   wilaya: string | null;
+  rating: number | null;
 }
 
 interface Listing {
@@ -25,9 +26,11 @@ interface Listing {
   title: string;
   description: string | null;
   price: number | null;
-  category: string;
+  category: 'for_sale' | 'job' | 'service' | 'for_rent';
   photos: string[];
   created_at: string;
+  status: string;
+  user_id: string;
   is_hot_deal?: boolean;
 }
 

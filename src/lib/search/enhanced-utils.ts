@@ -126,15 +126,15 @@ export class AdvancedSearchEngine {
         .eq('status', 'active');
 
       // Apply filters
-      queryBuilder = this.applyFilters(queryBuilder, params);
-      
+      queryBuilder = this.applyFilters(queryBuilder, params) as typeof queryBuilder;
+
       // Apply search strategy
       if (params.query) {
-        queryBuilder = this.applySearchStrategy(queryBuilder, params.query, strategy);
+        queryBuilder = this.applySearchStrategy(queryBuilder, params.query, strategy) as typeof queryBuilder;
       }
-      
+
       // Apply sorting with enhanced options
-      queryBuilder = this.applySorting(queryBuilder, params);
+      queryBuilder = this.applySorting(queryBuilder, params) as typeof queryBuilder;
       
       // Apply pagination
       const offset = ((params.page || 1) - 1) * (params.limit || 20);
@@ -158,68 +158,73 @@ export class AdvancedSearchEngine {
   }
 
   private applyFilters(queryBuilder: unknown, params: SearchParams): unknown {
-    let builder = queryBuilder as Record<string, (arg: string | number) => unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let builder = queryBuilder as any;
 
     if (params.category) {
-      builder = builder.eq('category', params.category) as typeof builder;
+      builder = builder.eq('category', params.category);
     }
     if (params.wilaya) {
-      builder = builder.eq('location_wilaya', params.wilaya) as typeof builder;
+      builder = builder.eq('location_wilaya', params.wilaya);
     }
     if (params.city) {
-      builder = builder.eq('location_city', params.city) as typeof builder;
+      builder = builder.eq('location_city', params.city);
     }
     if (params.minPrice !== undefined) {
-      builder = builder.gte('price', params.minPrice) as typeof builder;
+      builder = builder.gte('price', params.minPrice);
     }
     if (params.maxPrice !== undefined) {
-      builder = builder.lte('price', params.maxPrice) as typeof builder;
+      builder = builder.lte('price', params.maxPrice);
     }
 
     return builder;
   }
 
   private applySearchStrategy(queryBuilder: unknown, query: string, strategy: string): unknown {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const builder = queryBuilder as any;
     const escapedQuery = this.escapeSearchQuery(query);
-    
+
     switch (strategy) {
       case 'ilike':
-        return queryBuilder.or(`title.ilike.%${escapedQuery}%,description.ilike.%${escapedQuery}%`);
-      
+        return builder.or(`title.ilike.%${escapedQuery}%,description.ilike.%${escapedQuery}%`);
+
       case 'trigram':
         // Use trigram similarity with threshold
-        return queryBuilder.or(`title % ${escapedQuery}, description % ${escapedQuery}`);
-      
+        return builder.or(`title % ${escapedQuery}, description % ${escapedQuery}`);
+
       case 'fulltext':
         const ftsQuery = this.buildFullTextQuery(query);
-        return queryBuilder.textSearch('search_vector', ftsQuery);
-      
+        return builder.textSearch('search_vector', ftsQuery);
+
       default:
-        return queryBuilder.or(`title.ilike.%${escapedQuery}%,description.ilike.%${escapedQuery}%`);
+        return builder.or(`title.ilike.%${escapedQuery}%,description.ilike.%${escapedQuery}%`);
     }
   }
 
   private applySorting(queryBuilder: unknown, params: SearchParams): unknown {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const builder = queryBuilder as any;
     const sortBy = params.sortBy || 'created_at';
-    
+
     switch (sortBy) {
       case 'price_asc':
-        return queryBuilder.order('price', { ascending: true });
+        return builder.order('price', { ascending: true });
       case 'price_desc':
-        return queryBuilder.order('price', { ascending: false });
+        return builder.order('price', { ascending: false });
       case 'popularity':
         // Fall back to created_at since views_count doesn't exist yet
-        return queryBuilder.order('created_at', { ascending: false });
+        return builder.order('created_at', { ascending: false });
       case 'rating':
-        return queryBuilder.order('profiles.rating', { ascending: false });
+        return builder.order('profiles.rating', { ascending: false });
       case 'relevance':
         // For full-text search, order by rank
         if (params.query) {
-          return queryBuilder.order('ts_rank(search_vector, plainto_tsquery($1))', { ascending: false });
+          return builder.order('ts_rank(search_vector, plainto_tsquery($1))', { ascending: false });
         }
-        return queryBuilder.order('created_at', { ascending: false });
+        return builder.order('created_at', { ascending: false });
       default:
-        return queryBuilder.order('created_at', { ascending: false });
+        return builder.order('created_at', { ascending: false });
     }
   }
 
