@@ -1263,18 +1263,27 @@ export default function CompleteKickAssHomepage() {
               <h3 className="text-white text-lg font-semibold">MarketDZ</h3>
             </div>
             <p className="text-white/60 mb-4">Algeria's premier marketplace connecting buyers and sellers nationwide</p>
-            <div className="flex justify-center space-x-6 text-white/40 text-sm">
+            <div className="flex justify-center space-x-6 text-white/40 text-sm relative z-20">
               <span>© 2025 MarketDZ</span>
               <span>•</span>
-              <Link href="/privacy" className="hover:text-white hover:underline transition-colors cursor-pointer">
+              <Link
+                href="/privacy"
+                className="hover:text-white hover:underline transition-colors cursor-pointer inline-block pointer-events-auto"
+              >
                 Privacy Policy
               </Link>
               <span>•</span>
-              <Link href="/terms" className="hover:text-white hover:underline transition-colors cursor-pointer">
+              <Link
+                href="/terms"
+                className="hover:text-white hover:underline transition-colors cursor-pointer inline-block pointer-events-auto"
+              >
                 Terms of Service
               </Link>
               <span>•</span>
-              <Link href="/help" className="hover:text-white hover:underline transition-colors cursor-pointer">
+              <Link
+                href="/help"
+                className="hover:text-white hover:underline transition-colors cursor-pointer inline-block pointer-events-auto"
+              >
                 Support
               </Link>
             </div>
