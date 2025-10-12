@@ -7,15 +7,50 @@ export const LISTING_CATEGORIES = {
     label: 'For Sale',
     labelAr: 'للبيع',
     subcategories: [
+      // Electronics & Tech
       'Electronics',
-      'Vehicles', 
-      'Real Estate',
-      'Furniture',
-      'Clothing',
-      'Sports & Leisure',
-      'Books & Media',
+      'Phones & Accessories',
+      'Computers & Tablets',
+      'Cameras & Photography',
+      'Video Games & Consoles',
+
+      // Home & Living
+      'Home Appliances',
+      'Furniture & Decor',
+      'Home & Garden',
       'Garden & DIY',
+
+      // Fashion & Personal
+      'Fashion & Accessories',
+      'Watches & Jewelry',
+      'Health & Beauty',
+
+      // Entertainment & Hobbies
+      'Sports & Outdoors',
+      'Musical Instruments',
+      'Books & Media',
+      'Toys & Games',
+      'Art & Collectibles',
+
+      // Family & Kids
       'Baby & Kids',
+
+      // Tools & Professional
+      'Tools & Equipment',
+      'Industrial Supplies & Equipment',
+
+      // Big Ticket Items
+      'Vehicles',
+      'Real Estate',
+
+      // Business & Industry
+      'Construction Materials',
+      'Agriculture',
+      'Mining',
+      'Construction',
+      'Manufacturing',
+
+      // Miscellaneous
       'Animals',
       'Other'
     ]
@@ -53,8 +88,13 @@ export const LISTING_CATEGORIES = {
       'Electrical',
       'Painting',
       'Beauty & Hair',
+      'Physical Therapy',
+      'Senior Care',
       'Translation',
       'Photography',
+      'Event Planning',
+      'Catering',
+      'IT & Tech Support',
       'Other'
     ]
   },
