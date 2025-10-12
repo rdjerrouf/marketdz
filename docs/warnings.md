@@ -2,9 +2,9 @@
 
 ## Summary
 - **Started with**: 189 `@typescript-eslint/no-explicit-any` warnings
-- **Current**: 136 warnings
-- **Fixed**: 53 net warnings (67 targeted fixes, 14 reverted for legitimate reasons)
-- **Remaining**: 136 warnings to fix
+- **Current**: 123 warnings
+- **Fixed**: 66 net warnings (80 targeted fixes, 14 reverted for legitimate reasons)
+- **Remaining**: 123 warnings to fix
 
 **Note**: Some `as any` uses are legitimate (admin_users table, complex Supabase types).
 Not all warnings should or can be removed.
@@ -92,7 +92,25 @@ Fixed 26 warnings (reduced total by 26):
 6. Fixed navigator.connection accesses (2 instances)
 7. Fixed all method signatures using new interfaces (4 methods)
 
-**Commit**: (pending) - "Fix fourth batch of TypeScript 'any' warnings - Batch 4"
+**Commit**: `0acabf1` - "Fix fourth batch of TypeScript 'any' warnings - Batch 4"
+
+## Batch 5 - In Progress ⏳
+Fixed 13 warnings so far (reduced total to 123):
+
+**lib/notifications/push.ts (7 warnings fixed):**
+1. Changed `data?: any` to `Record<string, unknown>`
+2. Changed all return type `error?: any` to `error?: unknown` (4 functions)
+3. Changed all return type `result?: any` to `result?: unknown` (2 functions)
+
+**app/page.tsx (6 warnings fixed):**
+1. Created `Profile` interface for profile state
+2. Created `Listing` interface for featured listings
+3. Created `BeforeInstallPromptEvent` interface for PWA install prompt
+4. Created `NavigatorWithStandalone` interface for iOS PWA detection
+5. Fixed PWA detection: `(navigator as any).standalone` → proper interface
+6. Fixed getCategoryBadge: `icon: any` → `icon: React.ElementType`
+
+**Commit**: (pending) - "Fix fifth batch of TypeScript 'any' warnings - Batch 5 (partial)"
 
 ### Build Issues & Resolutions ⚠️
 
@@ -244,7 +262,8 @@ Latest commits pushed:
 - `ab8fed7` - Batch 1 (10 fixes, reduced by 6 warnings)
 - `b8f825f` - Batch 2 (10 fixes, reduced by 10 warnings)
 - `a191273` - Batch 3 (17 fixes, reduced by 21 warnings)
-- (pending) - Batch 4 (26 fixes, reduced by 26 warnings)
+- `0acabf1` - Batch 4 (26 fixes, reduced by 26 warnings)
+- (pending) - Batch 5 (13 fixes so far, reduced by 13 warnings)
 
 ---
 *Last updated: 2025-10-12*

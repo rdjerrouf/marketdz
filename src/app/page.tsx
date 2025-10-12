@@ -11,10 +11,39 @@ import MobileListingCard from '@/components/common/MobileListingCard'
 import BrowserGuidanceBanner from '@/components/BrowserGuidanceBanner'
 import { detectBrowserInfo } from '@/lib/browser-detection'
 
+interface Profile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  city: string | null;
+  wilaya: string | null;
+}
+
+interface Listing {
+  id: string;
+  title: string;
+  description: string | null;
+  price: number | null;
+  category: string;
+  photos: string[];
+  created_at: string;
+  is_hot_deal?: boolean;
+}
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+interface NavigatorWithStandalone extends Navigator {
+  standalone?: boolean;
+}
+
 export default function CompleteKickAssHomepage() {
   const { user, loading } = useAuth()
-  const [profile, setProfile] = useState<any>(null)
-  const [featuredListings, setFeaturedListings] = useState<any[]>([])
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [featuredListings, setFeaturedListings] = useState<Listing[]>([])
   const [listingsLoading, setListingsLoading] = useState(true)
   const [stats, setStats] = useState({
     totalListings: 0,
@@ -27,7 +56,7 @@ export default function CompleteKickAssHomepage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [userListingsCount, setUserListingsCount] = useState(0)
   const [userFavoritesCount, setUserFavoritesCount] = useState(0)
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showInstallButton, setShowInstallButton] = useState(false)
   const [showComingSoonModal, setShowComingSoonModal] = useState(false)
   const [showNewTodayModal, setShowNewTodayModal] = useState(false)
@@ -37,7 +66,8 @@ export default function CompleteKickAssHomepage() {
   useEffect(() => {
     const checkPWA = () => {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-      const isIOSPWA = (window.navigator as any).standalone === true
+      const nav = window.navigator as NavigatorWithStandalone;
+      const isIOSPWA = nav.standalone === true
       setIsPWA(isStandalone || isIOSPWA)
     }
     checkPWA()
@@ -248,12 +278,12 @@ export default function CompleteKickAssHomepage() {
       return
     }
 
-    const handleBeforeInstallPrompt = (e: any) => {
+    const handleBeforeInstallPrompt = (e: Event) => {
       console.log('📱 HomePage: beforeinstallprompt event fired')
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault()
       // Stash the event so it can be triggered later
-      setDeferredPrompt(e)
+      setDeferredPrompt(e as BeforeInstallPromptEvent)
       // Show install button
       setShowInstallButton(true)
     }
@@ -293,7 +323,7 @@ export default function CompleteKickAssHomepage() {
   }
 
   const getCategoryBadge = (category: string) => {
-    const badges: Record<string, { text: string; color: string; emoji: string; icon: any }> = {
+    const badges: Record<string, { text: string; color: string; emoji: string; icon: React.ElementType }> = {
       'for_sale': { text: 'For Sale', color: 'from-emerald-400 to-emerald-600', emoji: '💰', icon: DollarSign },
       'for_rent': { text: 'For Rent', color: 'from-blue-400 to-blue-600', emoji: '🏠', icon: Home },
       'job': { text: 'Jobs', color: 'from-purple-400 to-purple-600', emoji: '💼', icon: User },

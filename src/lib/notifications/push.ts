@@ -10,7 +10,7 @@ export interface PushNotificationPayload {
   tag?: string
   requireInteraction?: boolean
   actions?: NotificationAction[]
-  data?: any
+  data?: Record<string, unknown>
 }
 
 export interface NotificationAction {
@@ -50,9 +50,9 @@ export const storePushSubscription = async (userId: string, subscription: PushSu
 
 // Send push notification to specific user
 export const sendPushNotification = async (
-  userId: string, 
+  userId: string,
   payload: PushNotificationPayload
-): Promise<{ success: boolean; result?: any; error?: any }> => {
+): Promise<{ success: boolean; result?: unknown; error?: unknown }> => {
   try {
     // Get subscription from temporary storage
     const subscription = pushSubscriptions.get(userId)
@@ -89,7 +89,7 @@ export const sendPushNotification = async (
 export const sendBulkPushNotification = async (
   userIds: string[],
   payload: PushNotificationPayload
-): Promise<{ success: boolean; results?: any[]; error?: any }> => {
+): Promise<{ success: boolean; results?: unknown[]; error?: unknown }> => {
   try {
     const results = await Promise.all(
       userIds.map(userId => sendPushNotification(userId, payload))
@@ -126,7 +126,7 @@ const logNotificationToProfile = async (userId: string, payload: PushNotificatio
 }
 
 // Request permission and register service worker
-export const initializePushNotifications = async (): Promise<{ success: boolean; subscription?: PushSubscription; error?: any }> => {
+export const initializePushNotifications = async (): Promise<{ success: boolean; subscription?: PushSubscription; error?: unknown }> => {
   try {
     // Check if browser supports notifications
     if (!('Notification' in window)) {
@@ -161,7 +161,7 @@ export const initializePushNotifications = async (): Promise<{ success: boolean;
 }
 
 // Unsubscribe from push notifications
-export const unsubscribeFromPush = async (userId: string): Promise<{ success: boolean; error?: any }> => {
+export const unsubscribeFromPush = async (userId: string): Promise<{ success: boolean; error?: unknown }> => {
   try {
     // Remove from temporary storage
     pushSubscriptions.delete(userId)
