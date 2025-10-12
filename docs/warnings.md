@@ -2,9 +2,12 @@
 
 ## Summary
 - **Started with**: 189 `@typescript-eslint/no-explicit-any` warnings
-- **Current**: 173 warnings
-- **Fixed**: 16 warnings across 2 batches
-- **Remaining**: 157 warnings to fix
+- **Current**: 183 warnings
+- **Fixed**: 6 net warnings (20 targeted fixes, 14 reverted for legitimate reasons)
+- **Remaining**: 183 warnings to fix
+
+**Note**: Some `as any` uses are legitimate (admin_users table, complex Supabase types).
+Not all warnings should or can be removed.
 
 ## Batch 1 - Completed ✅
 Fixed 10 targeted warnings (reduced total by 6):
@@ -35,6 +38,48 @@ Fixed 10 targeted warnings (reduced total by 16):
 10. `api/favorites:91` - Added `FavoriteWithListing` interface
 
 **Commit**: `b8f825f` - "Fix second batch of 10 TypeScript 'any' warnings"
+
+### Build Issues & Resolutions ⚠️
+
+After pushing batch 1 & 2 fixes, encountered 3 build failures in Vercel:
+
+**Issue 1** - Webpack Config Implicit Any (commit `55cfcbc`):
+- **Error**: "Parameter 'config' implicitly has an 'any' type"
+- **Cause**: Removing `: any` without explicit type caused implicit any
+- **Fix**: Added `import type { Configuration } from 'webpack'`
+
+**Issue 2** - Supabase Generated Types Conflict (commit `7aaf745`):
+- **Error**: "column 'location_wilaya' does not exist on 'listings'"
+- **Cause**: Explicit type conflicted with Supabase's generated types
+- **Fix**: Changed to `unknown` with type assertion inside callback
+- **Pattern**: Use `unknown` + assertion for Supabase query results
+
+**Issue 3** - Admin Tables Not in Schema (commit `fab9b71`):
+- **Error**: "Argument of type '\"admin_users\"' is not assignable"
+- **Cause**: `admin_users` table not in public schema type definitions
+- **Fix**: Restored `as any` for admin_users table access (legitimate use)
+- **Files**: admin/layout.tsx, api/admin/check-status, user-management, users
+- **Reason**: Admin tables are intentionally excluded from generated types
+
+### Lessons Learned 📚
+
+1. **Not all `any` types can be removed safely** - Some are legitimate:
+   - Tables not in generated schema (admin_users)
+   - Complex generated types that fight explicit types
+
+2. **Use `unknown` instead of explicit types for Supabase queries**:
+   ```typescript
+   // ❌ Fights generated types
+   .map((item: { field: string }) => ...)
+
+   // ✅ Works with generated types
+   .map((item: unknown) => {
+     const typed = item as { field: string }
+     ...
+   })
+   ```
+
+3. **Test builds locally before pushing** - Prevents Vercel build failures
 
 ## Remaining Warnings by Category
 
