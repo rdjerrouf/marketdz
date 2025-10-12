@@ -90,9 +90,10 @@ export default function AdminAnalytics() {
         .gte('created_at', startDate.toISOString())
         .limit(1000) // Hard limit for cost control
 
-      const locationStats = locationData?.reduce((acc: Record<string, number>, item: { location_wilaya?: string }) => {
-        if (item.location_wilaya) {
-          acc[item.location_wilaya] = (acc[item.location_wilaya] || 0) + 1
+      const locationStats = locationData?.reduce((acc: Record<string, number>, item: unknown) => {
+        const typedItem = item as { location_wilaya?: string }
+        if (typedItem.location_wilaya) {
+          acc[typedItem.location_wilaya] = (acc[typedItem.location_wilaya] || 0) + 1
         }
         return acc
       }, {}) || {}
