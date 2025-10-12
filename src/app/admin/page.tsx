@@ -4,13 +4,24 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 
+interface ActivityItem {
+  id: string
+  title: string
+  price: number | null
+  created_at: string
+  profiles?: {
+    first_name: string
+    last_name: string
+  }
+}
+
 interface DashboardStats {
   totalUsers: number
   totalListings: number
   pendingListings: number
   totalRevenue: number
   monthlyActiveUsers: number
-  recentActivity: Array<Record<string, unknown>>
+  recentActivity: ActivityItem[]
 }
 
 export default function AdminDashboard() {
