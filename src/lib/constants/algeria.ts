@@ -62,7 +62,7 @@ export const ALGERIA_WILAYAS: wilaya[] = [
     code: '09',
     name: 'Blida',
     nameAr: 'البليدة',
-    cities: ['Blida', 'Boufarik', 'Larbaa', 'Bougara', 'Ouled Yaich', 'Chebli', 'Mouzaia', 'Souma', 'Bouinan', 'Meftah']
+    cities: ['Blida', 'Boufarik','Benchabane', 'Larbaa', 'Bougara', 'Ouled Yaich', 'Chebli', 'Mouzaia', 'Souma', 'Bouinan', 'Meftah']
   },
   {
     code: '10',

@@ -616,7 +616,7 @@ export default function CompleteKickAssHomepage() {
               <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse border border-black/20 [animation-delay:1s]"></div>
             </div>
             <div>
-              <h1 className="text-white text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">MarketDZ</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">MarketDZ</h1>
               <p className="text-white/60 text-sm flex items-center">
                 <span className="mr-1 text-base">🇩🇿</span>
                 Algeria's Premier
