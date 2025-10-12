@@ -37,7 +37,9 @@
       "mcp__ide__getDiagnostics",
       "Bash(npx tsc:*)",
       "WebSearch",
-      "Read(///**)"
+      "Read(///**)",
+      "Bash(awk:*)",
+      "Bash(npm run lint:*)"
     ],
     "deny": [],
     "ask": []

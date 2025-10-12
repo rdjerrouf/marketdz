@@ -8,10 +8,6 @@ import { useUserRating } from '@/hooks/useReviews'
 import StarRating from '@/components/common/StarRating'
 import ContactSeller from '@/components/listings/ContactSeller'
 import { fixPhotoUrl } from '@/lib/utils'
-import type { Database } from '@/types/supabase'
-
-type Json = Database['public']['Tables']['listings']['Row']['metadata']
-
 interface Listing {
   id: string
   title: string
@@ -22,7 +18,7 @@ interface Listing {
   created_at: string
   status: string
   user_id: string
-  metadata: Json
+  metadata: Record<string, unknown> | null
 }
 
 interface User {

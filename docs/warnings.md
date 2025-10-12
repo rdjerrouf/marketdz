@@ -157,6 +157,14 @@ After pushing batch 1 & 2 fixes, encountered **6 consecutive build failures** in
 - **File**: api/favorites/route.ts
 - **Pattern**: Same as Issue #2 - this is becoming the standard approach
 
+**Issue 7** - Wrong Import Path and Json Type Too Generic (commit pending):
+- **Error 1**: "Cannot find module '@/types/supabase'"
+- **Error 2**: "Property 'service_phone' does not exist on type Json"
+- **Cause**: Used wrong import path and Json type doesn't allow property access
+- **Fix**: Changed `@/types/supabase` to `@/types/database` and reverted to `Record<string, unknown> | null`
+- **Files**: browse/[id]/page.tsx, lib/search/enhanced-utils.ts
+- **Result**: Build successful - `Record<string, unknown>` allows property access with type assertions
+
 ### Lessons Learned 📚
 
 1. **Not all `any` types can be removed safely** - Some are legitimate:

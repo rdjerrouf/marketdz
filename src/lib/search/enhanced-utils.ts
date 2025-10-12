@@ -1,7 +1,7 @@
 // src/lib/search/enhanced-utils.ts - Production-grade search enhancements
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/types/supabase';
+import type { Database } from '@/types/database';
 
 export interface SearchAnalytics {
   query: string;
