@@ -1266,11 +1266,17 @@ export default function CompleteKickAssHomepage() {
             <div className="flex justify-center space-x-6 text-white/40 text-sm">
               <span>© 2025 MarketDZ</span>
               <span>•</span>
-              <span>Privacy Policy</span>
+              <Link href="/privacy" className="hover:text-white/60 transition-colors cursor-pointer">
+                Privacy Policy
+              </Link>
               <span>•</span>
-              <span>Terms of Service</span>
+              <Link href="/terms" className="hover:text-white/60 transition-colors cursor-pointer">
+                Terms of Service
+              </Link>
               <span>•</span>
-              <span>Support</span>
+              <Link href="/help" className="hover:text-white/60 transition-colors cursor-pointer">
+                Support
+              </Link>
             </div>
           </div>
         </div>
