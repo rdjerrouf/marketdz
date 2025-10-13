@@ -147,7 +147,15 @@ export default function FavoritesPage() {
                     <div
                       key={favorite.favoriteId}
                       className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl border border-white border-opacity-20 overflow-hidden hover:bg-opacity-20 transition-all duration-200 cursor-pointer group"
-                      onClick={() => router.push(`/browse/${listing.id}`)}
+                      onClick={(e) => {
+                        // Don't navigate if clicking on favorite button or its children
+                        const target = e.target as HTMLElement
+                        if (target.closest('[data-favorite-button]')) {
+                          console.log('🚫 Card click ignored - clicked on favorite button')
+                          return
+                        }
+                        router.push(`/browse/${listing.id}`)
+                      }}
                     >
                       <div className="relative">
                         {listing.photos && listing.photos.length > 0 ? (
@@ -184,6 +192,7 @@ export default function FavoritesPage() {
 
                         <div className="absolute top-2 right-2 flex items-center space-x-2 z-10 pointer-events-auto">
                           <div
+                            data-favorite-button="true"
                             onClick={(e) => {
                               e.stopPropagation();
                               e.preventDefault();

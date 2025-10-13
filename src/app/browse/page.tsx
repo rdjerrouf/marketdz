@@ -774,7 +774,15 @@ function BrowsePageContent() {
                     <div
                       key={listing.id}
                       className="group bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl"
-                      onClick={() => router.push(`/browse/${listing.id}`)}
+                      onClick={(e) => {
+                        // Don't navigate if clicking on favorite button or its children
+                        const target = e.target as HTMLElement
+                        if (target.closest('[data-favorite-button]')) {
+                          console.log('🚫 Card click ignored - clicked on favorite button')
+                          return
+                        }
+                        router.push(`/browse/${listing.id}`)
+                      }}
                     >
                       {/* Enhanced Image Container */}
                       <div className="relative h-56 overflow-hidden">
@@ -819,6 +827,7 @@ function BrowsePageContent() {
 
                         {/* Enhanced Favorite Button */}
                         <div
+                          data-favorite-button="true"
                           className="absolute top-4 right-4 z-10 pointer-events-auto"
                           onClick={(e) => {
                             e.stopPropagation();

@@ -103,7 +103,14 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
   const categoryConfig = getCategoryConfig(listing.category)
   const CategoryIcon = categoryConfig.icon
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on favorite button or its children
+    const target = e.target as HTMLElement
+    if (target.closest('[data-favorite-button]')) {
+      console.log('🚫 Card click ignored - clicked on favorite button')
+      return
+    }
+
     if (onClick) {
       onClick()
     } else {
@@ -167,6 +174,7 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
 
         {/* Favorite Button - Top Right - Compact */}
         <div
+          data-favorite-button="true"
           className="absolute top-2 right-2 z-10 pointer-events-auto"
           onClick={(e) => {
             e.stopPropagation();
