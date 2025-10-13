@@ -104,13 +104,21 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
   const CategoryIcon = categoryConfig.icon
 
   const handleClick = (e: React.MouseEvent) => {
+    console.log('📦 MobileListingCard handleClick called');
+    console.log('  - target:', (e.target as HTMLElement).tagName, (e.target as HTMLElement).className);
+    console.log('  - currentTarget:', (e.currentTarget as HTMLElement).tagName);
+
     // Don't navigate if clicking on favorite button or its children
     const target = e.target as HTMLElement
-    if (target.closest('[data-favorite-button]')) {
+    const closestFavoriteButton = target.closest('[data-favorite-button]')
+    console.log('  - closest data-favorite-button:', closestFavoriteButton ? 'FOUND' : 'NOT FOUND');
+
+    if (closestFavoriteButton) {
       console.log('🚫 Card click ignored - clicked on favorite button')
       return
     }
 
+    console.log('📦 Navigating to listing detail page');
     if (onClick) {
       onClick()
     } else {
@@ -177,11 +185,18 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
           data-favorite-button="true"
           className="absolute top-2 right-2 z-10 pointer-events-auto"
           onClick={(e) => {
+            console.log('💚 Wrapper div onClick called');
             e.stopPropagation();
             e.preventDefault();
           }}
-          onMouseDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
+          onMouseDown={(e) => {
+            console.log('💚 Wrapper div onMouseDown called');
+            e.stopPropagation();
+          }}
+          onTouchStart={(e) => {
+            console.log('💚 Wrapper div onTouchStart called');
+            e.stopPropagation();
+          }}
         >
           <FavoriteButton
             listingId={listing.id}

@@ -33,6 +33,8 @@ export default function FavoriteButton({
   const isOwnListing = user && listingOwnerId && user.id === listingOwnerId;
 
   const handleToggle = async (e: React.MouseEvent) => {
+    console.log('🔥🔥🔥 FavoriteButton handleToggle called - BEFORE stopping propagation');
+
     // CRITICAL: Stop propagation IMMEDIATELY before any other logic
     e.stopPropagation();
     e.preventDefault();
@@ -103,14 +105,20 @@ export default function FavoriteButton({
 
   return (
     <button
-      onClick={handleToggle}
+      onClick={(e) => {
+        console.log('❤️ BUTTON onClick fired');
+        handleToggle(e);
+      }}
+      onMouseDown={(e) => {
+        console.log('❤️ BUTTON onMouseDown fired');
+      }}
       disabled={isActive}
       className={`
         inline-flex items-center justify-center rounded-full
-        transition-all duration-200 
+        transition-all duration-200
         ${sizeClasses[size]}
-        ${isFavorited 
-          ? 'bg-red-100 text-red-600 hover:bg-red-200' 
+        ${isFavorited
+          ? 'bg-red-100 text-red-600 hover:bg-red-200'
           : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-red-600'
         }
         ${isActive ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
@@ -118,7 +126,7 @@ export default function FavoriteButton({
         ${className}
       `}
       title={
-        !isAuthenticated 
+        !isAuthenticated
           ? 'Sign in to add to favorites'
           : (isFavorited ? 'Remove from favorites' : 'Add to favorites')
       }
