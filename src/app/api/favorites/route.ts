@@ -71,6 +71,8 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Optimized favorites query with field selection and smart count strategy
+    // NOTE: We don't filter by listing status - users should see all their favorites
+    // even if the listing became sold/expired. We'll show status badges in the UI.
     const needExactCount = page === 1;
     const { data: favorites, error: favoritesError, count } = await supabase
       .from('favorites')
@@ -98,7 +100,6 @@ export async function GET(request: NextRequest) {
         )
       `, { count: needExactCount ? 'exact' : 'planned' })
       .eq('user_id', user.id)
-      .eq('listings.status', 'active')
       .order('created_at', { ascending: false })
       .order('id', { ascending: false }) // Stable secondary sort
       .range(offset, offset + limit - 1);
@@ -224,17 +225,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if listing exists and is active
+    // Check if listing exists (allow favoriting any status - user might want to save expired listings)
     const { data: listing, error: listingError } = await supabase
       .from('listings')
       .select('id, user_id, status')
       .eq('id', listingId)
-      .eq('status', 'active')
       .single();
 
     if (listingError || !listing) {
       return NextResponse.json(
-        { error: 'Listing not found or not active' },
+        { error: 'Listing not found' },
         { status: 404 }
       );
     }

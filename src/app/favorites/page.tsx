@@ -162,10 +162,24 @@ export default function FavoritesPage() {
                           </div>
                         )}
                         
-                        <div className="absolute top-2 left-2">
+                        <div className="absolute top-2 left-2 flex flex-col gap-2">
                           <span className={`${categoryInfo.color} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg`}>
                             {categoryInfo.emoji} {categoryInfo.text}
                           </span>
+                          {listing.status !== 'active' && (
+                            <span className={`
+                              ${listing.status === 'sold' ? 'bg-green-600' : ''}
+                              ${listing.status === 'rented' ? 'bg-blue-600' : ''}
+                              ${listing.status === 'completed' ? 'bg-gray-600' : ''}
+                              ${listing.status === 'expired' ? 'bg-red-600' : ''}
+                              text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg uppercase
+                            `}>
+                              {listing.status === 'sold' && '✓ Sold'}
+                              {listing.status === 'rented' && '✓ Rented'}
+                              {listing.status === 'completed' && '✓ Completed'}
+                              {listing.status === 'expired' && '⏰ Expired'}
+                            </span>
+                          )}
                         </div>
 
                         <div className="absolute top-2 right-2 flex items-center space-x-2">
