@@ -167,7 +167,7 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
 
         {/* Favorite Button - Top Right - Compact */}
         <div
-          className="absolute top-2 right-2 z-10"
+          className="absolute top-2 right-2 z-10 pointer-events-auto"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();

@@ -819,7 +819,7 @@ function BrowsePageContent() {
 
                         {/* Enhanced Favorite Button */}
                         <div
-                          className="absolute top-4 right-4 z-10"
+                          className="absolute top-4 right-4 z-10 pointer-events-auto"
                           onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();

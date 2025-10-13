@@ -182,7 +182,7 @@ export default function FavoritesPage() {
                           )}
                         </div>
 
-                        <div className="absolute top-2 right-2 flex items-center space-x-2 z-10">
+                        <div className="absolute top-2 right-2 flex items-center space-x-2 z-10 pointer-events-auto">
                           <div
                             onClick={(e) => {
                               e.stopPropagation();
