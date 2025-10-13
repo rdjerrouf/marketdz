@@ -166,7 +166,15 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
         </div>
 
         {/* Favorite Button - Top Right - Compact */}
-        <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="absolute top-2 right-2 z-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
           <FavoriteButton
             listingId={listing.id}
             listingOwnerId={listing.user_id}

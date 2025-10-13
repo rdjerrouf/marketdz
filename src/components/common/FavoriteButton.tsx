@@ -33,10 +33,11 @@ export default function FavoriteButton({
   const isOwnListing = user && listingOwnerId && user.id === listingOwnerId;
 
   const handleToggle = async (e: React.MouseEvent) => {
-    // Prevent event from bubbling up to parent elements
+    // CRITICAL: Stop propagation IMMEDIATELY before any other logic
     e.stopPropagation();
     e.preventDefault();
-    
+    e.nativeEvent.stopImmediatePropagation();
+
     console.log('🔥 FavoriteButton handleToggle called');
     console.log('- isAuthenticated:', isAuthenticated);
     console.log('- isToggling:', isToggling);
@@ -44,8 +45,11 @@ export default function FavoriteButton({
     console.log('- isOwnListing:', isOwnListing);
     console.log('- user:', user ? { id: user.id } : 'null');
     console.log('- listingOwnerId:', listingOwnerId);
-    
-    if (isToggling || loading) return;
+
+    if (isToggling || loading) {
+      console.log('🔥 Blocked: already toggling or loading');
+      return;
+    }
     
     // Prevent users from favoriting their own listings
     if (isOwnListing) {

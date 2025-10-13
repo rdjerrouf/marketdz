@@ -818,7 +818,15 @@ function BrowsePageContent() {
                         </div>
 
                         {/* Enhanced Favorite Button */}
-                        <div className="absolute top-4 right-4" onClick={(e) => e.stopPropagation()}>
+                        <div
+                          className="absolute top-4 right-4 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                          }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onTouchStart={(e) => e.stopPropagation()}
+                        >
                           <FavoriteButton
                             listingId={listing.id}
                             listingOwnerId={listing.user_id}

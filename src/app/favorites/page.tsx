@@ -182,19 +182,28 @@ export default function FavoritesPage() {
                           )}
                         </div>
 
-                        <div className="absolute top-2 right-2 flex items-center space-x-2">
-                          <FavoriteButton 
-                            listingId={listing.id}
-                            listingOwnerId={listing.user_id}
-                            size="sm"
-                            className="bg-white bg-opacity-90 hover:bg-white shadow-lg"
-                            onToggle={(isFavorited) => {
-                              if (!isFavorited) {
-                                // Refresh the favorites list when an item is removed
-                                refetch()
-                              }
+                        <div className="absolute top-2 right-2 flex items-center space-x-2 z-10">
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
                             }}
-                          />
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
+                          >
+                            <FavoriteButton
+                              listingId={listing.id}
+                              listingOwnerId={listing.user_id}
+                              size="sm"
+                              className="bg-white bg-opacity-90 hover:bg-white shadow-lg"
+                              onToggle={(isFavorited) => {
+                                if (!isFavorited) {
+                                  // Refresh the favorites list when an item is removed
+                                  refetch()
+                                }
+                              }}
+                            />
+                          </div>
                           <span className="bg-black bg-opacity-60 text-white px-2 py-1 rounded-full text-xs shadow-lg">
                             {getTimeAgo(favorite.favoritedAt)}
                           </span>

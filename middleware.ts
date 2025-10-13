@@ -5,8 +5,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function middleware(request: NextRequest) {
   const start = Date.now() // Add performance timing
   console.log('🔧 Middleware: Processing request to:', request.nextUrl.pathname);
-  
-  let response = NextResponse.next({
+
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
