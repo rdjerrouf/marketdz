@@ -155,7 +155,7 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none"></div>
 
         {/* Category Badge - Top Left - Compact */}
         <div className="absolute top-2 left-2">
