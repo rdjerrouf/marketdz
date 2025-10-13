@@ -15,13 +15,13 @@ interface FavoriteButtonProps {
   onToggle?: (isFavorited: boolean) => void;
 }
 
-export default function FavoriteButton({ 
-  listingId, 
+export default function FavoriteButton({
+  listingId,
   listingOwnerId,
-  size = 'md', 
-  showText = false, 
+  size = 'md',
+  showText = false,
   className = '',
-  onToggle 
+  onToggle
 }: FavoriteButtonProps) {
   const { isFavorited, loading, toggleFavorite } = useFavoriteStatus(listingId);
   const { user } = useAuth();
@@ -31,6 +31,15 @@ export default function FavoriteButton({
 
   // Check if the current user owns this listing
   const isOwnListing = user && listingOwnerId && user.id === listingOwnerId;
+
+  console.log('🎨 FavoriteButton RENDER:', {
+    listingId,
+    isOwnListing,
+    isFavorited,
+    loading,
+    userId: user?.id?.slice(-8),
+    listingOwnerId: listingOwnerId?.slice(-8)
+  });
 
   const handleToggle = async (e: React.MouseEvent) => {
     console.log('🔥🔥🔥 FavoriteButton handleToggle called - BEFORE stopping propagation');
