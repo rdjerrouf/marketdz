@@ -55,6 +55,11 @@ export default function CompleteKickAssHomepage() {
   })
   const [searchQuery, setSearchQuery] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Debug: Log whenever sidebar state changes
+  useEffect(() => {
+    console.log('🚨 SIDEBAR STATE CHANGED:', sidebarOpen ? 'OPEN (BLOCKING CLICKS!)' : 'CLOSED (OK)');
+  }, [sidebarOpen])
   const [favorites, setFavorites] = useState(new Set(['1', '3']))
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [userListingsCount, setUserListingsCount] = useState(0)
@@ -502,7 +507,10 @@ export default function CompleteKickAssHomepage() {
 
       {/* Enhanced Mobile Sidebar */}
       {sidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)}>
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => {
+          console.log('🚨 SIDEBAR OVERLAY CLICKED - This is blocking your clicks!');
+          setSidebarOpen(false);
+        }}>
           <div
             className={`fixed left-0 top-0 bottom-0 ${isPWA ? 'w-44' : 'w-52'} bg-black/30 backdrop-blur-xl border-r border-white/10 p-4`}
             onClick={e => e.stopPropagation()}
