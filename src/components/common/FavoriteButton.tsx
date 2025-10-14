@@ -114,12 +114,10 @@ export default function FavoriteButton({
 
   return (
     <button
+      data-favorite-button="true"
       onClick={(e) => {
         console.log('❤️ BUTTON onClick fired');
         handleToggle(e);
-      }}
-      onMouseDown={(e) => {
-        console.log('❤️ BUTTON onMouseDown fired');
       }}
       disabled={isActive}
       className={`

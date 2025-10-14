@@ -1,9 +1,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Heart, Clock, MapPin, DollarSign, Home, User, Zap } from 'lucide-react'
+import { Clock, MapPin, DollarSign, Home, User, Zap } from 'lucide-react'
 import FavoriteButton from './FavoriteButton'
-import StarRating from './StarRating'
 import { fixPhotoUrl } from '@/lib/utils'
 
 interface Listing {
@@ -126,13 +125,6 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
     }
   }
 
-  const handleUserClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (listing.user?.id) {
-      router.push(`/profile/${listing.user.id}`)
-    }
-  }
-
   return (
     <div
       onClick={handleClick}
@@ -181,23 +173,7 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
         </div>
 
         {/* Favorite Button - Top Right - Compact */}
-        <div
-          data-favorite-button="true"
-          className="absolute top-2 right-2 z-10 pointer-events-auto"
-          onClick={(e) => {
-            console.log('💚 Wrapper div onClick called');
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-          onMouseDown={(e) => {
-            console.log('💚 Wrapper div onMouseDown called');
-            e.stopPropagation();
-          }}
-          onTouchStart={(e) => {
-            console.log('💚 Wrapper div onTouchStart called');
-            e.stopPropagation();
-          }}
-        >
+        <div className="absolute top-2 right-2 z-10">
           <FavoriteButton
             listingId={listing.id}
             listingOwnerId={listing.user_id}
