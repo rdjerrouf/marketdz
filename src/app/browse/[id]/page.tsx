@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase/client'
 import { useUserRating } from '@/hooks/useReviews'
 import StarRating from '@/components/common/StarRating'
 import ContactSeller from '@/components/listings/ContactSeller'
+import FavoriteButton from '@/components/common/FavoriteButton'
 import { fixPhotoUrl } from '@/lib/utils'
 interface Listing {
   id: string
@@ -243,15 +244,13 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                 </svg>
               </button>
 
-              {user && (
-                <button 
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                  aria-label="Add to favorites"
-                >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </button>
+              {user && listing && (
+                <FavoriteButton
+                  listingId={listing.id}
+                  listingOwnerId={listing.user_id}
+                  size="md"
+                  className="text-gray-600 hover:text-gray-900"
+                />
               )}
             </div>
           </div>
