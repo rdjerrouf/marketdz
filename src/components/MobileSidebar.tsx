@@ -34,8 +34,14 @@ export default function MobileSidebar({
 
   // Close sidebar when route changes
   useEffect(() => {
+    console.log('🔄 Route changed to:', pathname)
     setIsOpen(false)
   }, [pathname])
+
+  // Debug state changes
+  useEffect(() => {
+    console.log('🎯 SIDEBAR STATE:', isOpen ? 'OPEN' : 'CLOSED')
+  }, [isOpen])
 
   // Handle outside clicks and body scroll lock
   useEffect(() => {
@@ -80,7 +86,10 @@ export default function MobileSidebar({
     }
   }
 
-  const toggleSidebar = () => {
+  const toggleSidebar = (e?: React.MouseEvent | React.TouchEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
+    console.log('🔥 SIDEBAR TOGGLE FIRED! Current state:', isOpen)
     setIsOpen(!isOpen)
   }
 
@@ -89,16 +98,24 @@ export default function MobileSidebar({
       {/* Hamburger Button */}
       <button
         onClick={toggleSidebar}
+        onTouchEnd={(e) => {
+          console.log('📱 TOUCH END on button')
+          e.preventDefault()
+          e.stopPropagation()
+          toggleSidebar()
+        }}
         className="p-2 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 lg:hidden relative"
         aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
         title={isOpen ? "Close menu" : "Open menu"}
         style={{
           WebkitTapHighlightColor: 'transparent',
           touchAction: 'manipulation',
-          zIndex: 1001,
+          zIndex: 9999,
           minWidth: '44px',
           minHeight: '44px',
           pointerEvents: 'auto',
+          cursor: 'pointer',
+          position: 'relative',
         }}
       >
         {isOpen ? (
