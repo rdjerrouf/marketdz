@@ -15,6 +15,11 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { unreadCount } = useRealtimeNotifications();
 
+  // Hide Navigation on home page - it has its own MobileSidebar component
+  if (pathname === '/') {
+    return null;
+  }
+
   const isActive = (path: string) => {
     return pathname === path;
   };

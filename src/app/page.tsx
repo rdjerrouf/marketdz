@@ -507,7 +507,7 @@ export default function CompleteKickAssHomepage() {
       </div>
 
       {/* Enhanced Desktop Sidebar */}
-      <div className="hidden lg:flex w-52 fixed left-0 top-0 bottom-0 bg-black/20 backdrop-blur-xl border-r border-white/10">
+      <div className="hidden lg:flex w-52 fixed left-0 top-0 bottom-0 bg-black/20 backdrop-blur-xl border-r border-white/10 pointer-events-auto">
         <div className="p-6 flex flex-col h-full">
           {/* Enhanced Logo */}
           <div className="flex items-center mb-12">
@@ -687,7 +687,7 @@ export default function CompleteKickAssHomepage() {
       </div>
 
       {/* Main Content */}
-      <div className="lg:ml-52 min-h-screen">
+      <div className="lg:ml-52 min-h-screen pointer-events-auto">
         <div className="p-8 pt-24 lg:pt-8">
           {/* Enhanced Hero Section */}
           <div className="relative mb-16 rounded-3xl overflow-hidden shadow-2xl">

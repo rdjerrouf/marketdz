@@ -6,7 +6,7 @@ test.describe('Admin Debug Test', () => {
 
     // Go to signin page
     console.log('📍 Navigating to signin page...');
-    await page.goto('http://localhost:3003/signin');
+    await page.goto('/signin');
     await page.waitForLoadState('networkidle');
 
     // Fill credentials
@@ -24,7 +24,7 @@ test.describe('Admin Debug Test', () => {
 
     // Try to go to admin page
     console.log('📍 Navigating to admin users page...');
-    await page.goto('http://localhost:3003/admin/users');
+    await page.goto('/admin/users');
     await page.waitForTimeout(3000);
 
     console.log(`📍 Final URL: ${page.url()}`);
