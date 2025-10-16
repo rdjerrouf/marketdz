@@ -89,10 +89,6 @@ export default function MobileSidebar({
       {/* Hamburger Button */}
       <button
         onClick={toggleSidebar}
-        onTouchStart={(e) => {
-          e.stopPropagation();
-          toggleSidebar();
-        }}
         className="p-2 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 lg:hidden relative"
         aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
         title={isOpen ? "Close menu" : "Open menu"}
