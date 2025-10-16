@@ -85,7 +85,13 @@ export default function Navigation() {
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="bg-gray-50 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              style={{
+                touchAction: 'manipulation',
+                WebkitTapHighlightColor: 'transparent',
+                userSelect: 'none',
+              }}
               aria-expanded={mobileMenuOpen}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
               <span className="sr-only">
                 {mobileMenuOpen ? 'Close menu' : 'Open menu'}
@@ -98,6 +104,7 @@ export default function Navigation() {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   aria-hidden="true"
+                  style={{ pointerEvents: 'none' }}
                 >
                   <path
                     strokeLinecap="round"
@@ -114,6 +121,7 @@ export default function Navigation() {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   aria-hidden="true"
+                  style={{ pointerEvents: 'none' }}
                 >
                   <path
                     strokeLinecap="round"
@@ -130,8 +138,14 @@ export default function Navigation() {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200">
+        <div
+          className="md:hidden relative z-50"
+          style={{
+            touchAction: 'manipulation',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200 bg-white shadow-lg">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -144,6 +158,11 @@ export default function Navigation() {
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
+                  style={{
+                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent',
+                    userSelect: 'none',
+                  }}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.label}</span>
@@ -152,7 +171,12 @@ export default function Navigation() {
             })}
 
             {/* Mobile Notifications */}
-            <div className="px-3 py-2">
+            <div
+              className="px-3 py-2"
+              style={{
+                touchAction: 'manipulation',
+              }}
+            >
               <div className="relative">
                 <NotificationBell
                   onClick={() => {
