@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { isValidEmail } from '@/lib/utils'
 
@@ -14,8 +13,6 @@ interface FormErrors {
 }
 
 export default function ForgotPasswordPage() {
-  const router = useRouter()
-  
   const [formData, setFormData] = useState<FormData>({
     email: ''
   })
@@ -122,7 +119,7 @@ export default function ForgotPasswordPage() {
               </p>
               
               <p className="text-xs text-gray-500 mb-6">
-                Don't forget to check your spam folder if you don't see the email.
+                Don&apos;t forget to check your spam folder if you don&apos;t see the email.
               </p>
               
               <div className="space-y-3">
@@ -237,7 +234,7 @@ export default function ForgotPasswordPage() {
             
             <div className="text-center">
               <span className="text-sm text-gray-600">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link 
                   href="/signup" 
                   className="font-medium text-blue-600 hover:text-blue-500"

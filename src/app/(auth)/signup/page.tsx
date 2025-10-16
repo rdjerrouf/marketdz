@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import { isValidEmail, isValidAlgerianPhone } from '@/lib/utils'
-import { supabase } from '@/lib/supabase/client'
 
 interface FormData {
   email: string

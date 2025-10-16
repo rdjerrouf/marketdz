@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Menu, X, Home, User, MessageCircle, Bell, Zap, Shield, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users } from 'lucide-react'
+import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Home, User, MessageCircle, Bell, Zap, Shield, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import { fixPhotoUrl } from '@/lib/storage'
@@ -10,6 +10,7 @@ import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import MobileListingCard from '@/components/common/MobileListingCard'
 import FavoriteButton from '@/components/common/FavoriteButton'
 import BrowserGuidanceBanner from '@/components/BrowserGuidanceBanner'
+import MobileSidebar from '@/components/MobileSidebar'
 import { detectBrowserInfo } from '@/lib/browser-detection'
 
 interface Profile {
@@ -55,18 +56,6 @@ export default function CompleteKickAssHomepage() {
     newToday: 0
   })
   const [searchQuery, setSearchQuery] = useState('')
-  // TEMPORARILY DISABLED: const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false) // Force closed for debugging
-
-  // Debug: Log whenever sidebar state changes
-  useEffect(() => {
-    console.log('🚨 SIDEBAR STATE CHANGED:', sidebarOpen ? 'OPEN (BLOCKING CLICKS!)' : 'CLOSED (OK)');
-    // Force close sidebar if it somehow opens
-    if (sidebarOpen) {
-      console.log('🚨 FORCING SIDEBAR CLOSED!');
-      setSidebarOpen(false);
-    }
-  }, [sidebarOpen])
   const [favorites, setFavorites] = useState(new Set(['1', '3']))
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [userListingsCount, setUserListingsCount] = useState(0)
@@ -359,6 +348,8 @@ export default function CompleteKickAssHomepage() {
     return date.toLocaleDateString()
   }
 
+  // Note: toggleFavorite is kept for future functionality
+  // Currently using FavoriteButton component which handles favorites internally
   const toggleFavorite = (id: string): void => {
     setFavorites(prev => {
       const newFavorites = new Set(prev)
@@ -370,6 +361,8 @@ export default function CompleteKickAssHomepage() {
       return newFavorites
     })
   }
+  // Suppress unused variable warning - will be used when integrating favorite sync
+  void toggleFavorite
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -489,7 +482,7 @@ export default function CompleteKickAssHomepage() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation with Sidebar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-lg border-b border-white/10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center">
@@ -499,181 +492,19 @@ export default function CompleteKickAssHomepage() {
             </div>
             <h1 className="text-white text-xl font-bold">MarketDZ</h1>
           </div>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300"
-            aria-label={sidebarOpen ? "Close navigation menu" : "Open navigation menu"}
-            title={sidebarOpen ? "Close menu" : "Open menu"}
-          >
-            {sidebarOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
-          </button>
+          {/* Sidebar toggle button */}
+          <MobileSidebar
+            userListingsCount={userListingsCount}
+            userFavoritesCount={userFavoritesCount}
+            showInstallButton={showInstallButton}
+            onInstallPWA={handleInstallPWA}
+            deferredPrompt={deferredPrompt}
+            isPWA={isPWA}
+          />
         </div>
         {/* Browser Guidance Banner - between header and content */}
         <BrowserGuidanceBanner />
       </div>
-
-      {/* Enhanced Mobile Sidebar - TEMPORARILY DISABLED */}
-      {false && sidebarOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm cursor-pointer" 
-          onClick={(e) => {
-            console.log('🚨 SIDEBAR OVERLAY CLICKED - Closing sidebar!');
-            e.preventDefault();
-            e.stopPropagation();
-            setSidebarOpen(false);
-          }}
-          onTouchEnd={(e) => {
-            console.log('🚨 SIDEBAR OVERLAY TOUCHED - Closing sidebar!');
-            e.preventDefault();
-            setSidebarOpen(false);
-          }}
-        >
-          <div
-            className={`fixed left-0 top-0 bottom-0 ${isPWA ? 'w-44' : 'w-52'} bg-black/30 backdrop-blur-xl border-r border-white/10 p-4`}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Close button at the top */}
-            <button
-              onClick={() => {
-                console.log('🚨 CLOSE BUTTON CLICKED - Closing sidebar!');
-                setSidebarOpen(false);
-              }}
-              className="absolute top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all"
-              aria-label="Close sidebar"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
-            
-            <div className="flex items-center mb-8 mt-16">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-white text-xl font-bold">MarketDZ</h1>
-            </div>
-            
-            <nav className="space-y-3">
-              <Link href="/" className="flex items-center w-full p-4 text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl border border-purple-500/20">
-                <Home className="w-5 h-5 mr-4" />
-                <span className="font-medium">Home</span>
-                <div className="ml-auto w-2 h-2 bg-purple-400 rounded-full"></div>
-              </Link>
-              
-              <Link href="/browse" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300">
-                <Search className="w-5 h-5 mr-4" />
-                <span className="font-medium">Browse</span>
-              </Link>
-
-              {user ? (
-                <Link href="/my-listings" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300">
-                  <Grid className="w-5 h-5 mr-4" />
-                  <span className="font-medium">My Listings</span>
-                  {userListingsCount > 0 && (
-                    <div className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                      {userListingsCount}
-                    </div>
-                  )}
-                </Link>
-              ) : null}
-              
-              <Link href="/add-item" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300">
-                <Plus className="w-5 h-5 mr-4" />
-                <span className="font-medium">Create Listing</span>
-                <div className="ml-auto bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">NEW</div>
-              </Link>
-              
-              <Link href="/favorites" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300">
-                <Heart className="w-5 h-5 mr-4" />
-                <span className="font-medium">Favorites</span>
-                {userFavoritesCount > 0 && (
-                  <div className="ml-auto bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center">
-                    {userFavoritesCount}
-                  </div>
-                )}
-              </Link>
-
-              <Link href="/messages" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300">
-                <MessageCircle className="w-5 h-5 mr-4" />
-                <span className="font-medium">Messages</span>
-                <div className="ml-auto flex items-center">
-                  <div className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium mr-2">2</div>
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                </div>
-              </Link>
-
-              <Link href="/profile" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300">
-                <User className="w-5 h-5 mr-4" />
-                <span className="font-medium">Profile</span>
-              </Link>
-
-              {/* Mobile Auth Buttons */}
-              <div className="pt-4 border-t border-white/10 space-y-3">
-                {user ? (
-                  <>
-                    {/* PWA Download Button - Mobile Signed-in */}
-                    {showInstallButton && (
-                      <button
-                        className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20"
-                        onClick={handleInstallPWA}
-                      >
-                        <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <span className="font-medium">Install App</span>
-                        {deferredPrompt && (
-                          <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
-                            READY
-                          </div>
-                        )}
-                      </button>
-                    )}
-                    <button
-                      onClick={handleSignOut}
-                      className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-red-500/10 hover:text-red-300 transition-all duration-300 border border-red-500/20"
-                    >
-                    <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    <span className="font-medium">Sign Out</span>
-                  </button>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/signin" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-green-500/10 hover:text-green-300 transition-all duration-300 border border-green-500/20">
-                      <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                      </svg>
-                      <span className="font-medium">Sign In</span>
-                    </Link>
-                    <Link href="/signup" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-blue-500/10 hover:text-blue-300 transition-all duration-300 border border-blue-500/20">
-                      <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                      </svg>
-                      <span className="font-medium">Register</span>
-                    </Link>
-                    {/* PWA Download Button - Mobile */}
-                    {showInstallButton && (
-                      <button
-                        className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20"
-                        onClick={handleInstallPWA}
-                      >
-                        <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <span className="font-medium">Install App</span>
-                        {deferredPrompt && (
-                          <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
-                            READY
-                          </div>
-                        )}
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </nav>
-          </div>
-        </div>
-      )}
 
       {/* Enhanced Desktop Sidebar */}
       <div className="hidden lg:flex w-52 fixed left-0 top-0 bottom-0 bg-black/20 backdrop-blur-xl border-r border-white/10">
@@ -689,7 +520,7 @@ export default function CompleteKickAssHomepage() {
               <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">MarketDZ</h1>
               <p className="text-white/60 text-sm flex items-center">
                 <span className="mr-1 text-base">🇩🇿</span>
-                Algeria's Premier
+                Algeria&apos;s Premier
               </p>
             </div>
           </div>
@@ -878,7 +709,7 @@ export default function CompleteKickAssHomepage() {
                 <div className="flex items-center mb-4">
                   <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center shadow-lg animate-pulse">
                     <Zap className="w-4 h-4 mr-2" />
-                    Algeria's #1 Marketplace
+                    Algeria&apos;s #1 Marketplace
                   </div>
                 </div>
                 <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
@@ -886,7 +717,7 @@ export default function CompleteKickAssHomepage() {
                   <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent animate-pulse"> Deals</span>
                 </h1>
                 <p className="text-xl text-white/90 mb-8 leading-relaxed">
-                  From smartphones to apartments, jobs to services - find exactly what you're looking for in Algeria's most trusted marketplace.
+                  From smartphones to apartments, jobs to services - find exactly what you&apos;re looking for in Algeria&apos;s most trusted marketplace.
                 </p>
                 
                 {/* Enhanced Search Bar */}
@@ -1332,7 +1163,7 @@ export default function CompleteKickAssHomepage() {
               </div>
               <h3 className="text-white text-lg font-semibold">MarketDZ</h3>
             </div>
-            <p className="text-white/60 mb-4">Algeria's premier marketplace connecting buyers and sellers nationwide</p>
+            <p className="text-white/60 mb-4">Algeria&apos;s premier marketplace connecting buyers and sellers nationwide</p>
             <div className="flex justify-center space-x-6 text-white/40 text-sm relative z-20">
               <span>© 2025 MarketDZ</span>
               <span>•</span>

@@ -42,6 +42,35 @@ a,
   touch-action: manipulation;
 }
 
+/* Mobile menu button with proper touch target size */
+.mobile-menu-button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Mobile menu container */
+.mobile-menu-container {
+  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile menu item */
+.mobile-menu-item {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Disable pointer events on SVG icons inside buttons */
+.mobile-menu-button svg {
+  pointer-events: none;
+}
+
 /* Line clamp utility */
 .line-clamp-2 {
   display: -webkit-box;
