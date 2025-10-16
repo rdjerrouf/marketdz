@@ -86,24 +86,33 @@ export default function MobileSidebar({
     }
   }
 
-  const toggleSidebar = (e?: React.MouseEvent | React.TouchEvent) => {
-    e?.preventDefault()
-    e?.stopPropagation()
+  const toggleSidebar = () => {
     console.log('🔥 SIDEBAR TOGGLE FIRED! Current state:', isOpen)
-    setIsOpen(!isOpen)
+    setIsOpen(prev => {
+      console.log('🎯 Setting sidebar to:', !prev)
+      return !prev
+    })
+  }
+
+  const handleButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    // Check if this is a touch event
+    if ('touches' in e || 'changedTouches' in e) {
+      console.log('📱 TOUCH EVENT detected')
+    } else {
+      console.log('🖱️ MOUSE EVENT detected')
+    }
+    
+    toggleSidebar()
   }
 
   return (
     <>
       {/* Hamburger Button */}
       <button
-        onClick={toggleSidebar}
-        onTouchEnd={(e) => {
-          console.log('📱 TOUCH END on button')
-          e.preventDefault()
-          e.stopPropagation()
-          toggleSidebar()
-        }}
+        onPointerDown={handleButtonClick}
         className="p-2 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 lg:hidden relative"
         aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
         title={isOpen ? "Close menu" : "Open menu"}
