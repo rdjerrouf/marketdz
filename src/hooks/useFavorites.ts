@@ -192,7 +192,7 @@ export function useFavoriteStatus(listingId: string) {
   const { user, loading: authLoading } = useAuth();
   const isAuthenticated = !!user;
 
-  const checkFavoriteStatus = async () => {
+  const checkFavoriteStatus = useCallback(async () => {
     if (!isAuthenticated) {
       setIsFavorited(false);
       setFavoriteId(null);
@@ -231,16 +231,23 @@ export function useFavoriteStatus(listingId: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [listingId, isAuthenticated]);
 
   useEffect(() => {
     if (!authLoading && listingId) {
       checkFavoriteStatus();
     }
-  }, [listingId, isAuthenticated, authLoading]);
+  }, [checkFavoriteStatus, authLoading, listingId]);
 
   const toggleFavorite = async () => {
+    console.log('🔍 toggleFavorite: ========== STARTING ==========');
+    console.log('🔍 toggleFavorite: isAuthenticated =', isAuthenticated);
+    console.log('🔍 toggleFavorite: user =', user ? { id: user.id, email: user.email } : 'null');
+    console.log('🔍 toggleFavorite: listingId =', listingId);
+    console.log('🔍 toggleFavorite: isFavorited =', isFavorited);
+
     if (!isAuthenticated) {
+      console.log('🔍 toggleFavorite: User not authenticated, returning requiresAuth');
       return { 
         success: false, 
         error: 'Please sign in to add favorites',
@@ -249,11 +256,12 @@ export function useFavoriteStatus(listingId: string) {
     }
 
     try {
-      console.log('🔍 toggleFavorite: Starting...');
+      console.log('🔍 toggleFavorite: Getting session...');
       
       // Get current session to include token
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       console.log('🔍 toggleFavorite: Session:', session ? 'exists' : 'null');
+      console.log('🔍 toggleFavorite: Session error:', sessionError);
       
       const headers: Record<string, string> = {
         'Content-Type': 'application/json'
@@ -262,46 +270,78 @@ export function useFavoriteStatus(listingId: string) {
       // Add authorization header if we have a session
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
-        console.log('🔍 toggleFavorite: Added auth header');
+        console.log('🔍 toggleFavorite: Added auth header with token (first 20 chars):', session.access_token.substring(0, 20));
+      } else {
+        console.warn('🔍 toggleFavorite: No access token available!');
       }
       
       if (isFavorited) {
+        console.log('🔍 toggleFavorite: Removing from favorites...');
         // Remove from favorites
-        const response = await fetch(`/api/favorites/${listingId}`, {
+        const url = `/api/favorites/${listingId}`;
+        console.log('🔍 toggleFavorite: DELETE URL:', url);
+        
+        const response = await fetch(url, {
           method: 'DELETE',
           credentials: 'same-origin',
           headers
         });
 
+        console.log('🔍 toggleFavorite: Response status:', response.status);
+        console.log('🔍 toggleFavorite: Response ok:', response.ok);
+
         if (response.ok) {
+          const responseData = await response.json();
+          console.log('🔍 toggleFavorite: Response data:', responseData);
           setIsFavorited(false);
           setFavoriteId(null);
           return { success: true, action: 'removed' };
         } else {
           const errorData = await response.json();
+          console.error('🔍 toggleFavorite: Error response:', errorData);
           throw new Error(errorData.error || 'Failed to remove favorite');
         }
       } else {
+        console.log('🔍 toggleFavorite: Adding to favorites...');
         // Add to favorites
-        const response = await fetch('/api/favorites', {
+        const url = '/api/favorites';
+        console.log('🔍 toggleFavorite: POST URL:', url);
+        console.log('🔍 toggleFavorite: POST body:', JSON.stringify({ listingId }));
+        
+        const response = await fetch(url, {
           method: 'POST',
           credentials: 'same-origin',
           headers,
           body: JSON.stringify({ listingId })
         });
 
+        console.log('🔍 toggleFavorite: Response status:', response.status);
+        console.log('🔍 toggleFavorite: Response ok:', response.ok);
+
         if (response.ok) {
           const data = await response.json();
+          console.log('🔍 toggleFavorite: Response data:', data);
           setIsFavorited(true);
           setFavoriteId(data.favorite.id);
           return { success: true, action: 'added' };
         } else {
-          const errorData = await response.json();
+          const errorText = await response.text();
+          console.error('🔍 toggleFavorite: Error response text:', errorText);
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = { error: errorText };
+          }
+          console.error('🔍 toggleFavorite: Error data:', errorData);
           throw new Error(errorData.error || 'Failed to add favorite');
         }
       }
     } catch (error) {
-      console.error('Error toggling favorite:', error);
+      console.error('🔍 toggleFavorite: ========== ERROR ==========');
+      console.error('🔍 toggleFavorite: Error:', error);
+      console.error('🔍 toggleFavorite: Error message:', error instanceof Error ? error.message : 'Unknown');
+      console.error('🔍 toggleFavorite: Error stack:', error instanceof Error ? error.stack : 'N/A');
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'An error occurred' 

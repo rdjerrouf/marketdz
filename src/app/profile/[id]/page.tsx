@@ -92,7 +92,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
   if (profileLoading || ratingLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#06402B] flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
       </div>
     )
@@ -106,7 +106,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const canReview = user && !isOwnProfile
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+    <div className="min-h-screen bg-[#06402B]">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Back Button */}

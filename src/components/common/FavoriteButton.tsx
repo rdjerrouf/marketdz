@@ -32,15 +32,6 @@ export default function FavoriteButton({
   // Check if the current user owns this listing
   const isOwnListing = user && listingOwnerId && user.id === listingOwnerId;
 
-  console.log('🎨 FavoriteButton RENDER:', {
-    listingId,
-    isOwnListing,
-    isFavorited,
-    loading,
-    userId: user?.id?.slice(-8),
-    listingOwnerId: listingOwnerId?.slice(-8)
-  });
-
   const handleToggle = async (e: React.MouseEvent) => {
     console.log('🔥🔥🔥 FavoriteButton handleToggle called - BEFORE stopping propagation');
 
@@ -56,6 +47,7 @@ export default function FavoriteButton({
     console.log('- isOwnListing:', isOwnListing);
     console.log('- user:', user ? { id: user.id } : 'null');
     console.log('- listingOwnerId:', listingOwnerId);
+    console.log('- isFavorited:', isFavorited);
 
     if (isToggling || loading) {
       console.log('🔥 Blocked: already toggling or loading');
@@ -68,13 +60,24 @@ export default function FavoriteButton({
       alert("You can't favorite your own listing!");
       return;
     }
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      console.log('🔥 User not authenticated, showing prompt');
+      if (confirm('Please sign in to add favorites. Would you like to go to the sign in page?')) {
+        router.push('/signin');
+      }
+      return;
+    }
     
     setIsToggling(true);
+    console.log('🔥 Calling toggleFavorite...');
     try {
       const result = await toggleFavorite();
       console.log('🔥 toggleFavorite result:', result);
       
       if (result.success) {
+        console.log('🔥 Success! Action:', result.action);
         onToggle?.(result.action === 'added');
       } else if (result.requiresAuth) {
         // Show a nice message and redirect to sign in
@@ -84,11 +87,14 @@ export default function FavoriteButton({
         }
       } else {
         // Show error message (you can customize this)
-        console.error('Failed to toggle favorite:', result.error);
+        console.error('🔥 Failed to toggle favorite:', result.error);
+        alert(`Failed to toggle favorite: ${result.error}`);
       }
     } catch (error) {
-      console.error('Error toggling favorite:', error);
+      console.error('🔥 Error toggling favorite:', error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
+      console.log('🔥 Finally block - setting isToggling to false');
       setIsToggling(false);
     }
   };

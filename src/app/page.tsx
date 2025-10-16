@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase/client'
 import { fixPhotoUrl } from '@/lib/storage'
 import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import MobileListingCard from '@/components/common/MobileListingCard'
+import FavoriteButton from '@/components/common/FavoriteButton'
 import BrowserGuidanceBanner from '@/components/BrowserGuidanceBanner'
 import { detectBrowserInfo } from '@/lib/browser-detection'
 
@@ -54,11 +55,17 @@ export default function CompleteKickAssHomepage() {
     newToday: 0
   })
   const [searchQuery, setSearchQuery] = useState('')
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  // TEMPORARILY DISABLED: const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false) // Force closed for debugging
 
   // Debug: Log whenever sidebar state changes
   useEffect(() => {
     console.log('🚨 SIDEBAR STATE CHANGED:', sidebarOpen ? 'OPEN (BLOCKING CLICKS!)' : 'CLOSED (OK)');
+    // Force close sidebar if it somehow opens
+    if (sidebarOpen) {
+      console.log('🚨 FORCING SIDEBAR CLOSED!');
+      setSidebarOpen(false);
+    }
   }, [sidebarOpen])
   const [favorites, setFavorites] = useState(new Set(['1', '3']))
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -443,7 +450,7 @@ export default function CompleteKickAssHomepage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#06402B' }}>
       {/* Animated background elements with enhanced effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
@@ -505,16 +512,38 @@ export default function CompleteKickAssHomepage() {
         <BrowserGuidanceBanner />
       </div>
 
-      {/* Enhanced Mobile Sidebar */}
-      {sidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => {
-          console.log('🚨 SIDEBAR OVERLAY CLICKED - This is blocking your clicks!');
-          setSidebarOpen(false);
-        }}>
+      {/* Enhanced Mobile Sidebar - TEMPORARILY DISABLED */}
+      {false && sidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm cursor-pointer" 
+          onClick={(e) => {
+            console.log('🚨 SIDEBAR OVERLAY CLICKED - Closing sidebar!');
+            e.preventDefault();
+            e.stopPropagation();
+            setSidebarOpen(false);
+          }}
+          onTouchEnd={(e) => {
+            console.log('🚨 SIDEBAR OVERLAY TOUCHED - Closing sidebar!');
+            e.preventDefault();
+            setSidebarOpen(false);
+          }}
+        >
           <div
             className={`fixed left-0 top-0 bottom-0 ${isPWA ? 'w-44' : 'w-52'} bg-black/30 backdrop-blur-xl border-r border-white/10 p-4`}
             onClick={e => e.stopPropagation()}
           >
+            {/* Close button at the top */}
+            <button
+              onClick={() => {
+                console.log('🚨 CLOSE BUTTON CLICKED - Closing sidebar!');
+                setSidebarOpen(false);
+              }}
+              className="absolute top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all"
+              aria-label="Close sidebar"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            
             <div className="flex items-center mb-8 mt-16">
               <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3">
                 <Shield className="w-6 h-6 text-white" />
@@ -1145,21 +1174,21 @@ export default function CompleteKickAssHomepage() {
                       </div>
 
                       {/* Enhanced Favorite Button */}
-                      <button
+                      <div
+                        className="absolute top-4 right-4 z-10"
                         onClick={(e) => {
-                          e.stopPropagation()
-                          toggleFavorite(listing.id)
+                          console.log('❤️ Home page desktop favorite wrapper clicked - stopping propagation');
+                          e.stopPropagation();
+                          e.preventDefault();
                         }}
-                        className={`absolute top-4 right-4 p-2 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg ${
-                          isFavorite
-                            ? 'bg-red-500 text-white scale-110 animate-pulse'
-                            : 'bg-white/20 text-white hover:bg-white/30 hover:scale-110'
-                        }`}
-                        aria-label={isFavorite ? `Remove ${listing.title} from favorites` : `Add ${listing.title} to favorites`}
-                        title={isFavorite ? "Remove from favorites" : "Add to favorites"}
                       >
-                        <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-                      </button>
+                        <FavoriteButton
+                          listingId={listing.id}
+                          listingOwnerId={listing.user_id}
+                          size="sm"
+                          className="backdrop-blur-sm shadow-lg"
+                        />
+                      </div>
 
                       {/* Enhanced Time Badge */}
                       <div className="absolute bottom-4 right-4">

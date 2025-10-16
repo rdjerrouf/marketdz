@@ -173,7 +173,15 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
         </div>
 
         {/* Favorite Button - Top Right - Compact */}
-        <div className="absolute top-2 right-2 z-10">
+        <div 
+          className="absolute top-2 right-2 z-10"
+          data-favorite-button="true"
+          onClick={(e) => {
+            console.log('❤️ Favorite wrapper clicked - stopping propagation');
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
           <FavoriteButton
             listingId={listing.id}
             listingOwnerId={listing.user_id}
