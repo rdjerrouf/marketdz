@@ -433,31 +433,16 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                         </div>
                       )}
                       {!!listing.metadata.application_phone && (
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <svg className="w-4 h-4 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                            </svg>
-                            <span className="text-green-700 font-medium">
-                              {listing.metadata.application_phone as string}
-                            </span>
-                          </div>
-                          <div className="flex space-x-2">
-                            <a
-                              href={`tel:${listing.metadata.application_phone as string}`}
-                              className="flex-1 inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-lg hover:bg-green-200 transition-colors"
-                            >
-                              📞 Call
-                            </a>
-                            <a
-                              href={`https://wa.me/${(listing.metadata.application_phone as string).replace(/\D/g, '')}?text=Hi! I'm interested in the ${listing.title} position at ${(listing.metadata.company_name as string) || 'your company'}.`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex-1 inline-flex items-center justify-center px-3 py-1 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors"
-                            >
-                              💬 WhatsApp
-                            </a>
-                          </div>
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
+                          <a
+                            href={`tel:${listing.metadata.application_phone as string}`}
+                            className="text-green-700 hover:text-green-800 transition-colors"
+                          >
+                            {listing.metadata.application_phone as string}
+                          </a>
                         </div>
                       )}
                       {!!listing.metadata.application_instructions && (
