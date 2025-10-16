@@ -19,6 +19,20 @@ export default function Navigation() {
     return pathname === path;
   };
 
+  // Handle mobile menu toggle with touch events for better mobile support
+  const handleMenuToggle = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMobileMenuOpen(prev => !prev);
+  };
+
+  // Separate touch handler to ensure it works on mobile
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMobileMenuOpen(prev => !prev);
+  };
+
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/browse', label: 'Browse', icon: Search },
@@ -83,12 +97,15 @@ export default function Navigation() {
           <div className="md:hidden">
             <button
               type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="bg-gray-50 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              onTouchStart={handleTouchEnd}
+              onClick={handleMenuToggle}
+              className="bg-gray-50 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer active:bg-gray-200"
               style={{
                 touchAction: 'manipulation',
                 WebkitTapHighlightColor: 'transparent',
                 userSelect: 'none',
+                minWidth: '44px',
+                minHeight: '44px',
               }}
               aria-expanded={mobileMenuOpen}
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
