@@ -34,14 +34,8 @@ export default function MobileSidebar({
 
   // Close sidebar when route changes
   useEffect(() => {
-    console.log('🔄 Route changed to:', pathname)
     setIsOpen(false)
   }, [pathname])
-
-  // Debug state changes
-  useEffect(() => {
-    console.log('🎯 SIDEBAR STATE:', isOpen ? 'OPEN' : 'CLOSED')
-  }, [isOpen])
 
   // Handle outside clicks and body scroll lock
   useEffect(() => {
@@ -87,24 +81,12 @@ export default function MobileSidebar({
   }
 
   const toggleSidebar = () => {
-    console.log('🔥 SIDEBAR TOGGLE FIRED! Current state:', isOpen)
-    setIsOpen(prev => {
-      console.log('🎯 Setting sidebar to:', !prev)
-      return !prev
-    })
+    setIsOpen(prev => !prev)
   }
 
   const handleButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    
-    // Check if this is a touch event
-    if ('touches' in e || 'changedTouches' in e) {
-      console.log('📱 TOUCH EVENT detected')
-    } else {
-      console.log('🖱️ MOUSE EVENT detected')
-    }
-    
     toggleSidebar()
   }
 
