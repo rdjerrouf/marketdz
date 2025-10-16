@@ -32,29 +32,53 @@ export default function MobileSidebar({
   const router = useRouter()
   const { user, signOut } = useAuth()
 
+  // Debug: Component mounted
+  useEffect(() => {
+    console.log('🔵 [MobileSidebar] Component mounted', {
+      pathname,
+      isPWA,
+      userListingsCount,
+      userFavoritesCount,
+      hasUser: !!user
+    })
+  }, [])
+
   // Close sidebar when route changes
   useEffect(() => {
+    console.log('🔄 [MobileSidebar] Route changed, closing sidebar', { pathname })
     setIsOpen(false)
   }, [pathname])
 
   // Handle outside clicks and body scroll lock
   useEffect(() => {
+    console.log('🎯 [MobileSidebar] isOpen state changed:', isOpen)
+
     function handleClickOutside(event: MouseEvent | TouchEvent) {
+      console.log('👆 [MobileSidebar] Outside click/touch detected', {
+        eventType: event.type,
+        targetElement: (event.target as HTMLElement)?.tagName,
+        sidebarRefExists: !!sidebarRef.current
+      })
       if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        console.log('✅ [MobileSidebar] Click was outside sidebar, closing')
         setIsOpen(false)
+      } else {
+        console.log('❌ [MobileSidebar] Click was inside sidebar, ignoring')
       }
     }
 
     if (isOpen) {
+      console.log('🟢 [MobileSidebar] Sidebar is OPEN - Adding event listeners and locking scroll')
       // Add event listeners for both mouse and touch
       document.addEventListener('mousedown', handleClickOutside)
       document.addEventListener('touchstart', handleClickOutside, { passive: true })
-      
+
       // Prevent body scroll when sidebar is open
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
       document.body.style.width = '100%'
     } else {
+      console.log('🔴 [MobileSidebar] Sidebar is CLOSED - Restoring scroll')
       // Restore body scroll
       document.body.style.overflow = ''
       document.body.style.position = ''
@@ -62,6 +86,7 @@ export default function MobileSidebar({
     }
 
     return () => {
+      console.log('🧹 [MobileSidebar] Cleanup - Removing event listeners')
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('touchstart', handleClickOutside)
       document.body.style.overflow = ''
@@ -80,21 +105,102 @@ export default function MobileSidebar({
     }
   }
 
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
   const toggleSidebar = () => {
-    setIsOpen(prev => !prev)
+    console.log('🔄 [MobileSidebar] toggleSidebar called - Current state:', isOpen)
+    setIsOpen(prev => {
+      const newState = !prev
+      console.log('🎯 [MobileSidebar] State changing from', prev, 'to', newState)
+      return newState
+    })
   }
 
   const handleButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
+    console.log('🖱️ [MobileSidebar] Hamburger button clicked!', {
+      eventType: e.type,
+      currentIsOpen: isOpen,
+      timestamp: new Date().toISOString(),
+      target: (e.target as HTMLElement)?.tagName,
+      currentTarget: (e.currentTarget as HTMLElement)?.tagName
+    })
     e.preventDefault()
     e.stopPropagation()
+    console.log('✋ [MobileSidebar] Event propagation stopped, calling toggleSidebar')
     toggleSidebar()
   }
+
+  // Debug: Check button element properties on mount and state changes
+  useEffect(() => {
+    if (buttonRef.current) {
+      const button = buttonRef.current
+      const rect = button.getBoundingClientRect()
+      const computedStyle = window.getComputedStyle(button)
+
+      console.log('🔍 [MobileSidebar] Button element debug info:', {
+        visible: rect.width > 0 && rect.height > 0,
+        position: {
+          top: rect.top,
+          left: rect.left,
+          right: rect.right,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height
+        },
+        computedStyles: {
+          pointerEvents: computedStyle.pointerEvents,
+          zIndex: computedStyle.zIndex,
+          position: computedStyle.position,
+          display: computedStyle.display,
+          visibility: computedStyle.visibility,
+          opacity: computedStyle.opacity,
+          touchAction: computedStyle.touchAction
+        },
+        inlineStyles: button.style.cssText,
+        isConnected: button.isConnected,
+        disabled: button.disabled
+      })
+
+      // Check if anything is on top of the button
+      const elementAtCenter = document.elementFromPoint(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2
+      )
+      console.log('🎯 [MobileSidebar] Element at button center:', {
+        isButton: elementAtCenter === button,
+        actualElement: elementAtCenter?.tagName,
+        actualElementClass: elementAtCenter?.className,
+        actualElementId: elementAtCenter?.id
+      })
+    }
+  }, [isOpen])
+
+  // Debug: Log render
+  console.log('🎨 [MobileSidebar] Component rendering - Current state:', {
+    isOpen,
+    pathname,
+    hasUser: !!user
+  })
 
   return (
     <>
       {/* Hamburger Button */}
       <button
+        ref={buttonRef}
         onPointerDown={handleButtonClick}
+        onClick={(e) => {
+          console.log('🖱️ [MobileSidebar] onClick also fired', { type: e.type })
+          handleButtonClick(e)
+        }}
+        onTouchStart={(e) => {
+          console.log('👆 [MobileSidebar] onTouchStart fired', {
+            type: e.type,
+            touches: e.touches.length
+          })
+        }}
+        onTouchEnd={(e) => {
+          console.log('👆 [MobileSidebar] onTouchEnd fired', { type: e.type })
+        }}
         className="p-2 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 lg:hidden relative"
         aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
         title={isOpen ? "Close menu" : "Open menu"}
@@ -118,14 +224,18 @@ export default function MobileSidebar({
 
       {/* Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm lg:hidden"
           style={{
             zIndex: 999,
             touchAction: 'none',
           }}
-          onClick={() => setIsOpen(false)}
+          onClick={() => {
+            console.log('🌫️ [MobileSidebar] Overlay clicked - closing sidebar')
+            setIsOpen(false)
+          }}
           onTouchEnd={(e) => {
+            console.log('🌫️ [MobileSidebar] Overlay touch ended - closing sidebar')
             e.preventDefault()
             setIsOpen(false)
           }}
