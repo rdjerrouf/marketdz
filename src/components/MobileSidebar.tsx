@@ -54,12 +54,22 @@ export default function MobileSidebar({
     console.log('🎯 [MobileSidebar] isOpen state changed:', isOpen)
 
     function handleClickOutside(event: MouseEvent | TouchEvent) {
+      const target = event.target as HTMLElement
+
+      // Ignore if clicking the hamburger button itself
+      if (buttonRef.current && buttonRef.current.contains(target)) {
+        console.log('🚫 [MobileSidebar] Click on hamburger button itself, ignoring')
+        return
+      }
+
       console.log('👆 [MobileSidebar] Outside click/touch detected', {
         eventType: event.type,
-        targetElement: (event.target as HTMLElement)?.tagName,
-        sidebarRefExists: !!sidebarRef.current
+        targetElement: target?.tagName,
+        sidebarRefExists: !!sidebarRef.current,
+        isHamburgerButton: buttonRef.current === target
       })
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+
+      if (sidebarRef.current && !sidebarRef.current.contains(target)) {
         console.log('✅ [MobileSidebar] Click was outside sidebar, closing')
         setIsOpen(false)
       } else {
@@ -68,30 +78,39 @@ export default function MobileSidebar({
     }
 
     if (isOpen) {
-      console.log('🟢 [MobileSidebar] Sidebar is OPEN - Adding event listeners and locking scroll')
-      // Add event listeners for both mouse and touch
-      document.addEventListener('mousedown', handleClickOutside)
-      document.addEventListener('touchstart', handleClickOutside, { passive: true })
+      console.log('🟢 [MobileSidebar] Sidebar is OPEN - Delaying outside-click listeners to avoid race condition')
 
       // Prevent body scroll when sidebar is open
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
       document.body.style.width = '100%'
+
+      // CRITICAL FIX: Delay adding outside-click listeners to avoid catching the opening click
+      const timeoutId = setTimeout(() => {
+        console.log('⏰ [MobileSidebar] Now adding outside-click listeners (after delay)')
+        document.addEventListener('mousedown', handleClickOutside)
+        document.addEventListener('touchstart', handleClickOutside, { passive: true })
+      }, 100) // 100ms delay to let the opening click event finish propagating
+
+      return () => {
+        console.log('🧹 [MobileSidebar] Cleanup - Removing event listeners and clearing timeout')
+        clearTimeout(timeoutId)
+        document.removeEventListener('mousedown', handleClickOutside)
+        document.removeEventListener('touchstart', handleClickOutside)
+        document.body.style.overflow = ''
+        document.body.style.position = ''
+        document.body.style.width = ''
+      }
     } else {
       console.log('🔴 [MobileSidebar] Sidebar is CLOSED - Restoring scroll')
       // Restore body scroll
       document.body.style.overflow = ''
       document.body.style.position = ''
       document.body.style.width = ''
-    }
 
-    return () => {
-      console.log('🧹 [MobileSidebar] Cleanup - Removing event listeners')
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('touchstart', handleClickOutside)
-      document.body.style.overflow = ''
-      document.body.style.position = ''
-      document.body.style.width = ''
+      return () => {
+        console.log('🧹 [MobileSidebar] Cleanup (sidebar closed)')
+      }
     }
   }, [isOpen])
 
