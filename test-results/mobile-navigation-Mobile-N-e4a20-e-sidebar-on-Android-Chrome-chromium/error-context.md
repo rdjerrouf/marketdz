@@ -1,0 +1,345 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - heading "MarketDZ" [level=1] [ref=e10]
+      - button "Open navigation menu" [ref=e11]:
+        - img [ref=e12]
+      - navigation [ref=e13]:
+        - generic [ref=e14]:
+          - button "Close sidebar" [ref=e15]:
+            - img [ref=e16]
+          - generic [ref=e19]:
+            - img [ref=e21]
+            - heading "MarketDZ" [level=1] [ref=e23]
+          - generic [ref=e24]:
+            - link "Home" [ref=e25] [cursor=pointer]:
+              - /url: /
+              - img [ref=e26] [cursor=pointer]
+              - generic [ref=e29] [cursor=pointer]: Home
+            - link "Browse" [ref=e31] [cursor=pointer]:
+              - /url: /browse
+              - img [ref=e32] [cursor=pointer]
+              - generic [ref=e35] [cursor=pointer]: Browse
+            - link "Create Listing NEW" [ref=e36] [cursor=pointer]:
+              - /url: /add-item
+              - img [ref=e37] [cursor=pointer]
+              - generic [ref=e38] [cursor=pointer]: Create Listing
+              - generic [ref=e39] [cursor=pointer]: NEW
+            - link "Favorites" [ref=e40] [cursor=pointer]:
+              - /url: /favorites
+              - img [ref=e41] [cursor=pointer]
+              - generic [ref=e43] [cursor=pointer]: Favorites
+            - link "Messages 2" [ref=e44] [cursor=pointer]:
+              - /url: /messages
+              - img [ref=e45] [cursor=pointer]
+              - generic [ref=e47] [cursor=pointer]: Messages
+              - generic [ref=e49] [cursor=pointer]: "2"
+            - link "Profile" [ref=e51] [cursor=pointer]:
+              - /url: /profile
+              - img [ref=e52] [cursor=pointer]
+              - generic [ref=e55] [cursor=pointer]: Profile
+            - generic [ref=e56]:
+              - link "Sign In" [ref=e57] [cursor=pointer]:
+                - /url: /signin
+                - img [ref=e58] [cursor=pointer]
+                - generic [ref=e60] [cursor=pointer]: Sign In
+              - link "Sign Up" [ref=e61] [cursor=pointer]:
+                - /url: /signup
+                - img [ref=e62] [cursor=pointer]
+                - generic [ref=e64] [cursor=pointer]: Sign Up
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - generic [ref=e69]:
+          - img "Hero 1" [ref=e70]
+          - img "Hero 2" [ref=e71]
+          - img "Hero 3" [ref=e72]
+          - img "Hero 4" [ref=e73]
+        - generic [ref=e75]:
+          - generic [ref=e77]:
+            - img [ref=e78]
+            - text: "Algeria's #1 Marketplace"
+          - heading "Discover Amazing Deals" [level=1] [ref=e80]:
+            - text: Discover Amazing
+            - generic [ref=e81]: Deals
+          - paragraph [ref=e82]: From smartphones to apartments, jobs to services - find exactly what you're looking for in Algeria's most trusted marketplace.
+          - generic [ref=e83]:
+            - generic [ref=e84]:
+              - textbox "What are you looking for today?" [ref=e85]
+              - button "Search" [ref=e86]:
+                - img [ref=e87]
+                - text: Search
+            - generic [ref=e90]:
+              - button "Electronics" [ref=e91]
+              - button "Real Estate" [ref=e92]
+              - button "Jobs" [ref=e93]
+              - button "Services" [ref=e94]
+        - generic [ref=e96]:
+          - button "Go to slide 1" [ref=e97]
+          - button "Go to slide 2" [ref=e98]
+          - button "Go to slide 3" [ref=e99]
+          - button "Go to slide 4" [ref=e100]
+      - generic [ref=e101]:
+        - link "19 Active Listings Browse all listings" [ref=e102] [cursor=pointer]:
+          - /url: /browse
+          - generic [ref=e103] [cursor=pointer]:
+            - img [ref=e105] [cursor=pointer]
+            - generic [ref=e108] [cursor=pointer]:
+              - generic [ref=e109] [cursor=pointer]: "19"
+              - generic [ref=e110] [cursor=pointer]: Active Listings
+          - generic [ref=e111] [cursor=pointer]:
+            - img [ref=e112] [cursor=pointer]
+            - text: Browse all listings
+        - button "Soon 0 HOT Hot Deals Premium Feature" [ref=e114] [cursor=pointer]:
+          - generic [ref=e116] [cursor=pointer]:
+            - img [ref=e117] [cursor=pointer]
+            - text: Soon
+          - generic [ref=e120] [cursor=pointer]:
+            - img [ref=e122] [cursor=pointer]
+            - generic [ref=e124] [cursor=pointer]:
+              - generic [ref=e125] [cursor=pointer]:
+                - text: "0"
+                - generic [ref=e126] [cursor=pointer]: HOT
+              - generic [ref=e127] [cursor=pointer]: Hot Deals
+          - generic [ref=e128] [cursor=pointer]:
+            - img [ref=e129] [cursor=pointer]
+            - text: Premium Feature
+        - button "Soon 0 New Today Premium Feature" [ref=e131] [cursor=pointer]:
+          - generic [ref=e133] [cursor=pointer]:
+            - img [ref=e134] [cursor=pointer]
+            - text: Soon
+          - generic [ref=e137] [cursor=pointer]:
+            - img [ref=e139] [cursor=pointer]
+            - generic [ref=e142] [cursor=pointer]:
+              - generic [ref=e143] [cursor=pointer]: "0"
+              - generic [ref=e145] [cursor=pointer]: New Today
+          - generic [ref=e146] [cursor=pointer]:
+            - img [ref=e147] [cursor=pointer]
+            - text: Premium Feature
+      - generic [ref=e149]:
+        - heading "Browse by Category" [level=2] [ref=e150]:
+          - img [ref=e151]
+          - text: Browse by Category
+        - generic [ref=e153]:
+          - link "For Sale Electronics, furniture, cars & more" [ref=e154] [cursor=pointer]:
+            - /url: /browse?category=for_sale
+            - img [ref=e156] [cursor=pointer]
+            - heading "For Sale" [level=3] [ref=e158] [cursor=pointer]
+            - paragraph [ref=e159] [cursor=pointer]: Electronics, furniture, cars & more
+          - link "For Rent Apartments, houses & commercial spaces" [ref=e160] [cursor=pointer]:
+            - /url: /browse?category=for_rent
+            - img [ref=e162] [cursor=pointer]
+            - heading "For Rent" [level=3] [ref=e165] [cursor=pointer]
+            - paragraph [ref=e166] [cursor=pointer]: Apartments, houses & commercial spaces
+          - link "Jobs Full-time, part-time & remote positions" [ref=e167] [cursor=pointer]:
+            - /url: /browse?category=job
+            - img [ref=e169] [cursor=pointer]
+            - heading "Jobs" [level=3] [ref=e172] [cursor=pointer]
+            - paragraph [ref=e173] [cursor=pointer]: Full-time, part-time & remote positions
+          - link "Services Professional services & expertise" [ref=e174] [cursor=pointer]:
+            - /url: /browse?category=service
+            - img [ref=e176] [cursor=pointer]
+            - heading "Services" [level=3] [ref=e178] [cursor=pointer]
+            - paragraph [ref=e179] [cursor=pointer]: Professional services & expertise
+      - generic [ref=e180]:
+        - generic [ref=e181]:
+          - generic [ref=e182]:
+            - heading "Featured Listings" [level=2] [ref=e183]:
+              - img [ref=e184]
+              - text: Featured Listings
+            - paragraph [ref=e186]: 9 recent listings
+          - link "View All" [ref=e187] [cursor=pointer]:
+            - /url: /browse
+            - text: View All
+            - img [ref=e188] [cursor=pointer]
+        - generic [ref=e190]:
+          - generic [ref=e191] [cursor=pointer]:
+            - generic [ref=e192] [cursor=pointer]:
+              - img "manager" [ref=e193] [cursor=pointer]
+              - img [ref=e196] [cursor=pointer]
+              - button "Sign in to add to favorites" [ref=e200]:
+                - img [ref=e201]
+              - generic [ref=e204] [cursor=pointer]:
+                - img [ref=e205] [cursor=pointer]
+                - generic [ref=e208] [cursor=pointer]: 3h ago
+            - generic [ref=e209] [cursor=pointer]:
+              - heading "manager" [level=3] [ref=e210] [cursor=pointer]
+              - generic [ref=e212] [cursor=pointer]: Salary negotiable
+          - generic [ref=e213] [cursor=pointer]:
+            - generic [ref=e214] [cursor=pointer]:
+              - img "car" [ref=e215] [cursor=pointer]
+              - img [ref=e218] [cursor=pointer]
+              - button "Sign in to add to favorites" [ref=e221]:
+                - img [ref=e222]
+              - generic [ref=e225] [cursor=pointer]:
+                - img [ref=e226] [cursor=pointer]
+                - generic [ref=e229] [cursor=pointer]: 3d ago
+            - generic [ref=e230] [cursor=pointer]:
+              - heading "car" [level=3] [ref=e231] [cursor=pointer]
+              - generic [ref=e233] [cursor=pointer]: DZD 450,000
+          - generic [ref=e234] [cursor=pointer]:
+            - generic [ref=e235] [cursor=pointer]:
+              - img "senior care" [ref=e236] [cursor=pointer]
+              - img [ref=e239] [cursor=pointer]
+              - button "Sign in to add to favorites" [ref=e242]:
+                - img [ref=e243]
+              - generic [ref=e246] [cursor=pointer]:
+                - img [ref=e247] [cursor=pointer]
+                - generic [ref=e250] [cursor=pointer]: 3d ago
+            - generic [ref=e251] [cursor=pointer]:
+              - heading "senior care" [level=3] [ref=e252] [cursor=pointer]
+              - generic [ref=e254] [cursor=pointer]: Price negotiable
+          - generic [ref=e255] [cursor=pointer]:
+            - generic [ref=e256] [cursor=pointer]:
+              - img "painter" [ref=e257] [cursor=pointer]
+              - img [ref=e260] [cursor=pointer]
+              - button "Sign in to add to favorites" [ref=e263]:
+                - img [ref=e264]
+              - generic [ref=e267] [cursor=pointer]:
+                - img [ref=e268] [cursor=pointer]
+                - generic [ref=e271] [cursor=pointer]: 3d ago
+            - generic [ref=e272] [cursor=pointer]:
+              - heading "painter" [level=3] [ref=e273] [cursor=pointer]
+              - generic [ref=e275] [cursor=pointer]: Price negotiable
+          - generic [ref=e276] [cursor=pointer]:
+            - generic [ref=e277] [cursor=pointer]:
+              - img "House" [ref=e278] [cursor=pointer]
+              - img [ref=e281] [cursor=pointer]
+              - button "Sign in to add to favorites" [ref=e285]:
+                - img [ref=e286]
+              - generic [ref=e289] [cursor=pointer]:
+                - img [ref=e290] [cursor=pointer]
+                - generic [ref=e293] [cursor=pointer]: 3d ago
+            - generic [ref=e294] [cursor=pointer]:
+              - heading "House" [level=3] [ref=e295] [cursor=pointer]
+              - generic [ref=e297] [cursor=pointer]: DZD 4,000
+          - generic [ref=e298] [cursor=pointer]:
+            - generic [ref=e299] [cursor=pointer]:
+              - img "car wash" [ref=e300] [cursor=pointer]
+              - img [ref=e303] [cursor=pointer]
+              - button "Sign in to add to favorites" [ref=e306]:
+                - img [ref=e307]
+              - generic [ref=e310] [cursor=pointer]:
+                - img [ref=e311] [cursor=pointer]
+                - generic [ref=e314] [cursor=pointer]: 5d ago
+            - generic [ref=e315] [cursor=pointer]:
+              - heading "car wash" [level=3] [ref=e316] [cursor=pointer]
+              - generic [ref=e318] [cursor=pointer]: Price negotiable
+          - generic [ref=e319] [cursor=pointer]:
+            - generic [ref=e320] [cursor=pointer]:
+              - img "Oliverrrr" [ref=e321] [cursor=pointer]
+              - img [ref=e324] [cursor=pointer]
+              - button "Sign in to add to favorites" [ref=e327]:
+                - img [ref=e328]
+              - generic [ref=e331] [cursor=pointer]:
+                - img [ref=e332] [cursor=pointer]
+                - generic [ref=e335] [cursor=pointer]: 5d ago
+            - generic [ref=e336] [cursor=pointer]:
+              - heading "Oliverrrr" [level=3] [ref=e337] [cursor=pointer]
+              - generic [ref=e339] [cursor=pointer]: DZD 12,000
+          - generic [ref=e340] [cursor=pointer]:
+            - generic [ref=e341] [cursor=pointer]:
+              - img "Oliverrrr" [ref=e342] [cursor=pointer]
+              - img [ref=e345] [cursor=pointer]
+              - button "Sign in to add to favorites" [ref=e348]:
+                - img [ref=e349]
+              - generic [ref=e352] [cursor=pointer]:
+                - img [ref=e353] [cursor=pointer]
+                - generic [ref=e356] [cursor=pointer]: 5d ago
+            - generic [ref=e357] [cursor=pointer]:
+              - heading "Oliverrrr" [level=3] [ref=e358] [cursor=pointer]
+              - generic [ref=e360] [cursor=pointer]: DZD 12,000
+          - generic [ref=e361] [cursor=pointer]:
+            - generic [ref=e362] [cursor=pointer]:
+              - img "Oliver the cat" [ref=e363] [cursor=pointer]
+              - img [ref=e366] [cursor=pointer]
+              - button "Sign in to add to favorites" [ref=e369]:
+                - img [ref=e370]
+              - generic [ref=e373] [cursor=pointer]:
+                - img [ref=e374] [cursor=pointer]
+                - generic [ref=e377] [cursor=pointer]: 5d ago
+            - generic [ref=e378] [cursor=pointer]:
+              - heading "Oliver the cat" [level=3] [ref=e379] [cursor=pointer]
+              - generic [ref=e381] [cursor=pointer]: DZD 23,766
+      - generic [ref=e383]:
+        - link [ref=e384] [cursor=pointer]:
+          - /url: /add-item
+          - img [ref=e385] [cursor=pointer]
+        - heading "Ready to Post Your Listing?" [level=2] [ref=e386]
+        - paragraph [ref=e387]: Join thousands of users on MarketDZ. Post items for sale, rentals, jobs, or services in minutes and reach millions of people across Algeria.
+        - generic [ref=e388]:
+          - link "Create Your Listing" [ref=e389] [cursor=pointer]:
+            - /url: /add-item
+            - img [ref=e390] [cursor=pointer]
+            - text: Create Your Listing
+          - link "Learn More" [ref=e391] [cursor=pointer]:
+            - /url: /help
+            - img [ref=e392] [cursor=pointer]
+            - text: Learn More
+      - generic [ref=e395]:
+        - heading "Recent Activity" [level=2] [ref=e396]:
+          - img [ref=e397]
+          - text: Recent Activity
+        - generic [ref=e400]:
+          - generic [ref=e401]:
+            - img [ref=e403]
+            - generic [ref=e406]:
+              - paragraph [ref=e407]: 127 new listings added today
+              - paragraph [ref=e408]:
+                - img [ref=e409]
+                - text: 2 minutes ago
+            - generic [ref=e412]: "+127"
+            - img [ref=e413]
+          - generic [ref=e415]:
+            - img [ref=e417]
+            - generic [ref=e419]:
+              - paragraph [ref=e420]: iPhone 13 Pro sold for 145,000 DA
+              - paragraph [ref=e421]:
+                - img [ref=e422]
+                - text: 15 minutes ago
+            - generic [ref=e425]: SOLD
+            - img [ref=e426]
+          - generic [ref=e428]:
+            - img [ref=e430]
+            - generic [ref=e435]:
+              - paragraph [ref=e436]: 15 new members joined
+              - paragraph [ref=e437]:
+                - img [ref=e438]
+                - text: 1 hour ago
+            - generic [ref=e441]: "+15"
+            - img [ref=e442]
+          - generic [ref=e444]:
+            - img [ref=e446]
+            - generic [ref=e449]:
+              - paragraph [ref=e450]: "Seller of the month: Ahmed B."
+              - paragraph [ref=e451]:
+                - img [ref=e452]
+                - text: 3 hours ago
+            - generic [ref=e455]:
+              - img [ref=e456]
+              - text: WINNER
+            - img [ref=e462]
+      - generic [ref=e464]:
+        - generic [ref=e465]:
+          - img [ref=e467]
+          - heading "MarketDZ" [level=3] [ref=e469]
+        - paragraph [ref=e470]: Algeria's premier marketplace connecting buyers and sellers nationwide
+        - generic [ref=e471]:
+          - generic [ref=e472]: © 2025 MarketDZ
+          - generic [ref=e473]: •
+          - link "Privacy Policy" [ref=e474] [cursor=pointer]:
+            - /url: /privacy
+          - generic [ref=e475]: •
+          - link "Terms of Service" [ref=e476] [cursor=pointer]:
+            - /url: /terms
+          - generic [ref=e477]: •
+          - link "Support" [ref=e478] [cursor=pointer]:
+            - /url: /help
+  - button "Open Next.js Dev Tools" [ref=e484] [cursor=pointer]:
+    - img [ref=e485] [cursor=pointer]
+  - alert [ref=e488]
+```

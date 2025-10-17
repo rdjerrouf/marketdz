@@ -27,7 +27,7 @@ export default function ChatPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-purple-100 to-indigo-50 dark:from-purple-900 dark:via-purple-800 dark:to-indigo-900 relative overflow-hidden flex items-center justify-center">
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center" style={{ background: '#06402B' }}>
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-60 h-60 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-8 dark:opacity-15 animate-pulse"></div>
@@ -48,7 +48,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-purple-100 to-indigo-50 dark:from-purple-900 dark:via-purple-800 dark:to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#06402B' }}>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-60 h-60 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-8 dark:opacity-15 animate-pulse"></div>

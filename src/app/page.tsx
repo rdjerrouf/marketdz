@@ -482,7 +482,7 @@ export default function CompleteKickAssHomepage() {
         </div>
       </div>
 
-      {/* Mobile Navigation with Sidebar */}
+      {/* Mobile Navigation Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-lg border-b border-white/10 pointer-events-auto">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center">
