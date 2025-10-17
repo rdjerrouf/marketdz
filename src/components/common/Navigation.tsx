@@ -14,10 +14,13 @@ export default function Navigation() {
   const [showNotifications, setShowNotifications] = useState(false);
   const { unreadCount } = useRealtimeNotifications();
 
-  // Hide Navigation on pages that have their own navigation system
-  if (pathname === '/' || pathname === '/browse') {
+  // Hide on homepage (has custom hero design)
+  if (pathname === '/') {
     return null;
   }
+
+  // This component is only for desktop navigation (hidden on mobile via CSS)
+  // Mobile uses the global BottomNavigation component
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -33,7 +36,7 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
+    <nav className="hidden md:block bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}

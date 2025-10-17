@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 import Navigation from '@/components/common/Navigation';
-import GlobalMobileNav from '@/components/GlobalMobileNav';
+import BottomNavigation from '@/components/common/BottomNavigation';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -70,9 +70,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <GlobalMobileNav />
           <Navigation />
           {children}
+          <BottomNavigation />
           <Toaster
             position="top-right"
             toastOptions={{

@@ -10,7 +10,6 @@ import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import MobileListingCard from '@/components/common/MobileListingCard'
 import FavoriteButton from '@/components/common/FavoriteButton'
 import BrowserGuidanceBanner from '@/components/BrowserGuidanceBanner'
-import MobileSidebar from '@/components/MobileSidebar'
 import { detectBrowserInfo } from '@/lib/browser-detection'
 
 interface Profile {
@@ -36,14 +35,6 @@ interface Listing {
   is_hot_deal?: boolean;
 }
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
-
-interface NavigatorWithStandalone extends Navigator {
-  standalone?: boolean;
-}
 
 export default function CompleteKickAssHomepage() {
   const { user, loading } = useAuth()
@@ -58,24 +49,8 @@ export default function CompleteKickAssHomepage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [favorites, setFavorites] = useState(new Set(['1', '3']))
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [userListingsCount, setUserListingsCount] = useState(0)
-  const [userFavoritesCount, setUserFavoritesCount] = useState(0)
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [showInstallButton, setShowInstallButton] = useState(false)
   const [showComingSoonModal, setShowComingSoonModal] = useState(false)
   const [showNewTodayModal, setShowNewTodayModal] = useState(false)
-  const [isPWA, setIsPWA] = useState(false)
-
-  // Detect if running as PWA
-  useEffect(() => {
-    const checkPWA = () => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-      const nav = window.navigator as NavigatorWithStandalone;
-      const isIOSPWA = nav.standalone === true
-      setIsPWA(isStandalone || isIOSPWA)
-    }
-    checkPWA()
-  }, [])
 
   // Fetch user profile when user changes
   useEffect(() => {
@@ -116,78 +91,7 @@ export default function CompleteKickAssHomepage() {
     })
   }, [user, profile, loading])
 
-  // Fetch user's listings count
-  useEffect(() => {
-    const fetchUserListingsCount = async () => {
-      if (!user) {
-        setUserListingsCount(0)
-        return
-      }
-
-      try {
-        console.log('🏠 HomePage: Fetching listings count for user:', user.id)
-        const { count, error } = await supabase
-          .from('listings')
-          .select('*', { count: 'exact' })
-          .eq('user_id', user.id)
-          .neq('title', '') // Exclude invalid listings
-
-        if (error) {
-          console.error('🏠 HomePage: Error fetching listings count:', error)
-          setUserListingsCount(0)
-        } else {
-          console.log('🏠 HomePage: User listings count:', count)
-          setUserListingsCount(count || 0)
-        }
-      } catch (err) {
-        console.error('🏠 HomePage: Error:', err)
-        setUserListingsCount(0)
-      }
-    }
-
-    fetchUserListingsCount()
-  }, [user])
-
-  // Fetch user's favorites count
-  useEffect(() => {
-    const fetchUserFavoritesCount = async () => {
-      if (!user) {
-        setUserFavoritesCount(0)
-        return
-      }
-
-      try {
-        console.log('🏠 HomePage: Fetching favorites count for user:', user.id)
-        // Match the same query as the API to get accurate count
-        const { data, error } = await supabase
-          .from('favorites')
-          .select(`
-            id,
-            listing_id,
-            listings!inner (
-              id,
-              status
-            )
-          `)
-          .eq('user_id', user.id)
-          .eq('listings.status', 'active')
-
-        if (error) {
-          console.error('🏠 HomePage: Error fetching favorites count:', error)
-          setUserFavoritesCount(0)
-        } else {
-          const count = data?.length || 0
-          console.log('🏠 HomePage: User favorites count (active listings only):', count)
-          setUserFavoritesCount(count)
-        }
-      } catch (err) {
-        console.error('🏠 HomePage: Error:', err)
-        setUserFavoritesCount(0)
-      }
-    }
-
-    fetchUserFavoritesCount()
-  }, [user])
+  // User counts now handled by individual pages/components as needed
 
   // Fetch featured listings and stats
   useEffect(() => {
@@ -270,52 +174,7 @@ export default function CompleteKickAssHomepage() {
     return () => clearInterval(interval)
   }, [])
 
-  // PWA Install functionality
-  useEffect(() => {
-    const browserInfo = detectBrowserInfo()
-    console.log('📱 HomePage: browserInfo =', browserInfo)
-
-    // Hide button if already installed
-    if (browserInfo.isInstalled) {
-      console.log('📱 HomePage: App is already installed - HIDING button')
-      setShowInstallButton(false)
-      return
-    }
-
-    const handleBeforeInstallPrompt = (e: Event) => {
-      console.log('📱 HomePage: beforeinstallprompt event fired')
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault()
-      // Stash the event so it can be triggered later
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
-      // Show install button
-      setShowInstallButton(true)
-    }
-
-    const handleAppInstalled = () => {
-      console.log('📱 HomePage: App was installed')
-      // Hide install button
-      setShowInstallButton(false)
-      setDeferredPrompt(null)
-    }
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    window.addEventListener('appinstalled', handleAppInstalled)
-
-    // Show button for iOS Safari (doesn't fire beforeinstallprompt)
-    if (browserInfo.platform === 'ios' && browserInfo.currentBrowser === 'safari') {
-      console.log('📱 HomePage: iOS Safari detected - SHOWING install button')
-      setShowInstallButton(true)
-    } else {
-      console.log('📱 HomePage: NOT iOS Safari - platform:', browserInfo.platform, 'browser:', browserInfo.currentBrowser)
-    }
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-      window.removeEventListener('appinstalled', handleAppInstalled)
-    }
-  }, [])
+  // PWA install functionality removed - handled by service worker
 
   const formatPrice = (price: number | null, category: string): string => {
     if (!price) return category === 'job' ? 'Salary negotiable' : 'Price negotiable'
@@ -400,41 +259,6 @@ export default function CompleteKickAssHomepage() {
     }
   }
 
-  const handleInstallPWA = useCallback(async () => {
-    const browserInfo = detectBrowserInfo()
-
-    // Check if already installed
-    if (browserInfo.isInstalled) {
-      alert('✅ MarketDZ is already installed on your device!')
-      return
-    }
-
-    // If no deferred prompt, show platform-specific instructions
-    if (!deferredPrompt) {
-      console.log('📱 PWA: Manual trigger - showing instructions')
-      alert(browserInfo.installInstructions || '⚠️ Your browser doesn\'t support app installation. Please try using Chrome, Edge, or Safari.')
-      return
-    }
-
-    // Show native install prompt (Chrome/Edge on Android)
-    console.log('📱 PWA: Showing install prompt')
-    deferredPrompt.prompt()
-
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice
-    console.log(`📱 PWA: User response to install prompt: ${outcome}`)
-
-    if (outcome === 'accepted') {
-      console.log('📱 PWA: User accepted the install prompt')
-      setShowInstallButton(false)
-    } else {
-      console.log('📱 PWA: User dismissed the install prompt')
-    }
-
-    // Clear the deferredPrompt variable
-    setDeferredPrompt(null)
-  }, [deferredPrompt]) // Only recreate if deferredPrompt changes
-
   const heroImages = [
     'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1200&h=800&fit=crop',
     'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&h=800&fit=crop',
@@ -484,7 +308,7 @@ export default function CompleteKickAssHomepage() {
 
       {/* Mobile Navigation Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-lg border-b border-white/10 pointer-events-auto">
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-center p-4">
           <div className="flex items-center">
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3 relative">
               <Shield className="w-6 h-6 text-white" />
@@ -492,15 +316,6 @@ export default function CompleteKickAssHomepage() {
             </div>
             <h1 className="text-white text-xl font-bold">MarketDZ</h1>
           </div>
-          {/* Sidebar toggle button */}
-          <MobileSidebar
-            userListingsCount={userListingsCount}
-            userFavoritesCount={userFavoritesCount}
-            showInstallButton={showInstallButton}
-            onInstallPWA={handleInstallPWA}
-            deferredPrompt={deferredPrompt}
-            isPWA={isPWA}
-          />
         </div>
         {/* Browser Guidance Banner - between header and content */}
         <BrowserGuidanceBanner />
@@ -543,11 +358,6 @@ export default function CompleteKickAssHomepage() {
               <Link href="/my-listings" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
                 <Grid className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
                 <span className="font-medium">My Listings</span>
-                {userListingsCount > 0 && (
-                  <div className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium animate-pulse shadow-lg">
-                    {userListingsCount}
-                  </div>
-                )}
               </Link>
             ) : null}
 
@@ -562,11 +372,6 @@ export default function CompleteKickAssHomepage() {
             <Link href="/favorites" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
               <Heart className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
               <span className="font-medium">Favorites</span>
-              {userFavoritesCount > 0 && (
-                <div className="ml-auto bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center animate-pulse shadow-lg">
-                  {userFavoritesCount}
-                </div>
-              )}
             </Link>
 
             <Link href="/messages" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
@@ -608,24 +413,6 @@ export default function CompleteKickAssHomepage() {
                     </div>
                   </div>
                 </div>
-                {/* PWA Download Button for Signed-in Users */}
-                {showInstallButton && (
-                  <button
-                    id="pwa-install-button-signed-in"
-                    className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20 group mb-3"
-                    onClick={handleInstallPWA}
-                  >
-                    <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <span className="font-medium">Install App</span>
-                    {deferredPrompt && (
-                      <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
-                        READY
-                      </div>
-                    )}
-                  </button>
-                )}
                 {/* Sign Out Button */}
                 <button
                   onClick={handleSignOut}
@@ -662,24 +449,6 @@ export default function CompleteKickAssHomepage() {
                   <span className="font-medium">Register</span>
                   <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </Link>
-                {/* PWA Download Button */}
-                {showInstallButton && (
-                  <button
-                    id="pwa-install-button"
-                    className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 transition-all duration-300 border border-pink-500/20 group"
-                    onClick={handleInstallPWA}
-                  >
-                    <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <span className="font-medium">Install App</span>
-                    {deferredPrompt && (
-                      <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
-                        READY
-                      </div>
-                    )}
-                  </button>
-                )}
               </>
             )}
           </div>
