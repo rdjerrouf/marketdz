@@ -51,6 +51,8 @@ export default function CompleteKickAssHomepage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showComingSoonModal, setShowComingSoonModal] = useState(false)
   const [showNewTodayModal, setShowNewTodayModal] = useState(false)
+  const [showInstallButton, setShowInstallButton] = useState(false)
+  const [browserInfo, setBrowserInfo] = useState<ReturnType<typeof detectBrowserInfo> | null>(null)
 
   // Fetch user profile when user changes
   useEffect(() => {
@@ -92,6 +94,30 @@ export default function CompleteKickAssHomepage() {
   }, [user, profile, loading])
 
   // User counts now handled by individual pages/components as needed
+
+  // Detect browser and show install button if appropriate
+  useEffect(() => {
+    const info = detectBrowserInfo()
+    setBrowserInfo(info)
+
+    // Show install button if:
+    // 1. Not already installed
+    // 2. On iOS Safari OR Android Chrome
+    const shouldShowInstall = !info.isInstalled && info.isOptimalBrowser
+    setShowInstallButton(shouldShowInstall)
+  }, [])
+
+  const handleInstallClick = () => {
+    if (!browserInfo) return
+
+    if (browserInfo.isInstalled) {
+      alert('✅ MarketDZ is already installed!')
+      return
+    }
+
+    // Show install instructions
+    alert(browserInfo.installInstructions)
+  }
 
   // Fetch featured listings and stats
   useEffect(() => {
@@ -331,8 +357,19 @@ export default function CompleteKickAssHomepage() {
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse border-2 border-black/20"></div>
               <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse border border-black/20 [animation-delay:1s]"></div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">MarketDZ</h1>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">MarketDZ</h1>
+                {showInstallButton && (
+                  <button
+                    onClick={handleInstallClick}
+                    className="px-2 py-1 text-xs bg-green-500/20 text-green-300 border border-green-500/30 rounded-lg hover:bg-green-500/30 transition-colors whitespace-nowrap"
+                    title={browserInfo?.installInstructions}
+                  >
+                    Install App
+                  </button>
+                )}
+              </div>
               <p className="text-white/60 text-sm flex items-center">
                 <span className="mr-1 text-base">🇩🇿</span>
                 Algeria&apos;s Premier

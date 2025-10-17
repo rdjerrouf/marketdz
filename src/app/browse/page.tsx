@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import FavoriteButton from '@/components/common/FavoriteButton'
 import StarRating from '@/components/common/StarRating'
-import PWAInstallButton from '@/components/PWAInstallButton'
 import MobileListingCard from '@/components/common/MobileListingCard'
 import { fixPhotoUrl } from '@/lib/utils'
 
@@ -471,9 +470,6 @@ function BrowsePageContent() {
       <div className="relative z-10 flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-auto">
         {/* Header */}
         <div className="text-center mb-4 md:mb-8 relative">
-          <div className="hidden md:block absolute top-0 right-0">
-            <PWAInstallButton variant="compact" />
-          </div>
           <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Search MarketDZ</h1>
           <p className="text-sm md:text-lg text-white text-opacity-90 px-4">
             Find exactly what you're looking for in Algeria's premier marketplace
