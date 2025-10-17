@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Home, User, MessageCircle, Bell, Zap, Shield, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -400,7 +400,7 @@ export default function CompleteKickAssHomepage() {
     }
   }
 
-  const handleInstallPWA = async () => {
+  const handleInstallPWA = useCallback(async () => {
     const browserInfo = detectBrowserInfo()
 
     // Check if already installed
@@ -433,7 +433,7 @@ export default function CompleteKickAssHomepage() {
 
     // Clear the deferredPrompt variable
     setDeferredPrompt(null)
-  }
+  }, [deferredPrompt]) // Only recreate if deferredPrompt changes
 
   const heroImages = [
     'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1200&h=800&fit=crop',

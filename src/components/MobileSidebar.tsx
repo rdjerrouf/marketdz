@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, memo, useCallback } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { 
-  Menu, X, Home, User, MessageCircle, Heart, Grid, 
-  Plus, Search, Shield 
+import {
+  Menu, X, Home, User, MessageCircle, Heart, Grid,
+  Plus, Search, Shield
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -18,7 +18,7 @@ interface MobileSidebarProps {
   isPWA?: boolean
 }
 
-export default function MobileSidebar({
+function MobileSidebarComponent({
   userListingsCount = 0,
   userFavoritesCount = 0,
   showInstallButton = false,
@@ -435,3 +435,30 @@ export default function MobileSidebar({
     </>
   )
 }
+
+// Memoize component to prevent unnecessary re-renders when parent page.tsx state changes
+// Only re-render if props actually change (userListingsCount, userFavoritesCount, etc.)
+const MobileSidebar = memo(MobileSidebarComponent, (prevProps, nextProps) => {
+  // Custom comparison function - return true if props are equal (skip re-render)
+  const propsEqual =
+    prevProps.userListingsCount === nextProps.userListingsCount &&
+    prevProps.userFavoritesCount === nextProps.userFavoritesCount &&
+    prevProps.showInstallButton === nextProps.showInstallButton &&
+    prevProps.isPWA === nextProps.isPWA &&
+    prevProps.deferredPrompt === nextProps.deferredPrompt
+
+  if (!propsEqual) {
+    console.log('🔄 [MobileSidebar] Props changed, re-rendering:', {
+      userListingsCount: {old: prevProps.userListingsCount, new: nextProps.userListingsCount},
+      userFavoritesCount: {old: prevProps.userFavoritesCount, new: nextProps.userFavoritesCount},
+      showInstallButton: {old: prevProps.showInstallButton, new: nextProps.showInstallButton},
+      isPWA: {old: prevProps.isPWA, new: nextProps.isPWA}
+    })
+  }
+
+  return propsEqual
+})
+
+MobileSidebar.displayName = 'MobileSidebar'
+
+export default MobileSidebar
