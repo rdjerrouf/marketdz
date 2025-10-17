@@ -335,12 +335,21 @@ export default function CompleteKickAssHomepage() {
       {/* Mobile Navigation Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-lg border-b border-white/10 pointer-events-auto">
         <div className="flex items-center justify-center p-4">
-          <div className="flex items-center">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3 relative flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl relative flex items-center justify-center">
               <span className="text-2xl">🇩🇿</span>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
             </div>
             <h1 className="text-white text-xl font-bold">MarketDZ</h1>
+            {showInstallButton && (
+              <button
+                onClick={handleInstallClick}
+                className="px-2 py-1 text-xs bg-green-500/20 text-green-300 border border-green-500/30 rounded-lg hover:bg-green-500/30 transition-colors whitespace-nowrap ml-1"
+                title={browserInfo?.installInstructions}
+              >
+                Install
+              </button>
+            )}
           </div>
         </div>
         {/* Browser Guidance Banner - between header and content */}

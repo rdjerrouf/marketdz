@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import ListingManager from '@/components/listings/ListingManager'
-import PWAInstallButton from '@/components/PWAInstallButton'
 
 interface User {
   id: string
@@ -187,7 +186,6 @@ export default function MyListingsPage() {
                 <h1 className="text-3xl font-bold text-white mb-2">My Listings</h1>
                 <p className="text-white/70">Manage your posted items and services</p>
               </div>
-              <PWAInstallButton />
             </div>
           </div>
         </div>

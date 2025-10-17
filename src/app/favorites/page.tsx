@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useAuth } from '@/contexts/AuthContext'
 import FavoriteButton from '@/components/common/FavoriteButton'
-import PWAInstallButton from '@/components/PWAInstallButton'
 import { fixPhotoUrl } from '@/lib/storage'
 
 export default function FavoritesPage() {
@@ -91,7 +90,6 @@ export default function FavoritesPage() {
             </svg>
             Back
           </button>
-          <PWAInstallButton />
         </div>
         
         <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl">

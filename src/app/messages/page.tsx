@@ -4,7 +4,6 @@
 import { useRouter } from 'next/navigation';
 import { useConversations } from '@/hooks/useSimpleMessages';
 import { useUser } from '@/hooks/useUser';
-import PWAInstallButton from '@/components/PWAInstallButton';
 
 export default function MessagesPage() {
   const router = useRouter();
@@ -77,7 +76,6 @@ export default function MessagesPage() {
               <h1 className="text-4xl font-bold text-white mb-2">💬 Messages</h1>
               <p className="text-purple-200">Your conversations with other users</p>
             </div>
-            <PWAInstallButton />
           </div>
         </div>
 
