@@ -206,26 +206,20 @@ export default function MobileSidebar({
       {/* Hamburger Button */}
       <button
         ref={buttonRef}
-        onPointerDown={handleButtonClick}
         onClick={(e) => {
-          console.log('🖱️ [MobileSidebar] onClick also fired', { type: e.type })
-          handleButtonClick(e)
-        }}
-        onTouchStart={(e) => {
-          console.log('👆 [MobileSidebar] onTouchStart fired', {
+          console.log('🖱️ [MobileSidebar] Button clicked (single onClick handler)', {
             type: e.type,
-            touches: e.touches.length
+            currentIsOpen: isOpen,
+            timestamp: new Date().toISOString()
           })
-        }}
-        onTouchEnd={(e) => {
-          console.log('👆 [MobileSidebar] onTouchEnd fired', { type: e.type })
+          handleButtonClick(e)
         }}
         className="p-2 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 lg:hidden relative"
         aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
         title={isOpen ? "Close menu" : "Open menu"}
         style={{
           WebkitTapHighlightColor: 'transparent',
-          touchAction: 'manipulation',
+          touchAction: 'manipulation', // Ensures immediate click response on touch devices
           zIndex: 9999,
           minWidth: '44px',
           minHeight: '44px',
