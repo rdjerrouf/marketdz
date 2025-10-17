@@ -6,10 +6,11 @@ import MobileSidebar from './MobileSidebar'
 export default function GlobalMobileNav() {
   const pathname = usePathname()
 
-  // Only show on homepage - it has special props and PWA install button
-  // Other pages will get a simpler version
-  if (pathname === '/') {
-    return null // Homepage has its own MobileSidebar with special features
+  // Hide on pages that have their own navigation system
+  // - Homepage has its own MobileSidebar with special features
+  // - Browse page has its own built-in mobile bottom navigation
+  if (pathname === '/' || pathname === '/browse') {
+    return null
   }
 
   // For all other pages, show basic mobile sidebar

@@ -14,8 +14,8 @@ export default function Navigation() {
   const [showNotifications, setShowNotifications] = useState(false);
   const { unreadCount } = useRealtimeNotifications();
 
-  // Hide Navigation on home page - it has its own MobileSidebar component
-  if (pathname === '/') {
+  // Hide Navigation on pages that have their own navigation system
+  if (pathname === '/' || pathname === '/browse') {
     return null;
   }
 
