@@ -7,14 +7,8 @@ export default function BottomNavigation() {
   const pathname = usePathname()
   const router = useRouter()
 
-  // Hide on desktop (≥768px)
-  // Always visible on mobile
-  const isActive = (path: string) => {
-    if (path === '/') {
-      return pathname === '/'
-    }
-    return pathname.startsWith(path)
-  }
+  // TODO: Connect to real unread messages count
+  const hasUnreadMessages = false
 
   const navItems = [
     {
@@ -33,8 +27,7 @@ export default function BottomNavigation() {
       icon: Plus,
       label: 'Post',
       path: '/add-item',
-      active: pathname === '/add-item',
-      highlight: true // Special styling for post button
+      active: pathname === '/add-item'
     },
     {
       icon: Heart,
@@ -47,7 +40,7 @@ export default function BottomNavigation() {
       label: 'Messages',
       path: '/messages',
       active: pathname.startsWith('/messages'),
-      badge: 0 // TODO: Connect to real unread count
+      hasUnread: hasUnreadMessages
     },
     {
       icon: User,
@@ -68,52 +61,30 @@ export default function BottomNavigation() {
         {navItems.map((item) => {
           const Icon = item.icon
           const isItemActive = item.active
-
-          // Special styling for the "Post" button
-          if (item.highlight) {
-            return (
-              <button
-                key={item.path}
-                onClick={() => router.push(item.path)}
-                className="flex flex-col items-center justify-center flex-1 py-2 relative"
-                aria-label={item.label}
-              >
-                <div className={`${
-                  isItemActive
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600'
-                    : 'bg-purple-600'
-                } rounded-full p-3 -mt-2 shadow-lg`}>
-                  <Icon className="w-6 h-6 text-white" strokeWidth={2.5} />
-                </div>
-                <span className={`text-xs mt-1 ${
-                  isItemActive ? 'text-purple-400 font-semibold' : 'text-gray-400'
-                }`}>
-                  {item.label}
-                </span>
-              </button>
-            )
-          }
+          const hasUnread = 'hasUnread' in item ? item.hasUnread : false
 
           return (
             <button
               key={item.path}
               onClick={() => router.push(item.path)}
               className={`flex flex-col items-center justify-center flex-1 py-2 transition-colors relative ${
-                isItemActive ? 'text-purple-400' : 'text-gray-400 hover:text-white'
+                isItemActive
+                  ? 'text-purple-400'
+                  : hasUnread
+                  ? 'text-green-400'
+                  : 'text-gray-400 hover:text-white'
               }`}
               aria-label={item.label}
               aria-current={isItemActive ? 'page' : undefined}
             >
               <div className="relative">
                 <Icon
-                  className="w-6 h-6"
+                  className={`w-6 h-6 ${hasUnread && !isItemActive ? 'animate-pulse' : ''}`}
                   strokeWidth={isItemActive ? 2.5 : 2}
                 />
-                {/* Badge for unread messages/notifications */}
-                {item.badge && item.badge > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                    {item.badge > 9 ? '9+' : item.badge}
-                  </div>
+                {/* Small dot indicator for unread messages */}
+                {hasUnread && !isItemActive && (
+                  <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full"></div>
                 )}
               </div>
               <span className={`text-xs mt-1 ${
