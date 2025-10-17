@@ -55,7 +55,7 @@ a,
 /* Mobile menu container */
 .mobile-menu-container {
   touch-action: manipulation;
-  -webkit-overflow-scrolling: touch;
+  /* Note: -webkit-overflow-scrolling is deprecated and no longer needed in iOS 13+ */
 }
 
 /* Mobile menu item */

@@ -105,7 +105,7 @@ export default function Navigation() {
               onTouchStart={handleTouchEnd}
               onClick={handleMenuToggle}
               className="mobile-menu-button bg-gray-50 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 cursor-pointer active:bg-gray-200"
-              aria-expanded={mobileMenuOpen ? 'true' : 'false'}
+              aria-expanded={mobileMenuOpen ? "true" : "false"}
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
               <span className="sr-only">

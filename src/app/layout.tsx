@@ -19,6 +19,16 @@ export const metadata: Metadata = {
   title: "MarketDZ - Marketplace Algeria",
   description: "Comprehensive marketplace for Algeria - Buy, Sell, Jobs, Services, Rentals",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: '/icons/icon-192x192.svg', sizes: '192x192', type: 'image/svg+xml' },
+      { url: '/icons/icon-512x512.svg', sizes: '512x512', type: 'image/svg+xml' }
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/apple-touch-icon-precomposed.png', sizes: '180x180', type: 'image/png' }
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -42,6 +52,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#3b82f6",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({
@@ -51,17 +65,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="MarketDZ" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#3b82f6" />
-        <meta name="format-detection" content="telephone=no" />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
