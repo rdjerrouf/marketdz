@@ -58,7 +58,7 @@ export default function MessagesPage() {
         <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto p-4 min-h-screen">
+      <div className="relative z-10 max-w-6xl mx-auto p-4 pb-24 md:pb-4 min-h-screen">
         {/* Header */}
         <div className="mb-8 pt-8">
           <button

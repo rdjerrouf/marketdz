@@ -355,7 +355,7 @@ export default function AddItemPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 p-8 pb-24 md:pb-8 overflow-auto">
         {/* Mobile Header - Only visible when sidebar is hidden */}
         <div className="lg:hidden mb-6">
           <div className="flex items-center justify-between">

@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import { normalizePhoneNumber, generateWhatsAppLink } from '@/lib/utils'
-import PWAInstallButton from '@/components/PWAInstallButton'
 import { fixPhotoUrl } from '@/lib/storage'
 
 interface User {
@@ -370,13 +369,11 @@ export default function ProfilePage() {
             </button>
 
             <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-            
-            <PWAInstallButton />
           </div>
         </div>
       </div>
 
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
         {/* Messages */}
         {message && (
           <div className="mb-6 bg-green-50 border-2 border-green-200 text-green-800 px-6 py-4 rounded-lg font-medium relative z-30">
