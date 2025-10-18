@@ -367,18 +367,7 @@ export default function CompleteKickAssHomepage() {
               <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse border border-black/20 [animation-delay:1s]"></div>
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">MarketDZ</h1>
-                {showInstallButton && (
-                  <button
-                    onClick={handleInstallClick}
-                    className="px-2 py-1 text-xs bg-green-500/20 text-green-300 border border-green-500/30 rounded-lg hover:bg-green-500/30 transition-colors whitespace-nowrap"
-                    title={browserInfo?.installInstructions}
-                  >
-                    Install App
-                  </button>
-                )}
-              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">MarketDZ</h1>
               <p className="text-white/60 text-sm flex items-center">
                 <span className="mr-1 text-base">🇩🇿</span>
                 Algeria&apos;s Premier
