@@ -17,6 +17,7 @@ interface Listing {
   user_id: string
   wilaya?: string
   city?: string
+  rental_period?: string | null
   search_rank?: number
   user?: {
     id: string
@@ -35,13 +36,32 @@ interface MobileListingCardProps {
 export default function MobileListingCard({ listing, onClick }: MobileListingCardProps) {
   const router = useRouter()
 
-  const formatPrice = (price: number | null, category: string): string => {
-    if (!price) return category === 'job' ? 'Salary negotiable' : 'Price negotiable'
-    return new Intl.NumberFormat('en-US', {
+  const formatPrice = (price: number | null, category: string, rentalPeriod?: string | null): string => {
+    if (!price) {
+      if (category === 'job') return 'Salary negotiable'
+      if (category === 'for_rent') return 'Contact for price'
+      return 'Price negotiable'
+    }
+
+    const formattedPrice = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'DZD',
       minimumFractionDigits: 0
     }).format(price)
+
+    // Add rental period for rental listings
+    if (category === 'for_rent' && rentalPeriod) {
+      const periodMap: Record<string, string> = {
+        'daily': '/day',
+        'weekly': '/week',
+        'monthly': '/month',
+        'yearly': '/year'
+      }
+      const periodText = periodMap[rentalPeriod] || ''
+      return `${formattedPrice}${periodText}`
+    }
+
+    return formattedPrice
   }
 
   const getCategoryConfig = (category: string) => {
@@ -209,7 +229,7 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
         {/* Price - Compact but Visible */}
         <div className="mb-2">
           <div className="text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
-            {formatPrice(listing.price, listing.category)}
+            {formatPrice(listing.price, listing.category, listing.rental_period)}
           </div>
         </div>
 

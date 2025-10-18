@@ -133,17 +133,33 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
     }
   }, [listingId])
 
-  const formatPrice = (price: number | null, category: string) => {
+  const formatPrice = (price: number | null, category: string, rentalPeriod?: string | null) => {
     if (!price) {
       if (category === 'job') return 'Salary negotiable'
       if (category === 'service') return 'Quote on request'
+      if (category === 'for_rent') return 'Contact for price'
       return 'Price negotiable'
     }
-    return new Intl.NumberFormat('en-US', {
+
+    const formattedPrice = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'DZD',
       minimumFractionDigits: 0
     }).format(price)
+
+    // Add rental period for rental listings
+    if (category === 'for_rent' && rentalPeriod) {
+      const periodMap: Record<string, string> = {
+        'daily': '/day',
+        'weekly': '/week',
+        'monthly': '/month',
+        'yearly': '/year'
+      }
+      const periodText = periodMap[rentalPeriod] || ''
+      return `${formattedPrice}${periodText}`
+    }
+
+    return formattedPrice
   }
 
   const getCategoryInfo = (category: string) => {
@@ -386,7 +402,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">{listing.title}</h1>
                 <div className="text-3xl font-bold text-green-600 mb-4">
-                  {formatPrice(listing.price, listing.category)}
+                  {formatPrice(listing.price, listing.category, listing.rental_period)}
                 </div>
 
                 {/* Service Phone Display */}

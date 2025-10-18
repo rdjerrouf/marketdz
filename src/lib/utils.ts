@@ -18,6 +18,29 @@ export function formatPrice(price: number): string {
   }).format(price)
 }
 
+// Format price with rental period for rental listings
+export function formatPriceWithPeriod(price: number | null, category: string, rentalPeriod?: string | null): string {
+  if (!price) {
+    return category === 'for_rent' ? 'Contact for price' : 'Price negotiable'
+  }
+
+  const formattedPrice = formatPrice(price)
+
+  // Add rental period for rental listings
+  if (category === 'for_rent' && rentalPeriod) {
+    const periodMap: Record<string, string> = {
+      'daily': '/day',
+      'weekly': '/week',
+      'monthly': '/month',
+      'yearly': '/year'
+    }
+    const periodText = periodMap[rentalPeriod] || ''
+    return `${formattedPrice}${periodText}`
+  }
+
+  return formattedPrice
+}
+
 // Format date for display
 export function formatDate(date: string | Date): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date

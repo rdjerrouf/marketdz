@@ -202,13 +202,32 @@ export default function CompleteKickAssHomepage() {
 
   // PWA install functionality removed - handled by service worker
 
-  const formatPrice = (price: number | null, category: string): string => {
-    if (!price) return category === 'job' ? 'Salary negotiable' : 'Price negotiable'
-    return new Intl.NumberFormat('en-US', {
+  const formatPrice = (price: number | null, category: string, rentalPeriod?: string | null): string => {
+    if (!price) {
+      if (category === 'job') return 'Salary negotiable'
+      if (category === 'for_rent') return 'Contact for price'
+      return 'Price negotiable'
+    }
+
+    const formattedPrice = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'DZD',
       minimumFractionDigits: 0
     }).format(price)
+
+    // Add rental period for rental listings
+    if (category === 'for_rent' && rentalPeriod) {
+      const periodMap: Record<string, string> = {
+        'daily': '/day',
+        'weekly': '/week',
+        'monthly': '/month',
+        'yearly': '/year'
+      }
+      const periodText = periodMap[rentalPeriod] || ''
+      return `${formattedPrice}${periodText}`
+    }
+
+    return formattedPrice
   }
 
   const getCategoryBadge = (category: string) => {
@@ -856,7 +875,7 @@ export default function CompleteKickAssHomepage() {
 
                       <div className="flex items-center justify-between mb-4">
                         <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
-                          {formatPrice(listing.price, listing.category)}
+                          {formatPrice(listing.price, listing.category, listing.rental_period)}
                         </div>
                         <div className="flex items-center text-white/50 text-sm">
                           <Users className="w-4 h-4 mr-1" />

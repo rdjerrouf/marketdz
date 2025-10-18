@@ -61,6 +61,7 @@ export interface BaseListing {
   location_wilaya?: string
   photos: string[]
   metadata: Record<string, unknown>
+  rental_period?: string | null
   created_at: string
   updated_at: string
 }
