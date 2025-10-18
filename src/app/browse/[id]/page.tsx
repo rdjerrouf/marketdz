@@ -19,6 +19,7 @@ interface Listing {
   created_at: string
   status: string
   user_id: string
+  rental_period?: string | null
   metadata: Record<string, unknown> | null
 }
 

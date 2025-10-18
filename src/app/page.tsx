@@ -32,6 +32,7 @@ interface Listing {
   created_at: string;
   status: string;
   user_id: string;
+  rental_period?: string | null;
   is_hot_deal?: boolean;
 }
 

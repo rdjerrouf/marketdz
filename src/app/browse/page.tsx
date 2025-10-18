@@ -21,6 +21,7 @@ interface Listing {
   user_id: string
   wilaya?: string
   city?: string
+  rental_period?: string | null
   search_rank?: number
   user?: {
     id: string
