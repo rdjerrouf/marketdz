@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import ListingForm from '@/components/listings/ListingForm'
-import PWAInstallButton from '@/components/PWAInstallButton'
 
 interface User {
   id: string
@@ -149,10 +148,7 @@ export default function CreateListingPage() {
               Back
             </button>
             
-            <div className="text-center relative">
-              <div className="absolute top-0 right-0">
-                <PWAInstallButton />
-              </div>
+            <div className="text-center">
               <div className="text-6xl mb-4">{display.icon}</div>
               <h1 className="text-4xl font-bold text-white mb-2">
                 Create New {display.title}
@@ -164,7 +160,7 @@ export default function CreateListingPage() {
           </div>
 
           {/* Form */}
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto pb-24 md:pb-8">
             <ListingForm
               initialData={{
                 category: category as 'for_sale' | 'job' | 'service' | 'for_rent',
