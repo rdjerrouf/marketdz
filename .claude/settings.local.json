@@ -39,7 +39,9 @@
       "WebSearch",
       "Read(///**)",
       "Bash(awk:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(supabase start:*)",
+      "Bash(docker:*)"
     ],
     "deny": [],
     "ask": []

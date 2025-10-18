@@ -41,6 +41,12 @@ export const LISTING_CATEGORIES = {
 
       // Big Ticket Items
       'Vehicles',
+      'Motorcycles',
+      'Boats & Watercraft',
+      'Trailers & Towing',
+      'RV & Campers',
+      'Heavy Equipment',
+      'Construction Vehiclest',
       'Real Estate',
 
       // Business & Industry
@@ -51,7 +57,6 @@ export const LISTING_CATEGORIES = {
       'Manufacturing',
 
       // Miscellaneous
-      'Animals',
       'Other'
     ]
   },
@@ -109,7 +114,7 @@ export const LISTING_CATEGORIES = {
       'Commercial Space',
       'Vehicles',
       'Equipment',
-      'Event Halls',
+      'Event Halls (Salle de Fête)',
       'Other'
     ]
   }

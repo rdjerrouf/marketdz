@@ -336,10 +336,7 @@ export default function CompleteKickAssHomepage() {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-lg border-b border-white/10 pointer-events-auto">
         <div className="flex items-center justify-center p-4">
           <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl relative flex items-center justify-center">
-              <span className="text-2xl">🇩🇿</span>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
-            </div>
+            <span className="text-2xl">🇩🇿</span>
             <h1 className="text-white text-xl font-bold">MarketDZ</h1>
             {showInstallButton && (
               <button
@@ -361,15 +358,10 @@ export default function CompleteKickAssHomepage() {
         <div className="p-6 flex flex-col h-full">
           {/* Enhanced Logo */}
           <div className="flex items-center mb-12">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-2xl mr-4 relative flex items-center justify-center">
-              <span className="text-3xl">🇩🇿</span>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse border-2 border-black/20"></div>
-              <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse border border-black/20 [animation-delay:1s]"></div>
-            </div>
+            <span className="text-6xl mr-4">🇩🇿</span>
             <div className="flex-1">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">MarketDZ</h1>
-              <p className="text-white/60 text-sm flex items-center">
-                <span className="mr-1 text-base">🇩🇿</span>
+              <p className="text-white/60 text-sm">
                 Algeria&apos;s Premier
               </p>
             </div>
@@ -492,7 +484,7 @@ export default function CompleteKickAssHomepage() {
 
       {/* Main Content */}
       <div className="lg:ml-52 min-h-screen pointer-events-auto">
-        <div className="p-8 pt-24 lg:pt-8">
+        <div className="p-8 pt-24 lg:pt-8 pb-32">
           {/* Enhanced Hero Section */}
           <div className="relative mb-16 rounded-3xl overflow-hidden shadow-2xl">
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent z-10"></div>
