@@ -114,7 +114,7 @@ export const LISTING_CATEGORIES = {
       'Commercial Space',
       'Vehicles',
       'Equipment',
-      'Event Halls (Salle de Fête)',
+      'Event Halls (Salle des Fêtes)',
       'Other'
     ]
   }

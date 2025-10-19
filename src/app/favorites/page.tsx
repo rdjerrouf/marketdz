@@ -144,12 +144,13 @@ export default function FavoritesPage() {
                   return (
                     <div
                       key={favorite.favoriteId}
+                      data-listing-card="true"
                       className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl border border-white border-opacity-20 overflow-hidden hover:bg-opacity-20 transition-all duration-200 cursor-pointer group"
                       onClick={(e) => {
-                        // Don't navigate if clicking on favorite button or its children
+                        // Don't navigate if clicking on buttons
                         const target = e.target as HTMLElement
-                        if (target.closest('[data-favorite-button]')) {
-                          console.log('🚫 Card click ignored - clicked on favorite button')
+                        if (target.closest('[data-favorite-button]') || target.closest('button')) {
+                          console.log('🚫 Card click ignored - clicked on button')
                           return
                         }
                         router.push(`/browse/${listing.id}`)
@@ -214,6 +215,27 @@ export default function FavoritesPage() {
                           <span className="bg-black bg-opacity-60 text-white px-2 py-1 rounded-full text-xs shadow-lg">
                             {getTimeAgo(favorite.favoritedAt)}
                           </span>
+                        </div>
+
+                        {/* Remove button - more visible option */}
+                        <div className="absolute bottom-2 right-2 z-10 pointer-events-auto">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              if (confirm('Remove this listing from your favorites?')) {
+                                // Use the same toggle mechanism
+                                const button = e.currentTarget.closest('[data-listing-card]')?.querySelector('[data-favorite-button] button') as HTMLButtonElement;
+                                button?.click();
+                              }
+                            }}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs font-medium shadow-lg transition-all hover:scale-105"
+                          >
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Remove
+                          </button>
                         </div>
                       </div>
 
