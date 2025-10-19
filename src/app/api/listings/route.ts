@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create the listing (temporarily without new fields due to schema cache issue)
+    // Create the listing with all category-specific fields
     const { data, error } = await supabase
       .from('listings')
       .insert([{
@@ -129,29 +129,31 @@ export async function POST(request: NextRequest) {
         location_city: location_city?.trim(),
         location_wilaya,
         photos: photos || [],
+        // Category-specific fields
+        available_from: available_from || null,
+        available_to: available_to || null,
+        rental_period: rental_period || null,
+        salary_min: salary_min ? parseInt(salary_min) : null,
+        salary_max: salary_max ? parseInt(salary_max) : null,
+        job_type: job_type || null,
+        company_name: company_name?.trim() || null,
+        condition: condition || null,
         metadata: {
           ...metadata || {},
-          // Store new fields in metadata temporarily until schema cache refreshes
-          ...(available_from && { available_from }),
-          ...(available_to && { available_to }),
-          ...(rental_period && { rental_period }),
-          ...(salary_min && { salary_min }),
-          ...(salary_max && { salary_max }),
-          ...(job_type && { job_type }),
-          ...(company_name?.trim() && { company_name: company_name.trim() }),
-          ...(condition && { condition }),
-          // Job application contact fields
+          // Job application contact fields in metadata
           ...(application_email?.trim() && { application_email: application_email.trim() }),
           ...(application_phone?.trim() && { application_phone: normalizePhoneNumber(application_phone.trim()) }),
           ...(application_instructions?.trim() && { application_instructions: application_instructions.trim() }),
-          // Service fields
+          // Service fields in metadata
           ...(service_phone?.trim() && { service_phone: normalizePhoneNumber(service_phone.trim()) })
         },
         status: 'active'
       }])
       .select(`
         id, title, description, category, subcategory, price, created_at, status,
-        user_id, location_city, location_wilaya, photos, metadata
+        user_id, location_city, location_wilaya, photos, metadata,
+        available_from, available_to, rental_period, salary_min, salary_max,
+        job_type, company_name, condition
       `)
       .single()
 

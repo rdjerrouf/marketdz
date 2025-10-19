@@ -68,7 +68,16 @@ export async function PUT(
       location_wilaya,
       photos,
       metadata,
-      status
+      status,
+      // Category-specific fields
+      available_from,
+      available_to,
+      rental_period,
+      salary_min,
+      salary_max,
+      job_type,
+      company_name,
+      condition
     } = body
 
     // First check if the listing exists and belongs to the user
@@ -108,6 +117,15 @@ export async function PUT(
     if (photos !== undefined) updateData.photos = photos
     if (metadata !== undefined) updateData.metadata = metadata
     if (status !== undefined) updateData.status = status
+    // Category-specific fields
+    if (available_from !== undefined) updateData.available_from = available_from
+    if (available_to !== undefined) updateData.available_to = available_to
+    if (rental_period !== undefined) updateData.rental_period = rental_period
+    if (salary_min !== undefined) updateData.salary_min = salary_min
+    if (salary_max !== undefined) updateData.salary_max = salary_max
+    if (job_type !== undefined) updateData.job_type = job_type
+    if (company_name !== undefined) updateData.company_name = company_name
+    if (condition !== undefined) updateData.condition = condition
 
     const { data, error } = await supabase
       .from('listings')
