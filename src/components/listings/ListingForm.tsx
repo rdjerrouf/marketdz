@@ -147,6 +147,11 @@ export default function ListingForm({
       setError('Valid price is required for this category')
       return false
     }
+    // Rental-specific validation
+    if (formData.category === 'for_rent' && !formData.rental_period) {
+      setError('Rental period is required for rental listings')
+      return false
+    }
     // Job-specific salary validation
     if (formData.category === 'job') {
       if (formData.salary_type === 'fixed' && (!formData.salary_amount || isNaN(Number(formData.salary_amount)) || Number(formData.salary_amount) <= 0)) {
@@ -509,15 +514,17 @@ export default function ListingForm({
                   </div>
                   <div>
                     <label htmlFor="rental_period" className={labelClassName}>
-                      Rental Period
+                      Rental Period <span className="text-red-500">*</span>
                     </label>
                     <select
                       id="rental_period"
                       value={formData.rental_period}
                       onChange={(e) => handleInputChange('rental_period', e.target.value)}
                       className={selectClassName}
+                      required
                     >
                       <option value="">Select rental period</option>
+                      <option value="hourly">Hourly</option>
                       <option value="daily">Daily</option>
                       <option value="weekly">Weekly</option>
                       <option value="monthly">Monthly</option>

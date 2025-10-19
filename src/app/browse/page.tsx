@@ -330,6 +330,7 @@ function BrowsePageContent() {
     // Add rental period for rental listings
     if (category === 'for_rent' && rentalPeriod) {
       const periodMap: Record<string, string> = {
+        'hourly': '/hour',
         'daily': '/day',
         'weekly': '/week',
         'monthly': '/month',

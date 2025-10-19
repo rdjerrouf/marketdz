@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate category-specific enums
-    if (rental_period && !['daily', 'weekly', 'monthly', 'yearly'].includes(rental_period)) {
+    if (rental_period && !['hourly', 'daily', 'weekly', 'monthly', 'yearly'].includes(rental_period)) {
       return NextResponse.json(
         { error: 'Invalid rental period' },
         { status: 400 }
