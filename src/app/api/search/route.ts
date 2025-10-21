@@ -203,7 +203,7 @@ export async function GET(request: NextRequest) {
         .select(getProfileSelectColumns())  // Use allowlisted columns
         .in('id', userIds);
 
-      profileById = new Map((profiles || []).map(p => [p.id, p]));
+      profileById = new Map((profiles || []).map((p: any) => [p.id, p]));
     }
 
     // Merge profiles into listings
