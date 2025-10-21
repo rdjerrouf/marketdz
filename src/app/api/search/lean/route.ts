@@ -1,15 +1,27 @@
 // src/app/api/search/lean/route.ts - Cost-optimized search for lean launch
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import {
+  getListingSelectColumns,
+  getProfileSelectColumns,
+  applySearchSecurityConstraints,
+  validateSearchParams,
+  logServiceRoleQuery
+} from '@/lib/search-security';
 
 export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
-    const supabase = await createServerSupabaseClient(request);
+    // Use admin client to bypass RLS and 3s timeout for public search
+    // SECURITY: We enforce status='active' server-side via applySearchSecurityConstraints()
+    const supabase = createSupabaseAdminClient();
     const urlSearchParams = request.nextUrl.searchParams;
     
     // Core search parameters
     const query = urlSearchParams.get('q')?.trim() || '';
     const category = urlSearchParams.get('category')?.trim();
+    const subcategory = urlSearchParams.get('subcategory')?.trim();
     const wilaya = urlSearchParams.get('wilaya')?.trim();
     const minPrice = urlSearchParams.get('minPrice');
     const maxPrice = urlSearchParams.get('maxPrice');
@@ -17,12 +29,30 @@ export async function GET(request: NextRequest) {
     const page = parseInt(urlSearchParams.get('page') || '1');
     const limit = Math.min(parseInt(urlSearchParams.get('limit') || '20'), 50); // Max 50 results
 
-    console.log('🔍 Lean Search:', { query, category, wilaya, minPrice, maxPrice, page, limit });
+    // SECURITY: Validate all parameters
+    const validation = validateSearchParams({
+      category,
+      subcategory,
+      wilaya,
+      sortBy,
+      limit,
+      page
+    });
+
+    if (!validation.isValid) {
+      console.error('❌ Invalid search parameters:', validation.errors);
+      return NextResponse.json(
+        { error: 'Invalid search parameters', details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    console.log('🔍 Lean Search:', { query, category, subcategory, wilaya, minPrice, maxPrice, page, limit });
 
     // =================================================================
     // COST CONTROL: Require at least one filter to prevent full scans
     // =================================================================
-    const hasFilter = category || wilaya || minPrice || maxPrice;
+    const hasFilter = category || subcategory || wilaya || minPrice || maxPrice;
     
     if (!hasFilter && !query) {
       return NextResponse.json({
@@ -34,35 +64,23 @@ export async function GET(request: NextRequest) {
 
     // =================================================================
     // OPTIMIZED QUERY: Use compound index for efficient filtering
+    // PERFORMANCE: No exact count, no profile join for maximum speed
+    // SECURITY: Use allowlisted columns only + enforce status='active'
     // =================================================================
     let supabaseQuery = supabase
       .from('listings')
-      .select(`
-        id,
-        title,
-        description,
-        price,
-        category,
-        location_wilaya,
-        location_city,
-        photos,
-        created_at,
-        favorites_count,
-        views_count,
-        profiles:user_id (
-          first_name,
-          last_name,
-          avatar_url,
-          rating
-        )
-      `, { count: 'exact' })
-      .eq('status', 'active') // Use index
-      .range((page - 1) * limit, page * limit - 1) // Pagination
-      .limit(limit); // Hard limit
+      .select(getListingSelectColumns());
+
+    // CRITICAL: Apply security constraints (enforces status='active')
+    supabaseQuery = applySearchSecurityConstraints(supabaseQuery);
 
     // Apply filters in order of index efficiency
     if (category && ['for_sale', 'job', 'service', 'for_rent'].includes(category)) {
       supabaseQuery = supabaseQuery.eq('category', category as 'for_sale' | 'job' | 'service' | 'for_rent');
+    }
+
+    if (subcategory) {
+      supabaseQuery = supabaseQuery.eq('subcategory', subcategory);
     }
 
     if (wilaya) {
@@ -84,9 +102,14 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Full-text search (uses GIN index)
+    // Full-text search using pre-computed search vectors (uses GIN indexes)
+    // CRITICAL: Use search_vector_ar/fr instead of to_tsvector() to avoid 4.5s timeouts
     if (query) {
-      supabaseQuery = supabaseQuery.textSearch('title,description', query);
+      // Search both Arabic and French vectors for multilingual support
+      // This uses the idx_listings_fts_ar and idx_listings_fts_fr GIN indexes
+      supabaseQuery = supabaseQuery.or(
+        `search_vector_ar.wfts.${query},search_vector_fr.wfts.${query}`
+      );
     }
 
     // Sorting
@@ -107,30 +130,61 @@ export async function GET(request: NextRequest) {
         supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
     }
 
+    // Apply pagination
+    const offset = (page - 1) * limit;
+    supabaseQuery = supabaseQuery.range(offset, offset + limit - 1);
+
     // Execute query
-    const { data: listings, error, count } = await supabaseQuery;
+    const { data: listings, error } = await supabaseQuery;
 
     if (error) {
       console.error('🚨 Search error:', error);
-      return NextResponse.json({ 
-        error: 'Search failed', 
-        details: error.message 
+      return NextResponse.json({
+        error: 'Search failed',
+        details: error.message
       }, { status: 500 });
     }
 
-    // Calculate pagination
-    const totalPages = Math.ceil((count || 0) / limit);
-    const hasNextPage = page < totalPages;
+    const resultCount = listings?.length || 0;
+    console.log(`✅ Search completed: ${resultCount} results`);
+
+    // SECURITY: Log service role query for audit trail
+    logServiceRoleQuery({
+      endpoint: '/api/search/lean',
+      filters: { category, subcategory, wilaya, query },
+      resultCount,
+      executionTime: Date.now() - startTime
+    });
+
+    // Lazy load profiles for displayed results only (max 50 profiles)
+    const userIds = [...new Set((listings || []).map((l: any) => l.user_id))];
+    let profileById = new Map<string, any>();
+
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select(getProfileSelectColumns())  // Use allowlisted columns
+        .in('id', userIds);
+
+      profileById = new Map((profiles || []).map(p => [p.id, p]));
+    }
+
+    // Merge profiles into listings
+    const listingsWithProfiles = (listings || []).map((listing: any) => ({
+      ...listing,
+      profiles: profileById.get(listing.user_id) || null
+    }));
+
+    // Calculate pagination (heuristic without expensive count)
+    const hasNextPage = (listings?.length || 0) === limit;
     const hasPreviousPage = page > 1;
 
-    console.log(`✅ Search completed: ${listings?.length || 0} results (${count} total)`);
-
     return NextResponse.json({
-      listings: listings || [],
+      listings: listingsWithProfiles,
       pagination: {
         currentPage: page,
-        totalPages,
-        totalItems: count || 0,
+        totalPages: null,  // Unknown without expensive count
+        totalItems: null,  // Unknown without expensive count
         hasNextPage,
         hasPreviousPage,
         limit
@@ -138,6 +192,7 @@ export async function GET(request: NextRequest) {
       searchParams: {
         query,
         category,
+        subcategory,
         wilaya,
         minPrice,
         maxPrice,

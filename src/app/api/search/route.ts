@@ -1,13 +1,25 @@
 // src/app/api/search/route.ts - Real database version
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import {
+  getListingSelectColumns,
+  getProfileSelectColumns,
+  applySearchSecurityConstraints,
+  validateSearchParams,
+  logServiceRoleQuery
+} from '@/lib/search-security';
 
 export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
-    const supabase = await createServerSupabaseClient(request);
+    // Use admin client to bypass RLS and 3s timeout for public search
+    // SECURITY: We enforce status='active' server-side via applySearchSecurityConstraints()
+    const supabase = createSupabaseAdminClient();
     const urlSearchParams = request.nextUrl.searchParams;
     const query = urlSearchParams.get('q')?.trim() || '';
     const category = urlSearchParams.get('category')?.trim();
+    const subcategory = urlSearchParams.get('subcategory')?.trim();
     const wilaya = urlSearchParams.get('wilaya')?.trim();
     const city = urlSearchParams.get('city')?.trim();
     const minPrice = urlSearchParams.get('minPrice');
@@ -28,31 +40,47 @@ export async function GET(request: NextRequest) {
     const companyName = urlSearchParams.get('companyName');
     const condition = urlSearchParams.get('condition');
 
+    // SECURITY: Validate all parameters before processing
+    const validation = validateSearchParams({
+      category,
+      subcategory,
+      wilaya,
+      city,
+      sortBy,
+      limit: safeLimit,
+      page: safePage
+    });
+
+    if (!validation.isValid) {
+      console.error('❌ Invalid search parameters:', validation.errors);
+      return NextResponse.json(
+        { error: 'Invalid search parameters', details: validation.errors },
+        { status: 400 }
+      );
+    }
+
     console.log('🔍 Search params:', {
-      query, category, wilaya, city, minPrice, maxPrice, sortBy, safePage, safeLimit,
+      query, category, subcategory, wilaya, city, minPrice, maxPrice, sortBy, safePage, safeLimit,
       availableFrom, availableTo, rentalPeriod, minSalary, maxSalary, jobType, companyName, condition
     });
 
     // Build the query with explicit column selection
-    // Always use exact count to avoid connection issues
+    // PERFORMANCE: No exact count, no profile join for maximum speed at 250k scale
+    // SECURITY: Use allowlisted columns only + enforce status='active'
     let supabaseQuery = supabase
       .from('listings')
-      .select(`
-        id, title, description, price, category, created_at, status,
-        user_id, location_wilaya, location_city, photos,
-        condition, available_from, available_to, rental_period,
-        salary_min, salary_max, job_type, company_name,
-        profiles:user_id (
-          first_name,
-          last_name,
-          avatar_url
-        )
-      `, { count: 'exact' })
-      .eq('status', 'active'); // Only show active listings
+      .select(getListingSelectColumns());
+
+    // CRITICAL: Apply security constraints (enforces status='active')
+    supabaseQuery = applySearchSecurityConstraints(supabaseQuery);
 
     // Apply filters
     if (category && ['for_sale', 'job', 'service', 'for_rent'].includes(category)) {
       supabaseQuery = supabaseQuery.eq('category', category as 'for_sale' | 'job' | 'service' | 'for_rent');
+    }
+
+    if (subcategory) {
+      supabaseQuery = supabaseQuery.eq('subcategory', subcategory);
     }
 
     if (wilaya) {
@@ -103,15 +131,15 @@ export async function GET(request: NextRequest) {
       supabaseQuery = supabaseQuery.eq('condition', condition);
     }
 
-    // Full-text search using proper PostgreSQL FTS with bilingual support
+    // Full-text search using pre-computed search vectors (uses GIN indexes)
+    // CRITICAL: Use search_vector_ar/fr instead of to_tsvector() to avoid 4.5s timeouts
     if (query) {
-      // Use textSearch for both Arabic and French vectors with ranking
-      // This uses the GIN indexes (search_vector_ar, search_vector_fr) for fast searches
-      // Note: Supabase .fts operator automatically uses ts_query for proper word matching
+      // Use websearch full-text search (.wfts) for both Arabic and French vectors
+      // This uses the idx_listings_fts_ar and idx_listings_fts_fr GIN indexes
+      // .wfts uses websearch_to_tsquery which handles phrases better than plain text search
       try {
-        // Use websearch_to_tsquery format for better phrase handling
         supabaseQuery = supabaseQuery.or(
-          `search_vector_ar.fts.${query},search_vector_fr.fts.${query}`
+          `search_vector_ar.wfts.${query},search_vector_fr.wfts.${query}`
         );
       } catch (error) {
         console.warn('Full-text search error, falling back to ILIKE:', error);
@@ -144,7 +172,7 @@ export async function GET(request: NextRequest) {
     const offset = (safePage - 1) * safeLimit;
     supabaseQuery = supabaseQuery.range(offset, offset + safeLimit - 1);
 
-    const { data: listings, error, count } = await supabaseQuery;
+    const { data: listings, error } = await supabaseQuery;
 
     if (error) {
       console.error('❌ Database error:', error);
@@ -154,19 +182,45 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(`✅ Found ${listings?.length || 0} listings`);
+    const resultCount = listings?.length || 0;
+    console.log(`✅ Found ${resultCount} listings`);
 
-    // Calculate pagination info
-    const totalItems = count || 0;
-    const totalPages = Math.ceil(totalItems / safeLimit);
-    const hasNextPage = safePage < totalPages;
+    // SECURITY: Log service role query for audit trail
+    logServiceRoleQuery({
+      endpoint: '/api/search',
+      filters: { category, subcategory, wilaya, query },
+      resultCount,
+      executionTime: Date.now() - startTime
+    });
+
+    // Lazy load profiles for displayed results only (20-50 profiles max)
+    const userIds = [...new Set((listings || []).map((l: any) => l.user_id))];
+    let profileById = new Map<string, any>();
+
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select(getProfileSelectColumns())  // Use allowlisted columns
+        .in('id', userIds);
+
+      profileById = new Map((profiles || []).map(p => [p.id, p]));
+    }
+
+    // Merge profiles into listings
+    const listingsWithProfiles = (listings || []).map((listing: any) => ({
+      ...listing,
+      profiles: profileById.get(listing.user_id) || null
+    }));
+
+    // Calculate pagination info (heuristic without expensive count)
+    const hasNextPage = (listings?.length || 0) === safeLimit;
 
     const response = {
-      listings: listings || [],
+      listings: listingsWithProfiles,
       pagination: {
         currentPage: safePage,
-        totalPages,
-        totalItems,
+        totalPages: null,  // Unknown without expensive count query
+        totalItems: null,  // Unknown without expensive count query
         hasNextPage,
         hasPreviousPage: safePage > 1,
         limit: safeLimit
@@ -174,7 +228,7 @@ export async function GET(request: NextRequest) {
       metadata: {
         executionTime: Date.now(),
         strategy: 'database',
-        countStrategy: 'exact'
+        countStrategy: 'none'  // No count for performance at 250k scale
       }
     };
 
