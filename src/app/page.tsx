@@ -1,5 +1,9 @@
 'use client'
 
+// Force dynamic rendering to prevent stale static builds
+export const dynamic = 'force-dynamic'
+export const revalidate = 60 // Revalidate every 60 seconds
+
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Home, User, MessageCircle, Bell, Zap, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users } from 'lucide-react'
@@ -126,61 +130,38 @@ export default function CompleteKickAssHomepage() {
       try {
         setListingsLoading(true)
 
-        // Fetch recent active listings with user info
-        // Note: Using left join to include listings even if profile is missing
-        const { data: listings, error } = await supabase
-          .from('listings')
-          .select(`
-            *,
-            user:profiles(
-              id,
-              first_name,
-              last_name,
-              avatar_url,
-              rating
-            )
-          `)
-          .eq('status', 'active')
-          .order('created_at', { ascending: false })
-          .limit(9)
+        // Use optimized search API instead of direct Supabase query
+        // This uses proper indexes and server-side optimization for 250k+ listings
+        const [listingsResponse, countResponse] = await Promise.all([
+          fetch('/api/search?limit=9&sortBy=created_at'),
+          fetch('/api/search/count')
+        ])
 
-        if (error) {
-          console.error('🏠 HomePage: Error fetching listings:', error)
-          console.error('🏠 HomePage: Error details:', {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          })
+        if (!listingsResponse.ok) {
+          console.error('🏠 HomePage: Error fetching listings:', listingsResponse.status, listingsResponse.statusText)
           setFeaturedListings([])
         } else {
+          const data = await listingsResponse.json()
           console.log('🏠 HomePage: Query successful!')
-          console.log('🏠 HomePage: Fetched', listings?.length || 0, 'featured listings')
-          console.log('🏠 HomePage: Listings data:', listings)
-          setFeaturedListings(listings || [])
+          console.log('🏠 HomePage: Fetched', data.listings?.length || 0, 'featured listings')
+          console.log('🏠 HomePage: Listings data:', data.listings)
+          setFeaturedListings(data.listings || [])
         }
 
-        // Fetch total listings count
-        const { count: totalCount } = await supabase
-          .from('listings')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'active')
+        // Fetch total count separately (optimized count endpoint)
+        if (countResponse.ok) {
+          const countData = await countResponse.json()
+          console.log('📊 HomePage: Count API Response:', countData)
+          setStats({
+            totalListings: countData.count || 0,
+            hotDeals: 0, // Will be implemented with hot_deals feature
+            newToday: 0 // Disabled - premium coming soon feature
+          })
+        } else {
+          console.error('❌ HomePage: Count API Error:', countResponse.status, countResponse.statusText)
+        }
 
-        // Fetch listings created today
-        // NOTE: Disabled for now - Fresh Arrivals is a premium coming soon feature
-        // const today = new Date()
-        // today.setHours(0, 0, 0, 0)
-        // const { count: todayCount } = await supabase
-        //   .from('listings')
-        //   .select('*', { count: 'exact', head: true })
-        //   .eq('status', 'active')
-        //   .gte('created_at', today.toISOString())
-
-        setStats({
-          totalListings: totalCount || 0,
-          hotDeals: 0, // Will be implemented with hot_deals feature
-          newToday: 0 // Disabled - premium coming soon feature
-        })
+        // Hot Deals and Fresh Arrivals are premium coming soon features
 
       } catch (err) {
         console.error('🏠 HomePage: Error:', err)
