@@ -2,216 +2,239 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## 🚨 CRITICAL ISSUES
 
-MarketDZ is a Next.js 15 marketplace application optimized for Algeria users with:
-- **PWA Support**: Installable app with offline functionality via next-pwa
-- **Bilingual Interface**: Arabic RTL + French localization
-- **Authentication**: Supabase PKCE flow with Docker networking fixes
-- **File Uploads**: Secure photo storage with content moderation via Edge Functions
+### ❌ Reviews & Favorites Timeout (2025-10-22)
+
+**Status**: 🔴 **BLOCKING** - Database timeout at 250k scale
+
+**Problem**: Both reviews and favorites fail with 500 errors due to expensive triggers that refresh entire materialized views on every insert.
+
+**Root Cause**:
+- Trigger `refresh_stats_on_review_change` refreshes `private.listing_stats` materialized view
+- Trigger `refresh_stats_on_favorite_change` does the same
+- At 250k listings, this takes 30+ seconds and times out
+- These were manually added to cloud DB (not in migrations)
+
+**Solution**: Migration `supabase/migrations/20251022000001_fix_review_timeout.sql`
+- Drops expensive materialized view refresh triggers
+- Keeps efficient row-level triggers (`update_user_rating`, `update_favorites_count`)
+- Adds `idx_reviews_reviewed_rating` index for fast aggregation
+
+**⚠️ BEFORE APPLYING**: Inspect cloud database state first using Supabase MCP (see "MCP Servers" section) or manual SQL at https://supabase.com/dashboard/project/vrlzwxoiglzwmhndpolj/sql/new
+
+**Verification After Fix**:
+1. Test reviews at http://localhost:3001/profile/12aecaf5-7547-4ec2-8de2-96817695c2ef
+2. Test favorites by clicking heart icon on any listing
+3. Both should complete instantly (<100ms)
+
+**Test Credentials**: user1@email.com / password123
+
+---
+
+## 📋 PROJECT OVERVIEW
+
+MarketDZ is a Next.js 15 marketplace application optimized for Algeria with:
+- **PWA Support**: Installable app with offline functionality
+- **Bilingual**: Arabic RTL + French localization
+- **Authentication**: Supabase PKCE flow with Docker networking
+- **File Uploads**: Secure storage with content moderation via Edge Functions
 - **Real-time**: Messaging and notifications
 - **Search**: Advanced Arabic full-text search with geographic filtering
-- **Admin System**: Complete role-based admin panel with security definer functions
-- **Image Optimization**: ResponsiveImage component with compression utilities
+- **Admin System**: Role-based admin panel with SECURITY DEFINER functions
+- **Performance**: Optimized for 250k+ listings scale
 
-## Essential Commands
+**Production Status**: Running on Supabase cloud (https://vrlzwxoiglzwmhndpolj.supabase.co)
 
-### Quick Start (New Developers)
+**Recent Optimizations** (2025-10-21):
+- Homepage: 20s → 164-403ms (87x faster)
+- Admin routes: All optimized for 250k scale
+- Query deduplication: 6x profile queries → 1x (80% reduction)
+- Placeholder image 404s fixed with inline SVG
+
+---
+
+## 🚀 ESSENTIAL COMMANDS
+
+### Quick Start
 ```bash
-# 1. Start Supabase (required first)
-npx supabase start
-
-# 2. Setup environment
-cp .env.docker.example .env.docker
-# Edit .env.docker with keys from: npx supabase status
-
-# 3. Start application
-npm run docker:up
+npx supabase start       # Start local Supabase
+npm install              # Install dependencies
+npm run dev              # Start dev server (opens browser at localhost:3000)
 ```
 
-### Development Commands
+### Development
 ```bash
-npm run dev              # Local development with turbopack (opens browser automatically)
-npm run build            # Build application with turbopack
+npm run dev              # Local dev with turbopack (opens browser)
+npm run build            # Build with turbopack
 npm run start            # Start production build
-npm run lint             # Run ESLint with new flat config (use this before committing)
-npm run health           # Check health endpoint (requires app running)
+npm run lint             # ESLint (use before committing)
+npm run health           # Check health endpoint
 ```
 
-### Docker Management
+### Docker
 ```bash
-npm run docker:up        # Start application container
+npm run docker:up        # Start container
 npm run docker:down      # Stop container
-npm run docker:restart   # Restart container
-npm run docker:build     # Rebuild container
-npm run docker:logs      # View container logs (follow mode)
-npm run docker:shell     # Access container shell
-npm run docker:status    # Check container & network status
+npm run docker:logs      # View logs (follow mode)
+npm run docker:restart   # Restart
 npm run docker:reset     # Full reset (down + up)
-npm run docker:dev       # Start development container
+npm run docker:shell     # Access shell
+npm run docker:status    # Check status
 ```
 
-### Testing & Debugging
+### Testing
 ```bash
-# Playwright E2E Testing
 npm run test             # Run all Playwright tests
-npm run test:headed      # Run tests with browser UI visible
-npm run test:ui          # Run tests with Playwright UI mode
-npm run test:report      # Show test report after running
-
-# Mock Data Generation
-npm run mock:test        # Generate minimal test data
-npm run mock:medium      # Generate medium dataset
-npm run mock:full        # Generate full dataset with all features
-
-# Connection & Performance Testing
-npm run test:pool        # Test database connection pool
-npm run docker:logs | grep "Middleware"    # Debug authentication
-docker logs marketdz-app-1 --follow       # Raw container logs
+npm run test:headed      # Tests with browser UI
+npm run test:ui          # Playwright UI mode
+npm run test:report      # Show test report
+npm run test:pool        # Test DB connection pool
 ```
 
-## Architecture
+### Mock Data
+```bash
+npm run mock:test        # Minimal test data
+npm run mock:medium      # Medium dataset
+npm run mock:full        # Full dataset
+```
+
+---
+
+## 🔌 MCP SERVERS
+
+### Chrome DevTools MCP
+**Status**: ✅ Configured
+**Purpose**: Browser automation and debugging
+
+```bash
+npm run chrome:debug     # Start Chrome with debugging (port 9222)
+npm run chrome:verify    # Verify connection
+```
+
+**Usage Examples**:
+- "Take a screenshot of localhost:3001"
+- "Show console errors"
+- "Click the Submit button"
+- "Fill out the review form with 5 stars"
+
+**Available Tools**: `take_snapshot`, `click`, `fill`, `list_network_requests`, `list_console_messages`, `navigate_page`, and 20+ more
+
+**Docs**: See `docs/CHROME_MCP_QUICK_START.md`
+
+### Supabase Database MCP
+**Status**: ✅ Configured (2025-10-22)
+**Purpose**: Direct cloud database inspection
+**Access Token**: Configured in `.mcp.json` (not committed to git)
+
+**⚠️ IMPORTANT**: Always ask user before running queries that modify cloud database!
+
+**Usage Examples**:
+- "Inspect triggers on the reviews table using Supabase MCP"
+- "List all functions that reference listing_stats"
+- "Check if private.listing_stats materialized view exists"
+
+**Available Tools**: `query`, `listTables`, `listFunctions`
+
+**Note**: Both MCPs require Claude Code restart to activate after installation.
+
+---
+
+## 🏗️ ARCHITECTURE
 
 ### Authentication System
-The app uses Supabase PKCE authentication with complex Docker networking:
+Supabase PKCE authentication with singleton pattern:
 
-- **Client** (`src/lib/supabase/client.ts`): Browser-side auth with implicit flow
-- **Server** (`src/lib/supabase/server.ts`): SSR auth with cookie handling  
-- **Server Pool** (`src/lib/supabase/serverPool.ts`): Connection pooling for API routes
-- **Middleware** (`middleware.ts`): Request interception and session validation
+**Key Files**:
+- `src/lib/supabase/client.ts` - Browser-side auth with singleton pattern
+- `src/lib/supabase/server.ts` - SSR auth with cookie handling
+- `src/lib/supabase/serverPool.ts` - Connection pooling for API routes
+- `middleware.ts` - Request interception and session validation
+- `src/contexts/AuthContext.tsx` - Global auth state (single source of truth)
 
-**Key Issue**: Session cookies in Docker require specific configuration:
+**Critical Pattern**: Only ONE auth listener exists (in AuthContext) to prevent "Multiple GoTrueClient instances" warning
+
+**Docker Cookie Config**:
 - Cookie attributes: `httpOnly: false`, `secure: false`, `sameSite: 'lax'`
-- Dual URL pattern: `SUPABASE_URL` (container) vs `NEXT_PUBLIC_SUPABASE_URL` (browser)
+- Dual URLs: `SUPABASE_URL` (container) vs `NEXT_PUBLIC_SUPABASE_URL` (browser)
 
-**Connection Pooling**: Uses singleton pattern in `serverPool.ts` for optimal performance on Nano tier
+### Admin System
+Role-based admin panel with SECURITY DEFINER functions:
 
-### Admin System Architecture
-- **Frontend**: Admin pages in `src/app/admin/` with role-based access control
-- **Backend**: Secure functions in `admin_secure` schema with SECURITY DEFINER
-- **Authentication**: `src/lib/admin/` utilities for admin session management
-- **Security**: All admin functions use proper RLS policies and secure search_path
-- **Context Management**: `src/contexts/AuthContext.tsx` for global authentication state
+**Structure**:
+- Frontend: `src/app/admin/*` - User management, analytics, logs, settings
+- Backend: `admin_secure` schema with secure functions
+- Auth: `src/lib/admin/*` - Invitations, MFA, session management
+- Roles: `super_admin`, `admin`, `moderator`
 
-**Admin Features**:
-- **User Management**: `src/app/admin/users/` - Manage user accounts and status
-- **Admin Management**: `src/app/admin/admins/` - Invite and manage admin accounts
-- **Analytics Dashboard**: `src/app/admin/analytics/` - System metrics and insights
-- **Audit Logs**: `src/app/admin/logs/` - Track all admin actions and changes
-- **Notifications**: `src/app/admin/notifications/` - System-wide notification management
-- **Listings Management**: `src/app/admin/listings/` - Moderate marketplace content
-- **Settings**: `src/app/admin/settings/` - System configuration
+**Pages**: users, admins, analytics, logs, notifications, listings, settings
 
-**Admin Authentication Flow**:
-- **Invitations**: `src/lib/admin/invitations.ts` - Secure admin invite system
-- **MFA Support**: `src/lib/admin/mfa.ts` - Two-factor authentication for admins
-- **Session Management**: `src/lib/admin/auth.ts` - Secure admin session handling
-- **Role-based Access**: Three tiers (super_admin, admin, moderator)
+### File Upload Flow
+Client validation → Content moderation → Secure upload → Metadata storage
 
-### File Upload Architecture
-- **Client**: `src/components/FileUpload.tsx` - React component with drag/drop
-- **Storage**: `src/lib/storage.ts` - Manages uploads via Supabase Edge Functions
-- **Security**: Content moderation + file validation (JPEG, PNG, WebP only)
-- **Flow**: Client validation → Content moderation → Secure upload → Metadata storage
-- **Image Optimization**: `src/lib/image-compression.ts` - Client-side compression utilities
-- **Responsive Images**: `src/components/common/ResponsiveImage.tsx` - Optimized image display
+**Key Files**:
+- `src/components/FileUpload.tsx` - Drag/drop component
+- `src/lib/storage.ts` - Upload management via Edge Functions
+- `src/lib/image-compression.ts` - Client-side compression
+- Allowed: JPEG, PNG, WebP only
 
-### Docker Configuration
-- **Main Config**: `docker-compose.yml` - Production setup with health checks
-- **Networking**: Uses external `supabase_network_marketdz` network
-- **Environment**: Secure injection via `.env.docker` (never commit actual keys)
-- **Build**: Multi-stage Dockerfile with Alpine Linux for minimal image size
+### API Routes (`src/app/api/`)
+- `auth/*` - signin, signup, signout, session, reset-password
+- `listings/*` - CRUD + search
+- `search/*` - Advanced search with Arabic support (analytics, suggestions, count)
+- `messages/*` - Real-time messaging
+- `admin/*` - Admin functions (users, stats, user-management)
+- `favorites/*`, `reviews/*` - User interactions
+- `upload/*` - File uploads
+- `health/*`, `monitoring/*` - System health
 
-### API Structure
-API routes in `src/app/api/` organized by domain:
-- `auth/` - Authentication endpoints (signin, signup, signout, session, reset-password, update-password)
-- `listings/` - Marketplace item management with search endpoints
-- `search/` - Advanced search with Arabic support (analytics, suggestions, lean, count, health)
-- `messages/` - Real-time messaging system with conversations
-- `admin/` - Administrative functions (users, stats, check-status, user-management)
-- `upload/` - File upload handling with content moderation
-- `favorites/` - User favorites management
-- `reviews/` - User reviews and ratings
-- `profile/` - User profile management
-- `notifications/` - Push notifications
-- `monitoring/` - System monitoring
-- `health/` - Application health checks
-- `exec-sql/` - Database execution utilities
-- `debug/` - Debugging endpoints
+### PWA Configuration
+- Manifest: `public/manifest.json`
+- Service Worker: Auto-caching via next-pwa
+- Config: `next.config.ts`
+- Caching: NetworkFirst (API), CacheFirst (static), NetworkOnly (admin/auth)
 
-### PWA Implementation
-- **Manifest**: `public/manifest.json` with app metadata
-- **Icons**: `public/icons/` with 192x192 and 512x512 SVG icons
-- **Service Worker**: Automatic caching via next-pwa configuration
-- **Config**: `next.config.ts` with PWA setup (currently enabled for beta testing)
-- **Caching Strategy**: NetworkFirst for API routes, CacheFirst for static assets, NetworkOnly for admin/auth routes
+### Mobile UI
+- `src/components/common/MobileListingCard.tsx` - 2-column grid layout
+- Mobile: `grid-cols-2` via `md:hidden`
+- Desktop: `lg:grid-cols-3` via `hidden md:grid`
 
-### Testing Architecture
-- **Framework**: Playwright for end-to-end testing across Chromium, Firefox, and WebKit
-- **Configuration**: `playwright.config.ts` with auto dev server startup
-- **Test Location**: `tests/` directory with parallel execution support
-- **Base URL**: Automatically uses `http://localhost:3000` for local development
-- **Reporting**: HTML reporter with trace collection on retry
-- **Test Types**: E2E tests, admin functionality tests, and authentication flow tests
+## 💡 CRITICAL PATTERNS & FIXES
 
-### Performance Configuration
-- **Turbopack**: Enabled for faster development builds
-- **Source Maps**: Disabled in production (`productionBrowserSourceMaps: false`)
-- **Standalone Output**: Optimized for Docker deployment
+### TypeScript Database Nullables
+**IMPORTANT**: Database columns return `null`, not `undefined`
 
-### Mobile UI Architecture (2025-10-09)
-- **MobileListingCard Component**: `src/components/common/MobileListingCard.tsx`
-  - 2-column grid layout optimized for PWA/mobile app
-  - Compact design showing 4 listings on screen at once
-  - Touch-friendly with category badges and icons
-  - Separate from desktop layout using Tailwind breakpoints
-- **Responsive Layouts**:
-  - Mobile: 2-column grid (`grid-cols-2`) via `md:hidden`
-  - Desktop: 3-column grid (`lg:grid-cols-3`) via `hidden md:grid`
-- **Implementation**: Home page (`src/app/page.tsx`) and Browse page (`src/app/browse/page.tsx`)
+```typescript
+// ❌ Wrong - uses optional (undefined)
+interface Listing {
+  listing_id?: string
+  avatar_url?: string
+}
 
-## Recent Critical Fixes (2025-10-09)
+// ✅ Correct - uses null union
+interface Listing {
+  listing_id: string | null
+  avatar_url: string | null
+}
+```
 
-### ✅ TypeScript Strict Mode Compliance
-**Issue**: Vercel builds failing due to implicit `any` types in callbacks after Supabase client refactoring.
+**Pattern**: Database nullables use `T | null`, not `T?` which means `T | undefined`
 
-**Files Fixed**:
-- `src/hooks/useMessages.ts` - Added `RealtimePostgresChangesPayload<T>` types to all realtime subscriptions
-- `src/hooks/useRealtime.ts` - Fixed 4 realtime callback parameters and 3 notification filter callbacks
-- `src/contexts/AuthContext.tsx` - Added `AuthChangeEvent` type to auth listener
-- `src/components/profile/UserReviews.tsx` - Fixed `reduce` and `forEach` callbacks
-- `src/app/admin/analytics/page.tsx` - Fixed category stats callback
-- `src/app/profile/page.tsx` - Added `user_id` to Listing interface
+### Supabase Client Singleton Pattern
+**CRITICAL**: Only ONE auth listener to prevent "Multiple GoTrueClient instances" warning
 
-**Type Corrections**:
-- Changed `listing_id?: string` to `listing_id: string | null` (database returns `null`, not `undefined`)
-- Changed `avatar_url?: string` to `avatar_url: string | null` across all interfaces
-- Pattern: Database nullables use `T | null`, not optional `T?` which means `T | undefined`
+**Implementation**:
+- `AuthContext.tsx` - Single source of truth for auth state
+- `useAuth.ts` - Re-exports from AuthContext (no listener)
+- `useUser.ts` - Consumes from AuthContext (no listener)
+- `src/lib/supabase/client.ts` - Singleton pattern
 
-### ✅ Multiple GoTrueClient Instances Warning RESOLVED
-**Issue**: "Multiple GoTrueClient instances detected" warning in browser console.
-
-**Root Cause**: Three separate `onAuthStateChange` listeners were running simultaneously:
-1. `AuthContext.tsx` - ✅ Keep (single source of truth)
-2. `useAuth.ts` - ❌ Removed (now re-exports from AuthContext)
-3. `useUser.ts` - ❌ Removed listener (now consumes from AuthContext)
-
-**Solution**:
-- `src/hooks/useUser.ts` - Refactored to consume user from `AuthContext` instead of creating own listener
-- `src/hooks/useAuth.ts` - Replaced entire implementation with re-export from `AuthContext`
-- `src/lib/supabase/client.ts` - Singleton pattern with `SupabaseClient` type from `@supabase/supabase-js`
-
-**Result**: Only ONE auth listener exists in the entire app (in AuthContext), eliminating the warning.
-
-### ✅ Supabase Client Singleton Pattern
-**Implementation** (`src/lib/supabase/client.ts`):
 ```typescript
 let supabaseInstance: SupabaseClient<Database> | null = null
 
 function getSupabaseClient(): SupabaseClient<Database> {
   if (!supabaseInstance) {
     supabaseInstance = createBrowserClient<Database>(supabaseUrl, supabaseKey)
-    console.log('✅ Supabase client instance created')
   }
   return supabaseInstance
 }
@@ -219,234 +242,200 @@ function getSupabaseClient(): SupabaseClient<Database> {
 export const supabase = getSupabaseClient()
 ```
 
-**Key Points**:
-- Import `SupabaseClient` from `@supabase/supabase-js`, NOT from `@supabase/ssr`
-- Only ONE Supabase client instance created globally
-- All imports use the same singleton instance
-- Prevents multiple auth listener warnings
+**Important**: Import `SupabaseClient` from `@supabase/supabase-js`, NOT from `@supabase/ssr`
 
-### Known Minor Issues
-- **Missing placeholder image**: `/public/images/placeholder.jpg` referenced in `src/lib/storage.ts` and `src/lib/utils.ts` but file doesn't exist (causes 404s in console, doesn't break functionality)
+---
 
-## Environment Setup
+## ⚙️ ENVIRONMENT & CONFIGURATION
 
-### File Structure
+### Environment Files
 ```
-├── .env.docker.example     # Template (commit this)
-├── .env.docker            # Your keys (NEVER commit)
-├── docker-compose.yml     # Uses ${VARIABLES} for security
+.env.docker.example     # Template (commit)
+.env.docker            # Your keys (NEVER commit)
+.env.local             # Local development keys
 ```
 
 ### Required Variables
+Get from: `npx supabase status`
 ```env
-# Get from: npx supabase status
+NEXT_PUBLIC_SUPABASE_URL=your_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-## Development Workflow
+### Key URLs
+- **Local Dev**: http://localhost:3000 (auto-opens)
+- **Production**: http://localhost:3002 (cloud backend)
+- **Docker App**: http://localhost:3001
+- **Supabase Studio**: http://localhost:54323
+- **Cloud Supabase**: https://vrlzwxoiglzwmhndpolj.supabase.co
 
-### Making Changes
-1. Edit files in host filesystem (hot reload works in Docker)
-2. For major changes: `npm run docker:build && npm run docker:up`
-3. Monitor logs: `npm run docker:logs`
+---
 
-### Utility Scripts
-The `scripts/` directory contains specialized utilities:
+## 🛠️ UTILITY SCRIPTS
 
-**Data Management:**
-- `setup-complete-test-data.js` - Complete test data setup
-- `create-test-listings-with-photos.js` - Create listings with photo uploads
-- `create-test-users-with-listings.js` - Generate test users with listings
-- `upload-test-photos.js` - Upload test photos to storage
-- `quick-setup.js` - Quick environment setup
+Located in `scripts/` directory:
 
-**Admin Management:**
-- `create-admin-user.js` - Create new admin user
-- `create-super-admin.js` - Create super admin account
-- `create-first-admin.js` - Initial admin setup
-- `test-admin-api.js` - Test admin API endpoints
-- `test-admin-system.js` - Verify admin system functionality
-- `test-admin-users-page.js` - Test admin UI pages
+**Data Management**:
+- `setup-complete-test-data.js` - Complete test data
+- `create-test-listings-with-photos.js` - Listings with photos
+- `generate-cloud-test-data.js` - Generate cloud test data
 
-**Verification & Testing:**
-- `verify-listings.js` - Verify listing data integrity
-- `simple-verify.js` - Quick system verification
-- `check-search-vector.js` - Verify search index status
-- `check-plumbing-listings.js` - Check specific category data
-- `test-rpc-function.js` - Test database RPC functions
+**Admin**:
+- `create-admin-user.js` - Create admin
+- `create-super-admin.js` - Create super admin
+- `test-admin-api.js` - Test admin endpoints
 
-### Common Issues & Solutions
+**Verification**:
+- `verify-listings.js` - Verify listing integrity
+- `check-search-vector.js` - Verify search index
+- `test-rpc-function.js` - Test DB functions
 
-**Authentication fails**: Check cookie handling in middleware, verify session flow. Use `src/lib/auth-error-handler.ts` for debugging
-**Photos not loading**: Use `fixPhotoUrl()` utility for Docker URL conversion
-**Container won't start**: Verify Supabase running (`npx supabase status`)
-**Build failures**: Ensure environment variables in `.env.local`
-**Test failures**: Run `npm run test:report` to view detailed test results
-**Admin access denied**: Check admin session using `src/lib/admin/` utilities
-**Image upload failures**: Check Edge Function logs and content moderation status
-**Performance issues**: All optimizations completed - now running on production Supabase cloud
-**Database errors**: **RESOLVED** - System migrated to production cloud (2025-10-03)
-**Production deployment**: **COMPLETED** - Application running on real Supabase cloud
-**PWA reload loops**: **RESOLVED** - Improved caching strategies with proper NetworkOnly for admin/auth routes
-**TypeScript build errors**: **RESOLVED (2025-10-09)** - All implicit `any` types fixed, see "Recent Critical Fixes" section
-**Multiple GoTrueClient warning**: **RESOLVED (2025-10-09)** - Consolidated to single auth listener in AuthContext, see "Recent Critical Fixes" section
+---
+
+## 🐛 TROUBLESHOOTING
+
+### Common Issues
+
+**Authentication fails**:
+- Check middleware cookie handling
+- Verify session flow
+- Use `src/lib/auth-error-handler.ts`
+
+**Photos not loading**:
+- Use `fixPhotoUrl()` utility for Docker URLs
+- Check storage bucket permissions
+
+**Container won't start**:
+- Verify Supabase running: `npx supabase status`
+- Check Docker network: `npm run docker:status`
+
+**Build failures**:
+- Ensure env variables in `.env.local`
+- Clear `.next` cache: `rm -rf .next`
+
+**Admin access denied**:
+- Check admin session via `src/lib/admin/` utilities
+- Verify admin_users table entry
+
+**Image upload failures**:
+- Check Edge Function logs
+- Verify content moderation status
 
 ### Debugging Commands
 ```bash
-# Check middleware authentication
-docker logs marketdz-app-1 --follow | grep "🔧 Middleware"
+# Auth debugging
+docker logs marketdz-app-1 --follow | grep "Middleware"
 
-# Monitor upload attempts
+# Upload debugging
 docker logs marketdz-app-1 --follow | grep "Upload"
 
-# Verify network connectivity (Docker - for local development)
+# Network status
 npm run docker:status
 docker network ls | grep supabase
-
-# PRODUCTION CLOUD COMMANDS (Current Environment):
-# Test cloud Supabase functionality
-node scripts/test-cloud-supabase.js
-
-# Generate additional test data on cloud
-node scripts/generate-cloud-test-data.js
-
-# Access production application
-open http://localhost:3002
-
-# Check production performance
-node -e "console.log('Production app: http://localhost:3002')"
 ```
 
-## Key URLs
-- **🚀 LOCAL DEVELOPMENT**: http://localhost:3000 (npm run dev - opens automatically)
-- **🚀 PRODUCTION APPLICATION**: http://localhost:3002 (npm run dev with cloud backend)
-- **Cloud Supabase**: https://vrlzwxoiglzwmhndpolj.supabase.co
-- **Docker Application** (dev only): http://localhost:3001 (Docker container)
-- **Local Supabase Studio** (dev only): http://localhost:54323
-- **Health Check**: http://localhost:3000/api/health (local dev) or http://localhost:3002/api/health (production)
+---
 
-## Critical Notes
+## 🔒 SECURITY NOTES
 
-### Security
-- **Never commit**: Actual API keys, `.env.docker`, sensitive configs
-- **Always use**: Environment variable placeholders in Docker configs
-- **File uploads**: Go through Edge Functions for content moderation
-- **Admin Functions**: All admin operations use SECURITY DEFINER with secure search_path
-- **Authentication Errors**: Use `src/lib/auth-error-handler.ts` for safe error handling
+- **Never commit**: API keys, `.env.docker`, `.env.local`
+- **File uploads**: Always go through Edge Functions with content moderation
+- **Admin operations**: Use SECURITY DEFINER with secure search_path
+- **Auth errors**: Use `src/lib/auth-error-handler.ts` for safe handling
 
-### Performance
-- **Turbopack**: Fast bundler for development and builds
-- **Connection Pooling**: Singleton Supabase clients to minimize connections
-- **Docker Optimization**: Standalone output for minimal container size
-- **Build Optimization**: Source maps disabled for faster production builds
-- **🚀 PRODUCTION PERFORMANCE**:
-  - **Cloud Database**: Real Supabase cloud with production scaling
-  - **Query Performance**: 150-300ms (real network latency)
-  - **Message Notifications**: 100% working on cloud
-  - **507+ User Profiles**: Production-scale testing completed
-  - **Migration Completed**: All Docker issues resolved (2025-10-03)
-  - **PWA Enabled**: Progressive Web App with optimized caching strategies
+---
 
-### Networking
-- **🚀 PRODUCTION**: `https://vrlzwxoiglzwmhndpolj.supabase.co` (cloud database)
-- **Local Development**: `localhost:54321` (Docker Supabase for development)
-- **Container**: `supabase_kong_marketdz:8000` (Docker internal networking)
-- **Environment Detection**: Automatic switching based on `.env.local` configuration
+## ⚡ PERFORMANCE NOTES
 
-## Database Migrations & Deployment
+- **Turbopack**: Enabled for fast dev/build
+- **Connection Pooling**: Singleton clients minimize connections
+- **Source Maps**: Disabled in production
+- **Docker**: Standalone output for minimal image size
+- **Current Scale**: Optimized for 250k+ listings
+- **Query Performance**: 150-300ms typical
 
-### Current Migration Status (2025-10-03)
-The database has been reset with a clean, lean schema approach. Current migrations:
+---
 
-1. `20250929000000_initial_lean_schema.sql` - Core marketplace schema with essential features
-2. `20250929000001_add_full_text_search.sql` - Arabic full-text search implementation
-3. `20250929000002_add_listings_security_optimization.sql` - Security and performance optimizations
-4. `20251001000001_add_hot_deals_support.sql` - Hot deals functionality
-5. `20251001000002_add_admin_system.sql` - Admin system with role-based access
-6. `20251001000004_add_role_based_rls.sql` - Enhanced RLS policies
-7. `20251002000000_pre_migration_cleanup.sql` - Database cleanup
-8. `20251002000001_align_search_with_cloud.sql` - Search optimization for cloud
+## 🗄️ DATABASE MANAGEMENT
 
-### Deploying Migrations to Production
+### Migration Status
+Clean, lean schema approach with essential migrations:
 
-**Check current migration status:**
-```sql
-SELECT * FROM supabase_migrations.schema_migrations ORDER BY version;
-```
+1. `initial_lean_schema.sql` - Core marketplace schema
+2. `add_full_text_search.sql` - Arabic full-text search
+3. `add_listings_security_optimization.sql` - Security + performance
+4. `add_hot_deals_support.sql` - Hot deals
+5. `add_admin_system.sql` - Admin with role-based access
+6. `add_role_based_rls.sql` - Enhanced RLS
+7. `align_search_with_cloud.sql` - Search optimization
+8. `add_homepage_index.sql` - Homepage performance
+9. `fix_review_timeout.sql` - Review/favorites timeout fix
 
-**Deploy all migrations:**
+### Deploying Migrations
+
+⚠️ **ALWAYS get user approval before applying migrations to cloud!**
+
 ```bash
-# Link to your Supabase project (first time only)
+# Link project (first time only)
 npx supabase link --project-ref YOUR_PROJECT_REF
 
-# Push all migrations to production
+# Push all migrations
 npx supabase db push --linked
 
-# Or push individual migration
+# Push single migration
 npx supabase db push --linked --include-all=false --file supabase/migrations/FILE_NAME.sql
 ```
 
-### Post-Deployment Verification
+### Verification Queries
 ```sql
--- Verify all tables exist
+-- Check migration status
+SELECT * FROM supabase_migrations.schema_migrations ORDER BY version;
+
+-- Verify tables
 SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;
 
--- Check full-text search is configured
-SELECT tablename, indexname FROM pg_indexes
-WHERE schemaname = 'public' AND indexname LIKE '%fulltext%';
+-- Check indexes
+SELECT tablename, indexname FROM pg_indexes WHERE schemaname = 'public';
 
--- Verify RLS policies are active
-SELECT schemaname, tablename, policyname FROM pg_policies
-WHERE schemaname = 'public' ORDER BY tablename;
-
--- Confirm migration count
-SELECT COUNT(*) as total_migrations FROM supabase_migrations.schema_migrations;
+-- Verify RLS policies
+SELECT schemaname, tablename, policyname FROM pg_policies WHERE schemaname = 'public';
 ```
 
-### Migration Best Practices
-- **Always test locally first**: Run migrations in local Supabase before production
-- **Backup before deploying**: Use `pg_dump` or Supabase dashboard backup
-- **Monitor after deployment**: Check application logs and database performance
-- **Use migrations for ALL schema changes**: Never manually edit production database
+---
 
-## Database Philosophy: KEEP IT LEAN 🎯
+## 🎯 DATABASE PHILOSOPHY: KEEP IT LEAN
 
-### ⚠️ CRITICAL: Do NOT Add Unnecessary Database Objects
-**Why this matters**: The previous version of this system got completely out of control by manually adding excessive indexes, triggers, and other database objects in the cloud environment, which **broke the entire system**.
+### ⚠️ CRITICAL WARNING
+**The previous version broke by manually adding excessive indexes, triggers, and materialized views in cloud.** Do NOT repeat this mistake!
 
-### Golden Rules:
-1. **NEVER manually add indexes** unless absolutely proven necessary through performance testing
-2. **NEVER add triggers** without thorough testing and documentation
-3. **ALWAYS use migrations** for any schema changes - never manual SQL in cloud
-4. **STICK to the golden schema** - it contains exactly what we need, nothing more
-5. **TEST performance first** - don't assume you need more indexes
+### Golden Rules
+1. **NEVER manually add indexes** without performance testing proof
+2. **NEVER add triggers** without thorough testing + documentation
+3. **ALWAYS use migrations** - never manual SQL in cloud
+4. **STICK to golden schema** - contains exactly what's needed
+5. **TEST first** - don't assume you need more indexes
+6. **GET APPROVAL** before any cloud database changes
 
 ### Current Lean State ✅
-Our golden schema contains exactly **11 essential indexes** - this is intentional:
+Exactly **11 essential indexes**:
 - `idx_profiles_wilaya` - Geographic filtering
 - `idx_listings_user_id` - User's listings
-- `idx_listings_fulltext` - Search functionality
+- `idx_listings_fulltext` - Search
 - `idx_listings_search_compound` - Complex filtering
-- `idx_favorites_listing_id` - Favorite lookups
-- `idx_reviews_reviewed_id` - User reviews
-- `idx_conversations_users` - User conversations
+- `idx_favorites_listing_id` - Favorites
+- `idx_reviews_reviewed_id` - Reviews
+- `idx_conversations_users` - Conversations
 - `idx_messages_conversation_time` - Message ordering
 - `idx_messages_unread` - Unread counts
 - `idx_notifications_user_unread` - Unread notifications
 - `idx_notifications_user_all` - Notification history
 
-### Before Adding ANY Database Object:
-1. **Prove it's needed** with actual performance testing
-2. **Document the reason** in a migration file with comments
-3. **Test thoroughly** in local environment first
-4. **Get approval** before deploying to cloud
-5. **Monitor impact** after deployment
-
-### Database Bloat Prevention:
-- ✅ **Regular testing confirms** current indexes handle all queries efficiently
-- ✅ **No additional indexes needed** for favorites, messaging, or notifications
-- ✅ **System performs well** with minimal, strategic indexing
-- ⚠️ **Adding more can hurt performance** by slowing down writes and consuming memory
+### Before Adding ANY Database Object
+1. Prove it's needed with actual performance tests
+2. Document reason in migration with comments
+3. Test thoroughly in local environment
+4. **Get user approval** before deploying to cloud
+5. Monitor impact after deployment
 
 **Remember**: More database objects ≠ better performance. Often the opposite is true.
