@@ -1,9 +1,5 @@
 'use client'
 
-// Force dynamic rendering to prevent stale static builds
-export const dynamic = 'force-dynamic'
-export const revalidate = 60 // Revalidate every 60 seconds
-
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Home, User, MessageCircle, Bell, Zap, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users } from 'lucide-react'
@@ -133,8 +129,8 @@ export default function CompleteKickAssHomepage() {
         // Use optimized search API instead of direct Supabase query
         // This uses proper indexes and server-side optimization for 250k+ listings
         const [listingsResponse, countResponse] = await Promise.all([
-          fetch('/api/search?limit=9&sortBy=created_at'),
-          fetch('/api/search/count')
+          fetch('/api/search?limit=9&sortBy=created_at', { cache: 'no-store' }),
+          fetch('/api/search/count', { cache: 'no-store' })
         ])
 
         if (!listingsResponse.ok) {
