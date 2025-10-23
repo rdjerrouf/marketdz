@@ -44,42 +44,45 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
 
-      // Fetch total users
+      // Fetch total users (small table, direct count is fine)
       const { count: totalUsers } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact' })
+        .select('*', { count: 'exact', head: true })
 
-      // Fetch total listings
-      const { count: totalListings } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact' })
+      // Fetch counts using optimized API endpoint (handles 250k+ scale efficiently)
+      const [countResponse, recentActivityData] = await Promise.all([
+        fetch('/api/search/count'),
+        supabase
+          .from('listings')
+          .select(`
+            id,
+            title,
+            created_at,
+            price,
+            profiles!listings_user_id_fkey(first_name, last_name)
+          `)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(10)
+      ])
 
-      // Fetch pending listings (using active status for now)
-      const { count: pendingListings } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact' })
-        .eq('status', 'active')
+      let totalListings = 0
+      let pendingListings = 0
 
-      // Fetch recent activity (recent listings)
-      const { data: recentActivity } = await supabase
-        .from('listings')
-        .select(`
-          id,
-          title,
-          created_at,
-          price,
-          profiles!listings_user_id_fkey(first_name, last_name)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(10)
+      if (countResponse.ok) {
+        const countData = await countResponse.json()
+        totalListings = countData.count || 0
+        // For now, use total count as pending (since we're using 'active' status)
+        pendingListings = totalListings
+      }
 
       setStats({
         totalUsers: totalUsers || 0,
-        totalListings: totalListings || 0,
-        pendingListings: pendingListings || 0,
+        totalListings,
+        pendingListings,
         totalRevenue: 0, // Implement revenue calculation
         monthlyActiveUsers: 0, // Implement MAU calculation
-        recentActivity: recentActivity || []
+        recentActivity: recentActivityData.data || []
       })
 
     } catch (error) {

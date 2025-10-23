@@ -44,25 +44,17 @@ export default function AdminAnalytics() {
       const daysBack = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : 365
       const startDate = new Date(now.getTime() - (daysBack * 24 * 60 * 60 * 1000))
 
-      // LEAN APPROACH: Use lightweight count queries with filters to use indexes efficiently
-      
-      // Fetch total users - lightweight count
+      // OPTIMIZED FOR 250K SCALE: Use API endpoints instead of direct count queries
+
+      // Fetch total users - lightweight count (small table)
       const { count: totalUsers } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact' })
+        .select('*', { count: 'exact', head: true })
 
-      // Fetch total active listings only (use status index)
-      const { count: totalListings } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact' })
-        .eq('status', 'active')
-
-      // Fetch recent listings as proxy for active users (cost-effective)
-      const { count: activeUsers } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact' })
-        .eq('status', 'active')
-        .gte('created_at', startDate.toISOString())
+      // Fetch total active listings using optimized count API
+      const countResponse = await fetch('/api/search/count')
+      const countData = await countResponse.json()
+      const totalListings = countData.count || 0
 
       // LEAN: Limited category query with filters to use compound index
       const { data: categoryData } = await supabase
@@ -71,6 +63,10 @@ export default function AdminAnalytics() {
         .eq('status', 'active')
         .gte('created_at', startDate.toISOString())
         .limit(1000) // Hard limit for cost control
+
+      // Active users: Use category data length as proxy metric (avoids expensive query)
+      // This represents active listings in the time period, not distinct users
+      const activeUsers = categoryData?.length || 0
 
       const categoryStats = categoryData?.reduce((acc: Record<string, number>, item: { category: string }) => {
         acc[item.category] = (acc[item.category] || 0) + 1

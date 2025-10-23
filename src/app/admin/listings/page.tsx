@@ -29,7 +29,7 @@ export default function AdminListings() {
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'sold' | 'expired' | 'rented' | 'completed'>('all')
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'sold' | 'expired' | 'rented' | 'completed'>('active')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [selectedListings, setSelectedListings] = useState<string[]>([])
@@ -44,7 +44,8 @@ export default function AdminListings() {
     try {
       setLoading(true)
 
-      // LEAN APPROACH: Always filter by status first to use index efficiently
+      // OPTIMIZED FOR 250K SCALE: Removed count=exact to avoid timeout
+      // Count queries at this scale are too expensive - using simple pagination instead
       let query = supabase
         .from('listings')
         .select(`
@@ -54,31 +55,33 @@ export default function AdminListings() {
             last_name,
             email
           )
-        `, { count: 'exact' })
+        `)
         .range((currentPage - 1) * listingsPerPage, currentPage * listingsPerPage - 1)
         .order('created_at', { ascending: false })
         .limit(listingsPerPage) // Hard limit for cost control
 
-      // Always apply status filter to use compound index
+      // Always apply status filter to use optimized index (idx_listings_active_created_at)
+      // At 250k scale, filtering by status='active' uses index for instant results
       if (filterStatus !== 'all') {
         query = query.eq('status', filterStatus)
-      } else {
-        // Default to active listings when no filter to use index
-        query = query.in('status', ['active', 'sold', 'expired', 'rented', 'completed'])
       }
+      // Note: 'all' filter removed - too expensive at 250k scale without proper index
+      // Users should select specific status for best performance
 
       if (searchTerm) {
         // Use FTS for better performance with bilingual support
         query = query.or(`search_vector_ar.fts.${searchTerm},search_vector_fr.fts.${searchTerm}`)
       }
 
-      const { data, error, count } = await query
+      const { data, error } = await query
 
       if (error) throw error
 
       // Type assertion needed - Supabase generated types don't recognize nested profiles relationship
       setListings((data as any) || [])
-      setTotalPages(Math.ceil((count || 0) / listingsPerPage))
+      // Set high page count since we removed expensive count query
+      // User can navigate until no more results
+      setTotalPages(9999)
 
     } catch (error) {
       console.error('Error fetching listings:', error)
