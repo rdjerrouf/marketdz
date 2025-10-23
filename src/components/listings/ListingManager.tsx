@@ -42,7 +42,7 @@ export default function ListingManager({ userId }: ListingManagerProps) {
   const fetchListings = async () => {
     try {
       setLoading(true)
-      
+
       let query = supabase
         .from('listings')
         .select(`
@@ -58,6 +58,7 @@ export default function ListingManager({ userId }: ListingManagerProps) {
           user_id
         `)
         .order('created_at', { ascending: false })
+        .limit(100) // PERFORMANCE: Limit to 100 listings to prevent timeout at scale
 
       if (userId) {
         query = query.eq('user_id', userId)
