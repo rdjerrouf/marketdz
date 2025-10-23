@@ -819,7 +819,7 @@ export default function CompleteKickAssHomepage() {
                       <div className="absolute bottom-4 right-4">
                         <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs flex items-center shadow-lg">
                           <Clock className="w-3 h-3 mr-1" />
-                          {getTimeAgo(listing.created_at)}
+                          <span suppressHydrationWarning>{getTimeAgo(listing.created_at)}</span>
                         </div>
                       </div>
 
