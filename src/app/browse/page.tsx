@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback, useMemo, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
+import { getSubcategories } from '@/lib/constants/categories'
 import FavoriteButton from '@/components/common/FavoriteButton'
 import StarRating from '@/components/common/StarRating'
 import MobileListingCard from '@/components/common/MobileListingCard'
@@ -35,6 +36,7 @@ interface Listing {
 interface SearchFilters {
   query: string
   category: string
+  subcategory: string
   wilaya: string
   city: string
   minPrice: string
@@ -81,6 +83,7 @@ function BrowsePageContent() {
   const [filters, setFilters] = useState<SearchFilters>({
     query: searchParams.get('search') || searchParams.get('query') || searchParams.get('q') || '',
     category: searchParams.get('category') || '',
+    subcategory: searchParams.get('subcategory') || '',
     wilaya: searchParams.get('wilaya') || '',
     city: searchParams.get('city') || '',
     minPrice: searchParams.get('minPrice') || '',
@@ -88,12 +91,25 @@ function BrowsePageContent() {
     sortBy: (searchParams.get('sortBy') as any) || 'relevance'
   })
 
+  // Memoized subcategories list based on selected category
+  const availableSubcategories = useMemo(() => {
+    if (!filters.category) return []
+    return getSubcategories(filters.category as any)
+  }, [filters.category])
+
   // Memoized cities list based on selected wilaya
   const availableCities = useMemo(() => {
     if (!filters.wilaya) return []
     const wilaya = ALGERIA_WILAYAS.find((w: any) => w.code === filters.wilaya || w.name === filters.wilaya)
     return wilaya ? wilaya.cities : []
   }, [filters.wilaya])
+
+  // Reset subcategory when category changes
+  useEffect(() => {
+    if (filters.category && filters.subcategory && availableSubcategories.length > 0 && !availableSubcategories.includes(filters.subcategory)) {
+      setFilters(prev => ({ ...prev, subcategory: '' }))
+    }
+  }, [filters.category, filters.subcategory, availableSubcategories])
 
   // Reset city when wilaya changes
   useEffect(() => {
@@ -167,6 +183,7 @@ function BrowsePageContent() {
 
       if (filters.query.trim()) queryParams.set('q', filters.query.trim())
       if (filters.category) queryParams.set('category', filters.category)
+      if (filters.subcategory) queryParams.set('subcategory', filters.subcategory)
       if (filters.wilaya) queryParams.set('wilaya', filters.wilaya)
       if (filters.city) queryParams.set('city', filters.city)
       if (filters.minPrice && !isNaN(Number(filters.minPrice))) {
@@ -291,6 +308,7 @@ function BrowsePageContent() {
     setFilters({
       query: '',
       category: '',
+      subcategory: '',
       wilaya: '',
       city: '',
       minPrice: '',
@@ -516,7 +534,7 @@ function BrowsePageContent() {
             </div>
 
             {/* Filter Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
               {/* Category */}
               <div>
                 <label htmlFor="category-select" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -533,6 +551,29 @@ function BrowsePageContent() {
                   <option value="for_rent">For Rent</option>
                   <option value="job">Jobs</option>
                   <option value="service">Services</option>
+                </select>
+              </div>
+
+              {/* Subcategory */}
+              <div>
+                <label htmlFor="subcategory-select" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Subcategory
+                </label>
+                <select
+                  id="subcategory-select"
+                  value={filters.subcategory}
+                  onChange={(e) => handleFilterChange('subcategory', e.target.value)}
+                  disabled={!filters.category}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
+                >
+                  <option value="">
+                    {filters.category ? 'All Subcategories' : 'Select Category First'}
+                  </option>
+                  {availableSubcategories.map((subcategory: string) => (
+                    <option key={subcategory} value={subcategory}>
+                      {subcategory}
+                    </option>
+                  ))}
                 </select>
               </div>
 
