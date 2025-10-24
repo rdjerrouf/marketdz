@@ -20,6 +20,8 @@ interface Listing {
   status: string
   user_id: string
   rental_period?: string | null
+  location_wilaya: string | null
+  location_city: string | null
   metadata: Record<string, unknown> | null
 }
 
@@ -393,6 +395,18 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                   <span className="font-medium text-gray-600">Status:</span>
                   <p className="text-gray-900 capitalize">{listing.status}</p>
                 </div>
+                {listing.location_wilaya && (
+                  <div>
+                    <span className="font-medium text-gray-600">Wilaya:</span>
+                    <p className="text-gray-900">{listing.location_wilaya}</p>
+                  </div>
+                )}
+                {listing.location_city && (
+                  <div>
+                    <span className="font-medium text-gray-600">City:</span>
+                    <p className="text-gray-900">{listing.location_city}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

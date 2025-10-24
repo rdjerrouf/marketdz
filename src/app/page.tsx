@@ -194,7 +194,7 @@ export default function CompleteKickAssHomepage() {
     }).format(price)
 
     // Add rental period for rental listings
-    if (category === 'for_rent' && rentalPeriod) {
+    if (category === 'for_rent') {
       const periodMap: Record<string, string> = {
         'hourly': '/hour',
         'daily': '/day',
@@ -202,7 +202,8 @@ export default function CompleteKickAssHomepage() {
         'monthly': '/month',
         'yearly': '/year'
       }
-      const periodText = periodMap[rentalPeriod] || ''
+      // Default to /month if rental_period is not specified
+      const periodText = rentalPeriod ? (periodMap[rentalPeriod] || '/month') : '/month'
       return `${formattedPrice}${periodText}`
     }
 

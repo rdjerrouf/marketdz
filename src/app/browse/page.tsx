@@ -123,9 +123,9 @@ function BrowsePageContent() {
     const mapping: Record<string, string> = {
       'relevance': 'created_at',
       'newest': 'created_at',
-      'oldest': 'created_at',
-      'price_low': 'price_asc',
-      'price_high': 'price_desc'
+      'oldest': 'oldest',
+      'price_low': 'price_low',
+      'price_high': 'price_high'
     }
     return mapping[sortBy] || 'created_at'
   }
@@ -346,7 +346,7 @@ function BrowsePageContent() {
     }).format(price)
 
     // Add rental period for rental listings
-    if (category === 'for_rent' && rentalPeriod) {
+    if (category === 'for_rent') {
       const periodMap: Record<string, string> = {
         'hourly': '/hour',
         'daily': '/day',
@@ -354,7 +354,8 @@ function BrowsePageContent() {
         'monthly': '/month',
         'yearly': '/year'
       }
-      const periodText = periodMap[rentalPeriod] || ''
+      // Default to /month if rental_period is not specified
+      const periodText = rentalPeriod ? (periodMap[rentalPeriod] || '/month') : '/month'
       return `${formattedPrice}${periodText}`
     }
 
@@ -714,16 +715,18 @@ function BrowsePageContent() {
               </h2>
               {!loading && !error && (
                 <p className="text-white/80 mt-1">
-                  {pagination.totalItems === 0 ?
+                  {listings.length === 0 ?
                     'No listings found' :
-                    `${pagination.totalItems} ${pagination.totalItems === 1 ? 'listing' : 'listings'} found`}
+                    pagination.totalItems ?
+                      `${pagination.totalItems} ${pagination.totalItems === 1 ? 'listing' : 'listings'} found` :
+                      `${listings.length}+ listings found`}
                   {filters.query && ` for "${filters.query}"`}
                 </p>
               )}
             </div>
 
             {/* Results Info */}
-            {!loading && !error && pagination.totalItems > 0 && (
+            {!loading && !error && listings.length > 0 && pagination.totalItems && (
               <div className="text-sm text-white/70">
                 Showing {((pagination.currentPage - 1) * 20) + 1}-{Math.min(pagination.currentPage * 20, pagination.totalItems)} of {pagination.totalItems}
               </div>
