@@ -106,8 +106,10 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
         console.log('Listing data:', listingData)
         setListing({
           ...listingData,
+          location_wilaya: listingData.location_wilaya,
+          location_city: listingData.location_city,
           metadata: listingData.metadata as Record<string, unknown> | null
-        })
+        } as Listing)
 
         // Fetch seller profile
         const { data: sellerData, error: sellerError } = await supabase
