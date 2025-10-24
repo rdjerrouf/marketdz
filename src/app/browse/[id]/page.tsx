@@ -106,8 +106,8 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
         console.log('Listing data:', listingData)
         setListing({
           ...listingData,
-          location_wilaya: listingData.location_wilaya,
-          location_city: listingData.location_city,
+          location_wilaya: (listingData as any).location_wilaya ?? null,
+          location_city: (listingData as any).location_city ?? null,
           metadata: listingData.metadata as Record<string, unknown> | null
         } as Listing)
 
