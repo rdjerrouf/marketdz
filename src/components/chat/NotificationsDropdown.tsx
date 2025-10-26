@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRealtimeNotifications } from '@/hooks/useRealtime'
+import { useNotifications } from '@/contexts/NotificationsContext'
 import { Bell, X, Check, Heart, MessageCircle, Star, Users } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -22,7 +22,7 @@ interface NotificationsDropdownProps {
 }
 
 export default function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdownProps) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useRealtimeNotifications()
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
   const getNotificationIcon = (type: string) => {

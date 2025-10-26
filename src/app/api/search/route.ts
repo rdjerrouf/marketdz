@@ -226,7 +226,7 @@ export async function GET(request: NextRequest) {
         limit: safeLimit
       },
       metadata: {
-        executionTime: Date.now(),
+        executionTime: Date.now() - startTime,  // Duration in milliseconds
         strategy: 'database',
         countStrategy: 'none'  // No count for performance at 250k scale
       }

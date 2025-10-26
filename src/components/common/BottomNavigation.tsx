@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, Search, Plus, Heart, MessageCircle, User } from 'lucide-react'
+import { Home, Search, Plus, Grid, MessageCircle, Heart } from 'lucide-react'
 
 export default function BottomNavigation() {
   const pathname = usePathname()
@@ -30,6 +30,12 @@ export default function BottomNavigation() {
       active: pathname === '/add-item'
     },
     {
+      icon: Grid,
+      label: 'My Listings',
+      path: '/my-listings',
+      active: pathname.startsWith('/my-listings')
+    },
+    {
       icon: Heart,
       label: 'Favorites',
       path: '/favorites',
@@ -41,12 +47,6 @@ export default function BottomNavigation() {
       path: '/messages',
       active: pathname.startsWith('/messages'),
       hasUnread: hasUnreadMessages
-    },
-    {
-      icon: User,
-      label: 'Profile',
-      path: '/profile',
-      active: pathname.startsWith('/profile')
     }
   ]
 

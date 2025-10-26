@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Home, Search, Plus, User, MessageCircle } from 'lucide-react';
-import { useRealtimeNotifications } from '@/hooks/useRealtime';
+import { useNotifications } from '@/contexts/NotificationsContext';
 import { NotificationBell } from '@/components/chat/NotificationsDropdown';
 import NotificationsDropdown from '@/components/chat/NotificationsDropdown';
 
 export default function Navigation() {
   const pathname = usePathname();
   const [showNotifications, setShowNotifications] = useState(false);
-  const { unreadCount } = useRealtimeNotifications();
+  const { unreadCount } = useNotifications();
 
   // Hide on homepage (has custom hero design)
   if (pathname === '/') {

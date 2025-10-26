@@ -9,12 +9,12 @@
 --   - Geographic filters: 1.3s (slow)
 --
 -- This migration adds specialized indexes to bring all queries under 1 second.
--- All indexes use CONCURRENTLY to avoid locking the table during creation.
+-- All indexes created without CONCURRENTLY for migration compatibility.
 
 -- Priority #1: Category-Only Queries (fixes 3.7s timeout)
 -- Enables fast scans for broad category pages like "All For Sale"
 -- Previous composite index required status='active' + multiple fields, not efficient for simple category queries
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_listings_active_category
+CREATE INDEX IF NOT EXISTS idx_listings_active_category
   ON public.listings USING btree (category, created_at DESC)
   WHERE status = 'active';
 
@@ -22,7 +22,7 @@ COMMENT ON INDEX idx_listings_active_category IS 'Optimizes category-only querie
 
 -- Priority #2: Category + Subcategory Queries (fixes 3.2s slow query)
 -- Handles dual-filter searches like "For Sale > Electronics"
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_listings_active_category_subcat
+CREATE INDEX IF NOT EXISTS idx_listings_active_category_subcat
   ON public.listings USING btree (category, subcategory, created_at DESC)
   WHERE status = 'active' AND subcategory IS NOT NULL;
 
@@ -30,7 +30,7 @@ COMMENT ON INDEX idx_listings_active_category_subcat IS 'Speeds up category+subc
 
 -- Priority #3: Geographic Queries (fixes 1.3s slow query)
 -- Optimizes location-based searches
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_listings_active_wilaya
+CREATE INDEX IF NOT EXISTS idx_listings_active_wilaya
   ON public.listings USING btree (location_wilaya, created_at DESC)
   WHERE status = 'active';
 
@@ -38,7 +38,7 @@ COMMENT ON INDEX idx_listings_active_wilaya IS 'Geographic filtering optimizatio
 
 -- Priority #4: Price Range and Sorting (improves 1.1s-1.3s queries)
 -- Supports price filtering and price-sorted results
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_listings_active_category_price
+CREATE INDEX IF NOT EXISTS idx_listings_active_category_price
   ON public.listings USING btree (category, price, id)
   WHERE status = 'active';
 
@@ -57,7 +57,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name = 'listings' AND column_name = 'search_vector_ar'
   ) THEN
-    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_listings_fts_ar
+    CREATE INDEX IF NOT EXISTS idx_listings_fts_ar
       ON public.listings USING GIN (search_vector_ar);
 
     COMMENT ON INDEX idx_listings_fts_ar IS 'Full-text search for Arabic content using pre-computed tsvector.';
@@ -68,7 +68,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name = 'listings' AND column_name = 'search_vector_fr'
   ) THEN
-    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_listings_fts_fr
+    CREATE INDEX IF NOT EXISTS idx_listings_fts_fr
       ON public.listings USING GIN (search_vector_fr);
 
     COMMENT ON INDEX idx_listings_fts_fr IS 'Full-text search for French content using pre-computed tsvector.';
@@ -85,14 +85,14 @@ BEGIN
     -- If we only have search_vector (not language-specific), ensure it's indexed
     -- This should already exist from 20250929000001_add_full_text_search.sql
     -- But IF NOT EXISTS makes this safe to run again
-    CREATE INDEX CONCURRENTLY IF NOT EXISTS listings_search_vector_gin
+    CREATE INDEX IF NOT EXISTS listings_search_vector_gin
       ON public.listings USING GIN (search_vector);
   END IF;
 END $$;
 
 -- Optional: Trigram index for partial/fuzzy matching (if needed)
 -- Uncomment if you need "starts with" or fuzzy search functionality
--- CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_listings_title_trgm
+-- CREATE INDEX IF NOT EXISTS idx_listings_title_trgm
 --   ON public.listings USING GIN (title gin_trgm_ops)
 --   WHERE status = 'active';
 

@@ -39,7 +39,7 @@ export default function MessagesPage() {
             <p className="text-black">You need to be signed in to access messages.</p>
             <button
               onClick={() => router.push('/signin')}
-              className="mt-4 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+              className="mt-4 px-6 py-3 bg-[#7c3f00] hover:bg-[#5f2e00] text-white rounded-lg transition-all"
             >
               Sign In
             </button>
@@ -107,7 +107,7 @@ export default function MessagesPage() {
               </p>
               <button
                 onClick={() => router.push('/browse')}
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105 font-medium"
+                className="px-6 py-3 bg-[#7c3f00] hover:bg-[#5f2e00] text-white rounded-lg transition-all duration-200 transform hover:scale-105 font-medium"
               >
                 Browse Listings
               </button>

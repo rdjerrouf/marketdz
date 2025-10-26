@@ -333,7 +333,7 @@ export default function CompleteKickAssHomepage() {
 
       {/* Mobile Navigation Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-lg border-b border-white/10 pointer-events-auto">
-        <div className="flex items-center justify-center p-4">
+        <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🇩🇿</span>
             <h1 className="text-white text-xl font-bold">MarketDZ</h1>
@@ -347,6 +347,18 @@ export default function CompleteKickAssHomepage() {
               </button>
             )}
           </div>
+          {/* Profile Icon */}
+          <Link href="/profile" className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+            {profile?.avatar_url ? (
+              <img
+                src={fixPhotoUrl(profile.avatar_url)}
+                alt="Profile"
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <User className="w-5 h-5 text-white" />
+            )}
+          </Link>
         </div>
         {/* Browser Guidance Banner - between header and content */}
         <BrowserGuidanceBanner />
@@ -863,10 +875,10 @@ export default function CompleteKickAssHomepage() {
                         </div>
                       </div>
 
-                      {/* Enhanced Action Button */}
-                      <div className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg hover:shadow-xl">
+                      {/* Enhanced Action Button (switched to #7c3f00) */}
+                      <div className="w-full bg-[#7c3f00] hover:bg-[#5f2e00] text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
                         View Details
-                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="w-4 h-4 ml-2 transition-transform" />
                       </div>
                     </div>
                   </Link>
@@ -879,9 +891,6 @@ export default function CompleteKickAssHomepage() {
           {/* Enhanced Call to Action Section */}
           <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-3xl p-12 border border-purple-500/30 text-center mb-16 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <div className="max-w-3xl mx-auto">
-              <Link href="/add-item" className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-2xl w-fit mx-auto mb-6 shadow-lg hover:scale-110 transition-transform block cursor-pointer">
-                <Plus className="w-12 h-12 text-white" />
-              </Link>
               <h2 className="text-4xl font-bold text-white mb-6">
                 Ready to Post Your Listing?
               </h2>
@@ -889,7 +898,7 @@ export default function CompleteKickAssHomepage() {
                 Join thousands of users on MarketDZ. Post items for sale, rentals, jobs, or services in minutes and reach millions of people across Algeria.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/add-item" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-xl hover:shadow-2xl">
+                <Link href="/add-item" className="bg-[#7c3f00] hover:bg-[#5f2e00] text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-xl hover:shadow-2xl">
                   <Plus className="w-6 h-6 mr-3" />
                   Create Your Listing
                 </Link>

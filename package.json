@@ -28,7 +28,9 @@
     "docker:reset": "docker-compose down && docker-compose up -d app",
     "docker:shell": "docker exec -it marketdz-app-1 sh",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
-    "docker:status": "docker ps && echo '\n--- Networks ---' && docker network ls"
+    "docker:status": "docker ps && echo '\n--- Networks ---' && docker network ls",
+    "chrome:debug": "bash scripts/start-chrome-debug.sh",
+    "chrome:verify": "bash scripts/verify-chrome-debug.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

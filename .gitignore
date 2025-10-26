@@ -69,3 +69,11 @@ supabase/migrations_backup/
 
 # MCP configuration (contains tokens)
 .mcp.json
+
+# Prevent test/debug files in root
+/*.test.js
+/test-*.js
+/debug-*.js
+/diagnose-*.js
+/create-test-*.js
+/reset-*.js

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import Navigation from '@/components/common/Navigation';
 import BottomNavigation from '@/components/common/BottomNavigation';
 import "./globals.css";
@@ -70,9 +71,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <Navigation />
-          {children}
-          <BottomNavigation />
+          <NotificationsProvider>
+            <Navigation />
+            {children}
+            <BottomNavigation />
+          </NotificationsProvider>
           <Toaster
             position="top-right"
             toastOptions={{

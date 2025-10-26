@@ -38,7 +38,7 @@ export default function ChatPage() {
           <p className="text-purple-600 dark:text-purple-200 mb-6">Please sign in to access your messages.</p>
           <button
             onClick={() => router.push('/signin')}
-            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+            className="px-6 py-3 bg-[#7c3f00] hover:bg-[#5f2e00] text-white rounded-lg transition-all"
           >
             Sign In
           </button>
@@ -142,7 +142,7 @@ export default function ChatPage() {
                         <div
                           className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
                             isMyMessage
-                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                              ? 'bg-[#7c3f00] text-white'
                               : 'bg-slate-200 dark:bg-white/20 text-slate-800 dark:text-white'
                           }`}
                         >
@@ -186,7 +186,7 @@ export default function ChatPage() {
               <button
                 type="submit"
                 disabled={!newMessage.trim() || sending}
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-[#7c3f00] hover:bg-[#5f2e00] text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {sending ? 'Sending...' : 'Send'}
               </button>

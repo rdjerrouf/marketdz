@@ -2,33 +2,37 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 🚨 CRITICAL ISSUES
+## 🚨 CRITICAL POLICIES
 
-### ❌ Reviews & Favorites Timeout (2025-10-22)
+### ❌ CLOUD DATABASE - ABSOLUTELY UNTOUCHABLE
 
-**Status**: 🔴 **BLOCKING** - Database timeout at 250k scale
+**The cloud Supabase database is PRODUCTION-READY and PERFECTLY STRUCTURED for launch.**
 
-**Problem**: Both reviews and favorites fail with 500 errors due to expensive triggers that refresh entire materialized views on every insert.
+**NEVER:**
+- Touch, modify, or "fix" the cloud database
+- Apply migrations to cloud automatically
+- Suggest optimizations for cloud
+- Run queries against cloud without explicit approval
+- Assume cloud needs any changes
 
-**Root Cause**:
-- Trigger `refresh_stats_on_review_change` refreshes `private.listing_stats` materialized view
-- Trigger `refresh_stats_on_favorite_change` does the same
-- At 250k listings, this takes 30+ seconds and times out
-- These were manually added to cloud DB (not in migrations)
+**The cloud database is ready for launch. Period.**
 
-**Solution**: Migration `supabase/migrations/20251022000001_fix_review_timeout.sql`
-- Drops expensive materialized view refresh triggers
-- Keeps efficient row-level triggers (`update_user_rating`, `update_favorites_count`)
-- Adds `idx_reviews_reviewed_rating` index for fast aggregation
+**ALL development and testing MUST be done in LOCAL Supabase ONLY.**
 
-**⚠️ BEFORE APPLYING**: Inspect cloud database state first using Supabase MCP (see "MCP Servers" section) or manual SQL at https://supabase.com/dashboard/project/vrlzwxoiglzwmhndpolj/sql/new
+---
 
-**Verification After Fix**:
-1. Test reviews at http://localhost:3001/profile/12aecaf5-7547-4ec2-8de2-96817695c2ef
-2. Test favorites by clicking heart icon on any listing
-3. Both should complete instantly (<100ms)
+### ⚠️ Environment Switching Protocol
 
-**Test Credentials**: user1@email.com / password123
+When switching between Local and Cloud environments (for inspection only):
+
+1. **ALWAYS clear browser cookies** (DevTools → Application → Cookies → Delete all)
+2. **ALWAYS restart dev server** after changing .env.local
+3. **ALWAYS sign out** before switching environments
+4. **VERIFY network requests** go to correct Supabase URL
+
+**Why**: JWT tokens from one environment won't work in another → Permission denied errors
+
+**Best Practice**: Use separate browser profiles for local vs cloud.
 
 ---
 
@@ -43,6 +47,14 @@ MarketDZ is a Next.js 15 marketplace application optimized for Algeria with:
 - **Search**: Advanced Arabic full-text search with geographic filtering
 - **Admin System**: Role-based admin panel with SECURITY DEFINER functions
 - **Performance**: Optimized for 250k+ listings scale
+
+**Tech Stack**:
+- Next.js 15.5.2 with App Router & Turbopack
+- Supabase (PostgreSQL + PostGIS)
+- Tailwind CSS 4 + Radix UI
+- TypeScript 5
+- Playwright for E2E testing
+- PWA via next-pwa
 
 **Production Status**: Running on Supabase cloud (https://vrlzwxoiglzwmhndpolj.supabase.co)
 
@@ -66,11 +78,26 @@ npm run dev              # Start dev server (opens browser at localhost:3000)
 ### Development
 ```bash
 npm run dev              # Local dev with turbopack (opens browser)
-npm run build            # Build with turbopack
+npm run build            # Production build with turbopack
 npm run start            # Start production build
 npm run lint             # ESLint (use before committing)
 npm run health           # Check health endpoint
 ```
+
+### Testing
+```bash
+npm run test             # Run all Playwright tests
+npm run test:headed      # Tests with browser UI
+npm run test:ui          # Playwright UI mode (interactive)
+npm run test:report      # Show test report
+npm run test:pool        # Test DB connection pool
+
+# Run specific tests
+npx playwright test --grep "auth"     # Run tests matching pattern
+npx playwright test --debug           # Debug mode
+```
+
+**Test Files Location**: `tests/` directory
 
 ### Docker
 ```bash
@@ -83,20 +110,23 @@ npm run docker:shell     # Access shell
 npm run docker:status    # Check status
 ```
 
-### Testing
-```bash
-npm run test             # Run all Playwright tests
-npm run test:headed      # Tests with browser UI
-npm run test:ui          # Playwright UI mode
-npm run test:report      # Show test report
-npm run test:pool        # Test DB connection pool
-```
-
-### Mock Data
+### Mock Data (LOCAL ONLY)
 ```bash
 npm run mock:test        # Minimal test data
 npm run mock:medium      # Medium dataset
 npm run mock:full        # Full dataset
+
+# Create users and listings
+node scripts/create-10-test-users.js      # user1@email.com - user10@email.com
+node scripts/generate-10k-listings.js     # 10k listings across users
+```
+
+**Test Credentials**: user1@email.com through user10@email.com / password123
+
+### PWA Testing
+```bash
+npm run build && npm run start  # Test PWA in production mode
+# Then test in Chrome DevTools > Application > Service Workers
 ```
 
 ---
@@ -124,23 +154,54 @@ npm run chrome:verify    # Verify connection
 
 ### Supabase Database MCP
 **Status**: ✅ Configured (2025-10-22)
-**Purpose**: Direct cloud database inspection
+**Purpose**: **INSPECTION ONLY** - View cloud database state
 **Access Token**: Configured in `.mcp.json` (not committed to git)
 
-**⚠️ IMPORTANT**: Always ask user before running queries that modify cloud database!
+**⚠️ CRITICAL**: This tool is for READ-ONLY inspection of cloud database. NEVER run modification queries!
+
+**When to Use**:
+- Inspecting cloud database schema (READ-ONLY)
+- Checking for manually added triggers/indexes (READ-ONLY)
+- Verifying production state (READ-ONLY)
+
+**When NOT to Use**:
+- Any modification queries (INSERT, UPDATE, DELETE, ALTER, DROP, CREATE)
+- Routine local development queries (use local Supabase instead)
+- "Fixing" or "optimizing" cloud database
 
 **Usage Examples**:
-- "Inspect triggers on the reviews table using Supabase MCP"
-- "List all functions that reference listing_stats"
-- "Check if private.listing_stats materialized view exists"
-
-**Available Tools**: `query`, `listTables`, `listFunctions`
+- "Show me the schema of the reviews table in cloud" (READ-ONLY)
+- "List all indexes on listings table in cloud" (READ-ONLY)
 
 **Note**: Both MCPs require Claude Code restart to activate after installation.
 
 ---
 
 ## 🏗️ ARCHITECTURE
+
+### Development Modes
+
+**Local Development (Default - USE THIS)**:
+- URL: http://localhost:3000
+- Supabase: Local instance via `npx supabase start` (http://127.0.0.1:54321)
+- Studio: http://127.0.0.1:54323
+- Hot reload with Turbopack
+- Use for ALL day-to-day development and testing
+
+**Docker Mode** (for production-like testing):
+- URL: http://localhost:3001
+- Requires `.env.docker` configuration
+- Use for testing Docker networking, PWA, or deployment issues
+
+**Cloud Production** (UNTOUCHABLE):
+- URL: https://vrlzwxoiglzwmhndpolj.supabase.co
+- **DO NOT TOUCH** - Production ready for launch
+- Inspection only via Supabase MCP (READ-ONLY)
+
+**Current Local Setup**:
+- `project_id = "vrlzwxoiglzwmhndpolj"` in config.toml
+- This is a LOCAL instance (completely separate from cloud)
+- Contains 10k test listings for development
 
 ### Authentication System
 Supabase PKCE authentication with singleton pattern:
@@ -173,7 +234,7 @@ Role-based admin panel with SECURITY DEFINER functions:
 Client validation → Content moderation → Secure upload → Metadata storage
 
 **Key Files**:
-- `src/components/FileUpload.tsx` - Drag/drop component
+- `src/components/listings/ImageUpload.tsx` - Drag/drop component
 - `src/lib/storage.ts` - Upload management via Edge Functions
 - `src/lib/image-compression.ts` - Client-side compression
 - Allowed: JPEG, PNG, WebP only
@@ -192,12 +253,17 @@ Client validation → Content moderation → Secure upload → Metadata storage
 - Manifest: `public/manifest.json`
 - Service Worker: Auto-caching via next-pwa
 - Config: `next.config.ts`
-- Caching: NetworkFirst (API), CacheFirst (static), NetworkOnly (admin/auth)
+- Caching Strategies:
+  - `NetworkFirst`: Supabase API, general API routes
+  - `CacheFirst`: Static assets (images)
+  - `NetworkOnly`: Admin/auth routes (never cached)
 
 ### Mobile UI
 - `src/components/common/MobileListingCard.tsx` - 2-column grid layout
 - Mobile: `grid-cols-2` via `md:hidden`
 - Desktop: `lg:grid-cols-3` via `hidden md:grid`
+
+---
 
 ## 💡 CRITICAL PATTERNS & FIXES
 
@@ -244,6 +310,62 @@ export const supabase = getSupabaseClient()
 
 **Important**: Import `SupabaseClient` from `@supabase/supabase-js`, NOT from `@supabase/ssr`
 
+### Database Query Best Practices
+
+**Search API Pattern**:
+```typescript
+// ✅ Correct - use precomputed search vectors
+.textSearch('search_vector', query, { type: 'websearch', config: 'simple' })
+
+// ❌ Wrong - forces expensive to_tsvector() on every query
+.textSearch('title', query)
+```
+
+**Pagination**:
+```typescript
+// ✅ Prefer keyset pagination for large datasets
+WHERE created_at < :cursor ORDER BY created_at DESC LIMIT 50
+
+// ❌ Avoid OFFSET for large result sets (slow at scale)
+OFFSET 10000 LIMIT 50
+```
+
+**Always Include Status Filter**:
+```typescript
+// ✅ Hits partial indexes efficiently
+.eq('status', 'active')
+
+// ❌ Requires full table scan
+// Missing status filter
+```
+
+---
+
+## 📁 QUICK FILE REFERENCE
+
+**Database**:
+- Type definitions: `src/types/database.ts`
+- Migrations: `supabase/migrations/`
+- Edge Functions: `supabase/functions/`
+- Config: `supabase/config.toml`
+
+**Authentication**:
+- Client singleton: `src/lib/supabase/client.ts`
+- Server auth: `src/lib/supabase/server.ts`
+- API route pool: `src/lib/supabase/serverPool.ts`
+- Auth context: `src/contexts/AuthContext.tsx`
+- Middleware: `middleware.ts`
+
+**Key Utilities**:
+- Storage: `src/lib/storage.ts`
+- Image compression: `src/lib/image-compression.ts`
+- Auth errors: `src/lib/auth-error-handler.ts`
+
+**Admin**:
+- Pages: `src/app/admin/*/page.tsx`
+- Auth: `src/lib/admin/*`
+- Secure schema: Database `admin_secure` schema
+
 ---
 
 ## ⚙️ ENVIRONMENT & CONFIGURATION
@@ -252,23 +374,23 @@ export const supabase = getSupabaseClient()
 ```
 .env.docker.example     # Template (commit)
 .env.docker            # Your keys (NEVER commit)
-.env.local             # Local development keys
+.env.local             # Local development keys (NEVER commit)
 ```
 
 ### Required Variables
-Get from: `npx supabase status`
+Get from: `npx supabase status` (for local development)
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_local_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_local_service_role_key
 ```
 
 ### Key URLs
 - **Local Dev**: http://localhost:3000 (auto-opens)
-- **Production**: http://localhost:3002 (cloud backend)
+- **Local Supabase API**: http://127.0.0.1:54321
+- **Local Supabase Studio**: http://127.0.0.1:54323
 - **Docker App**: http://localhost:3001
-- **Supabase Studio**: http://localhost:54323
-- **Cloud Supabase**: https://vrlzwxoiglzwmhndpolj.supabase.co
+- **Cloud Supabase (READ-ONLY)**: https://vrlzwxoiglzwmhndpolj.supabase.co
 
 ---
 
@@ -276,10 +398,11 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 Located in `scripts/` directory:
 
-**Data Management**:
-- `setup-complete-test-data.js` - Complete test data
+**Data Management (LOCAL ONLY)**:
+- `create-10-test-users.js` - Creates user1@email.com through user10@email.com
+- `generate-10k-listings.js` - 10k listings across users
 - `create-test-listings-with-photos.js` - Listings with photos
-- `generate-cloud-test-data.js` - Generate cloud test data
+- `generate-to-250k-multilingual.js` - 250k listings for scale testing
 
 **Admin**:
 - `create-admin-user.js` - Create admin
@@ -289,7 +412,7 @@ Located in `scripts/` directory:
 **Verification**:
 - `verify-listings.js` - Verify listing integrity
 - `check-search-vector.js` - Verify search index
-- `test-rpc-function.js` - Test DB functions
+- `performance-test-suite.js` - Test queries at scale
 
 ---
 
@@ -301,6 +424,14 @@ Located in `scripts/` directory:
 - Check middleware cookie handling
 - Verify session flow
 - Use `src/lib/auth-error-handler.ts`
+- **If switching environments**: Clear browser cookies!
+
+**Favorites/Reviews "permission denied"**:
+- Check which environment you're in (network tab)
+- Clear browser cookies when switching between local/cloud
+- Verify `.env.local` has correct Supabase URL
+- Restart dev server after changing env vars
+- **Root cause**: JWT token mismatch between environments
 
 **Photos not loading**:
 - Use `fixPhotoUrl()` utility for Docker URLs
@@ -314,13 +445,10 @@ Located in `scripts/` directory:
 - Ensure env variables in `.env.local`
 - Clear `.next` cache: `rm -rf .next`
 
-**Admin access denied**:
-- Check admin session via `src/lib/admin/` utilities
-- Verify admin_users table entry
-
-**Image upload failures**:
-- Check Edge Function logs
-- Verify content moderation status
+**Supabase Studio shows loading forever**:
+- Normal for large datasets (10k+ rows)
+- Use API calls to verify data instead
+- Use SQL Editor for direct queries
 
 ### Debugging Commands
 ```bash
@@ -333,6 +461,16 @@ docker logs marketdz-app-1 --follow | grep "Upload"
 # Network status
 npm run docker:status
 docker network ls | grep supabase
+
+# Check which environment browser is using
+# In browser DevTools > Network tab, look for Supabase requests
+# Should be: http://127.0.0.1:54321 for local
+# NOT: https://vrlzwxoiglzwmhndpolj.supabase.co
+
+# Verify data in local database
+curl -s "http://127.0.0.1:54321/rest/v1/listings?select=count" \
+  -H "apikey: YOUR_ANON_KEY" \
+  -H "Prefer: count=exact"
 ```
 
 ---
@@ -341,8 +479,10 @@ docker network ls | grep supabase
 
 - **Never commit**: API keys, `.env.docker`, `.env.local`
 - **File uploads**: Always go through Edge Functions with content moderation
-- **Admin operations**: Use SECURITY DEFINER with secure search_path
+- **Admin operations**: Use SECURITY DEFINER with `SET search_path TO public` (or specific schemas)
 - **Auth errors**: Use `src/lib/auth-error-handler.ts` for safe handling
+- **RLS Policies**: All tables have Row Level Security enabled
+- **Cloud Database**: READ-ONLY access only, never modify
 
 ---
 
@@ -353,41 +493,74 @@ docker network ls | grep supabase
 - **Source Maps**: Disabled in production
 - **Docker**: Standalone output for minimal image size
 - **Current Scale**: Optimized for 250k+ listings
-- **Query Performance**: 150-300ms typical
+- **Query Performance**: 150-300ms typical for complex queries
+
+### Performance Testing Learnings (250k Scale)
+
+**Key Insights from 250k listings test**:
+1. **Test indexes before applying** - don't assume you need them
+2. **Use precomputed columns** - query `search_vector`, never `to_tsvector()` on every request
+3. **Simple beats complex** - standalone category/subcategory indexes often outperform compound indexes for broad queries
+4. **Statement timeouts are symptoms** - fix queries, don't raise timeouts
+5. **Use CONCURRENTLY for production** - create indexes without locking tables
+6. **Avoid materialized views on write path** - use scheduled jobs instead
+
+**Performance Targets**:
+- Category pages: <600ms
+- Full-text search: <800ms
+- Geographic filter: <700ms
+- Multi-filter combo: <750ms
+- Homepage: <500ms
 
 ---
 
 ## 🗄️ DATABASE MANAGEMENT
 
-### Migration Status
-Clean, lean schema approach with essential migrations:
+### Local Database Setup
 
-1. `initial_lean_schema.sql` - Core marketplace schema
-2. `add_full_text_search.sql` - Arabic full-text search
-3. `add_listings_security_optimization.sql` - Security + performance
-4. `add_hot_deals_support.sql` - Hot deals
-5. `add_admin_system.sql` - Admin with role-based access
-6. `add_role_based_rls.sql` - Enhanced RLS
-7. `align_search_with_cloud.sql` - Search optimization
-8. `add_homepage_index.sql` - Homepage performance
-9. `fix_review_timeout.sql` - Review/favorites timeout fix
+**Current Status**:
+- Project ID: `vrlzwxoiglzwmhndpolj` (matches cloud name for clarity, but completely separate)
+- Users: 10 test users (user1@email.com - user10@email.com, password: password123)
+- Listings: 10,000 multilingual test listings
+- Ready for: Development and testing
 
-### Deploying Migrations
-
-⚠️ **ALWAYS get user approval before applying migrations to cloud!**
-
+**To reset local database**:
 ```bash
-# Link project (first time only)
-npx supabase link --project-ref YOUR_PROJECT_REF
-
-# Push all migrations
-npx supabase db push --linked
-
-# Push single migration
-npx supabase db push --linked --include-all=false --file supabase/migrations/FILE_NAME.sql
+npx supabase db reset  # Resets and re-runs all migrations
 ```
 
-### Verification Queries
+### Migration Philosophy
+
+**Local Development**:
+- Run migrations freely in local environment
+- Test thoroughly with 10k+ rows
+- Document all changes in migration files
+
+**Cloud Production** (UNTOUCHABLE):
+- **NEVER apply migrations without explicit user approval**
+- **NEVER suggest "fixing" cloud database**
+- Cloud is production-ready and perfectly structured
+- All testing MUST be done locally first
+
+### Migration Files (for local development)
+
+Clean, lean schema approach with essential migrations:
+
+1. `20250929000000_initial_lean_schema.sql` - Core marketplace schema
+2. `20250929000001_add_full_text_search.sql` - Arabic full-text search
+3. `20250929000002_add_listings_security_optimization.sql` - Security + performance
+4. `20251001000001_add_hot_deals_support.sql` - Hot deals
+5. `20251001000002_add_admin_system.sql` - Admin with role-based access
+6. `20251001000004_add_role_based_rls.sql` - Enhanced RLS
+7. `20251002000001_align_search_with_cloud.sql` - Search optimization
+8. `20251008000000_add_ranked_search_function.sql` - Ranked search
+9. `20251020000000_performance_optimization_250k.sql` - 250k scale optimization
+10. `20251021000000_add_homepage_index.sql` - Homepage performance
+11. `20251024000000_fix_security_definer_search_path.sql` - Fix SECURITY DEFINER functions
+12. `20251024000001_fix_remaining_functions_search_path.sql` - Fix remaining functions
+13. `20251024000002_fix_handle_new_user_null_names.sql` - Fix null name handling
+
+### Verification Queries (Local only)
 ```sql
 -- Check migration status
 SELECT * FROM supabase_migrations.schema_migrations ORDER BY version;
@@ -400,6 +573,12 @@ SELECT tablename, indexname FROM pg_indexes WHERE schemaname = 'public';
 
 -- Verify RLS policies
 SELECT schemaname, tablename, policyname FROM pg_policies WHERE schemaname = 'public';
+
+-- Count records
+SELECT
+  (SELECT COUNT(*) FROM listings) as listings,
+  (SELECT COUNT(*) FROM profiles) as profiles,
+  (SELECT COUNT(*) FROM auth.users) as users;
 ```
 
 ---
@@ -407,35 +586,78 @@ SELECT schemaname, tablename, policyname FROM pg_policies WHERE schemaname = 'pu
 ## 🎯 DATABASE PHILOSOPHY: KEEP IT LEAN
 
 ### ⚠️ CRITICAL WARNING
-**The previous version broke by manually adding excessive indexes, triggers, and materialized views in cloud.** Do NOT repeat this mistake!
+**Previous issues were caused by manually adding excessive indexes, triggers, and materialized views.** Do NOT repeat this mistake!
 
 ### Golden Rules
 1. **NEVER manually add indexes** without performance testing proof
-2. **NEVER add triggers** without thorough testing + documentation
-3. **ALWAYS use migrations** - never manual SQL in cloud
-4. **STICK to golden schema** - contains exactly what's needed
+2. **NEVER add triggers** without thorough testing + documentation IN MIGRATIONS
+3. **ALWAYS use migrations** - never manual SQL
+4. **STICK to lean schema** - contains exactly what's needed
 5. **TEST first** - don't assume you need more indexes
-6. **GET APPROVAL** before any cloud database changes
+6. **AVOID materialized views on write path** - use scheduled jobs instead
+7. **LOCAL TESTING ONLY** - never experiment on cloud
 
-### Current Lean State ✅
-Exactly **11 essential indexes**:
-- `idx_profiles_wilaya` - Geographic filtering
-- `idx_listings_user_id` - User's listings
-- `idx_listings_fulltext` - Search
-- `idx_listings_search_compound` - Complex filtering
-- `idx_favorites_listing_id` - Favorites
-- `idx_reviews_reviewed_id` - Reviews
-- `idx_conversations_users` - Conversations
-- `idx_messages_conversation_time` - Message ordering
-- `idx_messages_unread` - Unread counts
-- `idx_notifications_user_unread` - Unread notifications
-- `idx_notifications_user_all` - Notification history
-
-### Before Adding ANY Database Object
-1. Prove it's needed with actual performance tests
+### Before Adding ANY Database Object (in LOCAL)
+1. Prove it's needed with actual performance tests (run `scripts/performance-test-suite.js`)
 2. Document reason in migration with comments
-3. Test thoroughly in local environment
-4. **Get user approval** before deploying to cloud
+3. Test thoroughly in local environment with 10k+ rows
+4. Add to migrations - NEVER apply manually
 5. Monitor impact after deployment
 
 **Remember**: More database objects ≠ better performance. Often the opposite is true.
+
+### Preferred Patterns (for local development)
+```sql
+-- ✅ Good: Partial indexes for common queries
+CREATE INDEX idx_listings_active_category
+ON listings(category, created_at DESC)
+WHERE status = 'active';
+
+-- ✅ Good: Use CONCURRENTLY when needed
+CREATE INDEX CONCURRENTLY idx_name ON table(column);
+
+-- ✅ Good: Scheduled materialized view refresh (not on write path)
+SELECT cron.schedule('job', '0 */6 * * *',
+  $$REFRESH MATERIALIZED VIEW CONCURRENTLY view_name$$);
+
+-- ❌ Bad: Refreshing materialized views on every write
+CREATE TRIGGER refresh_on_insert ...
+  EXECUTE FUNCTION refresh_materialized_view();
+
+-- ❌ Bad: Overly broad indexes
+CREATE INDEX idx_everything ON table(col1, col2, col3, col4);
+```
+
+---
+
+## 📝 NOTES FOR FUTURE CLAUDE INSTANCES
+
+### Environment Setup Summary
+- **Local Supabase**: project_id = "vrlzwxoiglzwmhndpolj" (separate from cloud)
+- **Test Users**: user1@email.com through user10@email.com, password: password123
+- **Test Data**: 10k multilingual listings ready for development
+- **Cloud Database**: UNTOUCHABLE - production ready
+
+### Common Tasks
+```bash
+# Start fresh development session
+npx supabase start
+npm run dev
+
+# Reset local database if needed
+npx supabase db reset
+
+# Create fresh test data
+node scripts/create-10-test-users.js
+node scripts/generate-10k-listings.js
+
+# Test performance
+node scripts/performance-test-suite.js
+```
+
+### Remember
+- ALL development happens locally
+- Cloud database is READ-ONLY for inspection
+- Clear browser cookies when switching environments
+- Use Chrome DevTools MCP for debugging
+- Follow the lean database philosophy

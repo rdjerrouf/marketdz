@@ -3,6 +3,7 @@
 
 import { useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import { compressImage, validateImageFile } from '@/lib/image-compression'
 
 interface ImageUploadProps {
   images: string[]
@@ -27,28 +28,34 @@ export default function ImageUpload({
   const minImages = allowImages && required ? 1 : 0
 
   const validateFile = (file: File): string | null => {
-    // Check file type
-    if (!file.type.startsWith('image/')) {
-      return 'Please select only image files'
+    // Use the utility validation function
+    const validation = validateImageFile(file)
+    if (!validation.valid) {
+      return validation.error || 'Invalid image file'
     }
-
-    // Check file size (10MB max)
-    if (file.size > 10 * 1024 * 1024) {
-      return 'Image size must be less than 10MB'
-    }
-
-    // Check image dimensions (optional)
     return null
   }
 
   const uploadImage = async (file: File): Promise<string> => {
-    const fileExt = file.name.split('.').pop()
+    // Compress the image before uploading
+    const compressionResult = await compressImage(file, {
+      maxWidth: 800,
+      maxHeight: 600,
+      quality: 0.8,
+      format: 'webp',
+      maintainAspectRatio: true
+    })
+
+    console.log(`📸 Image compressed: ${(file.size / 1024).toFixed(1)}KB → ${(compressionResult.compressedSize / 1024).toFixed(1)}KB (${compressionResult.compressionRatio}% saved)`)
+
+    const compressedFile = compressionResult.file
+    const fileExt = compressionResult.format
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
     const filePath = `listings/${fileName}`
 
     const { error: uploadError } = await supabase.storage
       .from('listing-photos')
-      .upload(filePath, file)
+      .upload(filePath, compressedFile)
 
     if (uploadError) {
       throw new Error(`Failed to upload image: ${uploadError.message}`)
@@ -164,7 +171,7 @@ export default function ImageUpload({
             {minImages > 0 ? `Required: ${minImages}-${maxImages} images` : `Max ${maxImages} images`}
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            JPG, PNG, WebP up to 10MB each
+            JPG, PNG, WebP up to 50MB • Auto-compressed to WebP
           </p>
         </label>
       </div>
@@ -181,8 +188,9 @@ export default function ImageUpload({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <div className="flex items-center">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-3"></div>
-            <p className="text-blue-600 text-sm font-medium">Uploading images...</p>
+            <p className="text-blue-600 text-sm font-medium">Compressing and uploading images...</p>
           </div>
+          <p className="text-xs text-gray-600 mt-1">Optimizing for fast loading</p>
         </div>
       )}
 

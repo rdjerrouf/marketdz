@@ -23,7 +23,7 @@ RETURNS TABLE (
   location_wilaya text,
   location_city text,
   photos text[],
-  condition item_condition,
+  condition text,
   available_from date,
   available_to date,
   rental_period text,

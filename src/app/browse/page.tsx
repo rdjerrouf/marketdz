@@ -726,7 +726,7 @@ function BrowsePageContent() {
             </div>
 
             {/* Results Info */}
-            {!loading && !error && listings.length > 0 && pagination.totalItems && (
+            {!loading && !error && listings.length > 0 && pagination.totalItems > 0 && (
               <div className="text-sm text-white/70">
                 Showing {((pagination.currentPage - 1) * 20) + 1}-{Math.min(pagination.currentPage * 20, pagination.totalItems)} of {pagination.totalItems}
               </div>
