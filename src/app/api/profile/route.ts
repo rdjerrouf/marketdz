@@ -47,11 +47,17 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error updating profile:', error)
-      return NextResponse.json(
-        { error: 'Failed to update profile' },
-        { status: 500 }
-      )
+      console.error('Profile update error:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: (error as any).hint,
+      })
+      const status = error.code === '42501' ? 403 : 400
+      return NextResponse.json({ 
+        error: error.message, 
+        code: error.code 
+      }, { status })
     }
 
     return NextResponse.json({ 
@@ -85,11 +91,17 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error fetching profile:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch profile' },
-        { status: 500 }
-      )
+      console.error('Profile fetch error:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: (error as any).hint,
+      })
+      const status = error.code === '42501' ? 403 : 400
+      return NextResponse.json({ 
+        error: error.message, 
+        code: error.code 
+      }, { status })
     }
 
     return NextResponse.json({ 
