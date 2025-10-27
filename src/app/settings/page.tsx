@@ -25,6 +25,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [message, setMessage] = useState('')
+  const [mounted, setMounted] = useState(false) // Fix hydration
 
   const [formData, setFormData] = useState({
     first_name: '',
@@ -35,7 +36,14 @@ export default function SettingsPage() {
     wilaya: ''
   })
 
+  // Fix hydration mismatch
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return // Don't run until mounted
+
     if (!userLoading && !user) {
       router.push('/signin')
       return
@@ -44,7 +52,7 @@ export default function SettingsPage() {
     if (user) {
       fetchProfile()
     }
-  }, [user, userLoading, router])
+  }, [user, userLoading, router, mounted])
 
   const fetchProfile = async () => {
     try {
@@ -123,7 +131,8 @@ export default function SettingsPage() {
     }
   }
 
-  if (userLoading || loading) {
+  // Prevent hydration mismatch - don't render until mounted
+  if (!mounted || userLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
