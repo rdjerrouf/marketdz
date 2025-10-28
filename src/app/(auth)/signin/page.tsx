@@ -97,6 +97,8 @@ function SignInPageContent() {
         console.log('🔑 Signin: Authentication error:', result.error)
         if (result.error.includes('Invalid login credentials')) {
           setErrors({ general: 'Incorrect email or password.' })
+        } else if (result.error.includes('Email not confirmed')) {
+          setErrors({ general: 'Please verify your email before signing in. Check your inbox for the verification link.' })
         } else {
           setErrors({ general: result.error })
         }

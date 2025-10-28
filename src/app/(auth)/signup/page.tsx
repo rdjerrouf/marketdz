@@ -24,7 +24,7 @@ interface FormErrors {
 
 export default function SignUpPage() {
   const router = useRouter()
-  
+
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -36,10 +36,14 @@ export default function SignUpPage() {
     city: '',
     bio: ''
   })
-  
+
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
+  const [isResending, setIsResending] = useState(false)
+  const [resendMessage, setResendMessage] = useState('')
   
   // Get cities for selected wilaya
   const selectedWilaya = ALGERIA_WILAYAS.find(w => w.code === formData.wilaya)
@@ -92,11 +96,41 @@ export default function SignUpPage() {
     return newErrors
   }
 
+  // Handle resend verification email
+  const handleResendEmail = async () => {
+    setIsResending(true)
+    setResendMessage('')
+
+    try {
+      const response = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: userEmail }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        setResendMessage(result.error || 'Failed to resend email. Please try again.')
+        return
+      }
+
+      setResendMessage('Verification email sent! Please check your inbox.')
+    } catch (error) {
+      console.error('Resend email error:', error)
+      setResendMessage('An error occurred. Please try again.')
+    } finally {
+      setIsResending(false)
+    }
+  }
+
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
@@ -151,8 +185,14 @@ export default function SignUpPage() {
         return
       }
 
-      // Success - redirect to sign in page with success message
-      router.push('/signin?message=Account created successfully! Please sign in.')
+      // Success - show verification message
+      if (result.requiresVerification) {
+        setUserEmail(formData.email)
+        setShowVerificationMessage(true)
+      } else {
+        // Fallback: redirect to sign in if no verification required
+        router.push('/signin?message=Account created successfully! Please sign in.')
+      }
 
     } catch (error) {
       console.error('Sign up error:', error)
@@ -169,7 +209,7 @@ export default function SignUpPage() {
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
         <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
-        
+
         {/* Floating particles */}
         <div className="absolute inset-0">
           {[
@@ -190,8 +230,8 @@ export default function SignUpPage() {
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
         {/* Back button */}
         <div className="mb-4">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="inline-flex items-center text-sm text-white/80 hover:text-white transition-colors duration-200"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,18 +240,82 @@ export default function SignUpPage() {
             Back to Home
           </Link>
         </div>
-        
+
         <h1 className="text-center text-3xl font-bold text-white mb-2">
           MarketDZ
         </h1>
         <h2 className="text-center text-xl text-white/80">
-          Create Your Account
+          {showVerificationMessage ? 'Check Your Email' : 'Create Your Account'}
         </h2>
       </div>
 
       <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* Verification Message */}
+          {showVerificationMessage ? (
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+                <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Verify Your Email
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                We&apos;ve sent a verification email to:
+              </p>
+              <p className="text-sm font-medium text-gray-900 mb-6">
+                {userEmail}
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+                <p className="text-sm text-blue-800">
+                  Please check your inbox and click the verification link to activate your account.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <Link
+                  href="/signin"
+                  className="block w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Go to Sign In
+                </Link>
+                <button
+                  onClick={() => setShowVerificationMessage(false)}
+                  className="block w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Back to Sign Up
+                </button>
+              </div>
+              <p className="mt-4 text-xs text-gray-500">
+                Didn&apos;t receive the email? Check your spam folder.
+              </p>
+              <div className="mt-4 border-t border-gray-200 pt-4">
+                <button
+                  onClick={handleResendEmail}
+                  disabled={isResending}
+                  className={`text-sm font-medium ${
+                    isResending
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-blue-600 hover:text-blue-500'
+                  }`}
+                >
+                  {isResending ? 'Sending...' : 'Resend Verification Email'}
+                </button>
+                {resendMessage && (
+                  <p className={`mt-2 text-sm ${
+                    resendMessage.includes('sent')
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  }`}>
+                    {resendMessage}
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
             
             {errors.general && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
@@ -424,20 +528,23 @@ export default function SignUpPage() {
               </button>
             </div>
           </form>
+          )}
 
-          <div className="mt-6">
-            <div className="text-center">
-              <span className="text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link 
-                  href="/signin" 
-                  className="font-medium text-blue-600 hover:text-blue-500"
-                >
-                  Sign In
-                </Link>
-              </span>
+          {!showVerificationMessage && (
+            <div className="mt-6">
+              <div className="text-center">
+                <span className="text-sm text-gray-600">
+                  Already have an account?{' '}
+                  <Link
+                    href="/signin"
+                    className="font-medium text-blue-600 hover:text-blue-500"
+                  >
+                    Sign In
+                  </Link>
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

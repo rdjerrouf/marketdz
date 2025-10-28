@@ -29,10 +29,11 @@ export async function POST(request: NextRequest) {
     console.log('Phone normalization:', phone, '->', normalizedPhone)
 
     // Use admin client for signup
+    // Note: email_confirm is removed - users must verify their email
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      email_confirm: true,
+      email_confirm: false, // Require email verification
       user_metadata: {
         first_name: firstName || '',
         last_name: lastName || '',
@@ -58,11 +59,13 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('User created successfully:', data.user.id)
+    console.log('Verification email sent to:', email)
 
     return NextResponse.json({
       success: true,
       user: data.user,
-      message: 'User created successfully'
+      message: 'Account created successfully! Please check your email to verify your account.',
+      requiresVerification: true
     })
 
   } catch (error) {

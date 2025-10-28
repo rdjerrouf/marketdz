@@ -75,8 +75,21 @@ export const createApiSupabaseClient = (request: NextRequest) => {
     supabaseCookies: allCookies.filter(c => c.name.includes('supabase') || c.name.includes('sb-')),
   })
 
-  // IMPORTANT: Do NOT pass Authorization header to createServerClient
-  // It should ONLY use cookies for authentication in API routes
+  // Create a new Headers object WITHOUT the Authorization header
+  // This prevents @supabase/ssr from using bearer token auth
+  const headersWithoutAuth = new Headers(request.headers)
+  if (authHeader) {
+    console.log('🚫 Removing Authorization header to force cookie-based auth')
+    headersWithoutAuth.delete('Authorization')
+  }
+
+  // Create a modified request object without Authorization header
+  const modifiedRequest = new NextRequest(request.url, {
+    headers: headersWithoutAuth,
+    method: request.method,
+  })
+
+  // IMPORTANT: Use cookies ONLY - strip Authorization header completely
   // The Authorization header causes @supabase/ssr to ignore cookies
   const client = createServerClient<Database>(
     process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
