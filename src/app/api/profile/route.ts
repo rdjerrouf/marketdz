@@ -8,6 +8,13 @@ export async function PUT(request: NextRequest) {
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    console.log('🔍 Profile API Debug:', {
+      hasUser: !!user,
+      userId: user?.id,
+      authError: authError?.message
+    })
+    
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -31,6 +38,12 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update the profile
+    console.log('🔍 Attempting profile update:', {
+      userId: user.id,
+      hasCity: !!city,
+      hasWilaya: !!wilaya
+    })
+    
     const { data, error } = await supabase
       .from('profiles')
       .update({
