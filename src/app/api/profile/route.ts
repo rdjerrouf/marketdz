@@ -1,23 +1,37 @@
 // src/app/api/profile/route.ts
-// Force fresh deployment - v5 (fix RLS session issue with Node runtime)
+// FINAL FIX: Pure Bearer client (Supabase AI recommendation #1)
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database'
 
-// IMPORTANT: Force Node runtime for proper cookie handling and session management
-// Edge runtime has different cookie behavior that can cause getSession() to fail
+// Force Node runtime for consistent behavior
 export const runtime = 'nodejs'
 
 export async function PUT(request: NextRequest) {
   try {
-    // Extract token for per-request header (Supabase AI recommendation)
-    const authHeader = request.headers.get('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
+    // Extract token - Pure Bearer approach (no cookie mixing)
+    const token = request.headers.get('Authorization')?.replace('Bearer ', '')
 
-    if (!authHeader || !token) {
+    if (!token) {
       return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 })
     }
 
-    const supabase = await createServerSupabaseClient(request)
+    // Create a pure Bearer client - this guarantees the token reaches PostgREST
+    const supabase = createClient<Database>(
+      process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false
+        }
+      }
+    )
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -44,10 +58,9 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // CRITICAL FIX (from Supabase AI):
-    // Use .withHeaders() to guarantee Authorization header reaches PostgREST
-    // This ensures the JWT is on the exact mutation request for RLS context
-    const updateQuery = supabase
+    // Update profile using the pure Bearer client
+    // The client was created with global.headers.Authorization
+    const { data, error } = await supabase
       .from('profiles')
       .update({
         first_name: first_name.trim(),
@@ -61,12 +74,6 @@ export async function PUT(request: NextRequest) {
       .eq('id', user.id)
       .select()
       .single()
-
-    // Force Authorization header on this specific query
-    // @ts-ignore - withHeaders exists but may not be in types
-    const { data, error } = await updateQuery.withHeaders({
-      Authorization: `Bearer ${token}`
-    })
 
     if (error) {
       console.error('Profile update error:', {
@@ -97,11 +104,29 @@ export async function PUT(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Extract token for per-request header
-    const authHeader = request.headers.get('Authorization')
-    const token = authHeader?.replace('Bearer ', '')
+    // Extract token - Pure Bearer approach
+    const token = request.headers.get('Authorization')?.replace('Bearer ', '')
 
-    const supabase = await createServerSupabaseClient(request)
+    if (!token) {
+      return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 })
+    }
+
+    // Create pure Bearer client
+    const supabase = createClient<Database>(
+      process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false
+        }
+      }
+    )
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -109,18 +134,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get the profile with forced Authorization header
-    const selectQuery = supabase
+    // Get the profile
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
-
-    // Force Authorization header if available
-    const { data: profile, error } = token
-      // @ts-ignore
-      ? await selectQuery.withHeaders({ Authorization: `Bearer ${token}` })
-      : await selectQuery
 
     if (error) {
       console.error('Profile fetch error:', {
