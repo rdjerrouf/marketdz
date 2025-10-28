@@ -9,6 +9,14 @@ export const runtime = 'nodejs'
 
 export async function PUT(request: NextRequest) {
   try {
+    // CRITICAL LOGGING for Supabase AI Support
+    const authHeader = request.headers.get('Authorization')
+    const hasAuthHeader = !!authHeader
+
+    console.log('🚨 AUTHORIZATION HEADER PRESENCE:', hasAuthHeader)
+    console.log('🚨 RAW HEADER VALUE:', authHeader ? `Bearer ${authHeader.slice(7, 20)}...` : 'null')
+    console.log('🚨 COOKIES:', request.cookies.getAll().map(c => c.name))
+
     const supabase = await createServerSupabaseClient(request)
 
     // Check authentication
@@ -18,8 +26,8 @@ export async function PUT(request: NextRequest) {
       hasUser: !!user,
       userId: user?.id,
       authError: authError?.message,
-      hasAuthHeader: !!request.headers.get('Authorization'),
-      cookies: request.cookies.getAll().map(c => c.name)
+      hasAuthHeader,
+      clientType: hasAuthHeader ? 'createClient (token-based)' : 'createServerClient (cookie-based)'
     })
 
     if (authError || !user) {
