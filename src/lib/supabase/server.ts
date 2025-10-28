@@ -13,18 +13,26 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
   if (request?.headers.get('Authorization')) {
     const token = request.headers.get('Authorization')?.replace('Bearer ', '');
     if (token) {
-      // Create a server client that properly sets the auth context
+      // IMPORTANT: Keep cookies enabled for session refresh even when using Authorization header
+      // This ensures getSession() works and PostgREST has JWT context for RLS
       return createServerClient<Database>(
         process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
           cookies: {
             getAll() {
-              // For API routes with JWT, we don't need cookies
-              return []
+              // Allow cookies for session refresh
+              return cookieStore.getAll()
             },
-            setAll() {
-              // Don't set cookies in API routes
+            setAll(cookiesToSet) {
+              // Allow setting cookies for session persistence
+              try {
+                cookiesToSet.forEach(({ name, value, options }) =>
+                  cookieStore.set(name, value, options)
+                )
+              } catch {
+                // Ignore errors in Server Components
+              }
             },
           },
           global: {

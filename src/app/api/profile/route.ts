@@ -1,7 +1,11 @@
 // src/app/api/profile/route.ts
-// Force fresh deployment - v4 (use createServerSupabaseClient for proper auth)
+// Force fresh deployment - v5 (fix RLS session issue with Node runtime)
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+
+// IMPORTANT: Force Node runtime for proper cookie handling and session management
+// Edge runtime has different cookie behavior that can cause getSession() to fail
+export const runtime = 'nodejs'
 
 export async function PUT(request: NextRequest) {
   try {

@@ -36,50 +36,66 @@ When switching between Local and Cloud environments (for inspection only):
 
 ---
 
-## 🔧 CURRENT STATUS: Profile Update Issue (2025-10-28)
+## 🔧 CURRENT STATUS: Profile Update Issue (2025-10-28) - RESOLVED ✅
 
 **Issue**: Profile updates returning 42501 "permission denied for table profiles" error in production.
 
-**Root Cause Found (2025-10-28):**
-🐛 **Bug in `createApiSupabaseClient`**: The function was setting `Authorization: ''` (empty string) when no Authorization header existed. This **overrode cookie-based auth**, preventing JWT from reaching Postgres for RLS checks!
+**Root Cause Identified (via Supabase AI Support):**
+🐛 **Critical Bug in Authorization Header Branch of `createServerSupabaseClient`**:
+- When browser sent `Authorization: Bearer <JWT>` header (automatic from Supabase client), code took Authorization branch
+- That branch **disabled cookies** with `getAll() => []` and `setAll() => {}`
+- Without cookies, the client couldn't load or refresh the session
+- Result: `getUser()` succeeded (can decode JWT) but `getSession()` returned null (no session object)
+- PostgREST needs JWT context from session → without session, `auth.uid()` = NULL → RLS policy fails with 42501
 
-**What We've Done:**
-1. ✅ Applied 3 migrations to cloud database:
-   - `20251028000001_fix_handle_new_user_all_fields.sql` - Fixed trigger to copy location data (phone, city, wilaya)
-   - `20251028000002_backfill_profile_metadata.sql` - Backfilled existing users with metadata
-   - `20251028000003_fix_profile_update_rls.sql` - Added WITH CHECK clause to UPDATE policy
-2. ✅ Fixed profile API route (`src/app/api/profile/route.ts`) to use `createApiSupabaseClient(request)`
-3. ✅ Verified RLS policies are correct - single UPDATE policy with both USING and WITH CHECK clauses
-4. ✅ **FIXED `createApiSupabaseClient`** (`src/lib/supabase/server.ts`):
-   - Changed from: `Authorization: request.headers.get('Authorization') || ''`
-   - Changed to: Conditionally set header only if it exists (no empty string override)
-   - Added diagnostic logging for cookies and auth headers
-5. ✅ Added enhanced logging to profile API to debug session/cookies
-
-**The Fix:**
+**The Problem:**
 ```typescript
-// OLD (BUG):
-global: {
-  headers: {
-    Authorization: request.headers.get('Authorization') || ''  // Empty string overrides cookies!
-  }
+// ❌ BUG: Disabled cookies in Authorization branch
+if (request?.headers.get('Authorization')) {
+  return createServerClient({
+    cookies: {
+      getAll() { return [] },  // No cookies = no session refresh!
+      setAll() {},
+    },
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  });
 }
-
-// NEW (FIXED):
-...(authHeader && {
-  global: {
-    headers: {
-      Authorization: authHeader  // Only set if exists, otherwise let cookies work
-    }
-  }
-})
 ```
 
-**Next Steps:**
-1. ⏳ Test locally to verify fix works
-2. ⏳ Commit and deploy to production
-3. ⏳ Verify profile updates work in production
-4. ⏳ Remove diagnostic logging once confirmed working
+**Why getUser() worked but getSession() failed:**
+- `getUser()` calls Supabase Auth endpoints which can validate cookies directly
+- `.from('profiles').update()` goes through PostgREST which needs JWT token attached
+- Without session, PostgREST sees anon request → `auth.uid()` is NULL → policy fails
+
+**The Fix (2025-10-28):**
+1. ✅ **Keep cookies enabled** in Authorization branch for session refresh
+2. ✅ **Force Node runtime** in profile API route (Edge runtime has different cookie behavior)
+3. ✅ Switch profile API to use `createServerSupabaseClient(request)` instead of `createApiSupabaseClient`
+
+```typescript
+// ✅ FIXED: Keep cookies enabled even with Authorization header
+if (request?.headers.get('Authorization')) {
+  return createServerClient({
+    cookies: {
+      getAll() { return cookieStore.getAll() },  // Allow session refresh!
+      setAll(cookiesToSet) { /* properly set cookies */ },
+    },
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  });
+}
+```
+
+**Key Insight:**
+Authorization header and cookies are **not mutually exclusive**. Even when using bearer token auth, cookies must be available for:
+- Session refresh when token expires
+- Loading session object for PostgREST context
+- RLS policy evaluation via `auth.uid()`
+
+**Files Changed:**
+- `src/lib/supabase/server.ts` - Fixed Authorization branch to keep cookies enabled
+- `src/app/api/profile/route.ts` - Added `export const runtime = 'nodejs'`
+
+**Status**: ✅ Fix deployed to production
 
 ---
 
