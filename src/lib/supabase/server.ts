@@ -62,8 +62,8 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
 
 // For API routes that need to work with middleware-processed requests
 export const createApiSupabaseClient = (request: NextRequest) => {
-  const authHeader = request.headers.get('Authorization')
   const allCookies = request.cookies.getAll()
+  const authHeader = request.headers.get('Authorization')
 
   // Log everything to diagnose production issue
   console.log('🔧 createApiSupabaseClient DETAILED:', {
@@ -75,6 +75,9 @@ export const createApiSupabaseClient = (request: NextRequest) => {
     supabaseCookies: allCookies.filter(c => c.name.includes('supabase') || c.name.includes('sb-')),
   })
 
+  // IMPORTANT: Do NOT pass Authorization header to createServerClient
+  // It should ONLY use cookies for authentication in API routes
+  // The Authorization header causes @supabase/ssr to ignore cookies
   const client = createServerClient<Database>(
     process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -89,14 +92,7 @@ export const createApiSupabaseClient = (request: NextRequest) => {
           // Don't try to set cookies in API routes - they're already set by middleware
         },
       },
-      // Only set Authorization header if it exists - don't override with empty string!
-      ...(authHeader && {
-        global: {
-          headers: {
-            Authorization: authHeader
-          }
-        }
-      })
+      // DO NOT set Authorization header - let cookies handle auth
     }
   )
 
