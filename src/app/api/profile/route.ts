@@ -11,25 +11,14 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient(request)
 
-    // CRITICAL FIX (from Supabase AI Support):
-    // Extract token from Authorization header and force it onto PostgREST calls
-    const authHeader = request.headers.get('Authorization') || ''
-    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-
-    // Create a client with the token explicitly set for PostgREST
-    // This guarantees the Authorization header makes it to the actual query
-    const pg = token
-      ? supabase.rest.headers({ Authorization: `Bearer ${token}` })
-      : supabase
-
-    // Check authentication using the token-enabled client
-    const { data: { user }, error: authError } = await pg.auth.getUser()
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     console.log('🔍 Profile API Debug:', {
       hasUser: !!user,
       userId: user?.id,
       authError: authError?.message,
-      hasToken: !!token,
+      hasAuthHeader: !!request.headers.get('Authorization'),
       cookies: request.cookies.getAll().map(c => c.name)
     })
 
@@ -55,15 +44,14 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Update the profile using the token-enabled client (pg)
-    // This ensures PostgREST has the JWT token for RLS context
+    // Update the profile
     console.log('🔍 Attempting profile update:', {
       userId: user.id,
       hasCity: !!city,
       hasWilaya: !!wilaya
     })
 
-    const { data, error } = await pg
+    const { data, error } = await supabase
       .from('profiles')
       .update({
         first_name: first_name.trim(),
@@ -109,21 +97,14 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient(request)
 
-    // Extract token and create PostgREST-enabled client
-    const authHeader = request.headers.get('Authorization') || ''
-    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-    const pg = token
-      ? supabase.rest.headers({ Authorization: `Bearer ${token}` })
-      : supabase
-
     // Check authentication
-    const { data: { user }, error: authError } = await pg.auth.getUser()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get the profile using token-enabled client
-    const { data: profile, error } = await pg
+    // Get the profile
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)

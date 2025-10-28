@@ -9,36 +9,24 @@ import { NextRequest } from 'next/server'
 export const createServerSupabaseClient = async (request?: NextRequest) => {
   const cookieStore = await cookies()
 
-  // If this is an API route request with an Authorization header, use it
+  // CRITICAL FIX: When Authorization header is present, use createClient directly
+  // This ensures the JWT token is properly passed to PostgREST for RLS context
   if (request?.headers.get('Authorization')) {
     const token = request.headers.get('Authorization')?.replace('Bearer ', '');
     if (token) {
-      // IMPORTANT: Keep cookies enabled for session refresh even when using Authorization header
-      // This ensures getSession() works and PostgREST has JWT context for RLS
-      return createServerClient<Database>(
+      // Use createClient instead of createServerClient for pure token-based auth
+      // This bypasses SSR cookie complexity and directly uses the JWT
+      return createClient<Database>(
         process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
-          cookies: {
-            getAll() {
-              // Allow cookies for session refresh
-              return cookieStore.getAll()
-            },
-            setAll(cookiesToSet) {
-              // Allow setting cookies for session persistence
-              try {
-                cookiesToSet.forEach(({ name, value, options }) =>
-                  cookieStore.set(name, value, options)
-                )
-              } catch {
-                // Ignore errors in Server Components
-              }
-            },
-          },
           global: {
             headers: {
               Authorization: `Bearer ${token}`
             }
+          },
+          auth: {
+            persistSession: false // API routes don't need session persistence
           }
         }
       );
