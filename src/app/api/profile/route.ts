@@ -9,26 +9,18 @@ export const runtime = 'nodejs'
 
 export async function PUT(request: NextRequest) {
   try {
-    // CRITICAL LOGGING for Supabase AI Support
+    // Extract token for per-request header (Supabase AI recommendation)
     const authHeader = request.headers.get('Authorization')
-    const hasAuthHeader = !!authHeader
+    const token = authHeader?.replace('Bearer ', '')
 
-    console.log('🚨 AUTHORIZATION HEADER PRESENCE:', hasAuthHeader)
-    console.log('🚨 RAW HEADER VALUE:', authHeader ? `Bearer ${authHeader.slice(7, 20)}...` : 'null')
-    console.log('🚨 COOKIES:', request.cookies.getAll().map(c => c.name))
+    if (!authHeader || !token) {
+      return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 })
+    }
 
     const supabase = await createServerSupabaseClient(request)
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    console.log('🔍 Profile API Debug:', {
-      hasUser: !!user,
-      userId: user?.id,
-      authError: authError?.message,
-      hasAuthHeader,
-      clientType: hasAuthHeader ? 'createClient (token-based)' : 'createServerClient (cookie-based)'
-    })
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -52,14 +44,10 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Update the profile
-    console.log('🔍 Attempting profile update:', {
-      userId: user.id,
-      hasCity: !!city,
-      hasWilaya: !!wilaya
-    })
-
-    const { data, error } = await supabase
+    // CRITICAL FIX (from Supabase AI):
+    // Use .withHeaders() to guarantee Authorization header reaches PostgREST
+    // This ensures the JWT is on the exact mutation request for RLS context
+    const updateQuery = supabase
       .from('profiles')
       .update({
         first_name: first_name.trim(),
@@ -73,6 +61,12 @@ export async function PUT(request: NextRequest) {
       .eq('id', user.id)
       .select()
       .single()
+
+    // Force Authorization header on this specific query
+    // @ts-ignore - withHeaders exists but may not be in types
+    const { data, error } = await updateQuery.withHeaders({
+      Authorization: `Bearer ${token}`
+    })
 
     if (error) {
       console.error('Profile update error:', {
@@ -103,6 +97,10 @@ export async function PUT(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    // Extract token for per-request header
+    const authHeader = request.headers.get('Authorization')
+    const token = authHeader?.replace('Bearer ', '')
+
     const supabase = await createServerSupabaseClient(request)
 
     // Check authentication
@@ -111,12 +109,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get the profile
-    const { data: profile, error } = await supabase
+    // Get the profile with forced Authorization header
+    const selectQuery = supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
+
+    // Force Authorization header if available
+    const { data: profile, error } = token
+      // @ts-ignore
+      ? await selectQuery.withHeaders({ Authorization: `Bearer ${token}` })
+      : await selectQuery
 
     if (error) {
       console.error('Profile fetch error:', {
