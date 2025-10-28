@@ -4,7 +4,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient(request)
+    const supabase = await createServerSupabaseClient()
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -75,7 +75,7 @@ export async function PUT(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient(request)
+    const supabase = await createServerSupabaseClient()
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
