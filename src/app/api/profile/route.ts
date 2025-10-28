@@ -1,11 +1,11 @@
 // src/app/api/profile/route.ts
 // Force fresh deployment - v3 (repo now public)
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createApiSupabaseClient } from '@/lib/supabase/server'
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient()
+    const supabase = createApiSupabaseClient(request)
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient()
+    const supabase = createApiSupabaseClient(request)
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
