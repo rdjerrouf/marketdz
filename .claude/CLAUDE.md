@@ -36,6 +36,53 @@ When switching between Local and Cloud environments (for inspection only):
 
 ---
 
+## 🔧 CURRENT STATUS: Profile Update Issue (2025-10-28)
+
+**Issue**: Profile updates returning 42501 "permission denied for table profiles" error in production.
+
+**Root Cause Found (2025-10-28):**
+🐛 **Bug in `createApiSupabaseClient`**: The function was setting `Authorization: ''` (empty string) when no Authorization header existed. This **overrode cookie-based auth**, preventing JWT from reaching Postgres for RLS checks!
+
+**What We've Done:**
+1. ✅ Applied 3 migrations to cloud database:
+   - `20251028000001_fix_handle_new_user_all_fields.sql` - Fixed trigger to copy location data (phone, city, wilaya)
+   - `20251028000002_backfill_profile_metadata.sql` - Backfilled existing users with metadata
+   - `20251028000003_fix_profile_update_rls.sql` - Added WITH CHECK clause to UPDATE policy
+2. ✅ Fixed profile API route (`src/app/api/profile/route.ts`) to use `createApiSupabaseClient(request)`
+3. ✅ Verified RLS policies are correct - single UPDATE policy with both USING and WITH CHECK clauses
+4. ✅ **FIXED `createApiSupabaseClient`** (`src/lib/supabase/server.ts`):
+   - Changed from: `Authorization: request.headers.get('Authorization') || ''`
+   - Changed to: Conditionally set header only if it exists (no empty string override)
+   - Added diagnostic logging for cookies and auth headers
+5. ✅ Added enhanced logging to profile API to debug session/cookies
+
+**The Fix:**
+```typescript
+// OLD (BUG):
+global: {
+  headers: {
+    Authorization: request.headers.get('Authorization') || ''  // Empty string overrides cookies!
+  }
+}
+
+// NEW (FIXED):
+...(authHeader && {
+  global: {
+    headers: {
+      Authorization: authHeader  // Only set if exists, otherwise let cookies work
+    }
+  }
+})
+```
+
+**Next Steps:**
+1. ⏳ Test locally to verify fix works
+2. ⏳ Commit and deploy to production
+3. ⏳ Verify profile updates work in production
+4. ⏳ Remove diagnostic logging once confirmed working
+
+---
+
 ## 📋 PROJECT OVERVIEW
 
 MarketDZ is a Next.js 15 marketplace application optimized for Algeria with:
@@ -101,14 +148,28 @@ npx playwright test --debug           # Debug mode
 
 ### Docker
 ```bash
-npm run docker:up        # Start container
-npm run docker:down      # Stop container
+# Production mode (app on port 3001)
+npm run docker:build     # Build the app container
+npm run docker:up        # Start production container
+npm run docker:down      # Stop containers
 npm run docker:logs      # View logs (follow mode)
-npm run docker:restart   # Restart
+npm run docker:restart   # Restart container
 npm run docker:reset     # Full reset (down + up)
-npm run docker:shell     # Access shell
-npm run docker:status    # Check status
+npm run docker:shell     # Access shell in container
+npm run docker:status    # Check container and network status
+
+# Development mode (with hot reload)
+npm run docker:dev       # Start dev container with volume mounts
 ```
+
+**Two Docker Modes**:
+- **Production** (`docker-compose.yml`): Baked-in code, optimized build
+- **Development** (`docker-compose.dev.yml`): Hot reload, source mounted as volumes
+
+**Requirements**:
+- Supabase must be running: `npx supabase start`
+- Creates external network: `supabase_network_vrlzwxoiglzwmhndpolj`
+- Environment file: `.env.docker` (use `.env.docker.example` as template)
 
 ### Mock Data (LOCAL ONLY)
 ```bash
@@ -190,7 +251,14 @@ npm run chrome:verify    # Verify connection
 
 **Docker Mode** (for production-like testing):
 - URL: http://localhost:3001
-- Requires `.env.docker` configuration
+- Two modes: Production (`docker-compose.yml`) and Development (`docker-compose.dev.yml`)
+- Production: Optimized build with code baked into image
+- Development: Hot reload with source code mounted as volumes
+- Requires `.env.docker` configuration file
+- Uses external network: `supabase_network_vrlzwxoiglzwmhndpolj`
+- Dual URL setup:
+  - Browser → Supabase: `http://localhost:54321`
+  - Container → Supabase: `http://supabase_kong_marketdz:8000`
 - Use for testing Docker networking, PWA, or deployment issues
 
 **Cloud Production** (UNTOUCHABLE):
@@ -219,6 +287,59 @@ Supabase PKCE authentication with singleton pattern:
 - Cookie attributes: `httpOnly: false`, `secure: false`, `sameSite: 'lax'`
 - Dual URLs: `SUPABASE_URL` (container) vs `NEXT_PUBLIC_SUPABASE_URL` (browser)
 
+### Email Verification System
+**Status**: ✅ Implemented (2025-10-26) | ⚠️ Needs more testing
+
+Email verification flow requiring users to verify their email before signing in:
+
+**Implementation**:
+- Signup API (`src/app/api/auth/signup/route.ts`): Uses `admin.createUser` with `email_confirm: false`
+- Confirmation page (`src/app/auth/confirm/page.tsx`): Handles BOTH Supabase email formats
+  - **Implicit flow** (hash-based): `#access_token=...&refresh_token=...`
+  - **PKCE flow** (query-based): `?token_hash=...&type=email`
+- Resend verification API (`src/app/api/auth/resend-verification/route.ts`): Allows users to request new email
+- Signin flow: Blocks unverified users with helpful message
+
+**Configuration Required**:
+1. **Supabase Dashboard → Authentication → Providers → Email**:
+   - ✅ Enable "Confirm email" toggle
+   - ✅ Enable "Email provider"
+   - ✅ Disable "Allow unconfirmed email sign-ins" (if available)
+
+2. **Supabase Dashboard → Authentication → URL Configuration**:
+   - Site URL: `https://marketdz.vercel.app`
+   - Redirect URLs:
+     - `https://marketdz.vercel.app/auth/confirm`
+     - `https://marketdz.vercel.app/auth/callback`
+     - `https://marketdz.vercel.app/**`
+     - Plus localhost equivalents for development
+
+3. **Environment Variables** (API key formats):
+   - **NEW format** (preferred): `NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...` and `SUPABASE_SERVICE_ROLE_KEY=sb_secret_...`
+   - **OLD format** (legacy): JWT tokens starting with `eyJ...`
+   - **Note**: Supabase is migrating all projects to new format. If you see "Legacy API keys are disabled" error, update your keys in Supabase Dashboard → Settings → API
+
+**Email Flow**:
+1. User signs up → Account created with `email_confirmed_at = NULL`
+2. Verification email sent via Supabase's built-in service (no custom SMTP needed)
+3. User clicks email link → Redirects to `/auth/confirm`
+4. Email verified → `email_confirmed_at` timestamp set
+5. User can now sign in successfully
+
+**Known Issues & Testing Notes**:
+- ⚠️ **Needs more production testing** with various email providers
+- Email delivery tested with: Yahoo Mail (working)
+- Confirmation page handles both old and new Supabase URL formats
+- Resend functionality working
+- Check spam folders - verification emails sometimes land there
+
+**Troubleshooting**:
+- If "Legacy API keys are disabled" error: Update to new `sb_publishable_` and `sb_secret_` format
+- If no email received: Check Supabase → Logs for email errors
+- If confirmation fails but signin works: Email was verified server-side despite UI error (fixed in latest version)
+
+**Documentation**: See `docs/EMAIL_VERIFICATION_SETUP.md` for complete setup guide
+
 ### Admin System
 Role-based admin panel with SECURITY DEFINER functions:
 
@@ -240,12 +361,13 @@ Client validation → Content moderation → Secure upload → Metadata storage
 - Allowed: JPEG, PNG, WebP only
 
 ### API Routes (`src/app/api/`)
-- `auth/*` - signin, signup, signout, session, reset-password
+- `auth/*` - signin, signup, signout, session, reset-password, resend-verification
 - `listings/*` - CRUD + search
 - `search/*` - Advanced search with Arabic support (analytics, suggestions, count)
 - `messages/*` - Real-time messaging
 - `admin/*` - Admin functions (users, stats, user-management)
 - `favorites/*`, `reviews/*` - User interactions
+- `profile/*` - User profile get/update
 - `upload/*` - File uploads
 - `health/*`, `monitoring/*` - System health
 
@@ -310,6 +432,28 @@ export const supabase = getSupabaseClient()
 
 **Important**: Import `SupabaseClient` from `@supabase/supabase-js`, NOT from `@supabase/ssr`
 
+### API Route Authentication Pattern
+**CRITICAL**: API routes MUST use `createApiSupabaseClient(request)` to read middleware-processed cookies
+
+```typescript
+// ✅ Correct - reads cookies from middleware
+export async function PUT(request: Request) {
+  const supabase = createApiSupabaseClient(request)
+  const { data: { user } } = await supabase.auth.getUser()
+  // ... rest of handler
+}
+
+// ❌ Wrong - doesn't read middleware cookies
+export async function PUT(request: Request) {
+  const supabase = createServerSupabaseClient()
+  // This won't have auth context!
+}
+```
+
+**Why**: Middleware processes and validates session cookies. API routes must use `createApiSupabaseClient(request)` to access this auth context for RLS policies to work correctly.
+
+**Common Symptom**: 42501 "permission denied" errors in production when using wrong client.
+
 ### Database Query Best Practices
 
 **Search API Pattern**:
@@ -368,22 +512,72 @@ OFFSET 10000 LIMIT 50
 
 ---
 
+## 🗺️ QUICK NAVIGATION PATTERNS
+
+**Finding Components**:
+- Auth forms: `src/app/(auth)/[signin|signup|reset-password]/page.tsx`
+- Listing pages: `src/app/browse/`, `src/app/add-item/`
+- Admin pages: `src/app/admin/[feature]/page.tsx`
+- API routes: `src/app/api/[feature]/route.ts`
+- Common components: `src/components/common/`
+- Listing components: `src/components/listings/`
+
+**Finding Utilities**:
+- Supabase clients: `src/lib/supabase/[client|server|serverPool].ts`
+- Auth helpers: `src/lib/auth-*.ts`
+- Storage/uploads: `src/lib/storage.ts`, `src/lib/image-compression.ts`
+- Search utilities: `src/lib/search/*.ts`
+- Form validation: `src/lib/validation.ts`
+- General utilities: `src/lib/utils.ts`
+
+**Finding Types**:
+- Database types: `src/types/database.ts`
+- Component props: Usually inline or in same file
+
+**Finding Tests**:
+- E2E tests: `tests/*.spec.ts`
+- Test utilities: `tests/` directory
+
+---
+
 ## ⚙️ ENVIRONMENT & CONFIGURATION
 
 ### Environment Files
 ```
 .env.docker.example     # Template (commit)
-.env.docker            # Your keys (NEVER commit)
+.env.docker            # Docker keys (NEVER commit)
 .env.local             # Local development keys (NEVER commit)
 ```
 
 ### Required Variables
-Get from: `npx supabase status` (for local development)
+
+**For Local Development** (`.env.local`):
+Get from: `npx supabase status`
 ```env
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_local_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_local_service_role_key
 ```
+
+**For Docker** (`.env.docker`):
+Copy from `.env.docker.example` and fill in:
+```env
+# Browser access (exposed to client)
+NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_local_anon_key
+
+# Container-to-container access (server-side only)
+# This is set in docker-compose.yml, not in .env.docker
+# SUPABASE_URL=http://supabase_kong_marketdz:8000
+SUPABASE_SERVICE_ROLE_KEY=your_local_service_role_key
+
+# App URL (Docker runs on port 3001)
+NEXT_PUBLIC_APP_URL=http://localhost:3001
+```
+
+**Important**: Docker uses **dual URL setup**:
+- `NEXT_PUBLIC_SUPABASE_URL` - For browser (localhost:54321)
+- `SUPABASE_URL` - For container networking (set in docker-compose.yml)
 
 ### Key URLs
 - **Local Dev**: http://localhost:3000 (auto-opens)
@@ -440,6 +634,9 @@ Located in `scripts/` directory:
 **Container won't start**:
 - Verify Supabase running: `npx supabase status`
 - Check Docker network: `npm run docker:status`
+- Ensure `.env.docker` file exists (copy from `.env.docker.example`)
+- Verify external network exists: `docker network ls | grep supabase`
+- Check container logs: `npm run docker:logs`
 
 **Build failures**:
 - Ensure env variables in `.env.local`
@@ -449,6 +646,43 @@ Located in `scripts/` directory:
 - Normal for large datasets (10k+ rows)
 - Use API calls to verify data instead
 - Use SQL Editor for direct queries
+
+### Quick Diagnosis: "Permission Denied" Errors
+
+When you encounter 42501 "permission denied" errors:
+
+```
+Error: 42501 permission denied for table [table_name]
+         ↓
+Step 1: Check which environment you're using
+         ↓
+   Browser DevTools → Network Tab → Look for Supabase requests
+         ↓
+Step 2: Is the Supabase URL correct?
+  ├─ NO → Fix .env.local, restart dev server
+  │        Clear browser cookies, sign in again
+  └─ YES → Continue to Step 3
+         ↓
+Step 3: Clear auth state
+         ↓
+   - Clear all browser cookies (DevTools → Application → Cookies)
+   - Sign out completely
+   - Restart dev server
+   - Sign in again
+         ↓
+Step 4: If error persists in API routes
+         ↓
+   - Verify route uses createApiSupabaseClient(request)
+   - Check that middleware is processing cookies
+   - Verify RLS policies allow the operation
+   - Check that auth.uid() matches the user's ID
+```
+
+**Common Causes**:
+- JWT token from wrong environment (local vs cloud)
+- API route using wrong Supabase client (not reading cookies)
+- RLS policy doesn't allow operation for current user
+- User not authenticated (check middleware logs)
 
 ### Debugging Commands
 ```bash
@@ -559,6 +793,9 @@ Clean, lean schema approach with essential migrations:
 11. `20251024000000_fix_security_definer_search_path.sql` - Fix SECURITY DEFINER functions
 12. `20251024000001_fix_remaining_functions_search_path.sql` - Fix remaining functions
 13. `20251024000002_fix_handle_new_user_null_names.sql` - Fix null name handling
+14. `20251028000001_fix_handle_new_user_all_fields.sql` - Fix trigger to copy location data (phone, city, wilaya)
+15. `20251028000002_backfill_profile_metadata.sql` - Backfill existing users with metadata
+16. `20251028000003_fix_profile_update_rls.sql` - Add WITH CHECK clause to UPDATE policy
 
 ### Verification Queries (Local only)
 ```sql
@@ -639,6 +876,8 @@ CREATE INDEX idx_everything ON table(col1, col2, col3, col4);
 - **Cloud Database**: UNTOUCHABLE - production ready
 
 ### Common Tasks
+
+**Local Development**:
 ```bash
 # Start fresh development session
 npx supabase start
@@ -653,6 +892,28 @@ node scripts/generate-10k-listings.js
 
 # Test performance
 node scripts/performance-test-suite.js
+```
+
+**Docker Testing**:
+```bash
+# Ensure Supabase is running first
+npx supabase status
+
+# Production mode (optimized build)
+npm run docker:build
+npm run docker:up
+# App available at http://localhost:3001
+
+# Development mode (hot reload)
+npm run docker:dev
+# App available at http://localhost:3001 with live updates
+
+# Check status and logs
+npm run docker:status
+npm run docker:logs
+
+# Stop containers
+npm run docker:down
 ```
 
 ### Remember

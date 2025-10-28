@@ -62,7 +62,9 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
 
 // For API routes that need to work with middleware-processed requests
 export const createApiSupabaseClient = (request: NextRequest) => {
-  return createServerClient<Database>(
+  const authHeader = request.headers.get('Authorization')
+
+  const client = createServerClient<Database>(
     process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -74,13 +76,25 @@ export const createApiSupabaseClient = (request: NextRequest) => {
           // Don't try to set cookies in API routes - they're already set by middleware
         },
       },
-      global: {
-        headers: {
-          Authorization: request.headers.get('Authorization') || ''
+      // Only set Authorization header if it exists - don't override with empty string!
+      ...(authHeader && {
+        global: {
+          headers: {
+            Authorization: authHeader
+          }
         }
-      }
+      })
     }
   )
+
+  // Log cookies and auth to help debug
+  const cookieNames = request.cookies.getAll().map(c => c.name)
+  console.log('🔧 createApiSupabaseClient:', {
+    cookies: cookieNames,
+    hasAuthHeader: !!authHeader
+  })
+
+  return client
 }
 
 // Lazy initialization functions (community-proven pattern)

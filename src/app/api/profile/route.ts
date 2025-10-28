@@ -9,13 +9,20 @@ export async function PUT(request: NextRequest) {
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
+
+    // Get session to verify JWT token
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
     console.log('🔍 Profile API Debug:', {
       hasUser: !!user,
       userId: user?.id,
-      authError: authError?.message
+      authError: authError?.message,
+      hasSession: !!session,
+      sessionError: sessionError?.message,
+      accessToken: session?.access_token ? 'present' : 'missing',
+      cookies: request.cookies.getAll().map(c => c.name)
     })
-    
+
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -44,7 +51,7 @@ export async function PUT(request: NextRequest) {
       hasCity: !!city,
       hasWilaya: !!wilaya
     })
-    
+
     const { data, error } = await supabase
       .from('profiles')
       .update({
