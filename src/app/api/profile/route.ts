@@ -1,5 +1,5 @@
 // src/app/api/profile/route.ts
-// Force fresh deployment - v2
+// Force fresh deployment - v3 (repo now public)
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
