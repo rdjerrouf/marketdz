@@ -63,6 +63,17 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
 // For API routes that need to work with middleware-processed requests
 export const createApiSupabaseClient = (request: NextRequest) => {
   const authHeader = request.headers.get('Authorization')
+  const allCookies = request.cookies.getAll()
+
+  // Log everything to diagnose production issue
+  console.log('🔧 createApiSupabaseClient DETAILED:', {
+    url: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
+    anonKeyPrefix: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20),
+    hasAuthHeader: !!authHeader,
+    cookieCount: allCookies.length,
+    cookieNames: allCookies.map(c => c.name),
+    supabaseCookies: allCookies.filter(c => c.name.includes('supabase') || c.name.includes('sb-')),
+  })
 
   const client = createServerClient<Database>(
     process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -70,9 +81,11 @@ export const createApiSupabaseClient = (request: NextRequest) => {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          console.log('🔧 getAll() called, returning', allCookies.length, 'cookies')
+          return allCookies
         },
         setAll(cookiesToSet) {
+          console.log('🔧 setAll() called with', cookiesToSet.length, 'cookies')
           // Don't try to set cookies in API routes - they're already set by middleware
         },
       },
@@ -86,13 +99,6 @@ export const createApiSupabaseClient = (request: NextRequest) => {
       })
     }
   )
-
-  // Log cookies and auth to help debug
-  const cookieNames = request.cookies.getAll().map(c => c.name)
-  console.log('🔧 createApiSupabaseClient:', {
-    cookies: cookieNames,
-    hasAuthHeader: !!authHeader
-  })
 
   return client
 }
