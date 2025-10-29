@@ -58,9 +58,9 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Update profile using the pure Bearer client
-    // The client was created with global.headers.Authorization
-    const { data, error } = await supabase
+    // CRITICAL: Use .withHeaders() to FORCE Authorization on the exact mutation
+    // This guarantees the JWT reaches PostgREST (Supabase AI final recommendation)
+    const { data, error } = await (supabase
       .from('profiles')
       .update({
         first_name: first_name.trim(),
@@ -73,7 +73,7 @@ export async function PUT(request: NextRequest) {
       })
       .eq('id', user.id)
       .select()
-      .single()
+      .single() as any).withHeaders({ Authorization: `Bearer ${token}` })
 
     if (error) {
       console.error('Profile update error:', {
@@ -134,12 +134,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get the profile
-    const { data: profile, error } = await supabase
+    // Get the profile with forced Authorization header
+    const { data: profile, error } = await (supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .single() as any).withHeaders({ Authorization: `Bearer ${token}` })
 
     if (error) {
       console.error('Profile fetch error:', {
