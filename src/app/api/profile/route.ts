@@ -9,8 +9,8 @@ export const runtime = 'nodejs'
 
 export async function PUT(request: NextRequest) {
   try {
-    // Use cookie-based client (Next.js standard pattern)
-    const supabase = await createServerSupabaseClient()
+    // CRITICAL: Pass request to enable Authorization header forwarding to PostgREST
+    const supabase = await createServerSupabaseClient(request)
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -83,8 +83,8 @@ export async function PUT(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Use cookie-based client (Next.js standard pattern)
-    const supabase = await createServerSupabaseClient()
+    // CRITICAL: Pass request to enable Authorization header forwarding to PostgREST
+    const supabase = await createServerSupabaseClient(request)
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
