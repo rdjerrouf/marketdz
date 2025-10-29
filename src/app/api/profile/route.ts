@@ -30,17 +30,17 @@ export async function PUT(request: NextRequest) {
 
     // CRITICAL: Seed the auth state with the bearer token
     // This ensures supabase-js includes the token for all PostgREST calls
-    await supabase.auth.setSession({
+    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
       access_token: token,
       refresh_token: ''
     })
 
-    // Check authentication (now using the seeded session)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    // Use the user from setSession response directly
+    if (sessionError || !sessionData.session || !sessionData.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const user = sessionData.user
 
     const body = await request.json()
     const {
@@ -126,16 +126,17 @@ export async function GET(request: NextRequest) {
     )
 
     // CRITICAL: Seed the auth state with the bearer token
-    await supabase.auth.setSession({
+    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
       access_token: token,
       refresh_token: ''
     })
 
-    // Check authentication (now using the seeded session)
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    // Use the user from setSession response directly
+    if (sessionError || !sessionData.session || !sessionData.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const user = sessionData.user
 
     // Get the profile - token is already seeded via setSession()
     const { data: profile, error } = await supabase
