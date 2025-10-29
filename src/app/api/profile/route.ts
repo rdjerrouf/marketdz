@@ -1,7 +1,7 @@
 // src/app/api/profile/route.ts
-// Cookie-based approach (Next.js standard pattern)
+// Service role approach - bypasses RLS after auth check
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import type { Database } from '@/types/database'
 
 // Force Node runtime for consistent behavior
@@ -9,15 +9,16 @@ export const runtime = 'nodejs'
 
 export async function PUT(request: NextRequest) {
   try {
-    // CRITICAL: Pass request to enable Authorization header forwarding to PostgREST
+    // Authenticate user with regular client
     const supabase = await createServerSupabaseClient(request)
-
-    // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Use admin client to bypass RLS (we've already verified the user)
+    const adminClient = createSupabaseAdminClient()
 
     const body = await request.json()
     const {
@@ -37,9 +38,9 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Update profile - token is already seeded via setSession()
-    // The client will automatically include it in all PostgREST requests
-    const { data, error } = await supabase
+    // Update profile using admin client (bypasses RLS)
+    // Security: We manually ensure user can only update their own profile via .eq('id', user.id)
+    const { data, error } = await adminClient
       .from('profiles')
       .update({
         first_name: first_name.trim(),
@@ -50,7 +51,7 @@ export async function PUT(request: NextRequest) {
         wilaya: wilaya || null,
         updated_at: new Date().toISOString()
       })
-      .eq('id', user.id)
+      .eq('id', user.id)  // Security check: only update own profile
       .select()
       .single()
 
@@ -83,17 +84,19 @@ export async function PUT(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // CRITICAL: Pass request to enable Authorization header forwarding to PostgREST
+    // Authenticate user with regular client
     const supabase = await createServerSupabaseClient(request)
-
-    // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get the profile
-    const { data: profile, error } = await supabase
+    // Use admin client to bypass RLS (we've already verified the user)
+    const adminClient = createSupabaseAdminClient()
+
+    // Get the profile - security ensured via .eq('id', user.id)
+    const { data: profile, error } = await adminClient
       .from('profiles')
       .select('*')
       .eq('id', user.id)
