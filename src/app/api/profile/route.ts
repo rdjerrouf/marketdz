@@ -1,5 +1,5 @@
 // src/app/api/profile/route.ts
-// FINAL FIX: Pure Bearer client (Supabase AI recommendation #1)
+// FINAL FIX: setSession() approach (Supabase AI recommendation #3)
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
@@ -16,16 +16,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 })
     }
 
-    // Create a pure Bearer client - this guarantees the token reaches PostgREST
+    // Create a pure Bearer client (Supabase AI recommendation #3: setSession approach)
     const supabase = createClient<Database>(
       process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
-        global: {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        },
         auth: {
           persistSession: false,
           autoRefreshToken: false
@@ -33,7 +28,14 @@ export async function PUT(request: NextRequest) {
       }
     )
 
-    // Check authentication
+    // CRITICAL: Seed the auth state with the bearer token
+    // This ensures supabase-js includes the token for all PostgREST calls
+    await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: ''
+    })
+
+    // Check authentication (now using the seeded session)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -58,9 +60,9 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // CRITICAL: Use .withHeaders() to FORCE Authorization on the exact mutation
-    // This guarantees the JWT reaches PostgREST (Supabase AI final recommendation)
-    const { data, error } = await (supabase
+    // Update profile - token is already seeded via setSession()
+    // The client will automatically include it in all PostgREST requests
+    const { data, error } = await supabase
       .from('profiles')
       .update({
         first_name: first_name.trim(),
@@ -73,7 +75,7 @@ export async function PUT(request: NextRequest) {
       })
       .eq('id', user.id)
       .select()
-      .single() as any).withHeaders({ Authorization: `Bearer ${token}` })
+      .single()
 
     if (error) {
       console.error('Profile update error:', {
@@ -111,16 +113,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 })
     }
 
-    // Create pure Bearer client
+    // Create a pure Bearer client (Supabase AI recommendation #3: setSession approach)
     const supabase = createClient<Database>(
       process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
-        global: {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        },
         auth: {
           persistSession: false,
           autoRefreshToken: false
@@ -128,18 +125,24 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    // Check authentication
+    // CRITICAL: Seed the auth state with the bearer token
+    await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: ''
+    })
+
+    // Check authentication (now using the seeded session)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get the profile with forced Authorization header
-    const { data: profile, error } = await (supabase
+    // Get the profile - token is already seeded via setSession()
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single() as any).withHeaders({ Authorization: `Bearer ${token}` })
+      .single()
 
     if (error) {
       console.error('Profile fetch error:', {
