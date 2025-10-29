@@ -1,7 +1,7 @@
 // src/app/api/profile/route.ts
-// FINAL FIX: setSession() approach (Supabase AI recommendation #3)
+// Cookie-based approach (Next.js standard pattern)
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import type { Database } from '@/types/database'
 
 // Force Node runtime for consistent behavior
@@ -9,38 +9,15 @@ export const runtime = 'nodejs'
 
 export async function PUT(request: NextRequest) {
   try {
-    // Extract token - Pure Bearer approach (no cookie mixing)
-    const token = request.headers.get('Authorization')?.replace('Bearer ', '')
+    // Use cookie-based client (Next.js standard pattern)
+    const supabase = await createServerSupabaseClient()
 
-    if (!token) {
-      return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 })
-    }
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    // Create a pure Bearer client (Supabase AI recommendation #3: setSession approach)
-    const supabase = createClient<Database>(
-      process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false
-        }
-      }
-    )
-
-    // CRITICAL: Seed the auth state with the bearer token
-    // This ensures supabase-js includes the token for all PostgREST calls
-    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-      access_token: token,
-      refresh_token: ''
-    })
-
-    // Use the user from setSession response directly
-    if (sessionError || !sessionData.session || !sessionData.user) {
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const user = sessionData.user
 
     const body = await request.json()
     const {
@@ -106,39 +83,16 @@ export async function PUT(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Extract token - Pure Bearer approach
-    const token = request.headers.get('Authorization')?.replace('Bearer ', '')
+    // Use cookie-based client (Next.js standard pattern)
+    const supabase = await createServerSupabaseClient()
 
-    if (!token) {
-      return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 })
-    }
-
-    // Create a pure Bearer client (Supabase AI recommendation #3: setSession approach)
-    const supabase = createClient<Database>(
-      process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false
-        }
-      }
-    )
-
-    // CRITICAL: Seed the auth state with the bearer token
-    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-      access_token: token,
-      refresh_token: ''
-    })
-
-    // Use the user from setSession response directly
-    if (sessionError || !sessionData.session || !sessionData.user) {
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const user = sessionData.user
-
-    // Get the profile - token is already seeded via setSession()
+    // Get the profile
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
