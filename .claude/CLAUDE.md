@@ -36,66 +36,91 @@ When switching between Local and Cloud environments (for inspection only):
 
 ---
 
-## 🔧 CURRENT STATUS: Profile Update Issue (2025-10-28) - RESOLVED ✅
+## 🔧 Profile Update Issue (2025-10-29) - RESOLVED ✅
 
 **Issue**: Profile updates returning 42501 "permission denied for table profiles" error in production.
 
-**Root Cause Identified (via Supabase AI Support):**
-🐛 **Critical Bug in Authorization Header Branch of `createServerSupabaseClient`**:
-- When browser sent `Authorization: Bearer <JWT>` header (automatic from Supabase client), code took Authorization branch
-- That branch **disabled cookies** with `getAll() => []` and `setAll() => {}`
-- Without cookies, the client couldn't load or refresh the session
-- Result: `getUser()` succeeded (can decode JWT) but `getSession()` returned null (no session object)
-- PostgREST needs JWT context from session → without session, `auth.uid()` = NULL → RLS policy fails with 42501
+**Root Cause:**
+JWT token was **not being forwarded to PostgREST** for database queries in Next.js API routes. This caused `auth.uid()` in RLS policies to return `NULL`, triggering permission denied errors.
 
-**The Problem:**
+**Why JWT Forwarding Failed:**
+- `@supabase/supabase-js` with `global.headers.Authorization` doesn't reliably forward headers to PostgREST queries
+- `createServerClient` from `@supabase/ssr` uses cookies for auth, but those don't reach the RLS context
+- `setSession()` doesn't work in server-side API routes (browser-only)
+- Even passing `request` parameter to enable Authorization header branch was unreliable
+
+**Authentication worked, but database queries failed:**
+- ✅ `getUser()` succeeded (validates JWT via Auth endpoints)
+- ❌ `.from('profiles').update()` failed (PostgREST never received JWT → `auth.uid()` = NULL)
+
+---
+
+**THE SOLUTION: Service Role Pattern** ✅
+
+**Authenticate first, then bypass RLS with service role + manual security checks**
+
 ```typescript
-// ❌ BUG: Disabled cookies in Authorization branch
-if (request?.headers.get('Authorization')) {
-  return createServerClient({
-    cookies: {
-      getAll() { return [] },  // No cookies = no session refresh!
-      setAll() {},
-    },
-    global: { headers: { Authorization: `Bearer ${token}` } }
-  });
+// src/app/api/profile/route.ts
+export async function PUT(request: NextRequest) {
+  try {
+    // STEP 1: Authenticate user with regular client
+    const supabase = await createServerSupabaseClient(request)
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // STEP 2: Use admin client to bypass RLS
+    const adminClient = createSupabaseAdminClient()
+
+    // STEP 3: Update with explicit security check
+    const { data, error } = await adminClient
+      .from('profiles')
+      .update({...})
+      .eq('id', user.id)  // ← Security: only update own profile
+      .select()
+      .single()
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 403 })
+    }
+
+    return NextResponse.json({ data, message: 'Profile updated successfully' })
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 ```
 
-**Why getUser() worked but getSession() failed:**
-- `getUser()` calls Supabase Auth endpoints which can validate cookies directly
-- `.from('profiles').update()` goes through PostgREST which needs JWT token attached
-- Without session, PostgREST sees anon request → `auth.uid()` is NULL → policy fails
+**Why This Works:**
+1. **Authentication is secure** - JWT validated via `getUser()` before any DB operations
+2. **Service role bypasses RLS** - Uses `SUPABASE_SERVICE_ROLE_KEY` with full DB access
+3. **Security maintained manually** - `.eq('id', user.id)` ensures users can only modify their own data
+4. **No complex JWT forwarding** - Sidesteps unreliable header propagation entirely
 
-**The Fix (2025-10-28):**
-1. ✅ **Keep cookies enabled** in Authorization branch for session refresh
-2. ✅ **Force Node runtime** in profile API route (Edge runtime has different cookie behavior)
-3. ✅ Switch profile API to use `createServerSupabaseClient(request)` instead of `createApiSupabaseClient`
+**When to Use This Pattern:**
+- ✅ Next.js API routes with unpredictable header propagation
+- ✅ Complex multi-table updates
+- ✅ Admin operations
+- ✅ Need deterministic behavior
 
-```typescript
-// ✅ FIXED: Keep cookies enabled even with Authorization header
-if (request?.headers.get('Authorization')) {
-  return createServerClient({
-    cookies: {
-      getAll() { return cookieStore.getAll() },  // Allow session refresh!
-      setAll(cookiesToSet) { /* properly set cookies */ },
-    },
-    global: { headers: { Authorization: `Bearer ${token}` } }
-  });
-}
-```
-
-**Key Insight:**
-Authorization header and cookies are **not mutually exclusive**. Even when using bearer token auth, cookies must be available for:
-- Session refresh when token expires
-- Loading session object for PostgREST context
-- RLS policy evaluation via `auth.uid()`
+**Security Considerations:**
+- ⚠️ Keep `SUPABASE_SERVICE_ROLE_KEY` server-only (NEVER expose to browser)
+- ✅ Always validate user identity before using service role client
+- ✅ Always use `.eq('id', user.id)` or equivalent to enforce authorization
+- 💡 Consider adding: audit logging, rate limiting, enhanced input validation
 
 **Files Changed:**
-- `src/lib/supabase/server.ts` - Fixed Authorization branch to keep cookies enabled
-- `src/app/api/profile/route.ts` - Added `export const runtime = 'nodejs'`
+- `src/app/api/profile/route.ts` - Use service role client after auth (commit: eb61690)
+- `src/lib/supabase/server.ts` - Already had `createSupabaseAdminClient()` helper
 
-**Status**: ✅ Fix deployed to production
+**Validated by Supabase AI Support:**
+> "Your 'authenticate then bypass RLS with service role + explicit WHERE checks' solution is correct,
+> secure when implemented carefully, and pragmatic for Next.js API routes."
+
+**Status**: ✅ Deployed to production (2025-10-29)
+**Performance**: 93ms response time, 200 OK ✅
 
 ---
 
