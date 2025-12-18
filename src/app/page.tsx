@@ -49,7 +49,6 @@ export default function CompleteKickAssHomepage() {
   })
   const [searchQuery, setSearchQuery] = useState('')
   const [favorites, setFavorites] = useState(new Set(['1', '3']))
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showComingSoonModal, setShowComingSoonModal] = useState(false)
   const [showNewTodayModal, setShowNewTodayModal] = useState(false)
   const [showInstallButton, setShowInstallButton] = useState(false)
@@ -170,14 +169,6 @@ export default function CompleteKickAssHomepage() {
     fetchFeaturedListings()
   }, [])
 
-  // Auto-rotate hero images
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % 4)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [])
-
   // PWA install functionality removed - handled by service worker
 
   const formatPrice = (price: number | null, category: string, rentalPeriod?: string | null): string => {
@@ -283,13 +274,6 @@ export default function CompleteKickAssHomepage() {
       window.location.reload()
     }
   }
-
-  const heroImages = [
-    'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1200&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=1200&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=1200&h=800&fit=crop'
-  ]
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: '#06402B' }}>
@@ -496,85 +480,36 @@ export default function CompleteKickAssHomepage() {
       {/* Main Content */}
       <div className="lg:ml-52 min-h-screen pointer-events-auto">
         <div className="p-8 pt-24 lg:pt-8 pb-32">
-          {/* Enhanced Hero Section */}
-          <div className="relative mb-16 rounded-3xl overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent z-10"></div>
-            <div className="relative h-96 lg:h-80 overflow-hidden">
-              {heroImages.map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img}
-                  alt={`Hero ${idx + 1}`}
-                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ${
-                    idx === currentImageIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-                  }`}
+          {/* Search Bar Section */}
+          <div className="max-w-4xl mx-auto mb-16">
+            <div className="relative">
+              <div className="flex bg-white/95 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
+                <input
+                  type="text"
+                  placeholder="What are you looking for today?"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
+                  className="flex-1 px-6 py-4 bg-transparent text-gray-800 placeholder-gray-500 outline-none text-lg"
                 />
-              ))}
-            </div>
-            <div className="absolute inset-0 z-20 flex flex-col justify-center px-8 lg:px-12">
-              <div className="max-w-2xl">
-                <div className="flex items-center mb-4">
-                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center shadow-lg animate-pulse">
-                    <Zap className="w-4 h-4 mr-2" />
-                    Algeria&apos;s #1 Marketplace
-                  </div>
-                </div>
-                <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-                  Discover Amazing
-                  <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent animate-pulse"> Deals</span>
-                </h1>
-                <p className="text-xl text-white/90 mb-8 leading-relaxed">
-                  From smartphones to apartments, jobs to services - find exactly what you&apos;re looking for in Algeria&apos;s most trusted marketplace.
-                </p>
-                
-                {/* Enhanced Search Bar */}
-                <div className="relative">
-                  <div className="flex bg-white/95 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
-                    <input
-                      type="text"
-                      placeholder="What are you looking for today?"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={handleSearchKeyPress}
-                      className="flex-1 px-6 py-4 bg-transparent text-gray-800 placeholder-gray-500 outline-none text-lg"
-                    />
-                    <button
-                      onClick={handleSearch}
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:scale-105"
-                    >
-                      <Search className="w-5 h-5 mr-2" />
-                      Search
-                    </button>
-                  </div>
-                  
-                  {/* Enhanced Quick filters */}
-                  <div className="flex flex-wrap gap-3 mt-4">
-                    {['Electronics', 'Real Estate', 'Jobs', 'Services'].map((tag) => (
-                      <button
-                        key={tag}
-                        className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-105 hover:shadow-lg"
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <button
+                  onClick={handleSearch}
+                  className="bg-[#7c3f00] hover:bg-[#5f2e00] text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <Search className="w-5 h-5 mr-2" />
+                  Search
+                </button>
               </div>
-            </div>
-            
-            {/* Hero navigation dots */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
-              <div className="flex space-x-2">
-                {heroImages.map((_, idx) => (
+
+              {/* Quick filters */}
+              <div className="flex flex-wrap gap-3 mt-4">
+                {['Electronics', 'Real Estate', 'Jobs', 'Services'].map((tag) => (
                   <button
-                    key={idx}
-                    onClick={() => setCurrentImageIndex(idx)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      idx === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
-                    }`}
-                    aria-label={`Go to slide ${idx + 1}`}
-                    title={`Slide ${idx + 1}`}
-                  />
+                    key={tag}
+                    className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-105 hover:shadow-lg"
+                  >
+                    {tag}
+                  </button>
                 ))}
               </div>
             </div>
