@@ -1,4 +1,13 @@
-// src/components/common/ErrorBoundary.tsx
+/**
+ * ErrorBoundary Component - Catches Runtime Errors
+ *
+ * WHY NEEDED:
+ * - React components crash → White screen of death for entire app
+ * - This catches errors and shows friendly fallback UI
+ * - Prevents one broken component from breaking entire page
+ * - Shows error details in development mode for debugging
+ */
+
 'use client'
 
 import React, { Component, ErrorInfo, ReactNode } from 'react'

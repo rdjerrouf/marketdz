@@ -1,4 +1,20 @@
-// src/app/api/messages/conversations/route.ts - Updated for new messaging system
+/**
+ * Conversations API Route - Manage Messaging Conversations
+ *
+ * GET - Fetch user's conversations with lazy profile loading
+ * POST - Create or get existing conversation (idempotent)
+ *
+ * ARCHITECTURE:
+ * - Lazy profile loading: Separate query to avoid expensive JOINs
+ * - Idempotent create: Returns existing conversation if found
+ * - Validates listing is active before creating conversation
+ *
+ * FEATURES:
+ * - Sorted by last_message_at (most recent first)
+ * - Unread counts per user (buyer/seller)
+ * - Works with or without listing_id (general user-to-user chat)
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -34,7 +50,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch conversations' }, { status: 500 });
     }
 
-    // Get unique user IDs to fetch profiles
+    /**
+     * Lazy profile loading optimization
+     * Why: Avoids N+1 queries and expensive JOINs at scale
+     * 1. Collect unique user IDs from conversations
+     * 2. Single batch query for all profiles
+     * 3. Map profiles back to conversations
+     */
     const userIds = new Set<string>();
     (conversations || []).forEach((conv: any) => {
       if (conv.buyer_id !== user.id) userIds.add(conv.buyer_id);
@@ -87,7 +109,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'You must be either the buyer or seller' }, { status: 403 });
     }
 
-    // Check if conversation already exists
+    /**
+     * Idempotent conversation creation
+     * Why: Multiple "Send Message" clicks shouldn't create duplicates
+     * Logic: Return existing if found, create new otherwise
+     * Note: PGRST116 = "not found" error code (expected, not an error)
+     */
     let query = supabase
       .from('conversations')
       .select('id')

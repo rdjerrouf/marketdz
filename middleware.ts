@@ -1,33 +1,51 @@
-// middleware.ts - Handle Supabase authentication for API routes
+/**
+ * Middleware - Session Validation and Cookie Management
+ *
+ * RESPONSIBILITIES:
+ * 1. Create Supabase client with cookie handlers
+ * 2. Validate user session on every request
+ * 3. Refresh auth cookies (Supabase handles auto-refresh)
+ * 4. Protect admin routes (check admin_users table)
+ * 5. Add performance monitoring headers
+ *
+ * RUNS ON: All requests except static files (see config.matcher below)
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  const start = Date.now() // Add performance timing
+  const start = Date.now()
   console.log('🔧 Middleware: Processing request to:', request.nextUrl.pathname);
 
+  // Create response that will include updated cookies
   const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   })
 
+  // Create Supabase client with cookie handlers
+  // CRITICAL: This reads cookies from request and writes updated cookies to response
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
+          // Read cookies from incoming request
           const cookies = request.cookies.getAll();
           console.log('🔧 Middleware: Current cookies:', cookies.map(c => c.name));
           return cookies;
         },
         setAll(cookiesToSet) {
+          // Write updated cookies to both request and response
+          // This ensures refreshed tokens are available to API routes
           console.log('🔧 Middleware: Setting cookies:', cookiesToSet.map(c => c.name));
           const isProd = process.env.NODE_ENV === 'production'
           cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value)
-            response.cookies.set(name, value, {
+            request.cookies.set(name, value) // For API routes to read
+            response.cookies.set(name, value, { // For browser to receive
               ...options,
               httpOnly: options?.httpOnly ?? true,
               secure: options?.secure ?? isProd,
@@ -40,46 +58,43 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Try to get user session with proper error handling
+  // Validate user session and handle auth errors
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
 
-    // Enhanced logging for authentication status
     console.log('🔧 Middleware: Auth Status:', {
       isAuthenticated: !!user,
       userId: user?.id?.slice(-8) || 'none',
       email: user?.email || 'none',
-      metadata: user?.user_metadata || 'none'
     });
 
+    // Silently ignore common auth errors (missing session, expired tokens)
     if (error) {
-      // Only log non-standard auth errors
       if (!error.message.includes('Auth session missing') &&
           !error.message.includes('Invalid Refresh Token') &&
           !error.message.includes('Refresh Token Not Found')) {
         console.log('🔧 Middleware: Auth error:', error.message);
       }
-      // Don't process user as authenticated if there's an error
     } else if (user) {
       console.log('🔧 Middleware: User authenticated:', { id: user.id.slice(-8), email: user.email });
-    } else {
-      console.log('🔧 Middleware: No authenticated user');
     }
 
-    // Protect admin routes
+    // ===== ADMIN ROUTE PROTECTION =====
+    // Check if user has admin permissions before allowing access to /admin routes
     const pathname = request.nextUrl.pathname
     if (pathname.startsWith('/admin')) {
+      // Redirect unauthenticated users to signin
       if (!user) {
         console.log('🔒 Middleware: Redirecting unauthenticated user from /admin to signin')
         return NextResponse.redirect(new URL('/signin?redirect=/admin', request.url))
       }
 
-      // Check admin_users table (proper RBAC - Supabase AI recommended approach)
+      // Check admin status via multiple methods (primary → fallbacks)
       let isAdmin = false
       let adminCheckMethod = 'none'
 
+      // PRIMARY: Check admin_users table (proper RBAC)
       try {
-        // Lean SELECT 1 query - Supabase AI recommended
         const { data: adminRows, error: adminError } = await supabase
           .from('admin_users')
           .select('id')
@@ -89,7 +104,7 @@ export async function middleware(request: NextRequest) {
           .limit(1)
 
         if (adminError) {
-          console.warn('⚠️ Admin DB check error:', adminError.message, adminError.code)
+          console.warn('⚠️ Admin DB check error:', adminError.message)
         } else if (adminRows && adminRows.length > 0) {
           isAdmin = true
           adminCheckMethod = 'database'
@@ -99,7 +114,7 @@ export async function middleware(request: NextRequest) {
         console.warn('⚠️ Database admin check failed:', dbError)
       }
 
-      // Fallback 1: Check user metadata (legacy)
+      // FALLBACK 1: Check user metadata (legacy support)
       if (!isAdmin) {
         if (user.user_metadata?.role === 'admin' || user.app_metadata?.role === 'admin') {
           isAdmin = true
@@ -108,7 +123,7 @@ export async function middleware(request: NextRequest) {
         }
       }
 
-      // Fallback 2: Bootstrap allowlist (TEMPORARY - TODO: REMOVE AFTER SEEDING)
+      // FALLBACK 2: Bootstrap allowlist (TEMPORARY - remove after seeding admins)
       if (!isAdmin) {
         const BOOTSTRAP_ADMINS = ['rdjerrouf@gmail.com', 'anyadjerrouf@gmail.com']
         const isBootstrapAdmin = BOOTSTRAP_ADMINS.includes(user.email || '') &&
@@ -118,32 +133,28 @@ export async function middleware(request: NextRequest) {
           isAdmin = true
           adminCheckMethod = 'bootstrap'
           console.warn('⚠️ BOOTSTRAP: Allowing admin via temporary allowlist:', user.email)
-          console.warn('⚠️ ACTION REQUIRED: Run "node scripts/seed-admin-user.js" and remove bootstrap fallback')
+          console.warn('⚠️ TODO: Run "node scripts/seed-admin-user.js" and remove bootstrap')
         }
       }
 
+      // Deny access if not admin
       if (!isAdmin) {
-        console.log('🔒 Middleware: User authenticated but not admin, redirecting to homepage:', {
-          email: user.email,
-          metadata: user.user_metadata,
-          appMetadata: user.app_metadata
-        })
+        console.log('🔒 Middleware: User not admin, redirecting to homepage')
         return NextResponse.redirect(new URL('/', request.url))
       }
 
-      console.log(`🔒 Middleware: Allowing admin access to /admin (method: ${adminCheckMethod})`)
+      console.log(`🔒 Middleware: Admin access granted (method: ${adminCheckMethod})`)
     }
   } catch (middlewareError) {
-    // Catch any unexpected errors in auth processing
-    console.log('🔧 Middleware: Unexpected auth error:', middlewareError);
+    console.log('🔧 Middleware: Unexpected error:', middlewareError);
   }
 
-  // Add performance monitoring headers
+  // Add performance monitoring headers for debugging
   const duration = Date.now() - start
   response.headers.set('X-Response-Time', `${duration}ms`)
   response.headers.set('X-Timestamp', new Date().toISOString())
-  
-  // Add connection pool info for API routes
+
+  // Add API route metadata
   if (request.nextUrl.pathname.startsWith('/api/')) {
     response.headers.set('X-Pool-Strategy', 'supabase-pgbouncer')
     response.headers.set('X-MarketDZ-Version', '1.0.0')
@@ -153,17 +164,18 @@ export async function middleware(request: NextRequest) {
   return response
 }
 
+/**
+ * Middleware Configuration
+ *
+ * Runs on all requests EXCEPT:
+ * - Static files (_next/static, images, favicon, etc.)
+ * - Next.js internal routes (_next/image)
+ * - PWA assets (manifest.json, icons/)
+ *
+ * This ensures auth cookies are refreshed on every page navigation and API call
+ */
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - manifest.json (PWA manifest)
-     * - icons/ (PWA icons directory)
-     * - images - public images
-     */
     '/((?!_next/static|_next/image|favicon\\.ico|manifest\\.json|icons/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

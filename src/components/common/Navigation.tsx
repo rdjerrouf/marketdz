@@ -1,4 +1,20 @@
-// src/components/common/Navigation.tsx
+/**
+ * Navigation Component - Desktop Top Navigation Bar
+ *
+ * IMPORTANT:
+ * - Desktop only: md:hidden (hidden on mobile)
+ * - Mobile uses BottomNavigation instead
+ * - Hidden on homepage (homepage has custom hero)
+ *
+ * FEATURES:
+ * - Active page highlighting
+ * - Notifications dropdown with unread count
+ * - MarketDZ logo and branding
+ *
+ * NAV ITEMS:
+ * - Home, Browse, Advanced Search, Post, Messages, Profile
+ */
+
 'use client';
 
 import Link from 'next/link';

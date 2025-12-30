@@ -1,3 +1,19 @@
+/**
+ * Storage Utilities - Secure File Upload and Management
+ *
+ * ARCHITECTURE: Edge Function Upload Pattern
+ * All uploads go through Edge Functions for:
+ * - Content moderation (blocks inappropriate content)
+ * - Virus scanning
+ * - Image optimization (automatic variants)
+ * - Ownership verification (users can only modify their files)
+ *
+ * SECURITY:
+ * - Client-side validation (file type, size, name)
+ * - Server-side validation via Edge Functions
+ * - All uploads require authentication
+ */
+
 import { supabase } from '@/lib/supabase/client'
 import { generateImageVariants, type CompressionResult } from './image-compression'
 
@@ -48,15 +64,26 @@ export interface ImageVariants {
   }
 }
 
-// Secure file upload using Edge Function
+/**
+ * Upload file via secure Edge Function
+ *
+ * FLOW:
+ * 1. Validate authentication
+ * 2. Client-side validation (type, size, name)
+ * 3. Send to Edge Function (content moderation, virus scan)
+ * 4. Edge Function uploads to storage
+ * 5. Return public URL
+ *
+ * SECURITY: All uploads require valid session token
+ */
 export async function uploadFile(
-  file: File, 
+  file: File,
   options: UploadOptions
 ): Promise<UploadResult> {
   try {
-    // Get current session
+    // Require authentication for all uploads
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    
+
     if (sessionError || !session) {
       return {
         success: false,
@@ -67,7 +94,7 @@ export async function uploadFile(
       }
     }
 
-    // Validate file on client side first
+    // Client-side validation (prevents unnecessary Edge Function calls)
     const validation = validateFile(file, options.bucket)
     if (!validation.valid) {
       return {
@@ -76,7 +103,7 @@ export async function uploadFile(
       }
     }
 
-    // Prepare form data
+    // Prepare form data for Edge Function
     const formData = new FormData()
     formData.append('file', file)
     formData.append('bucket', options.bucket)
@@ -87,7 +114,7 @@ export async function uploadFile(
       formData.append('purpose', options.purpose)
     }
 
-    // Call secure upload Edge Function
+    // Call Edge Function (handles moderation, scanning, upload)
     const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/secure-file-upload`, {
       method: 'POST',
       headers: {
@@ -133,11 +160,15 @@ export async function uploadFile(
   }
 }
 
-// Client-side file validation
-function validateFile(file: File, bucket: string): { 
-  valid: boolean, 
-  error?: { message: string, messageAr: string } 
+/**
+ * Client-side file validation (fast fail before Edge Function)
+ * Checks: file type, size, suspicious file names
+ */
+function validateFile(file: File, bucket: string): {
+  valid: boolean,
+  error?: { message: string, messageAr: string }
 } {
+  // Only allow images
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
   const maxSizes = {
     'avatars': 2 * 1024 * 1024, // 2MB
@@ -145,7 +176,7 @@ function validateFile(file: File, bucket: string): {
     'user-photos': 5 * 1024 * 1024 // 5MB
   }
 
-  // Check file type
+  // Validate file type
   if (!allowedTypes.includes(file.type)) {
     return {
       valid: false,
@@ -156,7 +187,7 @@ function validateFile(file: File, bucket: string): {
     }
   }
 
-  // Check file size
+  // Validate file size
   const maxSize = maxSizes[bucket as keyof typeof maxSizes]
   if (file.size > maxSize) {
     const maxSizeMB = Math.round(maxSize / (1024 * 1024))
@@ -169,7 +200,7 @@ function validateFile(file: File, bucket: string): {
     }
   }
 
-  // Check file name for suspicious patterns
+  // Detect suspicious file names (prevents executable uploads)
   const suspiciousPatterns = ['.php', '.exe', '.bat', '.sh', '<', '>', '|', '..']
   if (suspiciousPatterns.some(pattern => file.name.includes(pattern))) {
     return {
@@ -401,17 +432,26 @@ export function getResponsiveImageUrls(baseUrl: string, variants?: { display?: s
   }
 }
 
-// Helper to ensure valid photo URLs for Supabase Storage
+/**
+ * Fix photo URL to ensure valid display
+ *
+ * Handles 3 cases:
+ * 1. Null/undefined → Returns inline SVG placeholder (no 404s)
+ * 2. Full URL → Returns as-is
+ * 3. Storage path → Converts to full public URL
+ *
+ * Why inline SVG: Avoids network requests for missing images
+ */
 export function fixPhotoUrl(url: string | undefined | null): string {
-  // Use inline SVG placeholder to avoid 404 errors
+  // Return inline SVG placeholder for missing images (avoids 404 errors)
   if (!url) return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" font-family="Arial,sans-serif" font-size="18" fill="%239ca3af" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'
 
-  // If already a full URL, return as is
+  // If already a full URL, use it
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url
   }
 
-  // If it's a storage path, convert to public URL
+  // Convert storage path to public URL
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
   return `${supabaseUrl}/storage/v1/object/public/listing-photos/${url}`
 }

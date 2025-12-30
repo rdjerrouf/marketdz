@@ -1,7 +1,26 @@
+/**
+ * MobileListingCard Component - 2-Column Mobile Grid Card
+ *
+ * DESIGN:
+ * - Compact layout optimized for 2x2 mobile grid (grid-cols-2)
+ * - 40% image height for visibility while scrolling
+ * - Gradient overlays for text readability
+ *
+ * EVENT HANDLING:
+ * - FavoriteButton integration with event propagation prevention
+ * - Uses data-favorite-button attribute to detect favorite clicks
+ * - Only navigates to detail page if clicking outside favorite button
+ *
+ * IMAGES:
+ * - Lazy loading for performance
+ * - Inline SVG placeholders for jobs/services (no 404s)
+ * - fixPhotoUrl() for Docker URL compatibility
+ */
+
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Clock, MapPin, DollarSign, Home, User, Zap } from 'lucide-react'
+import { Clock, MapPin, DollarSign, Home, User, Zap, AlertCircle } from 'lucide-react'
 import FavoriteButton from './FavoriteButton'
 import { fixPhotoUrl } from '@/lib/utils'
 
@@ -10,7 +29,7 @@ interface Listing {
   title: string
   description: string | null
   price: number | null
-  category: 'for_sale' | 'job' | 'service' | 'for_rent'
+  category: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
   photos: string[]
   created_at: string
   status: string
@@ -40,6 +59,7 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
     if (!price) {
       if (category === 'job') return 'Salary negotiable'
       if (category === 'for_rent') return 'Contact for price'
+      if (category === 'urgent') return 'Free / Donation'
       return 'Price negotiable'
     }
 
@@ -90,6 +110,12 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
         color: 'from-orange-400 to-orange-600',
         bgColor: 'bg-orange-500',
         icon: Zap
+      },
+      'urgent': {
+        text: 'URGENT',
+        color: 'from-red-500 to-red-700',
+        bgColor: 'bg-red-600',
+        icon: AlertCircle
       }
     }
     return configs[category as keyof typeof configs] || {
@@ -123,6 +149,11 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
   const categoryConfig = getCategoryConfig(listing.category)
   const CategoryIcon = categoryConfig.icon
 
+  /**
+   * Handle card click navigation
+   * CRITICAL: Must check if favorite button was clicked
+   * Why: Prevents navigating to detail page when toggling favorite
+   */
   const handleClick = (e: React.MouseEvent) => {
     console.log('📦 MobileListingCard handleClick called');
     console.log('  - target:', (e.target as HTMLElement).tagName, (e.target as HTMLElement).className);
@@ -146,10 +177,16 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
     }
   }
 
+  const isUrgent = listing.category === 'urgent'
+
   return (
     <div
       onClick={handleClick}
-      className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300 active:scale-95 cursor-pointer shadow-xl"
+      className={`bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-2xl overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shadow-xl ${
+        isUrgent
+          ? 'border-2 border-red-500 hover:border-red-400 animate-pulse-slow shadow-red-500/50'
+          : 'border border-white/10 hover:border-white/20'
+      }`}
     >
       {/* Compact Image Container - Mobile Optimized for 2x2 Grid */}
       <div className="relative h-40 overflow-hidden">
@@ -187,11 +224,26 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
 
         {/* Category Badge - Top Left - Compact */}
         <div className="absolute top-2 left-2">
-          <div className={`bg-gradient-to-r ${categoryConfig.color} text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center shadow-lg`}>
+          <div className={`bg-gradient-to-r ${categoryConfig.color} text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center shadow-lg ${
+            isUrgent ? 'animate-pulse' : ''
+          }`}>
             <CategoryIcon className="w-3 h-3 mr-1" />
             <span className="hidden sm:inline">{categoryConfig.text}</span>
           </div>
         </div>
+
+        {/* URGENT Badge Overlay - Center - Only for urgent listings */}
+        {isUrgent && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-red-600/95 text-white px-6 py-3 rounded-xl shadow-2xl transform rotate-[-5deg] animate-pulse">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="w-6 h-6" />
+                <span className="text-2xl font-black tracking-wider">URGENT</span>
+                <AlertCircle className="w-6 h-6" />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Favorite Button - Top Right - Compact */}
         <div 
@@ -229,7 +281,11 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
 
         {/* Price - Compact but Visible */}
         <div className="mb-2">
-          <div className="text-lg font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
+          <div className={`text-lg font-bold ${
+            isUrgent
+              ? 'bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent'
+              : 'bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent'
+          }`}>
             {formatPrice(listing.price, listing.category, listing.rental_period)}
           </div>
         </div>

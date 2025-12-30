@@ -1,13 +1,30 @@
-// src/app/api/listings/route.ts
+/**
+ * Listings API Route - Create and List Marketplace Items
+ *
+ * POST - Create new listing
+ * GET  - Fetch listings with filters and pagination
+ *
+ * FEATURES:
+ * - Multi-category support (for_sale, for_rent, job, service, urgent)
+ * - Category-specific validation (photos, price, salary, urgent fields, etc.)
+ * - Phone normalization for WhatsApp integration
+ * - Metadata storage for flexible category fields
+ * - Urgent category with auto-expiration (48h default)
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { normalizePhoneNumber } from '@/lib/utils'
 
+/**
+ * POST /api/listings - Create new listing
+ * Validates category-specific fields and normalizes contact info
+ */
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient(request)
-    
-    // Check authentication
+
+    // Require authentication for creating listings
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -24,7 +41,7 @@ export async function POST(request: NextRequest) {
       location_wilaya,
       photos,
       metadata,
-      // New category-specific fields
+      // Category-specific fields
       available_from,
       available_to,
       rental_period,
@@ -38,7 +55,11 @@ export async function POST(request: NextRequest) {
       application_phone,
       application_instructions,
       // Service fields
-      service_phone
+      service_phone,
+      // Urgent category fields
+      urgent_type,
+      urgent_expires_at,
+      urgent_contact_preference
     } = body
 
     // Validate required fields
@@ -50,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate category
-    const validCategories = ['for_sale', 'job', 'service', 'for_rent']
+    const validCategories = ['for_sale', 'job', 'service', 'for_rent', 'urgent']
     if (!validCategories.includes(category)) {
       return NextResponse.json(
         { error: 'Invalid category' },
@@ -58,7 +79,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate images based on category
+    // Category-specific photo validation
+    // for_sale/for_rent: require photos (1-3 for sale, 1-5 for rent)
+    // job/service: no photos allowed
+    // urgent: optional photos, max 2
     if ((category === 'for_sale' || category === 'for_rent')) {
       if (!photos || photos.length === 0) {
         return NextResponse.json(
@@ -66,7 +90,6 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-      // Allow 5 photos for rentals, 3 for other categories
       const maxPhotos = category === 'for_rent' ? 5 : 3
       if (photos.length > maxPhotos) {
         return NextResponse.json(
@@ -76,7 +99,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Jobs and services should not have images
     if ((category === 'job' || category === 'service') && photos && photos.length > 0) {
       return NextResponse.json(
         { error: 'Images are not allowed for job and service listings' },
@@ -84,8 +106,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (category === 'urgent' && photos && photos.length > 2) {
+      return NextResponse.json(
+        { error: 'Maximum 2 images allowed for urgent listings' },
+        { status: 400 }
+      )
+    }
+
     // Enhanced input validation
-    if (category !== 'job' && category !== 'service') {
+    // Price required for for_sale and for_rent only (optional for job, service, urgent)
+    if (category !== 'job' && category !== 'service' && category !== 'urgent') {
       if (!price || isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
         return NextResponse.json(
           { error: 'Price is required and must be a valid positive number' },
@@ -116,7 +146,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create the listing with all category-specific fields
+    // Urgent category validation
+    if (category === 'urgent') {
+      // urgent_type is required
+      if (!urgent_type || !['blood_donation', 'medicine_needed', 'food_assistance', 'medical_equipment', 'emergency_housing'].includes(urgent_type)) {
+        return NextResponse.json(
+          { error: 'Valid urgent type is required (blood_donation, medicine_needed, food_assistance, medical_equipment, emergency_housing)' },
+          { status: 400 }
+        )
+      }
+
+      // urgent_contact_preference is required
+      if (!urgent_contact_preference || !['phone', 'whatsapp', 'both'].includes(urgent_contact_preference)) {
+        return NextResponse.json(
+          { error: 'Valid contact preference is required (phone, whatsapp, both)' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Create listing with category-specific fields
+    // IMPORTANT: Phone numbers normalized to +213 format for WhatsApp compatibility
     const { data, error } = await supabase
       .from('listings')
       .insert([{
@@ -125,11 +175,11 @@ export async function POST(request: NextRequest) {
         description: description.trim(),
         category,
         subcategory: subcategory?.trim() || null,
-        price: (category === 'job' || category === 'service') ? null : parseFloat(price),
+        price: (category === 'job' || category === 'service' || category === 'urgent') ? null : parseFloat(price),
         location_city: location_city?.trim(),
         location_wilaya,
         photos: photos || [],
-        // Category-specific fields
+        // Category-specific columns (for_rent, job, for_sale)
         available_from: available_from || null,
         available_to: available_to || null,
         rental_period: rental_period || null,
@@ -138,13 +188,16 @@ export async function POST(request: NextRequest) {
         job_type: job_type || null,
         company_name: company_name?.trim() || null,
         condition: condition || null,
+        // Urgent category columns
+        urgent_type: urgent_type || null,
+        urgent_expires_at: urgent_expires_at || null, // Trigger sets default 48h if null
+        urgent_contact_preference: urgent_contact_preference || null,
+        // Contact info stored in metadata (normalized for WhatsApp)
         metadata: {
           ...metadata || {},
-          // Job application contact fields in metadata
           ...(application_email?.trim() && { application_email: application_email.trim() }),
           ...(application_phone?.trim() && { application_phone: normalizePhoneNumber(application_phone.trim()) }),
           ...(application_instructions?.trim() && { application_instructions: application_instructions.trim() }),
-          // Service fields in metadata
           ...(service_phone?.trim() && { service_phone: normalizePhoneNumber(service_phone.trim()) })
         },
         status: 'active'
@@ -153,7 +206,8 @@ export async function POST(request: NextRequest) {
         id, title, description, category, subcategory, price, created_at, status,
         user_id, location_city, location_wilaya, photos, metadata,
         available_from, available_to, rental_period, salary_min, salary_max,
-        job_type, company_name, condition
+        job_type, company_name, condition,
+        urgent_type, urgent_expires_at, urgent_contact_preference
       `)
       .single()
 
@@ -175,6 +229,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * GET /api/listings - Fetch listings with filters
+ *
+ * Query params:
+ * - userId: Filter by owner
+ * - category: Filter by type (for_sale, for_rent, job, service)
+ * - status: Filter by status (active, sold, rented, etc.)
+ * - page, limit: Pagination
+ *
+ * OPTIMIZATION: Only counts total on page 1 (expensive at scale)
+ */
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient(request)
@@ -184,7 +249,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category') ?? undefined
     const status = searchParams.get('status') ?? undefined
 
-    // Input validation and bounds checking
+    // Input validation with bounds (max 50 items per page)
     const rawPage = Number(searchParams.get('page') ?? '1')
     const rawLimit = Number(searchParams.get('limit') ?? '10')
     const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1
@@ -192,7 +257,7 @@ export async function GET(request: NextRequest) {
     const from = (page - 1) * limit
     const to = from + limit - 1
 
-    // Only get exact count for page 1 to reduce cost
+    // PERFORMANCE: Only count on page 1 (expensive at 250k+ scale)
     const countMode = page === 1 ? 'exact' : 'planned'
 
     // Validate enum inputs

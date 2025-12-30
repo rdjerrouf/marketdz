@@ -1,3 +1,15 @@
+/**
+ * Update Password API - Reset Password via Email Link
+ *
+ * FLOW:
+ * 1. User clicks "Reset Password" email link
+ * 2. Frontend extracts access_token & refresh_token from URL
+ * 3. Calls this API with tokens + new password
+ * 4. API sets session using tokens, then updates password
+ *
+ * SECURITY: Validates password strength (8+ chars), requires valid tokens from email
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 

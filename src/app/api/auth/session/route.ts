@@ -1,3 +1,14 @@
+/**
+ * Session API - Get Current User Session
+ *
+ * RETURNS:
+ * - User auth data (id, email, created_at)
+ * - Profile data from profiles table
+ * - authenticated: true/false
+ *
+ * NOTE: Always returns 200 (even when not authenticated) to avoid auth errors in UI
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 

@@ -67,7 +67,7 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          category: 'for_sale' | 'job' | 'service' | 'for_rent'
+          category: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
           subcategory: string | null
           title: string
           description: string | null
@@ -76,13 +76,16 @@ export interface Database {
           photos: string[]
           location: Json
           metadata: Json
+          urgent_type: 'blood_donation' | 'medicine_needed' | 'food_assistance' | 'medical_equipment' | 'emergency_housing' | null
+          urgent_expires_at: string | null
+          urgent_contact_preference: 'phone' | 'whatsapp' | 'both' | null
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          category: 'for_sale' | 'job' | 'service' | 'for_rent'
+          category: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
           subcategory?: string | null
           title: string
           description?: string | null
@@ -91,13 +94,16 @@ export interface Database {
           photos?: string[]
           location?: Json
           metadata?: Json
+          urgent_type?: 'blood_donation' | 'medicine_needed' | 'food_assistance' | 'medical_equipment' | 'emergency_housing' | null
+          urgent_expires_at?: string | null
+          urgent_contact_preference?: 'phone' | 'whatsapp' | 'both' | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          category?: 'for_sale' | 'job' | 'service' | 'for_rent'
+          category?: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
           subcategory?: string | null
           title?: string
           description?: string | null
@@ -106,6 +112,9 @@ export interface Database {
           photos?: string[]
           location?: Json
           metadata?: Json
+          urgent_type?: 'blood_donation' | 'medicine_needed' | 'food_assistance' | 'medical_equipment' | 'emergency_housing' | null
+          urgent_expires_at?: string | null
+          urgent_contact_preference?: 'phone' | 'whatsapp' | 'both' | null
           created_at?: string
           updated_at?: string
         }

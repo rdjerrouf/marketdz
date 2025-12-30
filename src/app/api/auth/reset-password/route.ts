@@ -1,3 +1,14 @@
+/**
+ * Reset Password API - Send Password Reset Email
+ *
+ * WHAT IT DOES:
+ * - Validates email format
+ * - Sends password reset email via Supabase (contains secure link with tokens)
+ * - Email link redirects to /reset-password page
+ *
+ * NOTE: Always returns success (even if email doesn't exist) to prevent email enumeration
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 

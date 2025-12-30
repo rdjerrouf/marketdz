@@ -1,4 +1,23 @@
-// src/hooks/useUserListings.ts
+/**
+ * useUserListings Hook - User's Listing Management Dashboard
+ *
+ * FEATURES:
+ * - Fetch user's listings with engagement stats (views, favorites, conversations)
+ * - Filter by status (active/sold/rented/expired) and category
+ * - Update listing status (mark as sold, rented, etc.)
+ * - Delete listings
+ * - Duplicate listings (create copy for re-posting)
+ *
+ * STATS INCLUDED:
+ * - Total/active/sold/rented/expired counts
+ * - Per-listing: views, favorites, conversations
+ *
+ * ⚠️ PERFORMANCE NOTE:
+ * - Fetches stats with separate queries per listing (N+1 pattern)
+ * - Acceptable for user's own listings (typically <100)
+ * - Would need optimization for larger datasets
+ */
+
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase/client'
 
@@ -74,7 +93,11 @@ export function useUserListings(
         return
       }
 
-      // Fetch additional stats for each listing
+      /**
+       * Fetch engagement stats for each listing
+       * Why separate queries: conversations and favorites are in different tables
+       * Performance: Acceptable for <100 user listings, would need optimization at scale
+       */
       const listingsWithStats = await Promise.all(
         data.map(async (listing: any) => {
           // Get conversation count

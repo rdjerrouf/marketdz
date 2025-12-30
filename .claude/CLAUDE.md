@@ -1,23 +1,29 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+PLEASE ADD COMMENTS TO THE PROVIDED CODE
 
 ## 🚨 CRITICAL POLICIES
 
-### ❌ CLOUD DATABASE - ABSOLUTELY UNTOUCHABLE
+### ❌ CLOUD DATABASE - PRODUCTION-READY & SYNCHRONIZED
 
 **The cloud Supabase database is PRODUCTION-READY and PERFECTLY STRUCTURED for launch.**
 
-**NEVER:**
-- Touch, modify, or "fix" the cloud database
-- Apply migrations to cloud automatically
-- Suggest optimizations for cloud
-- Run queries against cloud without explicit approval
-- Assume cloud needs any changes
+**Status (2025-12-30)**: ✅ Local and Cloud are IDENTICAL (25 migrations, 0 security warnings)
 
-**The cloud database is ready for launch. Period.**
+**CRITICAL RULES:**
+- ✅ **ALLOWED**: Inspect cloud (READ-ONLY), apply tested migrations with user approval
+- ❌ **FORBIDDEN**: Ad-hoc "fixes", automatic migrations, experimental queries
+- 🔒 **ALWAYS**: Test migrations locally first, then apply to cloud via MCP with approval
 
-**ALL development and testing MUST be done in LOCAL Supabase ONLY.**
+**Migration Protocol**:
+1. Create migration file in `supabase/migrations/`
+2. Test thoroughly in local environment (`npx supabase db reset`)
+3. Verify migration works correctly
+4. Apply to cloud using `mcp__supabase__apply_migration` **only with user approval**
+5. Verify cloud state with `get_advisors` and `list_tables`
+
+**ALL development and testing MUST be done in LOCAL Supabase FIRST.**
 
 ---
 
@@ -33,6 +39,52 @@ When switching between Local and Cloud environments (for inspection only):
 **Why**: JWT tokens from one environment won't work in another → Permission denied errors
 
 **Best Practice**: Use separate browser profiles for local vs cloud.
+
+---
+
+## 📧 TODO: EMAIL SETUP WHEN DOMAIN IS READY
+
+**Current Issue**: Email verification works but has 5-30 minute delays due to greylisting (missing DNS authentication).
+
+**Root Cause**: Using Supabase-managed email without custom domain + SPF/DKIM/DMARC records.
+
+**Fix Required**: Set up custom SMTP provider with proper DNS authentication.
+
+### Email Setup Checklist (HIGH PRIORITY)
+
+When you get your domain, complete these steps to fix email delays:
+
+1. **Register domain** (`marketdz.com` or `marketdz.dz`)
+
+2. **Choose SMTP provider**:
+   - **Resend** (easiest, free tier: 3k emails/month) - RECOMMENDED
+   - **Postmark** (best deliverability, $10/month for 10k emails)
+   - **SendGrid** (most popular, free tier: 100 emails/day)
+   - **Amazon SES** (cheapest at scale, $0.10 per 1,000 emails)
+
+3. **Configure SMTP in Supabase Dashboard**:
+   - Go to Project Settings → Auth → SMTP Settings
+   - Enable custom SMTP
+   - Enter provider credentials (host, port, user, password)
+   - Set sender email: `noreply@marketdz.com`
+   - Set sender name: `MarketDZ`
+
+4. **Add DNS records** (provided by your SMTP provider):
+   - **SPF**: Authorizes provider to send on your behalf
+   - **DKIM**: Cryptographic signature for email authentication
+   - **DMARC**: Policy for handling authentication failures
+
+5. **Test with real email addresses**:
+   - Sign up with Gmail account
+   - Sign up with Outlook account
+   - Verify emails arrive in <5 seconds (not 5-30 minutes)
+   - Check spam folders
+
+6. **Verify emails arrive in <5 seconds** ✅
+
+**Expected Result**: Email verification emails arrive instantly instead of 5-30 minute delays.
+
+**Documentation**: See `docs/EMAIL_VERIFICATION_SETUP.md` for detailed setup guide.
 
 ---
 
@@ -255,27 +307,59 @@ npm run chrome:verify    # Verify connection
 **Docs**: See `docs/CHROME_MCP_QUICK_START.md`
 
 ### Supabase Database MCP
-**Status**: ✅ Configured (2025-10-22)
-**Purpose**: **INSPECTION ONLY** - View cloud database state
+**Status**: ✅ Configured (2025-10-22) | **Updated**: 2025-12-30
+**Purpose**: Cloud database inspection and controlled migrations
 **Access Token**: Configured in `.mcp.json` (not committed to git)
 
-**⚠️ CRITICAL**: This tool is for READ-ONLY inspection of cloud database. NEVER run modification queries!
+**🎯 DATABASE STATUS (2025-12-30)**:
+- ✅ **Local and Cloud are IDENTICAL** (25 migrations applied to both)
+- ✅ **All security issues resolved** (0 warnings)
+- ✅ **Optimized** (duplicate indexes removed, pg_trgm in extensions schema)
+- 🔒 **Production-ready** for launch
+
+**How We Achieved Cloud/Local Parity**:
+1. **Migrations applied via MCP** - Used `mcp__supabase__apply_migration` tool
+2. **Verified sync** - Compared tables, extensions, and migration versions
+3. **Security hardening** - PostgreSQL upgraded, leaked password protection enabled, OTP secured
+4. **Performance optimization** - Duplicate indexes dropped, extensions properly organized
+
+**⚠️ CRITICAL USAGE POLICY**:
+- ✅ **Allowed**: Inspecting cloud database (READ-ONLY), applying migrations with user approval
+- ❌ **Forbidden**: Ad-hoc queries, automatic migrations, "fixing" without permission
 
 **When to Use**:
-- Inspecting cloud database schema (READ-ONLY)
-- Checking for manually added triggers/indexes (READ-ONLY)
-- Verifying production state (READ-ONLY)
+- Inspecting cloud database schema/state (READ-ONLY)
+- Applying tested migrations from local to cloud (with user approval)
+- Checking advisors for security/performance recommendations
+- Verifying cloud/local sync status
 
 **When NOT to Use**:
-- Any modification queries (INSERT, UPDATE, DELETE, ALTER, DROP, CREATE)
 - Routine local development queries (use local Supabase instead)
-- "Fixing" or "optimizing" cloud database
+- Automatic "fixes" or "optimizations"
+- Experimental migrations (test locally first!)
 
-**Usage Examples**:
-- "Show me the schema of the reviews table in cloud" (READ-ONLY)
-- "List all indexes on listings table in cloud" (READ-ONLY)
+**Available Tools**:
+- `list_projects`, `get_project` - Project info
+- `list_tables`, `list_migrations`, `list_extensions` - Schema inspection
+- `apply_migration` - Apply tested migrations (requires approval)
+- `get_advisors` - Security/performance recommendations
+- `execute_sql` - Run queries (READ-ONLY preferred)
 
-**Note**: Both MCPs require Claude Code restart to activate after installation.
+**Token Refresh (When Expired)**:
+If MCP connection fails with authentication error:
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard/account/tokens)
+2. Generate new access token
+3. Update `~/.mcp.json` or `.mcp.json` with new token:
+   ```json
+   {
+     "supabase": {
+       "access_token": "sbp_your_new_token_here"
+     }
+   }
+   ```
+4. Restart Claude Code
+
+**Note**: Both MCPs require Claude Code restart to activate after installation or token refresh.
 
 ---
 

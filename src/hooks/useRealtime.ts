@@ -1,5 +1,21 @@
-// Real-time messaging hooks for MarketDZ
-// Optimized for performance and proper connection management
+/**
+ * useRealtime Hooks - Supabase Real-Time Subscriptions
+ *
+ * FEATURES:
+ * - useRealtimeMessages: Live message updates in conversations
+ * - useRealtimeConversations: Live conversation list updates
+ * - useRealtimeNotifications: Live notification feed
+ *
+ * ARCHITECTURE:
+ * - Each hook creates Supabase channel subscription
+ * - Auto-cleanup on unmount (prevents memory leaks)
+ * - Filters by user_id to only receive relevant updates
+ *
+ * PERFORMANCE:
+ * - Channels are lightweight (WebSocket connections)
+ * - One channel per active conversation/feature
+ * - Proper cleanup prevents connection accumulation
+ */
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase/client'
@@ -57,7 +73,11 @@ export const useRealtimeMessages = (conversationId: string | null) => {
     loadMessages()
   }, [conversationId, user])
 
-  // Real-time subscription for new messages
+  /**
+   * Real-time subscription for new messages
+   * Why channel per conversation: Filters updates to only this conversation
+   * Cleanup: Removes channel on unmount to prevent memory leaks
+   */
   useEffect(() => {
     if (!conversationId || !user) return
 
@@ -152,7 +172,11 @@ export const useRealtimeConversations = () => {
     loadConversations()
   }, [user])
 
-  // Real-time subscription for conversation updates
+  /**
+   * Real-time subscription for conversation updates
+   * Why two subscriptions: Need to listen to both buyer_id and seller_id filters
+   * Updates: Last message timestamp, unread counts, etc.
+   */
   useEffect(() => {
     if (!user) return
 

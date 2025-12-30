@@ -1,4 +1,18 @@
-// src/app/api/health/route.ts - Connection pool health monitoring
+/**
+ * Health API - System Health Check & Metrics
+ *
+ * PROVIDES:
+ * - Database connection health (connected/error state)
+ * - Response time metrics
+ * - Total & active listings count
+ * - Connection pool strategy info
+ *
+ * USAGE:
+ * - Monitoring systems (uptime checks, alerts)
+ * - Load balancer health checks
+ * - Debugging connection issues
+ */
+
 import { NextResponse } from 'next/server'
 import { getServerSupabase, checkConnectionHealth } from '@/lib/supabase/serverPool'
 

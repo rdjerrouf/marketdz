@@ -1,4 +1,18 @@
-// src/components/common/LoadingSpinner.tsx
+/**
+ * LoadingSpinner Component - Loading States & Skeleton Loaders
+ *
+ * COMPONENTS:
+ * - LoadingSpinner: Animated spinner with optional text
+ * - CardSkeleton: Placeholder for card-style content
+ * - ListSkeleton: Placeholder for list items
+ * - TableSkeleton: Placeholder for tabular data
+ *
+ * USAGE:
+ * - fullScreen: Centers spinner in viewport
+ * - size/color: Customizable appearance
+ * - Skeletons use pulse animation for shimmer effect
+ */
+
 import React from 'react'
 
 interface LoadingSpinnerProps {

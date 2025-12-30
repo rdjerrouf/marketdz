@@ -1,4 +1,18 @@
-// src/app/api/reviews/route.ts
+/**
+ * Reviews API Route - User Rating and Review System
+ *
+ * FEATURES:
+ * - Users can review each other after transactions
+ * - Rating scale: 1-5 stars (validated)
+ * - Prevents duplicate reviews (reviewer + reviewed + listing combo)
+ * - Prevents self-reviews
+ *
+ * USE CASES:
+ * - Sellers can review buyers (after sale)
+ * - Buyers can review sellers (after purchase)
+ * - General user reviews (no listing, just user-to-user)
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -110,7 +124,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if review already exists for this combination
+    /**
+     * Prevent duplicate reviews
+     * Why: Users can only review each other once per listing
+     * Combination: (reviewer_id, reviewed_id, listing_id)
+     */
     const { data: existingReview } = await supabase
       .from('reviews')
       .select('id')

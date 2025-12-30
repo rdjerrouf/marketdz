@@ -117,6 +117,18 @@ export const LISTING_CATEGORIES = {
       'Event Halls (Salle des Fêtes)',
       'Other'
     ]
+  },
+  URGENT: {
+    value: 'urgent',
+    label: 'Urgent Help',
+    labelAr: 'مساعدة عاجلة',
+    subcategories: [
+      'Blood Donation',
+      'Medicine Needed',
+      'Food Assistance',
+      'Medical Equipment',
+      'Emergency Housing'
+    ]
   }
 } as const
 

@@ -1,5 +1,21 @@
-// Auth error handler utility
-// src/lib/auth-error-handler.ts
+/**
+ * Auth Error Handler - Centralized Auth Error Management
+ *
+ * WHY NEEDED:
+ * - Expired sessions cause cascading errors across app
+ * - This catches auth errors and auto-redirects to signin
+ * - Clears stale auth state to prevent infinite loops
+ *
+ * FEATURES:
+ * - isRefreshTokenError: Detects invalid/expired refresh tokens
+ * - isSessionExpiredError: Detects missing/expired sessions
+ * - handleAuthError: Auto sign-out + redirect to signin with message
+ * - withAuthErrorHandling: Wrapper for API calls with auto-retry
+ *
+ * USAGE:
+ * - Wrap API calls: withAuthErrorHandling(() => fetch(...))
+ * - In catch blocks: if (isSessionExpiredError(error)) handleAuthError(error)
+ */
 
 import { supabase } from './supabase/client'
 

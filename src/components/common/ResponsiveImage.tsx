@@ -1,3 +1,22 @@
+/**
+ * ResponsiveImage Component - Optimized Image Loading
+ *
+ * FEATURES:
+ * - Responsive srcSet: Loads appropriate image size for device
+ * - Docker URL fix: Converts Docker internal URLs to browser-accessible URLs
+ * - Loading states: Shimmer placeholder while loading
+ * - Error handling: Graceful fallback with Arabic "image not available" message
+ *
+ * SPECIALIZED VARIANTS:
+ * - ListingImage: For product photos (hover zoom effect)
+ * - AvatarImage: For user profiles (circular, sized)
+ * - ThumbnailGrid: Grid layout for multiple images
+ *
+ * OPTIMIZATION:
+ * - Uses Next.js Image component (automatic optimization)
+ * - Shows compression badge in development
+ */
+
 'use client'
 
 import React, { useState } from 'react'

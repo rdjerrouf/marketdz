@@ -1,3 +1,12 @@
+/**
+ * Signout API - User Sign Out
+ *
+ * WHAT IT DOES:
+ * - Invalidates user session via Supabase auth.signOut()
+ * - Clears auth cookies (handled by middleware)
+ * - Client should redirect to homepage after success
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 

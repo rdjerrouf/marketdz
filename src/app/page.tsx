@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Home, User, MessageCircle, Bell, Zap, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users } from 'lucide-react'
+import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Home, User, MessageCircle, Bell, Zap, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import { fixPhotoUrl } from '@/lib/storage'
@@ -27,7 +27,7 @@ interface Listing {
   title: string;
   description: string | null;
   price: number | null;
-  category: 'for_sale' | 'job' | 'service' | 'for_rent';
+  category: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent';
   photos: string[];
   created_at: string;
   status: string;
@@ -206,7 +206,8 @@ export default function CompleteKickAssHomepage() {
       'for_sale': { text: 'For Sale', color: 'from-emerald-400 to-emerald-600', emoji: '💰', icon: DollarSign },
       'for_rent': { text: 'For Rent', color: 'from-blue-400 to-blue-600', emoji: '🏠', icon: Home },
       'job': { text: 'Jobs', color: 'from-purple-400 to-purple-600', emoji: '💼', icon: User },
-      'service': { text: 'Services', color: 'from-orange-400 to-orange-600', emoji: '🔧', icon: Zap }
+      'service': { text: 'Services', color: 'from-orange-400 to-orange-600', emoji: '🔧', icon: Zap },
+      'urgent': { text: 'URGENT', color: 'from-red-500 to-red-700', emoji: '🚨', icon: AlertCircle }
     }
     return badges[category] || { text: category, color: 'from-gray-400 to-gray-600', emoji: '📦', icon: Grid }
   }
@@ -720,12 +721,17 @@ export default function CompleteKickAssHomepage() {
                 {featuredListings.map((listing, index) => {
                 const badge = getCategoryBadge(listing.category)
                 const isFavorite = favorites.has(listing.id)
+                const isUrgent = listing.category === 'urgent'
 
                 return (
                   <Link
                     href={`/browse/${listing.id}`}
                     key={listing.id}
-                    className="group bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl block"
+                    className={`group bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl block ${
+                      isUrgent
+                        ? 'border-2 border-red-500 hover:border-red-400 animate-pulse-slow shadow-red-500/50'
+                        : 'border border-white/10 hover:border-white/30'
+                    }`}
                   >
                     {/* Enhanced Image Container */}
                     <div className="relative h-56 overflow-hidden">
@@ -772,11 +778,24 @@ export default function CompleteKickAssHomepage() {
                       </div>
 
                       {/* Enhanced Featured Badge */}
-                      {index < 2 && (
+                      {index < 2 && !isUrgent && (
                         <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
                           <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-3 py-1 rounded-full text-xs font-bold flex items-center shadow-lg animate-pulse">
                             <Star className="w-3 h-3 mr-1 fill-current" />
                             FEATURED
+                          </div>
+                        </div>
+                      )}
+
+                      {/* URGENT Badge Overlay - Center - Only for urgent listings */}
+                      {isUrgent && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="bg-red-600/95 text-white px-6 py-3 rounded-xl shadow-2xl transform rotate-[-5deg] animate-pulse">
+                            <div className="flex items-center space-x-2">
+                              <AlertCircle className="w-6 h-6" />
+                              <span className="text-2xl font-black tracking-wider">URGENT</span>
+                              <AlertCircle className="w-6 h-6" />
+                            </div>
                           </div>
                         </div>
                       )}
@@ -801,7 +820,11 @@ export default function CompleteKickAssHomepage() {
                       </p>
 
                       <div className="flex items-center justify-between mb-4">
-                        <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
+                        <div className={`text-2xl font-bold bg-gradient-to-r ${
+                          isUrgent
+                            ? 'from-red-400 to-red-600'
+                            : 'from-green-400 to-green-600'
+                        } bg-clip-text text-transparent`}>
                           {formatPrice(listing.price, listing.category, listing.rental_period)}
                         </div>
                         <div className="flex items-center text-white/50 text-sm">

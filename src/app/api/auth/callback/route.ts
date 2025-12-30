@@ -1,3 +1,14 @@
+/**
+ * Auth Callback API - OAuth & Email Confirmation Handler
+ *
+ * PURPOSE:
+ * - Handles Supabase auth redirects (email verification, OAuth, password reset)
+ * - Extracts session from URL and sets auth cookies
+ * - Redirects user to intended destination (or homepage)
+ *
+ * FLOW: User clicks email link → Supabase redirects here → Cookies set → Redirect to app
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 

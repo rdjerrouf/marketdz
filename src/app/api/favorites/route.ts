@@ -1,4 +1,18 @@
-// src/app/api/favorites/route.ts - Enhanced favorites API with rate limiting and better error handling
+/**
+ * Favorites API Route - Manage User's Favorited Listings
+ *
+ * FEATURES:
+ * - Dual rate limiting: IP-based (60/min) + user-based (120/min) for GET
+ * - Smart pagination: exact count on page 1, heuristic thereafter
+ * - Shows ALL favorited listings regardless of status (sold/expired still visible)
+ * - Prevents self-favoriting with validation
+ *
+ * OPTIMIZATIONS:
+ * - Field selection to reduce data transfer
+ * - Upsert for idempotent favoriting (no duplicate errors)
+ * - 30-second cache with stale-while-revalidate
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { smartRateLimit } from '@/lib/rate-limit/database';
@@ -70,9 +84,12 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20'), 1), 50);
     const offset = (page - 1) * limit;
 
-    // Optimized favorites query with field selection and smart count strategy
-    // NOTE: We don't filter by listing status - users should see all their favorites
-    // even if the listing became sold/expired. We'll show status badges in the UI.
+    /**
+     * Smart count strategy:
+     * - Page 1: Exact count for accurate total pages
+     * - Page 2+: Planned count (faster, no expensive count query)
+     * - Don't filter by status: Users should see sold/expired favorites too
+     */
     const needExactCount = page === 1;
     const { data: favorites, error: favoritesError, count } = await supabase
       .from('favorites')
@@ -247,7 +264,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Add to favorites using proper auth context
+    /**
+     * Upsert for idempotent favoriting
+     * Why upsert: If user clicks favorite twice rapidly, doesn't throw error
+     * onConflict: Unique constraint on (user_id, listing_id)
+     */
     
     const { data: favorite, error: favoriteError } = await supabase
       .from('favorites')

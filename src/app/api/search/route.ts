@@ -1,4 +1,24 @@
-// src/app/api/search/route.ts - Real database version
+/**
+ * Search API Route - Full-Text Search with Filters
+ *
+ * ARCHITECTURE: Admin Client + Manual Security
+ * - Uses service role to bypass RLS (public search doesn't need auth)
+ * - Enforces status='active' via applySearchSecurityConstraints()
+ * - Column allowlisting prevents data leaks
+ *
+ * PERFORMANCE (250k+ scale):
+ * - Uses precomputed search vectors (idx_listings_fts_ar/fr GIN indexes)
+ * - No COUNT queries (heuristic pagination instead)
+ * - Lazy profile loading (only for results, not joins)
+ * - Target: <800ms for full-text + multi-filter queries
+ *
+ * FEATURES:
+ * - Bilingual search (Arabic + French)
+ * - Category-specific filters (rentals, jobs, for_sale)
+ * - Geographic filtering (wilaya, city)
+ * - Price/salary ranges
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import {
@@ -13,8 +33,8 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // Use admin client to bypass RLS and 3s timeout for public search
-    // SECURITY: We enforce status='active' server-side via applySearchSecurityConstraints()
+    // Use admin client for public search (bypasses RLS and 3s timeout)
+    // SECURITY: status='active' enforced via applySearchSecurityConstraints()
     const supabase = createSupabaseAdminClient();
     const urlSearchParams = request.nextUrl.searchParams;
     const query = urlSearchParams.get('q')?.trim() || '';
@@ -131,19 +151,20 @@ export async function GET(request: NextRequest) {
       supabaseQuery = supabaseQuery.eq('condition', condition);
     }
 
-    // Full-text search using pre-computed search vectors (uses GIN indexes)
-    // CRITICAL: Use search_vector_ar/fr instead of to_tsvector() to avoid 4.5s timeouts
+    // Full-text search using precomputed vectors (CRITICAL for performance)
+    // WHY: to_tsvector() on every query = 4.5s timeout at 250k scale
+    // SOLUTION: Use search_vector_ar/fr columns (updated by trigger)
     if (query) {
-      // Use websearch full-text search (.wfts) for both Arabic and French vectors
-      // This uses the idx_listings_fts_ar and idx_listings_fts_fr GIN indexes
-      // .wfts uses websearch_to_tsquery which handles phrases better than plain text search
+      // Bilingual search: query both Arabic and French vectors
+      // Uses GIN indexes: idx_listings_fts_ar, idx_listings_fts_fr
+      // .wfts = websearch full-text search (handles phrases better)
       try {
         supabaseQuery = supabaseQuery.or(
           `search_vector_ar.wfts.${query},search_vector_fr.wfts.${query}`
         );
       } catch (error) {
         console.warn('Full-text search error, falling back to ILIKE:', error);
-        // Fallback to ILIKE only if FTS fails (shouldn't happen in production)
+        // Fallback to ILIKE (slower but works if FTS fails)
         supabaseQuery = supabaseQuery.or(
           `title.ilike.%${query}%,description.ilike.%${query}%,company_name.ilike.%${query}%`
         );
@@ -185,7 +206,7 @@ export async function GET(request: NextRequest) {
     const resultCount = listings?.length || 0;
     console.log(`✅ Found ${resultCount} listings`);
 
-    // SECURITY: Log service role query for audit trail
+    // Audit logging for service role usage (security requirement)
     logServiceRoleQuery({
       endpoint: '/api/search',
       filters: { category, subcategory, wilaya, query },
@@ -193,14 +214,15 @@ export async function GET(request: NextRequest) {
       executionTime: Date.now() - startTime
     });
 
-    // Lazy load profiles for displayed results only (20-50 profiles max)
+    // OPTIMIZATION: Lazy load profiles (only for result set, not entire table)
+    // Why: Avoids expensive JOIN at 250k scale, loads 20-50 profiles max
     const userIds = [...new Set((listings || []).map((l: any) => l.user_id))];
     let profileById = new Map<string, any>();
 
     if (userIds.length > 0) {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select(getProfileSelectColumns())  // Use allowlisted columns
+        .select(getProfileSelectColumns())  // Allowlisted columns only
         .in('id', userIds);
 
       profileById = new Map((profiles || []).map((p: any) => [p.id, p]));
@@ -212,7 +234,8 @@ export async function GET(request: NextRequest) {
       profiles: profileById.get(listing.user_id) || null
     }));
 
-    // Calculate pagination info (heuristic without expensive count)
+    // Heuristic pagination (no COUNT for performance)
+    // hasNextPage = true if we got a full page (might be more)
     const hasNextPage = (listings?.length || 0) === safeLimit;
 
     const response = {

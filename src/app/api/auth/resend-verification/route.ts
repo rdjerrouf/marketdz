@@ -1,3 +1,16 @@
+/**
+ * Resend Verification API - Resend Email Verification Link
+ *
+ * WHEN USED:
+ * - User signed up but didn't receive verification email
+ * - Verification email expired or was lost
+ *
+ * FEATURES:
+ * - Validates email format
+ * - Handles specific errors (already verified, user not found)
+ * - Uses Supabase auth.resend() with type='signup'
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 

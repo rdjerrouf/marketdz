@@ -46,7 +46,7 @@ export interface CreateProfileData {
 
 // Listing related types
 export type ListingStatus = 'active' | 'sold' | 'rented' | 'completed' | 'expired'
-export type ListingCategory = 'for_sale' | 'job' | 'service' | 'for_rent'
+export type ListingCategory = 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
 
 export interface BaseListing {
   id: string
@@ -124,6 +124,15 @@ export interface RentalListing extends BaseListing {
       value: number
       unit: 'm²' | 'rooms'
     }
+  }
+}
+
+export interface UrgentListing extends BaseListing {
+  category: 'urgent'
+  metadata: {
+    urgent_type?: 'blood_donation' | 'medicine_needed' | 'food_assistance' | 'medical_equipment' | 'emergency_housing'
+    urgent_expires_at?: string
+    urgent_contact_preference?: 'phone' | 'whatsapp' | 'both'
   }
 }
 
@@ -329,4 +338,8 @@ export function isServiceListing(listing: BaseListing): listing is ServiceListin
 
 export function isRentalListing(listing: BaseListing): listing is RentalListing {
   return listing.category === 'for_rent'
+}
+
+export function isUrgentListing(listing: BaseListing): listing is UrgentListing {
+  return listing.category === 'urgent'
 }

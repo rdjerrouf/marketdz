@@ -1,4 +1,17 @@
-// src/components/common/FavoriteButton.tsx - Reusable favorite button component
+/**
+ * FavoriteButton Component - Reusable Favorite Toggle
+ *
+ * CRITICAL PATTERN: Event Propagation Handling
+ * - Stops propagation IMMEDIATELY to prevent card clicks from firing
+ * - Uses data-favorite-button attribute for click detection
+ * - Prevents users from favoriting their own listings
+ *
+ * FEATURES:
+ * - Optimistic UI updates (instant feedback)
+ * - Auto-redirect to signin for unauthenticated users
+ * - Loading states with spinner
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -32,6 +45,11 @@ export default function FavoriteButton({
   // Check if the current user owns this listing
   const isOwnListing = user && listingOwnerId && user.id === listingOwnerId;
 
+  /**
+   * Handle favorite toggle
+   * CRITICAL: Stops propagation FIRST to prevent card navigation
+   * Why important: This button is inside clickable listing cards
+   */
   const handleToggle = async (e: React.MouseEvent) => {
     console.log('🔥🔥🔥 FavoriteButton handleToggle called - BEFORE stopping propagation');
 

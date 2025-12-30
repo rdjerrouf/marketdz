@@ -1,21 +1,27 @@
-// src/lib/supabase/server.ts - Simple working version
+/**
+ * Server-Side Supabase Clients
+ *
+ * Contains factory functions for creating Supabase clients in different server contexts.
+ * Each function is optimized for specific use cases (SSR, API routes, admin operations).
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 import { NextRequest } from 'next/server'
 
-// For server-side components and API routes (Next.js 15 compatible)
+/**
+ * Create Supabase client for Server Components and API routes
+ * Supports both cookie-based (default) and Authorization header auth
+ */
 export const createServerSupabaseClient = async (request?: NextRequest) => {
   const cookieStore = await cookies()
 
-  // CRITICAL FIX: When Authorization header is present, use createClient directly
-  // This ensures the JWT token is properly passed to PostgREST for RLS context
+  // If Authorization header present, use token-based auth (bypasses cookie complexity)
   if (request?.headers.get('Authorization')) {
     const token = request.headers.get('Authorization')?.replace('Bearer ', '');
     if (token) {
-      // Use createClient instead of createServerClient for pure token-based auth
-      // This bypasses SSR cookie complexity and directly uses the JWT
       return createClient<Database>(
         process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,14 +32,14 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
             }
           },
           auth: {
-            persistSession: false // API routes don't need session persistence
+            persistSession: false // API routes don't persist sessions
           }
         }
       );
     }
   }
 
-  // Default cookie-based client for server components
+  // Default: Cookie-based auth for Server Components
   return createServerClient<Database>(
     process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -48,7 +54,7 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Ignore errors in Server Components
+            // Ignore errors in Server Components (can't set cookies there)
           }
         },
       },
@@ -56,59 +62,52 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
   )
 }
 
-// For API routes that need to work with middleware-processed requests
+/**
+ * Create Supabase client for API routes (reads middleware-processed cookies)
+ * CRITICAL: Must strip Authorization header to force cookie-based auth
+ */
 export const createApiSupabaseClient = (request: NextRequest) => {
   const allCookies = request.cookies.getAll()
   const authHeader = request.headers.get('Authorization')
 
-  // Log everything to diagnose production issue
-  console.log('🔧 createApiSupabaseClient DETAILED:', {
-    url: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
-    anonKeyPrefix: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20),
+  console.log('🔧 createApiSupabaseClient:', {
     hasAuthHeader: !!authHeader,
     cookieCount: allCookies.length,
-    cookieNames: allCookies.map(c => c.name),
     supabaseCookies: allCookies.filter(c => c.name.includes('supabase') || c.name.includes('sb-')),
   })
 
-  // Create a new Headers object WITHOUT the Authorization header
-  // This prevents @supabase/ssr from using bearer token auth
+  // Remove Authorization header to force cookie-based auth
+  // Why: @supabase/ssr ignores cookies when Authorization header is present
   const headersWithoutAuth = new Headers(request.headers)
   if (authHeader) {
     console.log('🚫 Removing Authorization header to force cookie-based auth')
     headersWithoutAuth.delete('Authorization')
   }
 
-  // Create a modified request object without Authorization header
-  const modifiedRequest = new NextRequest(request.url, {
-    headers: headersWithoutAuth,
-    method: request.method,
-  })
-
-  // IMPORTANT: Use cookies ONLY - strip Authorization header completely
-  // The Authorization header causes @supabase/ssr to ignore cookies
+  // Create client that reads cookies set by middleware
   const client = createServerClient<Database>(
     process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
-          console.log('🔧 getAll() called, returning', allCookies.length, 'cookies')
+          console.log('🔧 getAll() returning', allCookies.length, 'cookies')
           return allCookies
         },
         setAll(cookiesToSet) {
-          console.log('🔧 setAll() called with', cookiesToSet.length, 'cookies')
-          // Don't try to set cookies in API routes - they're already set by middleware
+          // Don't set cookies in API routes - middleware already handled this
         },
       },
-      // DO NOT set Authorization header - let cookies handle auth
     }
   )
 
   return client
 }
 
-// Lazy initialization functions (community-proven pattern)
+/**
+ * Create basic Supabase client (no auth context)
+ * Use for: Public data queries, non-auth operations
+ */
 export const createSupabaseClient = () => {
   return createClient<Database>(
     process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -116,6 +115,11 @@ export const createSupabaseClient = () => {
   )
 }
 
+/**
+ * Create admin Supabase client (bypasses RLS)
+ * SECURITY: Only use server-side after authenticating user
+ * See CLAUDE.md "Service Role Pattern" for usage guidelines
+ */
 export const createSupabaseAdminClient = () => {
   return createClient<Database>(
     process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -132,10 +136,10 @@ export const createSupabaseAdminClient = () => {
   )
 }
 
-// Helper functions
+// Helper: Get authenticated user in Server Components
 export async function getServerUser() {
   const supabase = await createServerSupabaseClient()
-  
+
   try {
     const { data: { user } } = await supabase.auth.getUser()
     return user
@@ -145,16 +149,17 @@ export async function getServerUser() {
   }
 }
 
+// Helper: Get user profile by ID in Server Components
 export async function getServerUserProfile(userId: string) {
   const supabase = await createServerSupabaseClient()
-  
+
   try {
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
       .single()
-    
+
     if (error) throw error
     return profile
   } catch (error) {

@@ -1,3 +1,21 @@
+/**
+ * BottomNavigation Component - Mobile Bottom Tab Bar
+ *
+ * DESIGN:
+ * - Mobile only: md:hidden (hidden on desktop)
+ * - Fixed bottom position with safe-area-inset support (iOS notch)
+ * - Dark theme: Slate-900 with backdrop blur
+ *
+ * FEATURES:
+ * - Active tab highlighting (purple)
+ * - Unread message indicator (green dot + pulse animation)
+ * - 6 tabs: Home, Browse, Post, My Listings, Favorites, Messages
+ *
+ * STYLING:
+ * - Active: Purple color + thicker icon stroke + top indicator line
+ * - Unread messages: Green + pulse animation
+ */
+
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'

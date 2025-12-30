@@ -1,4 +1,18 @@
-// src/components/common/ReviewCard.tsx
+/**
+ * ReviewCard Component - Display Single Review
+ *
+ * FEATURES:
+ * - Shows reviewer avatar (or initials fallback)
+ * - Star rating display (readonly)
+ * - Formatted date (French locale)
+ * - Optional edit/delete actions (if user owns review)
+ *
+ * PERMISSIONS:
+ * - canEdit: Shows edit button (user owns review)
+ * - canDelete: Shows delete button (user owns review)
+ * - Actions appear in dropdown menu
+ */
+
 'use client'
 
 import { useState } from 'react'

@@ -1,3 +1,10 @@
+/**
+ * Browser-Side Supabase Client (Singleton Pattern)
+ *
+ * CRITICAL: Only ONE instance exists across the entire app
+ * Auth state changes are handled in AuthContext.tsx (prevents duplicate listeners)
+ */
+
 import { createBrowserClient } from '@supabase/ssr'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database'
@@ -5,10 +12,13 @@ import { Database } from '@/types/database'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Singleton instance - only create once globally
+// Singleton instance - only create once globally to prevent "Multiple GoTrueClient instances" warning
 let supabaseInstance: SupabaseClient<Database> | null = null
 
-// Get or create the Supabase client instance
+/**
+ * Get or create the Supabase client instance
+ * Uses lazy initialization - creates client only when first accessed
+ */
 function getSupabaseClient(): SupabaseClient<Database> {
   if (!supabaseInstance) {
     supabaseInstance = createBrowserClient<Database>(supabaseUrl, supabaseKey)
@@ -17,16 +27,19 @@ function getSupabaseClient(): SupabaseClient<Database> {
   return supabaseInstance
 }
 
-// Export the singleton instance
-// Note: Auth state changes are handled in AuthContext.tsx to avoid duplicate listeners
+// Export the singleton instance for use throughout the app
+// IMPORTANT: Auth state listener is in AuthContext.tsx, not here
 export const supabase = getSupabaseClient()
 
-// Enhanced global error handler for auth errors
+/**
+ * Global error handler for auth errors
+ * Intercepts refresh token errors and redirects to signin (better UX than showing errors)
+ */
 const originalError = console.error
 console.error = (...args) => {
   const errorMessage = args.join(' ')
 
-  // Handle specific Supabase auth errors silently
+  // Handle expired/invalid token errors silently
   if (errorMessage.includes('Invalid Refresh Token') ||
       errorMessage.includes('Refresh Token Not Found') ||
       errorMessage.includes('AuthApiError') ||
@@ -34,7 +47,7 @@ console.error = (...args) => {
 
     console.log('🔄 Auth error detected - handling silently')
 
-    // Handle auth error directly by signing out
+    // Sign out and redirect to signin (only if not already on auth pages)
     supabase.auth.signOut()
     if (typeof window !== 'undefined') {
       const currentPath = window.location.pathname
@@ -45,10 +58,10 @@ console.error = (...args) => {
       }
     }
 
-    return // Don't log the error to console to reduce noise
+    return // Don't log to reduce console noise
   }
 
-  // Call original console.error for other errors
+  // Log all other errors normally
   originalError.apply(console, args)
 }
 

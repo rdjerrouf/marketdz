@@ -1,4 +1,13 @@
-// src/hooks/useFavorites.ts - Optimized custom hook for favorites management
+/**
+ * useFavorites Hook - Favorites Management with Caching
+ *
+ * OPTIMIZATIONS:
+ * - 30-second cache to reduce DB queries (important for mobile networks)
+ * - Optimistic updates for instant UI feedback
+ * - Abort controllers to cancel stale requests on page changes
+ * - Authorization header forwarding for RLS policies
+ */
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -44,7 +53,11 @@ interface FavoritesData {
 // Note: Using global auth context from @/contexts/AuthContext
 // Removed local useAuth to prevent conflicts
 
-// Simple cache for favorites data
+/**
+ * Global cache for favorites data
+ * Why cache: Reduces DB load when navigating between pages
+ * TTL: 30 seconds (balance between freshness and performance)
+ */
 const favoritesCache = new Map<string, { data: FavoritesData; timestamp: number }>();
 const CACHE_TTL = 30000; // 30 seconds cache
 
@@ -149,7 +162,11 @@ export function useFavorites(page: number = 1, limit: number = 20) {
     fetchFavorites();
   }, [fetchFavorites, user?.id]);
 
-  // Optimistic update for removing favorites
+  /**
+   * Optimistic update for removing favorites
+   * Why optimistic: Instant UI feedback while DB request is in flight
+   * Improves perceived performance on slow mobile networks
+   */
   const removeFavoriteOptimistic = useCallback((favoriteId: string) => {
     if (!data) return;
 

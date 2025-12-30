@@ -13,20 +13,20 @@ import { Zap } from 'lucide-react'
 interface ListingFormData {
   title: string
   description: string
-  category: 'for_sale' | 'job' | 'service' | 'for_rent'
+  category: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
   subcategory: string
   price: string
   location_city: string
   location_wilaya: string
   photos: string[]
-  // New category-specific columns
+  // Category-specific columns
   available_from?: string
   available_to?: string
   rental_period?: string
   salary_min?: string
   salary_max?: string
-  salary_type?: string  // Add salary type field
-  salary_amount?: string  // For fixed salary
+  salary_type?: string
+  salary_amount?: string
   job_type?: string
   company_name?: string
   condition?: string
@@ -36,6 +36,10 @@ interface ListingFormData {
   application_instructions?: string
   // Service contact fields
   service_phone?: string
+  // Urgent category fields
+  urgent_type?: string
+  urgent_expires_at?: string
+  urgent_contact_preference?: string
   metadata: {
     brand?: string
     experience?: string
@@ -79,14 +83,14 @@ export default function ListingForm({
     location_city: '',
     location_wilaya: '',
     photos: [],
-    // New category-specific fields
+    // Category-specific fields
     available_from: '',
     available_to: '',
     rental_period: '',
     salary_min: '',
     salary_max: '',
-    salary_type: '',  // Add salary type initialization
-    salary_amount: '',  // For fixed salary
+    salary_type: '',
+    salary_amount: '',
     job_type: '',
     company_name: '',
     condition: '',
@@ -96,13 +100,17 @@ export default function ListingForm({
     application_instructions: '',
     // Service fields initialization
     service_phone: '',
+    // Urgent fields initialization
+    urgent_type: '',
+    urgent_expires_at: '',
+    urgent_contact_preference: '',
     metadata: {},
     ...initialData
   })
 
   const categoryData = LISTING_CATEGORIES[formData.category.toUpperCase() as keyof typeof LISTING_CATEGORIES]
   const requiresImages = formData.category === 'for_sale' || formData.category === 'for_rent'
-  const requiresPrice = formData.category !== 'job' && formData.category !== 'service'
+  const requiresPrice = formData.category !== 'job' && formData.category !== 'service' && formData.category !== 'urgent'
   
   // Get cities for selected wilaya
   const selectedWilaya = getWilayaByName(formData.location_wilaya)
@@ -185,14 +193,27 @@ export default function ListingForm({
         return false
       }
     }
+    // Urgent category validation
+    if (formData.category === 'urgent') {
+      if (!formData.urgent_type) {
+        setError('Please select the type of urgent help needed')
+        return false
+      }
+      if (!formData.urgent_contact_preference) {
+        setError('Please select your preferred contact method')
+        return false
+      }
+    }
     if (requiresImages && formData.photos.length === 0) {
       setError('At least 1 image is required for this category')
       return false
     }
-    // Allow 5 photos for rentals, 3 for other categories
-    const maxPhotos = formData.category === 'for_rent' ? 5 : 3
+    // Photo limits: 5 for rentals, 3 for sale, 2 for urgent
+    let maxPhotos = 3
+    if (formData.category === 'for_rent') maxPhotos = 5
+    if (formData.category === 'urgent') maxPhotos = 2
     if (formData.photos.length > maxPhotos) {
-      setError(`Maximum ${maxPhotos} images allowed${formData.category === 'for_rent' ? ' for rentals' : ''}`)
+      setError(`Maximum ${maxPhotos} images allowed for ${formData.category} listings`)
       return false
     }
     return true
@@ -237,7 +258,7 @@ export default function ListingForm({
           location_city: formData.location_city.trim(),
           location_wilaya: formData.location_wilaya,
           photos: formData.photos,
-          // New category-specific fields
+          // Category-specific fields
           available_from: formData.available_from || null,
           available_to: formData.available_to || null,
           rental_period: formData.rental_period || null,
@@ -254,6 +275,10 @@ export default function ListingForm({
           application_instructions: formData.application_instructions?.trim() || null,
           // Service contact information
           service_phone: formData.service_phone?.trim() || null,
+          // Urgent category fields
+          urgent_type: formData.urgent_type || null,
+          urgent_expires_at: formData.urgent_expires_at || null,
+          urgent_contact_preference: formData.urgent_contact_preference || null,
           metadata: formData.metadata
         })
       })
@@ -456,12 +481,13 @@ export default function ListingForm({
       </div>
 
       {/* Category-Specific Fields */}
-      {(formData.category === 'for_rent' || formData.category === 'job' || formData.category === 'for_sale' || formData.category === 'service') && (
+      {(formData.category === 'for_rent' || formData.category === 'job' || formData.category === 'for_sale' || formData.category === 'service' || formData.category === 'urgent') && (
         <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             {formData.category === 'for_rent' ? 'Rental Details' :
              formData.category === 'job' ? 'Job Details' :
-             formData.category === 'service' ? 'Service Details' : 'Item Details'}
+             formData.category === 'service' ? 'Service Details' :
+             formData.category === 'urgent' ? 'Urgent Request Details' : 'Item Details'}
           </h2>
           
           <div className="space-y-6">
@@ -715,6 +741,91 @@ export default function ListingForm({
                 </div>
               </div>
             )}
+
+            {/* Urgent category specific fields */}
+            {formData.category === 'urgent' && (
+              <div className="space-y-6">
+                {/* Urgent alert banner */}
+                <div className="bg-red-50 border-2 border-red-300 rounded-lg p-6">
+                  <div className="flex items-center mb-3">
+                    <span className="text-3xl mr-3">🚨</span>
+                    <h3 className="text-lg font-bold text-red-900">
+                      Urgent Humanitarian Assistance Request
+                    </h3>
+                  </div>
+                  <p className="text-red-800 font-medium mb-2">
+                    This category is for time-sensitive humanitarian needs only.
+                  </p>
+                  <p className="text-red-700 text-sm">
+                    Your request will be prominently displayed and will automatically expire after the selected time period to ensure only current needs are visible.
+                  </p>
+                </div>
+
+                {/* Urgent Type */}
+                <div>
+                  <label htmlFor="urgent_type" className={labelClassName}>
+                    Type of Urgent Help Needed <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="urgent_type"
+                    value={formData.urgent_type}
+                    onChange={(e) => handleInputChange('urgent_type', e.target.value)}
+                    className={selectClassName}
+                    required
+                  >
+                    <option value="">Select urgent help type</option>
+                    <option value="blood_donation">🩸 Blood Donation</option>
+                    <option value="medicine_needed">💊 Medicine Needed</option>
+                    <option value="food_assistance">🍲 Food Assistance</option>
+                    <option value="medical_equipment">🏥 Medical Equipment</option>
+                    <option value="emergency_housing">🏠 Emergency Housing</option>
+                  </select>
+                </div>
+
+                {/* Expiration Time */}
+                <div>
+                  <label htmlFor="urgent_expires_at" className={labelClassName}>
+                    Request Expiration Time
+                  </label>
+                  <select
+                    id="urgent_expires_at"
+                    value={formData.urgent_expires_at}
+                    onChange={(e) => handleInputChange('urgent_expires_at', e.target.value)}
+                    className={selectClassName}
+                  >
+                    <option value="">48 hours (default)</option>
+                    <option value="24h">24 hours</option>
+                    <option value="48h">48 hours</option>
+                    <option value="72h">72 hours</option>
+                  </select>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Your request will automatically expire after this time to keep listings current.
+                  </p>
+                </div>
+
+                {/* Contact Preference */}
+                <div>
+                  <label htmlFor="urgent_contact_preference" className={labelClassName}>
+                    Preferred Contact Method <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="urgent_contact_preference"
+                    value={formData.urgent_contact_preference}
+                    onChange={(e) => handleInputChange('urgent_contact_preference', e.target.value)}
+                    className={selectClassName}
+                    required
+                  >
+                    <option value="">Select contact preference</option>
+                    <option value="phone">📞 Phone Call Only</option>
+                    <option value="whatsapp">💬 WhatsApp Only</option>
+                    <option value="both">📞💬 Both Phone & WhatsApp</option>
+                  </select>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Responders will contact you through your selected method.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -771,13 +882,13 @@ export default function ListingForm({
         </div>
       )}
 
-      {/* Images - Hide for job and service categories */}
-      {formData.category !== 'job' && formData.category !== 'service' && (
+      {/* Images - Hide for job, service, and urgent categories */}
+      {formData.category !== 'job' && formData.category !== 'service' && formData.category !== 'urgent' && (
         <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Images {requiresImages && <span className="text-red-500">*</span>}
           </h2>
-          
+
           <ImageUpload
             images={formData.photos}
             onImagesChange={(photos) => handleInputChange('photos', photos)}
@@ -788,7 +899,8 @@ export default function ListingForm({
         </div>
       )}
 
-      {/* Hot Deal Section - Coming Soon */}
+      {/* Hot Deal Section - Coming Soon - Hide for urgent category */}
+      {formData.category !== 'urgent' && (
       <div className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-8 shadow-lg relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-200/30 to-red-200/30 rounded-full blur-2xl"></div>
@@ -841,6 +953,7 @@ export default function ListingForm({
           </div>
         </div>
       </div>
+      )}
 
       {/* Submit Buttons */}
       <div className="flex justify-end space-x-4 pt-4">

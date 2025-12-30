@@ -1,4 +1,16 @@
-// src/app/api/favorites/[id]/route.ts - Remove from favorites and get favorite status
+/**
+ * Favorites By ID API - Remove & Check Favorite Status
+ *
+ * ENDPOINTS:
+ * - DELETE /api/favorites/[id]: Remove listing from favorites
+ * - GET /api/favorites/[id]: Check if listing is favorited
+ *
+ * FEATURES:
+ * - Rate limiting: 60 removes/min per IP
+ * - Returns 404 if favorite doesn't exist (not an error for idempotency)
+ * - GET returns isFavorited: false for unauthenticated users (graceful)
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { smartRateLimit } from '@/lib/rate-limit/database';

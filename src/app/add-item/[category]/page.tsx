@@ -26,7 +26,7 @@ export default function CreateListingPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const validCategories = ['for_sale', 'job', 'service', 'for_rent']
+    const validCategories = ['for_sale', 'job', 'service', 'for_rent', 'urgent']
     if (!validCategories.includes(category)) {
       router.push('/add-item')
       return

@@ -1,8 +1,20 @@
 /**
- * Security safeguards for search API using service role
+ * Search Security - Manual Security for Service Role Queries
  *
- * When using service role (which bypasses RLS), we must enforce
- * all security constraints server-side to prevent data leaks.
+ * WHY NEEDED:
+ * - Search API uses service role to bypass RLS (avoids 3s timeout at scale)
+ * - Service role = full database access → MUST enforce security manually
+ * - Without this: Users could see inactive/private listings
+ *
+ * SECURITY LAYERS:
+ * 1. Column allowlisting: Only expose safe columns (no email, phone, etc.)
+ * 2. Status filtering: applySearchSecurityConstraints() enforces status='active'
+ * 3. Input validation: validateSearchParams() prevents injection
+ * 4. Audit logging: logServiceRoleQuery() tracks all service role usage
+ *
+ * CRITICAL:
+ * - applySearchSecurityConstraints() MUST be called on ALL service role queries
+ * - Never expose sensitive columns (email, phone, metadata)
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';

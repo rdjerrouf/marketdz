@@ -1,4 +1,13 @@
-// src/hooks/useUser.ts
+/**
+ * useUser Hook - Combines Auth User with Profile Data
+ *
+ * WHY THIS EXISTS:
+ * - Auth user only has email/id (from Supabase Auth)
+ * - Profile data (name, avatar, location) lives in profiles table
+ * - This hook merges both for complete user information
+ * - Auto-refreshes profile when auth state changes
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';

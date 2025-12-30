@@ -1,19 +1,30 @@
-// Utility functions
-// src/lib/utils.ts
+/**
+ * Utility Functions - Common Helpers
+ *
+ * Includes:
+ * - Tailwind class merging
+ * - Price/date formatting (Algeria-specific)
+ * - Phone number normalization (WhatsApp-compatible)
+ * - Validation helpers
+ */
+
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
-// Utility function to merge Tailwind CSS classes
+/**
+ * Merge Tailwind CSS classes with proper precedence
+ * Handles conflicts (e.g., "px-2 px-4" → "px-4")
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Format currency for Algeria (DZD)
+// Format currency for Algeria (DZD - Algerian Dinar)
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'DZD',
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 0,  // No cents for DZD
     maximumFractionDigits: 0,
   }).format(price)
 }
@@ -83,29 +94,36 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email)
 }
 
-// Validate phone number (Algeria format)
+/**
+ * Validate Algerian phone number format
+ * Accepts: +213 5XX XXX XXX or 05XX XXX XXX
+ * Mobile prefixes: 5, 6, 7 (Djezzy, Mobilis, Ooredoo)
+ */
 export function isValidAlgerianPhone(phone: string): boolean {
-  // Algeria phone numbers: +213 followed by 9 digits, or 0 followed by 9 digits
   const phoneRegex = /^(\+213|0)[567]\d{8}$/
   return phoneRegex.test(phone.replace(/\s/g, ''))
 }
 
-// Normalize phone number to international WhatsApp-compatible format
+/**
+ * Normalize phone to international format for WhatsApp
+ * Converts: 0551234567 → +213551234567
+ * Why: WhatsApp requires +country_code format
+ */
 export function normalizePhoneNumber(phone: string): string {
   if (!phone) return ''
 
-  const cleaned = phone.replace(/\D/g, '')
+  const cleaned = phone.replace(/\D/g, '')  // Remove non-digits
 
   if (cleaned.startsWith('213')) {
     // Already international format
     return `+${cleaned}`
   } else if (cleaned.startsWith('0') && cleaned.length === 10) {
-    // Convert local format (0551234567) to international (+213551234567)
-    const localNumber = cleaned.substring(1) // Remove leading 0
+    // Convert local to international (remove leading 0, add +213)
+    const localNumber = cleaned.substring(1)
     return `+213${localNumber}`
   }
 
-  // Return as-is if format is not recognized
+  // Return as-is if format not recognized
   return phone
 }
 
@@ -125,12 +143,16 @@ export function formatPhoneNumber(phone: string): string {
   return phone
 }
 
-// Generate WhatsApp link from phone number
+/**
+ * Generate WhatsApp "Click to Chat" link
+ * Opens WhatsApp with pre-filled message to normalized phone number
+ * Format: https://wa.me/213551234567?text=Hello
+ */
 export function generateWhatsAppLink(phone: string, message?: string): string {
   if (!phone) return ''
 
   const normalizedPhone = normalizePhoneNumber(phone)
-  const cleanPhone = normalizedPhone.replace(/\D/g, '') // Remove all non-digits including +
+  const cleanPhone = normalizedPhone.replace(/\D/g, '') // Remove + for wa.me
 
   const encodedMessage = message ? encodeURIComponent(message) : ''
   const messageParam = message ? `?text=${encodedMessage}` : ''

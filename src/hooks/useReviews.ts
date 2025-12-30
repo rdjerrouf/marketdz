@@ -1,4 +1,19 @@
-// src/hooks/useReviews.ts
+/**
+ * useReviews Hooks - Complete Review Management System
+ *
+ * FEATURES:
+ * - useReviews: Fetch and filter reviews with pagination
+ * - useCreateReview: Submit new reviews (1-5 stars)
+ * - useUpdateReview: Edit existing reviews
+ * - useDeleteReview: Remove reviews
+ * - useUserRating: Get average rating from profiles table
+ *
+ * FILTERING:
+ * - By reviewedId: Reviews received by a user
+ * - By reviewerId: Reviews written by a user
+ * - By listingId: Reviews for a specific transaction
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'

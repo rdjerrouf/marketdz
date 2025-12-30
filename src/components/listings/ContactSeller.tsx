@@ -1,3 +1,18 @@
+/**
+ * ContactSeller Component - Initiate Conversations with Sellers
+ *
+ * FLOW:
+ * 1. Check if user is authenticated (redirect to signin if not)
+ * 2. Call POST /api/messages/conversations to create/get conversation
+ * 3. Navigate to /chat/{conversation_id}
+ *
+ * FEATURES:
+ * - Prevents users from messaging their own listings
+ * - Auto-creates conversation if doesn't exist
+ * - Handles listing validation (active status check)
+ * - Authorization header forwarding for API auth
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -42,6 +57,11 @@ export default function ContactSeller({
     setShowContactInfo(true)
   }
 
+  /**
+   * Create conversation and navigate to chat
+   * Why create conversation here: Ensures conversation exists before opening chat
+   * Authorization header: Forwarded to API for RLS policies
+   */
   const handleSendMessage = async () => {
     setIsLoading(true)
 

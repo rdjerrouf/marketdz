@@ -1,3 +1,20 @@
+/**
+ * Signin API Route - Email/Password Authentication
+ *
+ * FLOW:
+ * 1. Validate email/password format
+ * 2. Sign in via Supabase Auth (checks email_confirmed_at)
+ * 3. Fetch user profile from profiles table
+ * 4. Return user + profile data
+ *
+ * SECURITY:
+ * - Email verification required (see signup route)
+ * - Middleware will set auth cookies automatically
+ * - Profile fetch validates user exists in database
+ *
+ * NOTE: Unverified users will get error from Supabase Auth
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -26,7 +43,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Attempt to sign in
+    // Authenticate via Supabase Auth
+    // IMPORTANT: This checks email_confirmed_at automatically
+    // Unverified users will get "Email not confirmed" error
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -49,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     console.log('=== Signin successful ===')
 
-    // Get user profile
+    // Fetch user profile (created by handle_new_user trigger)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -58,7 +77,8 @@ export async function POST(request: NextRequest) {
 
     if (profileError) {
       console.error('Profile fetch error:', profileError)
-      // User signed in but profile not found - this might be a data integrity issue
+      // User authenticated but profile missing (data integrity issue)
+      // Return partial success - client should handle gracefully
       return NextResponse.json({
         message: 'Signed in successfully',
         user: {
@@ -69,6 +89,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Success - return user + profile
     return NextResponse.json({
       message: 'Signed in successfully',
       user: {

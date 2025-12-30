@@ -1,4 +1,20 @@
-// src/app/api/upload/route.ts
+/**
+ * Upload API - File Upload to Supabase Storage
+ *
+ * SECURITY:
+ * - Auth required: Only authenticated users can upload
+ * - File type validation: JPEG, PNG, WebP only
+ * - Size limit: 5MB max
+ * - Unique naming: userId_timestamp.ext (prevents collisions)
+ *
+ * ENDPOINTS:
+ * - POST: Upload file to Supabase Storage bucket
+ * - DELETE: Remove file from storage (requires file path)
+ *
+ * NOTE: This is basic upload. For listings, use ImageUpload component which includes
+ * client-side compression (reduces 60-80% before upload)
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseClient } from '@/lib/supabase/server'
 

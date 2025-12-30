@@ -1,4 +1,19 @@
-// src/app/api/messages/[conversationId]/route.ts - Updated for new messaging schema
+/**
+ * Messages By Conversation API - Fetch & Send Messages in a Conversation
+ *
+ * GET - Fetch messages with pagination and cursor-based loading
+ * POST - Send new message in conversation
+ *
+ * FEATURES:
+ * - Auto-mark-as-read: Marks received messages as read when fetched
+ * - Pagination: Limit + before cursor for infinite scroll
+ * - Access control: Users must be buyer or seller in conversation
+ * - Unread counts: Auto-updates conversation unread counts
+ *
+ * OPTIMIZATION:
+ * - Messages returned in chronological order (oldest first) for chat UI
+ * - Fetches in reverse order for efficient cursor pagination
+ */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';

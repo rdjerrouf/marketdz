@@ -1,4 +1,21 @@
-// src/components/common/ReviewForm.tsx
+/**
+ * ReviewForm Component - Submit User Reviews
+ *
+ * VALIDATION:
+ * - Rating: Required (1-5 stars)
+ * - Comment: 10-500 characters required
+ *
+ * FEATURES:
+ * - Interactive star rating selector
+ * - Character counter (500 max)
+ * - Loading state during submission
+ * - Works with or without listing context
+ *
+ * USAGE:
+ * - After transaction: reviewedUserId + listingId
+ * - General review: reviewedUserId only
+ */
+
 'use client'
 
 import { useState } from 'react'

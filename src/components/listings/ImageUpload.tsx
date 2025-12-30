@@ -1,4 +1,21 @@
-// src/components/listings/ImageUpload.tsx
+/**
+ * ImageUpload Component - Drag-and-Drop Image Uploader
+ *
+ * FEATURES:
+ * - Client-side compression before upload (60-80% size reduction)
+ * - Category-based validation (for_sale/for_rent require photos, jobs/services don't)
+ * - Multiple file upload with progress
+ * - Image preview with delete functionality
+ * - Direct Supabase Storage upload (no Edge Function needed here)
+ *
+ * FLOW:
+ * 1. User selects/drops images
+ * 2. Validate file type and size
+ * 3. Compress to WebP @ 800x600
+ * 4. Upload to Supabase Storage
+ * 5. Return public URLs for storage in database
+ */
+
 'use client'
 
 import { useState, useRef } from 'react'
@@ -6,11 +23,11 @@ import { supabase } from '@/lib/supabase/client'
 import { compressImage, validateImageFile } from '@/lib/image-compression'
 
 interface ImageUploadProps {
-  images: string[]
-  onImagesChange: (images: string[]) => void
-  category: 'for_sale' | 'job' | 'service' | 'for_rent'
-  maxImages?: number
-  required?: boolean
+  images: string[]                          // Current uploaded image URLs
+  onImagesChange: (images: string[]) => void // Callback when images change
+  category: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
+  maxImages?: number                        // Max photos allowed (3 for sale, 5 for rent, 2 for urgent)
+  required?: boolean                        // Whether at least 1 image is required
 }
 
 export default function ImageUpload({
@@ -24,11 +41,11 @@ export default function ImageUpload({
   const [error, setError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const allowImages = category === 'for_sale' || category === 'for_rent'
+  // Category validation: for_sale, for_rent, and urgent allow images; jobs/services don't
+  const allowImages = category === 'for_sale' || category === 'for_rent' || category === 'urgent'
   const minImages = allowImages && required ? 1 : 0
 
   const validateFile = (file: File): string | null => {
-    // Use the utility validation function
     const validation = validateImageFile(file)
     if (!validation.valid) {
       return validation.error || 'Invalid image file'
@@ -36,8 +53,17 @@ export default function ImageUpload({
     return null
   }
 
+  /**
+   * Upload single image with compression
+   *
+   * PROCESS:
+   * 1. Compress to WebP (typically 2MB → 300KB)
+   * 2. Generate unique filename
+   * 3. Upload to Supabase Storage
+   * 4. Return public URL
+   */
   const uploadImage = async (file: File): Promise<string> => {
-    // Compress the image before uploading
+    // Client-side compression (saves bandwidth and storage costs)
     const compressionResult = await compressImage(file, {
       maxWidth: 800,
       maxHeight: 600,
@@ -50,9 +76,11 @@ export default function ImageUpload({
 
     const compressedFile = compressionResult.file
     const fileExt = compressionResult.format
+    // Generate collision-resistant filename (timestamp + random)
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
     const filePath = `listings/${fileName}`
 
+    // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from('listing-photos')
       .upload(filePath, compressedFile)
@@ -61,6 +89,7 @@ export default function ImageUpload({
       throw new Error(`Failed to upload image: ${uploadError.message}`)
     }
 
+    // Get public URL for storage in database
     const { data } = supabase.storage
       .from('listing-photos')
       .getPublicUrl(filePath)

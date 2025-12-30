@@ -45,6 +45,14 @@ const categories = [
     subtitle: 'Home services, consulting, tutoring...',
     icon: '🔧',
     color: 'from-orange-400 to-orange-600'
+  },
+  {
+    id: 'urgent',
+    title: 'Urgent Help',
+    description: 'Request urgent humanitarian assistance',
+    subtitle: 'Blood donations, medicine, food assistance...',
+    icon: '🚨',
+    color: 'from-red-500 to-red-700'
   }
 ]
 

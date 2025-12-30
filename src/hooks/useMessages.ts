@@ -1,4 +1,19 @@
-// src/hooks/useMessages.ts - Comprehensive messaging hook with caching and real-time
+/**
+ * useMessages Hook - Real-Time Messaging System
+ *
+ * FEATURES:
+ * - Message caching by conversation ID (reduces DB queries)
+ * - Pagination for loading older messages (infinite scroll)
+ * - Real-time subscriptions for live updates (Supabase channels)
+ * - Auto-mark-as-read when viewing messages
+ * - Get-or-create conversation logic (no duplicate conversations)
+ *
+ * ARCHITECTURE:
+ * - Two subscriptions: conversations list + active conversation messages
+ * - Messages cached per conversation to avoid re-fetching
+ * - Optimistic UI updates for sent messages
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -46,6 +61,11 @@ export interface Conversation {
   };
 }
 
+/**
+ * Message cache structure
+ * Why cache: Prevents re-fetching messages when switching between conversations
+ * hasMore: True if there are older messages to load (pagination)
+ */
 interface MessageCache {
   [conversationId: string]: {
     messages: Message[];
@@ -412,7 +432,11 @@ export const useMessages = (conversationId?: string) => {
     }
   }, [user]);
 
-  // Subscribe to real-time conversation updates
+  /**
+   * Real-time subscription for conversations list
+   * Why: Live updates when new conversations are created or updated
+   * Listens to: INSERT and UPDATE events on conversations table
+   */
   useEffect(() => {
     if (!user) return;
 
@@ -452,7 +476,11 @@ export const useMessages = (conversationId?: string) => {
     };
   }, [user, fetchConversations]);
 
-  // Subscribe to real-time messages for active conversation
+  /**
+   * Real-time subscription for active conversation messages
+   * Why: Live updates when new messages arrive
+   * Auto-marks as read: After 1 second delay if message is from other user
+   */
   useEffect(() => {
     if (!user || !conversationId) return;
 

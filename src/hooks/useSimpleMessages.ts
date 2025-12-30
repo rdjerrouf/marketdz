@@ -1,4 +1,19 @@
-// src/hooks/useSimpleMessages.ts - Simple messaging hook for easy debugging
+/**
+ * useSimpleMessages Hooks - Simplified Messaging for Debugging
+ *
+ * WHY THIS EXISTS:
+ * - Simpler alternative to useMessages (which has caching, real-time, pagination)
+ * - Better for debugging messaging issues
+ * - Explicit logging for troubleshooting
+ *
+ * HOOKS:
+ * - useConversations: List all user's conversations
+ * - useConversationMessages: Messages for specific conversation
+ * - useStartConversation: Create new conversation with initial message
+ *
+ * NOTE: For production features, prefer useMessages (has caching + real-time)
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';

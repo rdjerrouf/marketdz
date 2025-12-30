@@ -1,6 +1,24 @@
-// Database-based rate limiting with Supabase
-// Note: This requires the rate_limits table to be created in your database
-// For production, prefer Redis-based rate limiting for better performance
+/**
+ * Rate Limiting - Prevent API Abuse
+ *
+ * STRATEGY:
+ * - Development: Memory-based (simple Map)
+ * - Production: Database-based (ready for upgrade to Redis)
+ *
+ * FEATURES:
+ * - Sliding window: Counts requests per time window
+ * - Auto-cleanup: Removes expired entries from memory
+ * - smartRateLimit: Environment-aware (memory vs database)
+ *
+ * TYPICAL LIMITS:
+ * - Favorites GET: 60 req/min per IP, 120 req/min per user
+ * - Favorites POST: 30 req/min per IP, 50 req/min per user
+ * - Returns 429 status when exceeded
+ *
+ * PRODUCTION TODO:
+ * - Upgrade to Redis for distributed rate limiting
+ * - Current database implementation is placeholder
+ */
 
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { RateLimit } from '@/types'

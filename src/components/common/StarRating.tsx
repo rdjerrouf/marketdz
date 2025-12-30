@@ -1,4 +1,17 @@
-// src/components/common/StarRating.tsx
+/**
+ * StarRating Component - Interactive 5-Star Rating Display
+ *
+ * FEATURES:
+ * - Interactive: Click to set rating (when not readonly)
+ * - Hover preview: Shows rating before clicking
+ * - Half stars: Supports decimal ratings (e.g., 4.5)
+ * - Sizes: sm/md/lg variants
+ *
+ * MODES:
+ * - Interactive: onRatingChange provided, readonly=false
+ * - Display only: readonly=true (for showing existing ratings)
+ */
+
 'use client'
 
 import { useState } from 'react'
