@@ -15,7 +15,7 @@ interface Listing {
   title: string
   description: string
   price: number | null
-  category: 'for_sale' | 'job' | 'service' | 'for_rent'
+  category: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
   photos: string[]
   created_at: string
   status: string

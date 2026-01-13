@@ -14,7 +14,7 @@ interface Listing {
   title: string
   description: string | null
   price: number | null
-  category: 'for_sale' | 'job' | 'service' | 'for_rent'
+  category: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
   photos: string[]
   created_at: string
   status: string
@@ -143,6 +143,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
       if (category === 'job') return 'Salary negotiable'
       if (category === 'service') return 'Quote on request'
       if (category === 'for_rent') return 'Contact for price'
+      if (category === 'urgent') return 'Free / Donation'
       return 'Price negotiable'
     }
 
@@ -173,7 +174,8 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
       'for_sale': { text: 'For Sale', color: 'bg-green-500', emoji: '💰' },
       'for_rent': { text: 'For Rent', color: 'bg-blue-500', emoji: '🏠' },
       'job': { text: 'Jobs', color: 'bg-red-500', emoji: '💼' },
-      'service': { text: 'Services', color: 'bg-purple-500', emoji: '🔧' }
+      'service': { text: 'Services', color: 'bg-purple-500', emoji: '🔧' },
+      'urgent': { text: 'Urgent Help', color: 'bg-red-500', emoji: '🚨' }
     }
     return categories[category as keyof typeof categories] || { text: category, color: 'bg-gray-500', emoji: '📦' }
   }
