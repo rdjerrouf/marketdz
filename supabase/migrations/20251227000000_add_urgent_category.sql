@@ -61,6 +61,8 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path TO public
 AS $$
+DECLARE
+  expired_count INTEGER;
 BEGIN
   -- Update expired urgent listings to 'expired' status
   UPDATE listings
@@ -70,8 +72,11 @@ BEGIN
     AND urgent_expires_at < NOW()
     AND status = 'active';
 
+  -- Get the number of rows affected
+  GET DIAGNOSTICS expired_count = ROW_COUNT;
+
   -- Log the number of expired listings
-  RAISE NOTICE 'Expired % urgent listings', ROW_COUNT;
+  RAISE NOTICE 'Expired % urgent listings', expired_count;
 END;
 $$;
 
