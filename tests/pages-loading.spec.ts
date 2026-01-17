@@ -36,7 +36,7 @@ test.describe('All Pages Loading Test', () => {
       // Check that the page has some content (not completely empty)
       const bodyText = await page.locator('body').textContent();
       expect(bodyText).toBeTruthy();
-      expect(bodyText.trim().length).toBeGreaterThan(0);
+      expect(bodyText?.trim().length).toBeGreaterThan(0);
     });
   }
 });
