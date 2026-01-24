@@ -17,6 +17,27 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { normalizePhoneNumber } from '@/lib/utils'
 
 /**
+ * Convert expiration string ("24h", "48h", "72h") to ISO timestamp
+ * Returns null if empty/invalid (database trigger will set 48h default)
+ */
+function convertExpirationToTimestamp(expiration: string | null | undefined): string | null {
+  if (!expiration) return null
+
+  const hoursMap: Record<string, number> = {
+    '24h': 24,
+    '48h': 48,
+    '72h': 72
+  }
+
+  const hours = hoursMap[expiration]
+  if (!hours) return null // Invalid value, let trigger set default
+
+  const expiresAt = new Date()
+  expiresAt.setHours(expiresAt.getHours() + hours)
+  return expiresAt.toISOString()
+}
+
+/**
  * POST /api/listings - Create new listing
  * Validates category-specific fields and normalizes contact info
  */
@@ -190,7 +211,7 @@ export async function POST(request: NextRequest) {
         condition: condition || null,
         // Urgent category columns
         urgent_type: urgent_type || null,
-        urgent_expires_at: urgent_expires_at || null, // Trigger sets default 48h if null
+        urgent_expires_at: convertExpirationToTimestamp(urgent_expires_at), // Convert "24h"/"48h"/"72h" to timestamp
         urgent_contact_preference: urgent_contact_preference || null,
         // Contact info stored in metadata (normalized for WhatsApp)
         metadata: {
@@ -262,7 +283,7 @@ export async function GET(request: NextRequest) {
 
     // Validate enum inputs
     if (category) {
-      const validCategories = ['for_sale', 'job', 'service', 'for_rent'] as const
+      const validCategories = ['for_sale', 'job', 'service', 'for_rent', 'urgent'] as const
       if (!validCategories.includes(category as any)) {
         return NextResponse.json({ error: 'Invalid category' }, { status: 400 })
       }
@@ -280,6 +301,7 @@ export async function GET(request: NextRequest) {
       .select(`
         id, title, description, category, subcategory, price, created_at, status,
         user_id, location_city, location_wilaya, photos, metadata,
+        urgent_type, urgent_expires_at, urgent_contact_preference,
         profiles:user_id (
           first_name,
           last_name,
@@ -295,7 +317,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (category) {
-      query = query.eq('category', category as 'for_sale' | 'job' | 'service' | 'for_rent')
+      query = query.eq('category', category as 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent')
     }
 
     if (status) {
