@@ -247,7 +247,11 @@ export default function ProfilePage() {
   }
 
   const formatPrice = (price: number | null, category: string) => {
-    if (!price) return category === 'job' ? 'Salary negotiable' : 'Price negotiable'
+    if (!price) {
+      if (category === 'job') return 'Salary negotiable'
+      if (category === 'urgent') return 'Free / Donation'
+      return 'Price negotiable'
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'DZD',

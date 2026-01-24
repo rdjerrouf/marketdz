@@ -336,6 +336,7 @@ function BrowsePageContent() {
     if (!price) {
       if (category === 'job') return 'Salary negotiable'
       if (category === 'for_rent') return 'Contact for price'
+      if (category === 'urgent') return 'Free / Donation'
       return 'Price negotiable'
     }
 
