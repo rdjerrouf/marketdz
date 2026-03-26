@@ -77,3 +77,10 @@ supabase/migrations_backup/
 /diagnose-*.js
 /create-test-*.js
 /reset-*.js
+
+# Test results and playwright reports (generated artifacts)
+test-results/
+playwright-report/data/
+
+# Seed scripts with embedded credentials
+scripts/seed-cloud-users-listings.js
