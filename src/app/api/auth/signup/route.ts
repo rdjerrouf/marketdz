@@ -3,12 +3,10 @@
  *
  * FLOW:
  * 1. Create user via admin client (email_confirm: false)
- * 2. Supabase automatically sends verification email
- * 3. User must verify email before signing in
- * 4. Trigger (handle_new_user) creates profile with metadata
- *
- * NOTE: Email delays (5-30 min) are expected without custom SMTP/DNS
- * See CLAUDE.md "TODO: EMAIL SETUP WHEN DOMAIN IS READY"
+ * 2. Generate confirmation link via admin API
+ * 3. Send confirmation email via Resend
+ * 4. User must verify email before signing in
+ * 5. Trigger (handle_new_user) creates profile with metadata
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -67,14 +65,63 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('User created successfully:', data.user.id)
-    console.log('Verification email sent to:', email)
 
-    // Return success - verification email sent automatically by Supabase
+    // Generate confirmation link and send via Resend
+    // (admin.createUser does NOT auto-send confirmation emails — must be done explicitly)
+    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'signup',
+      email,
+      password,
+    })
+
+    if (linkError || !linkData?.properties?.action_link) {
+      console.error('Failed to generate confirmation link:', linkError?.message)
+      // User was created — return success but warn about email
+      return NextResponse.json({
+        success: true,
+        user: data.user,
+        message: 'Account created! Email confirmation may be delayed — please check your inbox.',
+        requiresVerification: true,
+      })
+    }
+
+    const confirmationUrl = linkData.properties.action_link
+
+    // Send via Resend
+    const resendResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'DlalaDZ <noreply@dlaladz.com>',
+        to: email,
+        subject: 'Verify your email - DlalaDZ',
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+            <h2 style="color:#1e293b">Welcome to DlalaDZ!</h2>
+            <p>Please verify your email address to activate your account.</p>
+            <a href="${confirmationUrl}" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;margin:16px 0">
+              Verify Email Address
+            </a>
+            <p style="color:#64748b;font-size:14px">This link expires in 24 hours. If you didn't create an account, you can ignore this email.</p>
+          </div>
+        `,
+      }),
+    })
+
+    if (!resendResponse.ok) {
+      console.error('Resend error:', await resendResponse.text())
+    } else {
+      console.log('Verification email sent via Resend to:', email)
+    }
+
     return NextResponse.json({
       success: true,
       user: data.user,
       message: 'Account created successfully! Please check your email to verify your account.',
-      requiresVerification: true
+      requiresVerification: true,
     })
 
   } catch (error) {
