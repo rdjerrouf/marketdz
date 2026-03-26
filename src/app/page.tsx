@@ -869,55 +869,6 @@ export default function CompleteKickAssHomepage() {
             </div>
           </div>
 
-          {/* Enhanced Recent Activity */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-white mb-8 flex items-center">
-              <Clock className="w-8 h-8 mr-3 text-blue-400" />
-              Recent Activity
-            </h2>
-            <div className="space-y-4">
-              {[
-                { icon: TrendingUp, color: 'from-green-400 to-green-600', text: '127 new listings added today', time: '2 minutes ago', count: '127' },
-                { icon: DollarSign, color: 'from-yellow-400 to-orange-500', text: 'iPhone 13 Pro sold for 145,000 DA', time: '15 minutes ago', highlight: true },
-                { icon: Users, color: 'from-blue-400 to-purple-600', text: '15 new members joined', time: '1 hour ago', count: '15' },
-                { icon: Award, color: 'from-pink-400 to-red-500', text: 'Seller of the month: Ahmed B.', time: '3 hours ago', featured: true }
-              ].map((activity, index) => {
-                const Icon = activity.icon
-                return (
-                  <div key={index} className="flex items-center p-4 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300 group shadow-lg hover:shadow-xl hover:scale-105">
-                    <div className={`bg-gradient-to-r ${activity.color} p-3 rounded-xl mr-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white font-medium">{activity.text}</p>
-                      <p className="text-white/50 text-sm flex items-center">
-                        <Clock className="w-3 h-3 mr-1" />
-                        {activity.time}
-                      </p>
-                    </div>
-                    {activity.count && (
-                      <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm px-3 py-1 rounded-full font-bold">
-                        +{activity.count}
-                      </div>
-                    )}
-                    {activity.highlight && (
-                      <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs px-2 py-1 rounded-full font-bold animate-pulse">
-                        SOLD
-                      </div>
-                    )}
-                    {activity.featured && (
-                      <div className="bg-gradient-to-r from-pink-400 to-red-500 text-white text-xs px-2 py-1 rounded-full font-bold flex items-center">
-                        <Trophy className="w-3 h-3 mr-1" />
-                        WINNER
-                      </div>
-                    )}
-                    <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white/60 group-hover:translate-x-1 transition-all" />
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
           {/* Enhanced Footer Section */}
           <div className="text-center py-12 border-t border-white/10 relative z-10">
             <div className="flex items-center justify-center mb-4">

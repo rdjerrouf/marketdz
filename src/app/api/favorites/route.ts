@@ -264,28 +264,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    /**
-     * Upsert for idempotent favoriting
-     * Why upsert: If user clicks favorite twice rapidly, doesn't throw error
-     * onConflict: Unique constraint on (user_id, listing_id)
-     */
-    
+    // Plain INSERT — avoids ON CONFLICT DO UPDATE which requires UPDATE RLS policy
     const { data: favorite, error: favoriteError } = await supabase
       .from('favorites')
-      .upsert(
-        {
-          user_id: user.id,
-          listing_id: listingId
-        },
-        {
-          onConflict: 'user_id,listing_id',
-          ignoreDuplicates: false
-        }
-      )
-      .select()
+      .insert({ user_id: user.id, listing_id: listingId })
+      .select('id, user_id, listing_id, created_at')
       .single();
 
     if (favoriteError) {
+      // 23505 = unique_violation: already favorited (stale client state)
+      if (favoriteError.code === '23505') {
+        const { data: existing } = await supabase
+          .from('favorites')
+          .select('id, user_id, listing_id, created_at')
+          .eq('user_id', user.id)
+          .eq('listing_id', listingId)
+          .single();
+        if (existing) {
+          return NextResponse.json({
+            message: 'Added to favorites successfully',
+            favorite: existing
+          });
+        }
+      }
       console.error('Add favorite error:', favoriteError);
       return NextResponse.json(
         { error: 'Failed to add favorite' },
