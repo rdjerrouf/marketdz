@@ -271,10 +271,11 @@ function MobileSidebarComponent({
               width: isPWA ? '176px' : '208px',
               zIndex: 1000,
               WebkitOverflowScrolling: 'touch',
-              overflowY: 'auto',
+              overflowY: 'scroll',
+              height: '100dvh',
             }}
           >
-            <div className="p-4">
+            <div className="p-4 pb-8">
               {/* Close button at the top */}
               <button
                 onClick={() => setIsOpen(false)}

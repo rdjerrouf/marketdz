@@ -372,7 +372,7 @@ export default function ProfilePage() {
               Back to Home
             </button>
 
-            <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
+            <h1 className="text-2xl font-bold text-white">My Profile</h1>
           </div>
         </div>
       </div>

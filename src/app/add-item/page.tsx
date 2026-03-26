@@ -4,7 +4,6 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import PWAInstallButton from '@/components/PWAInstallButton'
 
 interface User {
   id: string
@@ -389,10 +388,7 @@ export default function AddItemPage() {
 
         {/* Header */}
         <div className="text-center mb-12 relative">
-          <div className="absolute top-0 right-0">
-            <PWAInstallButton />
-          </div>
-          <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center">
+  <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center">
             ✨ Create Your Listing
           </h1>
           <p className="text-xl text-white text-opacity-90 mb-2">
