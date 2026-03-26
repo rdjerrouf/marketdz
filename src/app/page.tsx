@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Home, User, MessageCircle, Bell, Zap, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase/client'
-import { fixPhotoUrl } from '@/lib/storage'
+import { fixPhotoUrl, getCategoryPlaceholder } from '@/lib/storage'
 import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import MobileListingCard from '@/components/common/MobileListingCard'
 import FavoriteButton from '@/components/common/FavoriteButton'
@@ -743,9 +743,10 @@ export default function CompleteKickAssHomepage() {
                     {/* Enhanced Image Container */}
                     <div className="relative h-56 overflow-hidden">
                       <img
-                        src={fixPhotoUrl(listing.photos[0])}
+                        src={listing.photos && listing.photos.length > 0 ? fixPhotoUrl(listing.photos[0]) : getCategoryPlaceholder(listing.category)}
                         alt={listing.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        onError={(e) => { (e.target as HTMLImageElement).src = getCategoryPlaceholder(listing.category) }}
                       />
 
                       {/* Enhanced Gradient Overlay */}
