@@ -505,13 +505,19 @@ export default function CompleteKickAssHomepage() {
 
               {/* Quick filters */}
               <div className="flex flex-wrap gap-3 mt-4">
-                {['Electronics', 'Real Estate', 'Jobs', 'Services'].map((tag) => (
-                  <button
-                    key={tag}
+                {[
+                  { label: 'Electronics', href: '/browse?category=for_sale&subcategory=Electronics' },
+                  { label: 'Real Estate', href: '/browse?category=for_rent' },
+                  { label: 'Jobs', href: '/browse?category=job' },
+                  { label: 'Services', href: '/browse?category=service' },
+                ].map((tag) => (
+                  <Link
+                    key={tag.label}
+                    href={tag.href}
                     className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-105 hover:shadow-lg"
                   >
-                    {tag}
-                  </button>
+                    {tag.label}
+                  </Link>
                 ))}
               </div>
             </div>
