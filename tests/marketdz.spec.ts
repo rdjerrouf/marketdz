@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-test('MarketDZ homepage loads correctly', async ({ page }) => {
+test('DlalaDZ homepage loads correctly', async ({ page }) => {
   await page.goto('/');
 
-  // Check if the page title contains MarketDZ
-  await expect(page).toHaveTitle(/MarketDZ/);
+  // Check if the page title contains DlalaDZ
+  await expect(page).toHaveTitle(/DlalaDZ/);
 });
 
 test('can navigate to browse listings', async ({ page }) => {

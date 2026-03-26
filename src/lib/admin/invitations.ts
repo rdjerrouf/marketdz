@@ -252,9 +252,9 @@ async function sendInvitationEmail(
 📧 ADMIN INVITATION EMAIL (implement actual email service)
 ==========================================
 To: ${email}
-Subject: You've been invited to admin MarketDZ
+Subject: You've been invited to admin DlalaDZ
 
-You've been invited to join MarketDZ as an ${role}.
+You've been invited to join DlalaDZ as an ${role}.
 
 Click here to accept: ${invitationUrl}
 
@@ -266,7 +266,7 @@ This invitation expires in 7 days.
   /*
   await emailService.send({
     to: email,
-    subject: 'MarketDZ Admin Invitation',
+    subject: 'DlalaDZ Admin Invitation',
     template: 'admin-invitation',
     data: {
       invitationUrl,

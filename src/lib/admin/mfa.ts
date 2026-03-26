@@ -78,7 +78,7 @@ export async function setupAdminMFA(adminUserId: string): Promise<{
   }
 
   // Generate QR code URL for authenticator apps
-  const appName = 'MarketDZ Admin'
+  const appName = 'DlalaDZ Admin'
   const accountName = `admin-${adminUserId.slice(0, 8)}`
   const qrCodeUrl = authenticator.keyuri(accountName, appName, secret)
 

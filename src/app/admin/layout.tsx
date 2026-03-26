@@ -148,10 +148,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         // Final fallback to legacy email approach
         const adminEmails = [
-          'admin@marketdz.com',
-          'moderator@marketdz.com',
+          'admin@dlaladz.com',
+          'moderator@dlaladz.com',
           'test@example.com',
-          'ryad@marketdz.com',
+          'ryad@dlaladz.com',
           'rdjerrouf@gmail.com',
           'anyadjerrouf@gmail.com'
         ]

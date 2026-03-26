@@ -1,6 +1,6 @@
 // src/config/app.ts
 export const APP_CONFIG = {
-  name: 'MarketDZ',
+  name: 'DlalaDZ',
   description: 'Algeria\'s Premier Online Marketplace',
   version: '1.0.0',
   url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
@@ -56,17 +56,17 @@ export const APP_CONFIG = {
 
   // Contact Information
   contact: {
-    email: 'support@marketdz.com',
+    email: 'support@dlaladz.com',
     phone: '+213 XXX XXX XXX',
     address: 'Algiers, Algeria',
   },
 
   // Social Media
   social: {
-    facebook: 'https://facebook.com/marketdz',
-    twitter: 'https://twitter.com/marketdz',
-    instagram: 'https://instagram.com/marketdz',
-    linkedin: 'https://linkedin.com/company/marketdz',
+    facebook: 'https://facebook.com/dlaladz',
+    twitter: 'https://twitter.com/dlaladz',
+    instagram: 'https://instagram.com/dlaladz',
+    linkedin: 'https://linkedin.com/company/dlaladz',
   },
 
   // Feature Flags
@@ -81,9 +81,9 @@ export const APP_CONFIG = {
 
   // SEO Configuration
   seo: {
-    defaultTitle: 'MarketDZ - Algeria\'s Premier Online Marketplace',
-    titleTemplate: '%s | MarketDZ',
-    defaultDescription: 'Buy and sell anything in Algeria. Cars, electronics, jobs, real estate and more on MarketDZ.',
+    defaultTitle: 'DlalaDZ - Algeria\'s Premier Online Marketplace',
+    titleTemplate: '%s | DlalaDZ',
+    defaultDescription: 'Buy and sell anything in Algeria. Cars, electronics, jobs, real estate and more on DlalaDZ.',
     defaultKeywords: ['marketplace', 'algeria', 'buy', 'sell', 'classified', 'ads'],
     defaultImage: '/images/og-image.jpg',
   },

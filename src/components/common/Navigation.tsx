@@ -9,7 +9,7 @@
  * FEATURES:
  * - Active page highlighting
  * - Notifications dropdown with unread count
- * - MarketDZ logo and branding
+ * - DlalaDZ logo and branding
  *
  * NAV ITEMS:
  * - Home, Browse, Advanced Search, Post, Messages, Profile
@@ -59,9 +59,9 @@ export default function Navigation() {
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">M</span>
+                <span className="text-white font-bold text-lg">D</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">MarketDZ</span>
+              <span className="text-xl font-bold text-gray-900">DlalaDZ</span>
             </Link>
           </div>
 

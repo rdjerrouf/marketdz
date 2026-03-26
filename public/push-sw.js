@@ -27,7 +27,7 @@ self.addEventListener('push', function(event) {
     try {
       const payload = event.data.json();
       options.body = payload.body || options.body;
-      options.title = payload.title || 'MarketDZ';
+      options.title = payload.title || 'DlalaDZ';
       options.icon = payload.icon || options.icon;
       options.badge = payload.badge || options.badge;
       options.image = payload.image;
@@ -44,7 +44,7 @@ self.addEventListener('push', function(event) {
   }
 
   event.waitUntil(
-    self.registration.showNotification(options.title || 'MarketDZ', options)
+    self.registration.showNotification(options.title || 'DlalaDZ', options)
   );
 });
 

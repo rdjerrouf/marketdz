@@ -13,12 +13,12 @@ services:
       - NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
       # Server-side Supabase URL (for container-to-container access)  
-      - SUPABASE_URL=http://supabase_kong_marketdz:8000
+      - SUPABASE_URL=http://supabase_kong_dlaladz:8000
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       - NEXT_PUBLIC_APP_URL=http://localhost:3001
     restart: unless-stopped
     networks:
-      - supabase_network_marketdz
+      - supabase_network_dlaladz
     # Health check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
@@ -28,11 +28,11 @@ services:
       start_period: 40s
     # Production labels
     labels:
-      - "com.docker.compose.service=marketdz-prod"
+      - "com.docker.compose.service=dlaladz-prod"
       - "environment=production"
 
 networks:
-  supabase_network_marketdz:
+  supabase_network_dlaladz:
     external: true
 
 # Note: Supabase services are already running separately

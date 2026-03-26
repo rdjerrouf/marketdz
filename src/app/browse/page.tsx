@@ -429,7 +429,7 @@ function BrowsePageContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </div>
-            <h1 className="text-white text-xl font-bold">MarketDZ</h1>
+            <h1 className="text-white text-xl font-bold">DlalaDZ</h1>
           </div>
 
           {/* Back Button and PWA Install */}
@@ -511,7 +511,7 @@ function BrowsePageContent() {
       <div className="relative z-10 flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-auto">
         {/* Header */}
         <div className="text-center mb-4 md:mb-8 relative">
-          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Search MarketDZ</h1>
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Search DlalaDZ</h1>
           <p className="text-sm md:text-lg text-white text-opacity-90 px-4">
             Find exactly what you're looking for in Algeria's premier marketplace
           </p>

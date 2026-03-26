@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MarketDZ - Marketplace Algeria",
+  title: "DlalaDZ - Marketplace Algeria",
   description: "Comprehensive marketplace for Algeria - Buy, Sell, Jobs, Services, Rentals",
   manifest: "/manifest.json",
   icons: {
@@ -34,20 +34,20 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "MarketDZ",
+    title: "DlalaDZ",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "MarketDZ",
-    title: "MarketDZ - Marketplace Algeria",
+    siteName: "DlalaDZ",
+    title: "DlalaDZ - Marketplace Algeria",
     description: "Comprehensive marketplace for Algeria - Buy, Sell, Jobs, Services, Rentals",
   },
   twitter: {
     card: "summary",
-    title: "MarketDZ - Marketplace Algeria",
+    title: "DlalaDZ - Marketplace Algeria",
     description: "Comprehensive marketplace for Algeria - Buy, Sell, Jobs, Services, Rentals",
   },
 };

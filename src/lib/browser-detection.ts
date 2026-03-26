@@ -102,13 +102,13 @@ export function detectBrowserInfo(): BrowserInfo {
   let installInstructions = ''
 
   if (isIOS && currentBrowser === 'safari') {
-    installInstructions = `To install MarketDZ:
+    installInstructions = `To install DlalaDZ:
 
 1. Tap the Share button ⬆️ at the bottom
 2. Scroll and tap "Add to Home Screen"
 3. Tap "Add"
 
-You'll have MarketDZ like a native app! 🎉`
+You'll have DlalaDZ like a native app! 🎉`
   } else if (isIOS && currentBrowser !== 'safari') {
     installInstructions = `For easy installation, please open this page in Safari:
 
@@ -119,7 +119,7 @@ You'll have MarketDZ like a native app! 🎉`
 
 Safari is required for installing apps on iPhone.`
   } else if (isAndroid && currentBrowser === 'chrome') {
-    installInstructions = `To install MarketDZ:
+    installInstructions = `To install DlalaDZ:
 
 1. Tap the menu (⋮) button
 2. Select "Add to Home Screen" or "Install app"
@@ -136,12 +136,12 @@ Or simply tap the "Install App" button when prompted!`
 
 Chrome provides the easiest way to install apps on Android.`
   } else if (isDesktop) {
-    installInstructions = `To install MarketDZ on your computer:
+    installInstructions = `To install DlalaDZ on your computer:
 
 1. Look for the install icon (⊕) in your browser's address bar
 2. Click it and select "Install"
 
-Or use your browser menu and select "Install MarketDZ"`
+Or use your browser menu and select "Install DlalaDZ"`
   }
 
   // Debug logging
@@ -206,8 +206,8 @@ export async function shareCurrentUrl(): Promise<boolean> {
 
   try {
     await navigator.share({
-      title: 'MarketDZ - Marketplace Algeria',
-      text: 'Check out MarketDZ marketplace',
+      title: 'DlalaDZ - Marketplace Algeria',
+      text: 'Check out DlalaDZ marketplace',
       url: window.location.href,
     })
     return true

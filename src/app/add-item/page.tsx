@@ -212,7 +212,7 @@ export default function AddItemPage() {
               </svg>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
             </div>
-            <h1 className="text-white text-xl font-bold">MarketDZ</h1>
+            <h1 className="text-white text-xl font-bold">DlalaDZ</h1>
           </div>
 
           {/* Back Button */}
@@ -382,7 +382,7 @@ export default function AddItemPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
               </div>
-              <h1 className="text-white text-lg font-bold">MarketDZ</h1>
+              <h1 className="text-white text-lg font-bold">DlalaDZ</h1>
             </div>
           </div>
         </div>

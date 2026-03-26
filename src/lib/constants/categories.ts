@@ -1,5 +1,5 @@
 // src/lib/constants/categories.ts
-// Listing categories specific to MarketDZ
+// Listing categories specific to DlalaDZ
 
 export const LISTING_CATEGORIES = {
   FOR_SALE: {

@@ -8,7 +8,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 /**
  * Global server-side Supabase client for connection pooling
  * This instance is reused across all API calls in the same serverless container
- * Optimized for MarketDZ marketplace on Supabase Nano tier (Pool Size: 15, Max Connections: 200)
+ * Optimized for DlalaDZ marketplace on Supabase Nano tier (Pool Size: 15, Max Connections: 200)
  */
 let serverSupabaseInstance: ReturnType<typeof createClient<Database>> | null = null
 
@@ -23,7 +23,7 @@ export const getServerSupabase = () => {
       // Enable automatic retries for better reliability
       global: {
         headers: {
-          'X-Client-Info': 'marketdz-server@1.0.0',
+          'X-Client-Info': 'dlaladz-server@1.0.0',
         },
       },
     })
@@ -48,7 +48,7 @@ export const getAuthenticatedServerSupabase = (userJWT: string) => {
       global: {
         headers: {
           Authorization: `Bearer ${userJWT}`,
-          'X-Client-Info': 'marketdz-server-auth@1.0.0',
+          'X-Client-Info': 'dlaladz-server-auth@1.0.0',
         },
       },
     }

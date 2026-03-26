@@ -1,4 +1,4 @@
-// Latency Optimization Library for MarketDZ - Algeria Focus
+// Latency Optimization Library for DlalaDZ - Algeria Focus
 import { supabase } from '@/lib/supabase/client'
 import { useState, useEffect } from 'react'
 

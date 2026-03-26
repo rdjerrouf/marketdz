@@ -651,7 +651,7 @@ export default function ProfilePage() {
                                 📞 Call
                               </a>
                               <a
-                                href={generateWhatsAppLink(user.phone, `Hi! I saw your profile on MarketDZ.`)}
+                                href={generateWhatsAppLink(user.phone, `Hi! I saw your profile on DlalaDZ.`)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-lg hover:bg-green-200 transition-colors"

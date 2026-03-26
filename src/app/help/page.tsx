@@ -65,7 +65,7 @@ export default function HelpPage() {
             Our support team is here to assist you.
           </p>
           <Link
-            href="mailto:support@marketdz.com"
+            href="mailto:support@dlaladz.com"
             className="inline-block bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors font-medium"
           >
             Email Support

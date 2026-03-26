@@ -59,7 +59,7 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
 
     // Check if already installed
     if (browserInfo.isInstalled) {
-      toast.success('✅ MarketDZ is already installed on your device!');
+      toast.success('✅ DlalaDZ is already installed on your device!');
       return;
     }
 
@@ -80,7 +80,7 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
     console.log(`📱 PWA: User response to install prompt: ${outcome}`);
 
     if (outcome === 'accepted') {
-      toast.success('🎉 Thanks for installing MarketDZ!');
+      toast.success('🎉 Thanks for installing DlalaDZ!');
     }
 
     setDeferredPrompt(null);

@@ -6,7 +6,7 @@ import { X, Copy, Share2 } from 'lucide-react'
 import { detectBrowserInfo, getBrowserSwitchMessage, copyCurrentUrl, shareCurrentUrl } from '@/lib/browser-detection'
 import toast from 'react-hot-toast'
 
-const DISMISSAL_KEY = 'marketdz_browser_banner_dismissed'
+const DISMISSAL_KEY = 'dlaladz_browser_banner_dismissed'
 const DISMISSAL_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
 
 export default function BrowserGuidanceBanner() {

@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
           <div className="prose prose-lg max-w-none">
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">1. Introduction</h2>
             <p className="text-gray-600 mb-4">
-              MarketDZ ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
+              DlalaDZ ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">2. Information We Collect</h2>
@@ -105,8 +105,8 @@ export default function PrivacyPolicyPage() {
               If you have any questions about this Privacy Policy or our data practices, please contact us:
             </p>
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
-              <p className="text-gray-700 mb-2"><strong>Email:</strong> privacy@marketdz.com</p>
-              <p className="text-gray-700 mb-2"><strong>Address:</strong> MarketDZ Privacy Team, Algiers, Algeria</p>
+              <p className="text-gray-700 mb-2"><strong>Email:</strong> privacy@dlaladz.com</p>
+              <p className="text-gray-700 mb-2"><strong>Address:</strong> DlalaDZ Privacy Team, Algiers, Algeria</p>
               <p className="text-gray-700"><strong>Phone:</strong> +213 XXX XXX XXX</p>
             </div>
           </div>

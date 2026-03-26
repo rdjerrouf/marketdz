@@ -44,7 +44,7 @@ export default function AdminSettings() {
 
   // Settings state
   const [platformSettings, setPlatformSettings] = useState<PlatformSettings>({
-    site_name: 'MarketDZ',
+    site_name: 'DlalaDZ',
     site_description: 'The Premier Marketplace for Algeria',
     maintenance_mode: false,
     registration_enabled: true,
@@ -129,7 +129,7 @@ export default function AdminSettings() {
   const resetToDefaults = () => {
     if (confirm('Are you sure you want to reset all settings to default values?')) {
       setPlatformSettings({
-        site_name: 'MarketDZ',
+        site_name: 'DlalaDZ',
         site_description: 'The Premier Marketplace for Algeria',
         maintenance_mode: false,
         registration_enabled: true,

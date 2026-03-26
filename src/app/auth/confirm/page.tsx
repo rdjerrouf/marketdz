@@ -121,7 +121,7 @@ function ConfirmEmailContent() {
 
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
         <h1 className="text-center text-3xl font-bold text-white mb-2">
-          MarketDZ
+          DlalaDZ
         </h1>
         <h2 className="text-center text-xl text-white/80 mb-8">
           Email Verification

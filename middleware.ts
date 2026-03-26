@@ -157,7 +157,7 @@ export async function middleware(request: NextRequest) {
   // Add API route metadata
   if (request.nextUrl.pathname.startsWith('/api/')) {
     response.headers.set('X-Pool-Strategy', 'supabase-pgbouncer')
-    response.headers.set('X-MarketDZ-Version', '1.0.0')
+    response.headers.set('X-DlalaDZ-Version', '1.0.0')
   }
 
   console.log('🔧 Middleware: Request completed in', duration, 'ms');

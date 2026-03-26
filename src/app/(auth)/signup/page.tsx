@@ -242,7 +242,7 @@ export default function SignUpPage() {
         </div>
 
         <h1 className="text-center text-3xl font-bold text-white mb-2">
-          MarketDZ
+          DlalaDZ
         </h1>
         <h2 className="text-center text-xl text-white/80">
           {showVerificationMessage ? 'Check Your Email' : 'Create Your Account'}

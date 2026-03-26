@@ -292,7 +292,7 @@ function MobileSidebarComponent({
                 <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
-                <h1 className="text-white text-xl font-bold">MarketDZ</h1>
+                <h1 className="text-white text-xl font-bold">DlalaDZ</h1>
               </div>
               
               <div className="space-y-3">

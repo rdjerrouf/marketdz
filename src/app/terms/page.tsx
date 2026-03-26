@@ -23,12 +23,12 @@ export default function TermsOfServicePage() {
           <div className="prose prose-lg max-w-none">
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">1. Acceptance of Terms</h2>
             <p className="text-gray-600 mb-4">
-              By accessing and using MarketDZ ("Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+              By accessing and using DlalaDZ ("Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">2. Description of Service</h2>
             <p className="text-gray-600 mb-4">
-              MarketDZ is an online marketplace that connects buyers and sellers in Algeria. We provide a platform for users to list items for sale, browse available products, and communicate with other users.
+              DlalaDZ is an online marketplace that connects buyers and sellers in Algeria. We provide a platform for users to list items for sale, browse available products, and communicate with other users.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">3. User Accounts</h2>
@@ -79,7 +79,7 @@ export default function TermsOfServicePage() {
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">6. Transactions</h2>
             <h3 className="text-lg font-medium text-gray-900 mt-6 mb-3">Platform Role</h3>
             <p className="text-gray-600 mb-4">
-              MarketDZ acts as a platform connecting buyers and sellers. We do not participate in actual transactions and are not responsible for the quality, safety, or legality of items listed.
+              DlalaDZ acts as a platform connecting buyers and sellers. We do not participate in actual transactions and are not responsible for the quality, safety, or legality of items listed.
             </p>
 
             <h3 className="text-lg font-medium text-gray-900 mt-6 mb-3">User Responsibility</h3>
@@ -92,12 +92,12 @@ export default function TermsOfServicePage() {
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">7. Fees and Payments</h2>
             <p className="text-gray-600 mb-4">
-              Currently, MarketDZ is free to use. We reserve the right to introduce fees for certain services with appropriate notice to users.
+              Currently, DlalaDZ is free to use. We reserve the right to introduce fees for certain services with appropriate notice to users.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">8. Intellectual Property</h2>
             <p className="text-gray-600 mb-4">
-              The MarketDZ platform, including its design, functionality, and content, is protected by intellectual property laws. Users retain rights to their own content but grant us license to use it on our platform.
+              The DlalaDZ platform, including its design, functionality, and content, is protected by intellectual property laws. Users retain rights to their own content but grant us license to use it on our platform.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">9. Privacy and Data</h2>
@@ -115,7 +115,7 @@ export default function TermsOfServicePage() {
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">11. Limitation of Liability</h2>
             <p className="text-gray-600 mb-4">
-              MarketDZ shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the service.
+              DlalaDZ shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the service.
             </p>
 
             <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">12. Termination</h2>
@@ -138,8 +138,8 @@ export default function TermsOfServicePage() {
               If you have questions about these Terms of Service, please contact us:
             </p>
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
-              <p className="text-gray-700 mb-2"><strong>Email:</strong> legal@marketdz.com</p>
-              <p className="text-gray-700 mb-2"><strong>Address:</strong> MarketDZ Legal Team, Algiers, Algeria</p>
+              <p className="text-gray-700 mb-2"><strong>Email:</strong> legal@dlaladz.com</p>
+              <p className="text-gray-700 mb-2"><strong>Address:</strong> DlalaDZ Legal Team, Algiers, Algeria</p>
               <p className="text-gray-700"><strong>Phone:</strong> +213 XXX XXX XXX</p>
             </div>
           </div>

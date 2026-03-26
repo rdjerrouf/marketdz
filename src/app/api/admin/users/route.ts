@@ -37,10 +37,10 @@ export async function GET(request: NextRequest) {
 
     // Fallback to email-based check for legacy support
     const adminEmails = [
-      'admin@marketdz.com',
-      'moderator@marketdz.com',
+      'admin@dlaladz.com',
+      'moderator@dlaladz.com',
       'test@example.com',
-      'ryad@marketdz.com',
+      'ryad@dlaladz.com',
       'rdjerrouf@gmail.com',
       'anyadjerrouf@gmail.com'
     ]
@@ -143,10 +143,10 @@ export async function POST(request: NextRequest) {
 
     // Fallback to email-based check for legacy support
     const adminEmails = [
-      'admin@marketdz.com',
-      'moderator@marketdz.com',
+      'admin@dlaladz.com',
+      'moderator@dlaladz.com',
       'test@example.com',
-      'ryad@marketdz.com',
+      'ryad@dlaladz.com',
       'rdjerrouf@gmail.com',
       'anyadjerrouf@gmail.com'
     ]

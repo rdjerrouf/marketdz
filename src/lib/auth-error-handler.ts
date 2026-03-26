@@ -60,7 +60,7 @@ export async function handleAuthError(error: any, redirectPath?: string): Promis
     // Clear local storage
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem('supabase.auth.token')
-      localStorage.removeItem('marketdz-auth')
+      localStorage.removeItem('dlaladz-auth')
     }
 
     // Redirect to signin page

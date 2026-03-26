@@ -31,7 +31,7 @@ export default function NotificationsPage() {
     setNotifications([
       {
         id: '1',
-        title: 'Welcome to MarketDZ!',
+        title: 'Welcome to DlalaDZ!',
         message: 'Thank you for joining our marketplace. Start exploring listings in your area.',
         type: 'success',
         is_read: false,

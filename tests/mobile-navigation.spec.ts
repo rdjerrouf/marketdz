@@ -29,7 +29,7 @@ test.describe('Mobile Navigation Tests', () => {
     await page.screenshot({ path: 'mobile-ios-after-tap.png', fullPage: false });
 
     // Check if sidebar is visible
-    const sidebar = page.locator('nav').filter({ hasText: 'MarketDZ' });
+    const sidebar = page.locator('nav').filter({ hasText: 'DlalaDZ' });
     const isSidebarVisible = await sidebar.isVisible();
 
     console.log(`📊 Sidebar visible: ${isSidebarVisible ? '✅ YES' : '❌ NO'}`);
@@ -50,7 +50,7 @@ test.describe('Mobile Navigation Tests', () => {
 
       // Debug: Check what's on the page
       const bodyHTML = await page.locator('body').innerHTML();
-      console.log('📄 Body contains "MarketDZ":', bodyHTML.includes('MarketDZ'));
+      console.log('📄 Body contains "DlalaDZ":', bodyHTML.includes('DlalaDZ'));
 
       // Check for blocking elements
       const blockingElements = await page.locator('[style*="pointer-events"]').count();
@@ -90,7 +90,7 @@ test.describe('Mobile Navigation Tests', () => {
     await page.screenshot({ path: 'mobile-android-after-tap.png', fullPage: false });
 
     // Check if sidebar is visible
-    const sidebar = page.locator('nav').filter({ hasText: 'MarketDZ' });
+    const sidebar = page.locator('nav').filter({ hasText: 'DlalaDZ' });
     const isSidebarVisible = await sidebar.isVisible();
 
     console.log(`📊 Sidebar visible: ${isSidebarVisible ? '✅ YES' : '❌ NO'}`);
@@ -111,7 +111,7 @@ test.describe('Mobile Navigation Tests', () => {
 
       // Debug: Check what's on the page
       const bodyHTML = await page.locator('body').innerHTML();
-      console.log('📄 Body contains "MarketDZ":', bodyHTML.includes('MarketDZ'));
+      console.log('📄 Body contains "DlalaDZ":', bodyHTML.includes('DlalaDZ'));
 
       // Check for blocking elements
       const blockingElements = await page.locator('[style*="pointer-events"]').count();

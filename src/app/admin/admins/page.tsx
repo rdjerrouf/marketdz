@@ -168,7 +168,7 @@ export default function AdminUsersPage() {
                         <div className="text-sm font-medium text-gray-900">
                           Current Admin
                         </div>
-                        <div className="text-sm text-gray-500">admin@marketdz.com</div>
+                        <div className="text-sm text-gray-500">admin@dlaladz.com</div>
                         <div className="text-xs text-gray-400">ID: {admin.user_id}</div>
                       </div>
                     </td>

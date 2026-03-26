@@ -159,7 +159,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(null)
           if (typeof localStorage !== 'undefined') {
             localStorage.removeItem('supabase.auth.token')
-            localStorage.removeItem('marketdz-auth')
+            localStorage.removeItem('dlaladz-auth')
           }
         }
       }

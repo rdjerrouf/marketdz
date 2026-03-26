@@ -111,7 +111,7 @@ export default function CompleteKickAssHomepage() {
     if (!browserInfo) return
 
     if (browserInfo.isInstalled) {
-      alert('✅ MarketDZ is already installed!')
+      alert('✅ DlalaDZ is already installed!')
       return
     }
 
@@ -322,7 +322,7 @@ export default function CompleteKickAssHomepage() {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🇩🇿</span>
-            <h1 className="text-white text-xl font-bold">MarketDZ</h1>
+            <h1 className="text-white text-xl font-bold">DlalaDZ</h1>
             {showInstallButton && (
               <button
                 onClick={handleInstallClick}
@@ -357,7 +357,7 @@ export default function CompleteKickAssHomepage() {
           <div className="flex items-center mb-12">
             <span className="text-6xl mr-4">🇩🇿</span>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">MarketDZ</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">DlalaDZ</h1>
               <p className="text-white/60 text-sm">
                 Algeria&apos;s Premier
               </p>
@@ -854,7 +854,7 @@ export default function CompleteKickAssHomepage() {
                 Ready to Post Your Listing?
               </h2>
               <p className="text-xl text-white/80 mb-8 leading-relaxed">
-                Join thousands of users on MarketDZ. Post items for sale, rentals, jobs, or services in minutes and reach millions of people across Algeria.
+                Join thousands of users on DlalaDZ. Post items for sale, rentals, jobs, or services in minutes and reach millions of people across Algeria.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/add-item" className="bg-[#7c3f00] hover:bg-[#5f2e00] text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-xl hover:shadow-2xl">
@@ -924,11 +924,11 @@ export default function CompleteKickAssHomepage() {
               <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3 flex items-center justify-center">
                 <span className="text-2xl">🇩🇿</span>
               </div>
-              <h3 className="text-white text-lg font-semibold">MarketDZ</h3>
+              <h3 className="text-white text-lg font-semibold">DlalaDZ</h3>
             </div>
             <p className="text-white/60 mb-4">Algeria&apos;s premier marketplace connecting buyers and sellers nationwide</p>
             <div className="flex justify-center space-x-6 text-white/40 text-sm relative z-20">
-              <span>© 2025 MarketDZ</span>
+              <span>© 2026 DlalaDZ</span>
               <span>•</span>
               <Link
                 href="/privacy"
