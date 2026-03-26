@@ -176,10 +176,24 @@ export function fileToBase64(file: File): Promise<string> {
   })
 }
 
+// Returns a category-specific gradient placeholder SVG (briefcase for jobs, wrench for services, etc.)
+export function getCategoryPlaceholder(category?: string): string {
+  const configs: Record<string, { bg1: string; bg2: string; emoji: string }> = {
+    for_sale: { bg1: '#3b82f6', bg2: '#1d4ed8', emoji: '🛒' },
+    for_rent: { bg1: '#10b981', bg2: '#059669', emoji: '🏠' },
+    job:      { bg1: '#a855f7', bg2: '#7c3aed', emoji: '💼' },
+    service:  { bg1: '#f97316', bg2: '#ea580c', emoji: '🔧' },
+    urgent:   { bg1: '#ef4444', bg2: '#dc2626', emoji: '🚨' },
+  }
+  const cfg = configs[category ?? ''] ?? { bg1: '#9ca3af', bg2: '#6b7280', emoji: '📷' }
+  const svg = `<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${cfg.bg1}"/><stop offset="100%" stop-color="${cfg.bg2}"/></linearGradient></defs><rect width="400" height="300" fill="url(#g)"/><text x="50%" y="55%" font-family="Arial,sans-serif" font-size="96" text-anchor="middle" dominant-baseline="middle">${cfg.emoji}</text></svg>`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
 // Fix photo URLs to use the correct Supabase URL for browser access
-export function fixPhotoUrl(url: string | undefined | null): string {
-  // Use inline SVG placeholder to avoid 404 errors
-  if (!url) return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" font-family="Arial,sans-serif" font-size="18" fill="%239ca3af" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'
+export function fixPhotoUrl(url: string | undefined | null, category?: string): string {
+  // Use category-specific placeholder to avoid 404 errors
+  if (!url) return getCategoryPlaceholder(category)
 
   // If already a full URL, just fix Docker URLs
   if (url.startsWith('http://') || url.startsWith('https://')) {

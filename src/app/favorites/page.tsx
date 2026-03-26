@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useAuth } from '@/contexts/AuthContext'
 import FavoriteButton from '@/components/common/FavoriteButton'
-import { fixPhotoUrl } from '@/lib/storage'
+import { fixPhotoUrl, getCategoryPlaceholder } from '@/lib/storage'
 
 export default function FavoritesPage() {
   const router = useRouter()
@@ -157,17 +157,14 @@ export default function FavoritesPage() {
                       }}
                     >
                       <div className="relative">
-                        {listing.photos && listing.photos.length > 0 ? (
-                          <img
-                            src={fixPhotoUrl(listing.photos[0])}
-                            alt={listing.title}
-                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200"
-                          />
-                        ) : (
-                          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-400 text-4xl">📷</span>
-                          </div>
-                        )}
+                        <img
+                          src={listing.photos && listing.photos.length > 0 ? fixPhotoUrl(listing.photos[0]) : getCategoryPlaceholder(listing.category)}
+                          alt={listing.title}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = getCategoryPlaceholder(listing.category)
+                          }}
+                        />
                         
                         <div className="absolute top-2 left-2 flex flex-col gap-2">
                           <span className={`${categoryInfo.color} text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg`}>

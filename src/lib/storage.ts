@@ -16,6 +16,8 @@
 
 import { supabase } from '@/lib/supabase/client'
 import { generateImageVariants, type CompressionResult } from './image-compression'
+export { getCategoryPlaceholder } from '@/lib/utils'
+import { getCategoryPlaceholder } from '@/lib/utils'
 
 export interface UploadOptions {
   bucket: 'avatars' | 'listing-photos' | 'user-photos'
@@ -442,9 +444,9 @@ export function getResponsiveImageUrls(baseUrl: string, variants?: { display?: s
  *
  * Why inline SVG: Avoids network requests for missing images
  */
-export function fixPhotoUrl(url: string | undefined | null): string {
-  // Return inline SVG placeholder for missing images (avoids 404 errors)
-  if (!url) return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" font-family="Arial,sans-serif" font-size="18" fill="%239ca3af" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'
+export function fixPhotoUrl(url: string | undefined | null, category?: string): string {
+  // Return category-specific placeholder for missing images (avoids 404 errors)
+  if (!url) return getCategoryPlaceholder(category)
 
   // If already a full URL, use it
   if (url.startsWith('http://') || url.startsWith('https://')) {

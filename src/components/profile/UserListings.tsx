@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { fixPhotoUrl } from '@/lib/storage'
+import { fixPhotoUrl, getCategoryPlaceholder } from '@/lib/storage'
 
 interface ListingWithStats {
   id: string
@@ -336,17 +336,14 @@ export default function UserListings({ userId, isOwnProfile }: UserListingsProps
             <div key={listing.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
               {/* Image */}
               <div className="relative h-48 bg-gray-200">
-                {listing.photos.length > 0 ? (
-                  <img
-                    src={fixPhotoUrl(listing.photos[0])}
-                    alt={listing.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-4xl">
-                    {getCategoryIcon(listing.category)}
-                  </div>
-                )}
+                <img
+                  src={listing.photos.length > 0 ? fixPhotoUrl(listing.photos[0]) : getCategoryPlaceholder(listing.category)}
+                  alt={listing.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = getCategoryPlaceholder(listing.category)
+                  }}
+                />
                 <div className="absolute top-2 left-2">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(listing.status)}`}>
                     {listing.status}

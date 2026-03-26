@@ -22,7 +22,7 @@
 import { useRouter } from 'next/navigation'
 import { Clock, MapPin, DollarSign, Home, User, Zap, AlertCircle } from 'lucide-react'
 import FavoriteButton from './FavoriteButton'
-import { fixPhotoUrl } from '@/lib/utils'
+import { fixPhotoUrl, getCategoryPlaceholder } from '@/lib/utils'
 
 interface Listing {
   id: string
@@ -138,14 +138,6 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
     return date.toLocaleDateString()
   }
 
-  const getDefaultImage = (category: string) => {
-    const defaults: Record<string, string> = {
-      job: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJqb2JHcmFkIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I2E4NTVmNztzdG9wLW9wYWNpdHk6MSIgLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM3YzNhZWQ7c3RvcC1vcGFjaXR5OjEiIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9InVybCgja29iR3JhZCkiLz48cGF0aCBkPSJNMjAwIDgwQzE3NSA4MCAxNTUgMTAwIDE1NSAxMjVMMTU1IDE4MEMxNTUgMTg1IDE2MCAxOTAgMTY1IDE5MEwyMzUgMTkwQzI0MCAxOTAgMjQ1IDE4NSAyNDUgMTgwTDI0NSAxMjVDMjQ1IDEwMCAyMjUgODAgMjAwIDgwWiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4zIi8+PHBhdGggZD0iTTE3MCAxMjBMMTcwIDEwNUMxNzAgOTUgMTc4IDg3IDE4OCA4N0wyMTIgODdDMjIyIDg3IDIzMCA5NSAyMzAgMTA1TDIzMCAxMjAiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNzAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iODAiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuOSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+SvDwvdGV4dD48L3N2Zz4=',
-      service: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJzZXJ2aWNlR3JhZCIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmOTdiMTY7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZWE1ODBjO3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSJ1cmwoI3NlcnZpY2VHcmFkKSIvPjxwYXRoIGQ9Ik0xODAgOTBMMTgwIDE4MEwxNjAgMTgwQzE1MCAxODAgMTQwIDE3MCAxNDAgMTYwTDE0MCAxMTBDMTQwIDEwMCAxNTAgOTAgMTYwIDkwTDE4MCA5MFoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuMyIvPjxjaXJjbGUgY3g9IjE3MCIgY3k9IjEwMCIgcj0iMTAiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuMyIvPjxwYXRoIGQ9Ik0yMjAgOTBMMjQwIDEyMEwyMjAgMTUwTDIwMCAxMjBMMjIwIDkwWiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4zIi8+PHRleHQgeD0iNTAlIiB5PSI3MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI4MCIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC45IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7wn5KnPC90ZXh0Pjwvc3ZnPg=='
-    }
-    return defaults[category] || null
-  }
-
   const categoryConfig = getCategoryConfig(listing.category)
   const CategoryIcon = categoryConfig.icon
 
@@ -190,34 +182,16 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
     >
       {/* Compact Image Container - Mobile Optimized for 2x2 Grid */}
       <div className="relative h-40 overflow-hidden">
-        {listing.photos && listing.photos.length > 0 ? (
-          <img
-            src={fixPhotoUrl(listing.photos[0])}
-            alt={listing.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement
-              const defaultImg = getDefaultImage(listing.category)
-              if (defaultImg) {
-                target.src = defaultImg
-              }
-            }}
-          />
-        ) : getDefaultImage(listing.category) ? (
-          <img
-            src={getDefaultImage(listing.category)!}
-            alt={listing.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-700 to-gray-800">
-            <CategoryIcon className="w-16 h-16 text-white/30" />
-          </div>
-        )}
+        <img
+          src={listing.photos && listing.photos.length > 0 ? fixPhotoUrl(listing.photos[0]) : getCategoryPlaceholder(listing.category)}
+          alt={listing.title}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = getCategoryPlaceholder(listing.category)
+          }}
+        />
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none"></div>
