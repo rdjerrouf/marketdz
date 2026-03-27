@@ -506,7 +506,7 @@ export default function CompleteKickAssHomepage() {
               {/* Quick filters */}
               <div className="flex flex-wrap gap-3 mt-4">
                 {[
-                  { label: 'Electronics', href: '/browse?category=for_sale&subcategory=Electronics' },
+                  { label: 'Electronics', href: '/browse?category=for_sale' },
                   { label: 'Real Estate', href: '/browse?category=for_rent' },
                   { label: 'Jobs', href: '/browse?category=job' },
                   { label: 'Services', href: '/browse?category=service' },
