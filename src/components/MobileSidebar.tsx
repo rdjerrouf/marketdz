@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, memo, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import {
   Menu, X, Home, User, MessageCircle, Heart, Grid,
   Plus, Search, Shield
@@ -33,6 +34,7 @@ function MobileSidebarComponent({
   const pathname = usePathname()
   const router = useRouter()
   const { user, signOut } = useAuth()
+  const t = useTranslations('nav')
 
   // Track client-side mount for portal
   useEffect(() => {
@@ -222,8 +224,8 @@ function MobileSidebarComponent({
           handleButtonClick(e)
         }}
         className="p-2 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 lg:hidden relative"
-        aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-        title={isOpen ? "Close menu" : "Open menu"}
+        aria-label={isOpen ? t('closeMenu') : t('openMenu')}
+        title={isOpen ? t('closeMenu') : t('openMenu')}
         style={{
           WebkitTapHighlightColor: 'transparent',
           touchAction: 'manipulation', // Ensures immediate click response on touch devices
@@ -303,7 +305,7 @@ function MobileSidebarComponent({
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <Home className="w-5 h-5 mr-4" />
-                  <span className="font-medium">Home</span>
+                  <span className="font-medium">{t('home')}</span>
                   <div className="ml-auto w-2 h-2 bg-purple-400 rounded-full"></div>
                 </Link>
                 
@@ -313,7 +315,7 @@ function MobileSidebarComponent({
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <Search className="w-5 h-5 mr-4" />
-                  <span className="font-medium">Browse</span>
+                  <span className="font-medium">{t('browse')}</span>
                 </Link>
 
                 {user && (
@@ -323,7 +325,7 @@ function MobileSidebarComponent({
                     style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
                     <Grid className="w-5 h-5 mr-4" />
-                    <span className="font-medium">My Listings</span>
+                    <span className="font-medium">{t('myListings')}</span>
                     {userListingsCount > 0 && (
                       <div className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
                         {userListingsCount}
@@ -338,7 +340,7 @@ function MobileSidebarComponent({
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <Plus className="w-5 h-5 mr-4" />
-                  <span className="font-medium">Create Listing</span>
+                  <span className="font-medium">{t('post')}</span>
                   <div className="ml-auto bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">NEW</div>
                 </Link>
                 
@@ -348,7 +350,7 @@ function MobileSidebarComponent({
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <Heart className="w-5 h-5 mr-4" />
-                  <span className="font-medium">Favorites</span>
+                  <span className="font-medium">{t('favorites')}</span>
                   {userFavoritesCount > 0 && (
                     <div className="ml-auto bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center">
                       {userFavoritesCount}
@@ -362,7 +364,7 @@ function MobileSidebarComponent({
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <MessageCircle className="w-5 h-5 mr-4" />
-                  <span className="font-medium">Messages</span>
+                  <span className="font-medium">{t('messages')}</span>
                   <div className="ml-auto flex items-center">
                     <div className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium mr-2">2</div>
                     <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
@@ -375,7 +377,7 @@ function MobileSidebarComponent({
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <User className="w-5 h-5 mr-4" />
-                  <span className="font-medium">Profile</span>
+                  <span className="font-medium">{t('profile')}</span>
                 </Link>
 
                 {/* Mobile Auth Buttons */}
@@ -392,7 +394,7 @@ function MobileSidebarComponent({
                           <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                           </svg>
-                          <span className="font-medium">Install App</span>
+                          <span className="font-medium">{t('installApp')}</span>
                           {deferredPrompt && (
                             <div className="ml-auto bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
                               READY
@@ -408,7 +410,7 @@ function MobileSidebarComponent({
                         <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        <span className="font-medium">Sign Out</span>
+                        <span className="font-medium">{t('signOut')}</span>
                       </button>
                     </>
                   ) : (
@@ -421,7 +423,7 @@ function MobileSidebarComponent({
                         <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                         </svg>
-                        <span className="font-medium">Sign In</span>
+                        <span className="font-medium">{t('signIn')}</span>
                       </Link>
                       <Link 
                         href="/signup" 
@@ -431,7 +433,7 @@ function MobileSidebarComponent({
                         <svg className="w-5 h-5 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                         </svg>
-                        <span className="font-medium">Sign Up</span>
+                        <span className="font-medium">{t('signUp')}</span>
                       </Link>
                     </>
                   )}

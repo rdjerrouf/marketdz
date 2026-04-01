@@ -10,58 +10,57 @@
  * - Active tab highlighting (purple)
  * - Unread message indicator (green dot + pulse animation)
  * - 6 tabs: Home, Browse, Post, My Listings, Favorites, Messages
- *
- * STYLING:
- * - Active: Purple color + thicker icon stroke + top indicator line
- * - Unread messages: Green + pulse animation
  */
 
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
 import { Home, Search, Plus, Grid, MessageCircle, Heart } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function BottomNavigation() {
   const pathname = usePathname()
   const router = useRouter()
+  const t = useTranslations('nav')
 
   // TODO: Connect to real unread messages count
   const hasUnreadMessages = false
 
+  // next-intl usePathname returns locale-stripped paths, so these comparisons stay clean
   const navItems = [
     {
       icon: Home,
-      label: 'Home',
+      label: t('home'),
       path: '/',
       active: pathname === '/'
     },
     {
       icon: Search,
-      label: 'Browse',
+      label: t('browse'),
       path: '/browse',
       active: pathname.startsWith('/browse')
     },
     {
       icon: Plus,
-      label: 'Post',
+      label: t('post'),
       path: '/add-item',
       active: pathname === '/add-item'
     },
     {
       icon: Grid,
-      label: 'My Listings',
+      label: t('myListings'),
       path: '/my-listings',
       active: pathname.startsWith('/my-listings')
     },
     {
       icon: Heart,
-      label: 'Favorites',
+      label: t('favorites'),
       path: '/favorites',
       active: pathname.startsWith('/favorites')
     },
     {
       icon: MessageCircle,
-      label: 'Messages',
+      label: t('messages'),
       path: '/messages',
       active: pathname.startsWith('/messages'),
       hasUnread: hasUnreadMessages
@@ -100,19 +99,15 @@ export default function BottomNavigation() {
                   className={`w-6 h-6 ${hasUnread && !isItemActive ? 'animate-pulse' : ''}`}
                   strokeWidth={isItemActive ? 2.5 : 2}
                 />
-                {/* Small dot indicator for unread messages */}
                 {hasUnread && !isItemActive && (
                   <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full"></div>
                 )}
               </div>
-              <span className={`text-xs mt-1 ${
-                isItemActive ? 'font-semibold' : ''
-              }`}>
+              <span className={`text-xs mt-1 ${isItemActive ? 'font-semibold' : ''}`}>
                 {item.label}
               </span>
-              {/* Active indicator line */}
               {isItemActive && (
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-purple-400 rounded-b-full"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-purple-400 rounded-b-full"></div>
               )}
             </button>
           )

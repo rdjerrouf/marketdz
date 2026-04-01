@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
 
 interface ActivityItem {
@@ -173,7 +174,7 @@ export default function AdminDashboard() {
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a
+            <Link
               href="/admin/listings"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
@@ -182,8 +183,8 @@ export default function AdminDashboard() {
                 <div className="font-medium text-gray-900">Review Listings</div>
                 <div className="text-sm text-gray-500">{stats.pendingListings} pending</div>
               </div>
-            </a>
-            <a
+            </Link>
+            <Link
               href="/admin/users"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
@@ -192,8 +193,8 @@ export default function AdminDashboard() {
                 <div className="font-medium text-gray-900">Manage Users</div>
                 <div className="text-sm text-gray-500">{stats.totalUsers} total users</div>
               </div>
-            </a>
-            <a
+            </Link>
+            <Link
               href="/admin/notifications"
               className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
@@ -202,7 +203,7 @@ export default function AdminDashboard() {
                 <div className="font-medium text-gray-900">Send Notifications</div>
                 <div className="text-sm text-gray-500">Bulk messaging</div>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

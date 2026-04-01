@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import MobileSidebar from './MobileSidebar'
 
 export default function GlobalMobileNav() {
+  // next-intl usePathname returns the locale-stripped path (e.g. '/' not '/ar/')
   const pathname = usePathname()
 
   // Hide on pages that have their own navigation system
@@ -14,7 +15,6 @@ export default function GlobalMobileNav() {
   }
 
   // For all other pages, show basic mobile sidebar
-  // No PWA install button or special features
   return (
     <MobileSidebar
       userListingsCount={0}

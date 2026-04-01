@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const withPWA = require('next-pwa');
+import createNextIntlPlugin from 'next-intl/plugin';
 
 import type { Configuration } from 'webpack';
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig = {
   output: 'standalone', // Enable for Docker deployment
@@ -81,4 +84,4 @@ const withPWAConfig = withPWA({
   ],
 });
 
-export default withPWAConfig(nextConfig);
+export default withNextIntl(withPWAConfig(nextConfig));

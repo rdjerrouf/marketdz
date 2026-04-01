@@ -1,21 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { NotificationsProvider } from '@/contexts/NotificationsContext';
-import Navigation from '@/components/common/Navigation';
-import BottomNavigation from '@/components/common/BottomNavigation';
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "DlalaDZ - Marketplace Algeria",
@@ -66,15 +53,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    // lang/dir are set by the [locale]/layout.tsx — this shell has no lang attribute
+    // so Next.js will merge the locale layout's <html> attributes correctly
+    <html suppressHydrationWarning>
+      <body className="antialiased">
         <AuthProvider>
           <NotificationsProvider>
-            <Navigation />
             {children}
-            <BottomNavigation />
           </NotificationsProvider>
           <Toaster
             position="top-right"
