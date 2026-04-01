@@ -438,8 +438,7 @@ function PolicySection({ section, isRtl }: { section: Section; isRtl: boolean })
       {section.contact && (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
           <p className="text-gray-700 mb-2"><strong>Email:</strong> {section.contact.email}</p>
-          <p className="text-gray-700 mb-2"><strong>{isRtl ? 'العنوان' : 'Adresse'}:</strong> {section.contact.address}</p>
-          <p className="text-gray-700"><strong>{isRtl ? 'الهاتف' : 'Tél'}:</strong> {section.contact.phone}</p>
+          <p className="text-gray-700"><strong>{isRtl ? 'العنوان' : 'Adresse'}:</strong> {section.contact.address}</p>
         </div>
       )}
     </div>
