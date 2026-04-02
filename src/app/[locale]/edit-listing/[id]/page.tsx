@@ -1,16 +1,18 @@
-// src/app/edit-listing/[id]/page.tsx
+// src/app/[locale]/edit-listing/[id]/page.tsx
 'use client'
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 import { Listing } from '@/types'
 import ListingForm from '@/components/listings/ListingForm'
 
 export default function EditListingPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
+  const t = useTranslations('editListing')
   const { id: listingId } = use(params)
-  
+
   const [listing, setListing] = useState<Listing | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -74,7 +76,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-        <span className="ml-3 text-gray-600">Loading listing...</span>
+        <span className="ml-3 text-gray-600">{t('loading')}</span>
       </div>
     )
   }
@@ -83,13 +85,13 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
         <div className="bg-red-50 border border-red-200 rounded-lg p-8 max-w-md text-center">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
+          <h2 className="text-xl font-bold text-red-600 mb-4">{t('errorTitle')}</h2>
           <p className="text-red-600 font-medium mb-6">{error}</p>
           <button
             onClick={() => router.push('/')}
             className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            Go Home
+            {t('goHome')}
           </button>
         </div>
       </div>
@@ -100,13 +102,13 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Listing Not Found</h2>
-          <p className="text-gray-600 mb-6">The listing you're trying to edit could not be found.</p>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('notFound')}</h2>
+          <p className="text-gray-600 mb-6">{t('notFoundDesc')}</p>
           <button
             onClick={() => router.push('/')}
             className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            Go Home
+            {t('goHome')}
           </button>
         </div>
       </div>
@@ -115,10 +117,10 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
 
   const getCategoryDisplay = (cat: string) => {
     const displays = {
-      for_sale: { icon: '🛒', title: 'Item for Sale' },
-      for_rent: { icon: '🏠', title: 'Item for Rent' },
-      job: { icon: '💼', title: 'Job Posting' },
-      service: { icon: '🔧', title: 'Service Offering' }
+      for_sale: { icon: '🛒', title: t('categories.for_sale') },
+      for_rent: { icon: '🏠', title: t('categories.for_rent') },
+      job: { icon: '💼', title: t('categories.job') },
+      service: { icon: '🔧', title: t('categories.service') }
     }
     return displays[cat as keyof typeof displays] || displays.for_sale
   }
@@ -132,10 +134,10 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">{display.icon}</div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Edit {display.title}
+            {display.title}
           </h1>
           <p className="text-xl text-gray-600">
-            Update your listing information
+            {t('subtitle')}
           </p>
         </div>
 

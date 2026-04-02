@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useAuth } from '@/contexts/AuthContext'
 import FavoriteButton from '@/components/common/FavoriteButton'
@@ -9,6 +10,7 @@ import { fixPhotoUrl, getCategoryPlaceholder } from '@/lib/storage'
 
 export default function FavoritesPage() {
   const router = useRouter()
+  const t = useTranslations('favorites')
   const { user, loading: authLoading } = useAuth()
   const [currentPage, setCurrentPage] = useState(1)
   const { data: favoritesData, loading, error, refetch } = useFavorites(currentPage, 20)
@@ -95,7 +97,7 @@ export default function FavoritesPage() {
         <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-black">
-              ❤️ My Favorites
+              ❤️ {t('title')}
             </h1>
           </div>
 

@@ -1,0 +1,60 @@
+{
+  "name": "دلالة دي زد - سوق الجزائر الرقمي",
+  "short_name": "دلالة دي زد",
+  "description": "تسوّق وبيع بسهولة في الجزائر — إعلانات البيع والإيجار والوظائف والخدمات",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#06402B",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "business", "lifestyle"],
+  "lang": "ar",
+  "dir": "rtl",
+  "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay", "standalone"],
+  "shortcuts": [
+    {
+      "name": "تصفّح الإعلانات",
+      "short_name": "تصفّح",
+      "description": "تصفّح جميع إعلانات السوق",
+      "url": "/browse",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "نشر إعلان",
+      "short_name": "نشر",
+      "description": "نشر إعلان جديد",
+      "url": "/add-item",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "المفضلة",
+      "short_name": "المفضلة",
+      "description": "عرض إعلاناتك المفضلة",
+      "url": "/favorites",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "الرسائل",
+      "short_name": "الرسائل",
+      "description": "عرض رسائلك",
+      "url": "/messages",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

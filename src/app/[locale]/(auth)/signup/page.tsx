@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations, useLocale } from 'next-intl'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import { isValidEmail, isValidAlgerianPhone } from '@/lib/utils'
 
@@ -24,6 +25,10 @@ interface FormErrors {
 
 export default function SignUpPage() {
   const router = useRouter()
+  const t = useTranslations('auth.signUp')
+  const tCommon = useTranslations('common')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   const [formData, setFormData] = useState<FormData>({
     email: '',
@@ -234,18 +239,18 @@ export default function SignUpPage() {
             href="/"
             className="inline-flex items-center text-sm text-white/80 hover:text-white transition-colors duration-200"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-4 h-4 me-2 ${isRtl ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Home
+            {tCommon('back')}
           </Link>
         </div>
 
         <h1 className="text-center text-3xl font-bold text-white mb-2">
-          DlalaDZ
+          {tCommon('appName')}
         </h1>
         <h2 className="text-center text-xl text-white/80">
-          {showVerificationMessage ? 'Check Your Email' : 'Create Your Account'}
+          {showVerificationMessage ? t('verifyEmail') : t('title')}
         </h2>
       </div>
 
@@ -326,7 +331,7 @@ export default function SignUpPage() {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email *
+                {t('email')} *
               </label>
               <input
                 type="email"
@@ -334,10 +339,11 @@ export default function SignUpPage() {
                 id="email"
                 value={formData.email}
                 onChange={handleInputChange}
+                dir="ltr"
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.email ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="example@email.com"
+                placeholder={t('emailPlaceholder')}
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>

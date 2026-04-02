@@ -1,7 +1,7 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
 
 const LOCALE_LABELS: Record<string, string> = {
@@ -10,20 +10,41 @@ const LOCALE_LABELS: Record<string, string> = {
   en: 'English',
 }
 
-export default function LanguageSwitcher({ className = '' }: { className?: string }) {
+const LOCALE_SHORT: Record<string, string> = {
+  ar: 'AR',
+  fr: 'FR',
+  en: 'EN',
+}
+
+export default function LanguageSwitcher({ className = '', compact = false }: { className?: string; compact?: boolean }) {
   const locale = useLocale()
   const pathname = usePathname()
   const router = useRouter()
 
   function switchLocale(newLocale: string) {
     if (newLocale === locale) return
-    // next-intl usePathname returns the locale-stripped path
-    // We navigate to the same path under the new locale
-    if (newLocale === routing.defaultLocale) {
-      router.push(pathname)
-    } else {
-      router.push(`/${newLocale}${pathname}`)
-    }
+    router.replace(pathname, { locale: newLocale })
+  }
+
+  if (compact) {
+    return (
+      <div className={`flex items-center gap-1 flex-wrap ${className}`}>
+        {routing.locales.map((loc) => (
+          <button
+            key={loc}
+            onClick={() => switchLocale(loc)}
+            title={LOCALE_LABELS[loc]}
+            className={`text-xs px-2 py-1 rounded-md transition-all ${
+              locale === loc
+                ? 'bg-white/20 text-white font-semibold'
+                : 'text-white/60 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            {LOCALE_SHORT[loc]}
+          </button>
+        ))}
+      </div>
+    )
   }
 
   return (

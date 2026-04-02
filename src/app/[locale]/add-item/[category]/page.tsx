@@ -1,8 +1,9 @@
-// src/app/add-item/[category]/page.tsx
+// src/app/[locale]/add-item/[category]/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 import ListingForm from '@/components/listings/ListingForm'
 
@@ -20,7 +21,11 @@ export default function CreateListingPage() {
   const router = useRouter()
   const params = useParams()
   const category = params.category as string
-  
+  const t = useTranslations('addItem')
+  const tCommon = useTranslations('common')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -76,7 +81,7 @@ export default function CreateListingPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-        <span className="ml-3 text-gray-600">Loading...</span>
+        <span className="ms-3 text-gray-600">{t('loading')}</span>
       </div>
     )
   }
@@ -90,7 +95,7 @@ export default function CreateListingPage() {
             onClick={() => router.push('/')}
             className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            Go Home
+            {t('backToHome')}
           </button>
         </div>
       </div>
@@ -99,10 +104,11 @@ export default function CreateListingPage() {
 
   const getCategoryDisplay = (cat: string) => {
     const displays = {
-      for_sale: { icon: '🛒', title: 'Item for Sale', description: 'Sell your items to buyers across Algeria' },
-      for_rent: { icon: '🏠', title: 'Item for Rent', description: 'Rent out your properties and equipment' },
-      job: { icon: '💼', title: 'Job Posting', description: 'Post job opportunities for job seekers' },
-      service: { icon: '🔧', title: 'Service Offering', description: 'Offer your professional services' }
+      for_sale: { icon: '🛒', title: t('categories.forSale'), description: t('categories.forSaleDesc') },
+      for_rent: { icon: '🏠', title: t('categories.forRent'), description: t('categories.forRentDesc') },
+      job: { icon: '💼', title: t('categories.job'), description: t('categories.jobDesc') },
+      service: { icon: '🔧', title: t('categories.service'), description: t('categories.serviceDesc') },
+      urgent: { icon: '🚨', title: t('categories.urgent'), description: t('categories.urgentDesc') }
     }
     return displays[cat as keyof typeof displays] || displays.for_sale
   }
@@ -142,16 +148,16 @@ export default function CreateListingPage() {
               onClick={() => router.back()}
               className="flex items-center text-white/80 hover:text-white transition-colors mb-6 group"
             >
-              <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              Back
+              {tCommon('back')}
             </button>
-            
+
             <div className="text-center">
               <div className="text-6xl mb-4">{display.icon}</div>
               <h1 className="text-4xl font-bold text-white mb-2">
-                Create New {display.title}
+                {display.title}
               </h1>
               <p className="text-xl text-white/80">
                 {display.description}

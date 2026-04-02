@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 import ListingManager from '@/components/listings/ListingManager'
 
@@ -13,6 +14,7 @@ interface User {
 
 export default function MyListingsPage() {
   const router = useRouter()
+  const t = useTranslations('myListings')
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -183,7 +185,7 @@ export default function MyListingsPage() {
           <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-3xl font-bold text-white mb-2">My Listings</h1>
+                <h1 className="text-3xl font-bold text-white mb-2">{t('title')}</h1>
                 <p className="text-white/70">Manage your posted items and services</p>
               </div>
             </div>

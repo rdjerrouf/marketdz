@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations, useLocale } from 'next-intl'
 import { isValidEmail } from '@/lib/utils'
 import { signIn } from './actions'
 import PWAInstallButton from '@/components/PWAInstallButton'
@@ -19,6 +20,10 @@ interface FormErrors {
 function SignInPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const t = useTranslations('auth.signIn')
+  const tCommon = useTranslations('common')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   const successMessage = searchParams?.get('message')
   
   const [formData, setFormData] = useState<FormData>({
@@ -149,23 +154,23 @@ function SignInPageContent() {
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
         {/* Back button and PWA Install */}
         <div className="mb-4 flex items-center justify-between">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="inline-flex items-center text-sm text-white/80 hover:text-white transition-colors duration-200"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-4 h-4 me-2 ${isRtl ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Home
+            {tCommon('back')}
           </Link>
           <PWAInstallButton variant="compact" />
         </div>
-        
+
         <h1 className="text-center text-3xl font-bold text-white mb-2">
-          DlalaDZ
+          {tCommon('appName')}
         </h1>
         <h2 className="text-center text-xl text-white/80">
-          Sign In
+          {t('title')}
         </h2>
       </div>
 
@@ -190,7 +195,7 @@ function SignInPageContent() {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
+                {t('email')}
               </label>
               <input
                 type="email"
@@ -198,10 +203,11 @@ function SignInPageContent() {
                 id="email"
                 value={formData.email}
                 onChange={handleInputChange}
+                dir="ltr"
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.email ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="your@email.com"
+                placeholder={t('emailPlaceholder')}
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
@@ -209,7 +215,7 @@ function SignInPageContent() {
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                {t('password')}
               </label>
               <div className="relative">
                 <input
@@ -218,17 +224,18 @@ function SignInPageContent() {
                   id="password"
                   value={formData.password}
                   onChange={handleInputChange}
+                  dir="ltr"
                   className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Your password"
+                  placeholder={t('passwordPlaceholder')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600"
+                  className="absolute inset-y-0 end-0 pe-3 flex items-center text-sm text-gray-600"
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? t('hidePassword') : t('showPassword')}
                 </button>
               </div>
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
@@ -247,15 +254,15 @@ function SignInPageContent() {
               >
                 {isRedirecting ? (
                   <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Login successful! Redirecting...
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white me-2"></div>
+                    {tCommon('loading')}
                   </div>
                 ) : isLoading ? (
                   <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Signing in...
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white me-2"></div>
+                    {t('submitting')}
                   </div>
-                ) : 'Sign In'}
+                ) : t('submit')}
               </button>
             </div>
           </form>
@@ -263,22 +270,16 @@ function SignInPageContent() {
           {/* Links */}
           <div className="mt-6 space-y-4">
             <div className="text-center">
-              <Link 
-                href="/forgot-password" 
-                className="text-sm text-blue-600 hover:text-blue-500"
-              >
-                Forgot password?
+              <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+                {t('forgotPassword')}
               </Link>
             </div>
-            
+
             <div className="text-center">
               <span className="text-sm text-gray-600">
-                Don&apos;t have an account?{' '}
-                <Link 
-                  href="/signup" 
-                  className="font-medium text-blue-600 hover:text-blue-500"
-                >
-                  Create Account
+                {t('noAccount')}{' '}
+                <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+                  {t('createAccount')}
                 </Link>
               </span>
             </div>

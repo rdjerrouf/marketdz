@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import { normalizePhoneNumber, generateWhatsAppLink } from '@/lib/utils'
@@ -34,6 +35,7 @@ interface Listing {
 
 export default function ProfilePage() {
   const router = useRouter()
+  const t = useTranslations('profile')
   const [user, setUser] = useState<User | null>(null)
   const [userListings, setUserListings] = useState<Listing[]>([])
   const [activeTab, setActiveTab] = useState<'profile' | 'listings' | 'settings'>('profile')
@@ -372,7 +374,7 @@ export default function ProfilePage() {
               Back to Home
             </button>
 
-            <h1 className="text-2xl font-bold text-white">My Profile</h1>
+            <h1 className="text-2xl font-bold text-white">{t('title')}</h1>
           </div>
         </div>
       </div>

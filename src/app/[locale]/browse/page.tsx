@@ -1,8 +1,9 @@
-// src/app/browse/page.tsx - Compatible with current API
+// src/app/[locale]/browse/page.tsx - Compatible with current API
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import { getSubcategories } from '@/lib/constants/categories'
 import FavoriteButton from '@/components/common/FavoriteButton'
@@ -60,6 +61,10 @@ interface SearchResponse {
 function BrowsePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const t = useTranslations('browse')
+  const tNav = useTranslations('nav')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(false)
@@ -334,10 +339,10 @@ function BrowsePageContent() {
 
   const formatPrice = (price: number | null, category: string, rentalPeriod?: string | null) => {
     if (!price) {
-      if (category === 'job') return 'Salary negotiable'
-      if (category === 'for_rent') return 'Contact for price'
-      if (category === 'urgent') return 'Free / Donation'
-      return 'Price negotiable'
+      if (category === 'job') return t('priceSalaryNegotiable')
+      if (category === 'for_rent') return t('priceContactForPrice')
+      if (category === 'urgent') return t('priceFree')
+      return t('priceNegotiable')
     }
 
     const formattedPrice = new Intl.NumberFormat('en-US', {
@@ -349,14 +354,13 @@ function BrowsePageContent() {
     // Add rental period for rental listings
     if (category === 'for_rent') {
       const periodMap: Record<string, string> = {
-        'hourly': '/hour',
-        'daily': '/day',
-        'weekly': '/week',
-        'monthly': '/month',
-        'yearly': '/year'
+        'hourly': t('rentalHour'),
+        'daily': t('rentalDay'),
+        'weekly': t('rentalWeek'),
+        'monthly': t('rentalMonth'),
+        'yearly': t('rentalYear')
       }
-      // Default to /month if rental_period is not specified
-      const periodText = rentalPeriod ? (periodMap[rentalPeriod] || '/month') : '/month'
+      const periodText = rentalPeriod ? (periodMap[rentalPeriod] || t('rentalMonth')) : t('rentalMonth')
       return `${formattedPrice}${periodText}`
     }
 
@@ -365,10 +369,10 @@ function BrowsePageContent() {
 
   const getCategoryBadge = (category: string) => {
     const badges = {
-      'for_sale': { text: 'For Sale', color: 'bg-green-500', emoji: '💰' },
-      'for_rent': { text: 'For Rent', color: 'bg-blue-500', emoji: '🏠' },
-      'job': { text: 'Jobs', color: 'bg-red-500', emoji: '💼' },
-      'service': { text: 'Services', color: 'bg-purple-500', emoji: '🔧' }
+      'for_sale': { text: t('categorySale'), color: 'bg-green-500', emoji: '💰' },
+      'for_rent': { text: t('categoryRent'), color: 'bg-blue-500', emoji: '🏠' },
+      'job': { text: t('categoryJob'), color: 'bg-red-500', emoji: '💼' },
+      'service': { text: t('categoryService'), color: 'bg-purple-500', emoji: '🔧' }
     }
     return badges[category as keyof typeof badges] || { text: category, color: 'bg-gray-500', emoji: '📦' }
   }
@@ -378,11 +382,11 @@ function BrowsePageContent() {
     const date = new Date(dateString)
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
 
-    if (diffInHours < 1) return 'Just now'
-    if (diffInHours < 24) return `${diffInHours}h ago`
+    if (diffInHours < 1) return t('timeJustNow')
+    if (diffInHours < 24) return t('timeHoursAgo', { n: diffInHours })
     const diffInDays = Math.floor(diffInHours / 24)
-    if (diffInDays < 7) return `${diffInDays}d ago`
-    return date.toLocaleDateString()
+    if (diffInDays < 7) return t('timeDaysAgo', { n: diffInDays })
+    return date.toLocaleDateString(locale === 'ar' ? 'ar-DZ' : locale)
   }
 
   return (
@@ -411,11 +415,11 @@ function BrowsePageContent() {
       </div>
 
       {/* Sidebar Navigation - Hidden on mobile, shown on desktop */}
-      <div className="hidden md:block relative z-10 w-64 bg-slate-900/90 backdrop-blur-sm border-r border-white/10">
+      <div className={`hidden md:block relative z-10 w-64 bg-slate-900/90 backdrop-blur-sm ${isRtl ? 'border-l' : 'border-r'} border-white/10`}>
         <div className="p-6">
           {/* Logo */}
           <div className="flex items-center mb-8">
-            <div className="bg-purple-600/30 p-2 rounded-lg mr-3">
+            <div className="bg-purple-600/30 p-2 rounded-lg me-3">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -423,76 +427,76 @@ function BrowsePageContent() {
             <h1 className="text-white text-xl font-bold">DlalaDZ</h1>
           </div>
 
-          {/* Back Button and PWA Install */}
+          {/* Back Button */}
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => router.back()}
               className="flex items-center text-white/80 hover:text-white transition-colors group"
             >
-              <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              Back
+              {t('back')}
             </button>
           </div>
 
           {/* Navigation Menu */}
           <nav className="space-y-2">
-            <button 
+            <button
               onClick={() => router.push('/')}
               className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              Home
+              {tNav('home')}
             </button>
 
             <div className="flex items-center w-full p-3 text-white bg-purple-600/30 rounded-lg border border-purple-400/30">
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              Search & Browse
+              {t('searchAndBrowse')}
             </div>
 
-            <button 
+            <button
               onClick={() => router.push('/add-item')}
               className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Create Listing
+              {t('createListing')}
             </button>
 
-            <button 
+            <button
               onClick={() => router.push('/my-listings')}
               className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              My Listings
+              {tNav('myListings')}
             </button>
 
-            <button 
+            <button
               onClick={() => router.push('/favorites')}
               className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              Favorites
+              {tNav('favorites')}
             </button>
 
-            <button 
+            <button
               onClick={() => router.push('/profile')}
               className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              Profile
+              {tNav('profile')}
             </button>
           </nav>
         </div>
@@ -502,9 +506,9 @@ function BrowsePageContent() {
       <div className="relative z-10 flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-auto">
         {/* Header */}
         <div className="text-center mb-4 md:mb-8 relative">
-          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Search DlalaDZ</h1>
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('searchTitle')}</h1>
           <p className="text-sm md:text-lg text-white text-opacity-90 px-4">
-            Find exactly what you're looking for in Algeria's premier marketplace
+            {t('searchSubtitle')}
           </p>
         </div>
 
@@ -514,14 +518,15 @@ function BrowsePageContent() {
             {/* Search Query */}
             <div className="mb-6">
               <label htmlFor="search-query" className="block text-sm font-semibold text-gray-700 mb-2">
-                What are you looking for?
+                {t('filters.searchQuery')}
               </label>
               <input
                 id="search-query"
                 type="text"
                 value={filters.query}
                 onChange={(e) => handleFilterChange('query', e.target.value)}
-                placeholder="Search for items, jobs, services..."
+                placeholder={t('filters.searchPlaceholder')}
+                dir={isRtl ? 'rtl' : 'ltr'}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
               />
             </div>
@@ -531,7 +536,7 @@ function BrowsePageContent() {
               {/* Category */}
               <div>
                 <label htmlFor="category-select" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Category
+                  {t('filters.category')}
                 </label>
                 <select
                   id="category-select"
@@ -539,18 +544,18 @@ function BrowsePageContent() {
                   onChange={(e) => handleFilterChange('category', e.target.value)}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                 >
-                  <option value="">All Categories</option>
-                  <option value="for_sale">For Sale</option>
-                  <option value="for_rent">For Rent</option>
-                  <option value="job">Jobs</option>
-                  <option value="service">Services</option>
+                  <option value="">{t('allCategories')}</option>
+                  <option value="for_sale">{t('categorySale')}</option>
+                  <option value="for_rent">{t('categoryRent')}</option>
+                  <option value="job">{t('categoryJob')}</option>
+                  <option value="service">{t('categoryService')}</option>
                 </select>
               </div>
 
               {/* Subcategory */}
               <div>
                 <label htmlFor="subcategory-select" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Subcategory
+                  {t('filters.subcategory')}
                 </label>
                 <select
                   id="subcategory-select"
@@ -560,7 +565,7 @@ function BrowsePageContent() {
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
                 >
                   <option value="">
-                    {filters.category ? 'All Subcategories' : 'Select Category First'}
+                    {filters.category ? t('filters.allSubcategories') : t('filters.selectCategoryFirst')}
                   </option>
                   {availableSubcategories.map((subcategory: string) => (
                     <option key={subcategory} value={subcategory}>
@@ -573,7 +578,7 @@ function BrowsePageContent() {
               {/* Wilaya */}
               <div>
                 <label htmlFor="wilaya-select" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Wilaya
+                  {t('filters.wilaya')}
                 </label>
                 <select
                   id="wilaya-select"
@@ -581,7 +586,7 @@ function BrowsePageContent() {
                   onChange={(e) => handleFilterChange('wilaya', e.target.value)}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                 >
-                  <option value="">All Wilayas</option>
+                  <option value="">{t('filters.allWilayas')}</option>
                   {ALGERIA_WILAYAS.map((wilaya: any) => (
                     <option key={wilaya.code} value={wilaya.name}>
                       {wilaya.name}
@@ -593,7 +598,7 @@ function BrowsePageContent() {
               {/* City */}
               <div>
                 <label htmlFor="city-select" className="block text-sm font-semibold text-gray-700 mb-2">
-                  City
+                  {t('filters.city')}
                 </label>
                 <select
                   id="city-select"
@@ -603,7 +608,7 @@ function BrowsePageContent() {
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
                 >
                   <option value="">
-                    {filters.wilaya ? 'All Cities' : 'Select Wilaya First'}
+                    {filters.wilaya ? t('filters.allCities') : t('filters.selectWilayaFirst')}
                   </option>
                   {availableCities.map((city: string) => (
                     <option key={city} value={city}>
@@ -616,7 +621,7 @@ function BrowsePageContent() {
               {/* Sort */}
               <div>
                 <label htmlFor="sort-select" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Sort by
+                  {t('sortBy')}
                 </label>
                 <select
                   id="sort-select"
@@ -624,11 +629,11 @@ function BrowsePageContent() {
                   onChange={(e) => handleFilterChange('sortBy', e.target.value as any)}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                 >
-                  <option value="relevance">Relevance</option>
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                  <option value="price_low">Price: Low to High</option>
-                  <option value="price_high">Price: High to Low</option>
+                  <option value="relevance">{t('sortRelevance')}</option>
+                  <option value="newest">{t('sortNewest')}</option>
+                  <option value="oldest">{t('sortOldest')}</option>
+                  <option value="price_low">{t('sortPriceAsc')}</option>
+                  <option value="price_high">{t('sortPriceDesc')}</option>
                 </select>
               </div>
             </div>
@@ -637,7 +642,7 @@ function BrowsePageContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
                 <label htmlFor="min-price" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Min Price (DA)
+                  {t('filters.minPrice')}
                 </label>
                 <input
                   id="min-price"
@@ -646,21 +651,23 @@ function BrowsePageContent() {
                   onChange={(e) => handleFilterChange('minPrice', e.target.value)}
                   placeholder="0"
                   min="0"
+                  dir="ltr"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                 />
               </div>
 
               <div>
                 <label htmlFor="max-price" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Max Price (DA)
+                  {t('filters.maxPrice')}
                 </label>
                 <input
                   id="max-price"
                   type="number"
                   value={filters.maxPrice}
                   onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                  placeholder="No limit"
+                  placeholder="∞"
                   min="0"
+                  dir="ltr"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                 />
               </div>
@@ -675,21 +682,21 @@ function BrowsePageContent() {
               >
                 {loading ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Searching...
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white me-2"></div>
+                    {t('searching')}
                   </>
                 ) : (
-                  'Search Listings'
+                  t('filters.apply')
                 )}
               </button>
-              
+
               <button
                 type="button"
                 onClick={clearFilters}
                 disabled={loading}
                 className="bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-200 disabled:opacity-50 transition-colors"
               >
-                Clear Filters
+                {t('filters.reset')}
               </button>
             </div>
           </form>
@@ -701,17 +708,17 @@ function BrowsePageContent() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-white">
-                {loading && pagination.totalItems === 0 ? 'Searching...' :
-                 error ? 'Search Error' :
-                 `Search Results`}
+                {loading && pagination.totalItems === 0 ? t('searching') :
+                 error ? t('searchError') :
+                 t('searchResults')}
               </h2>
               {!loading && !error && (
                 <p className="text-white/80 mt-1">
                   {listings.length === 0 ?
-                    'No listings found' :
+                    t('noListings') :
                     pagination.totalItems ?
-                      `${pagination.totalItems} ${pagination.totalItems === 1 ? 'listing' : 'listings'} found` :
-                      `${listings.length}+ listings found`}
+                      t('listingsFound', { count: pagination.totalItems }) :
+                      `${listings.length}+ ${t('results')}`}
                   {filters.query && ` for "${filters.query}"`}
                 </p>
               )}
@@ -720,7 +727,11 @@ function BrowsePageContent() {
             {/* Results Info */}
             {!loading && !error && listings.length > 0 && pagination.totalItems > 0 && (
               <div className="text-sm text-white/70">
-                Showing {((pagination.currentPage - 1) * 20) + 1}-{Math.min(pagination.currentPage * 20, pagination.totalItems)} of {pagination.totalItems}
+                {t('showingRange', {
+                  from: ((pagination.currentPage - 1) * 20) + 1,
+                  to: Math.min(pagination.currentPage * 20, pagination.totalItems),
+                  total: pagination.totalItems
+                })}
               </div>
             )}
           </div>
@@ -733,20 +744,20 @@ function BrowsePageContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Search Failed</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('searchFailed')}</h3>
               <p className="text-gray-600 mb-4 max-w-md mx-auto">{error}</p>
-              <div className="space-x-4">
+              <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => performSearch(1)}
                   className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
                 >
-                  Try Again
+                  {t('tryAgain')}
                 </button>
                 <button
                   onClick={clearFilters}
                   className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
                 >
-                  Clear Filters
+                  {t('filters.reset')}
                 </button>
               </div>
             </div>
@@ -767,7 +778,7 @@ function BrowsePageContent() {
           )}
 
           {/* Empty State */}
-          {!loading && !error && (!listings ||  (listings || []).length === 0) && (
+          {!loading && !error && (!listings || (listings || []).length === 0) && (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-4">
                 <svg className="mx-auto h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -775,12 +786,12 @@ function BrowsePageContent() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {Object.values(filters).some(f => f) ? 'No Results Found' : 'Start Your Search'}
+                {Object.values(filters).some(f => f) ? t('noResultsFound') : t('startYourSearch')}
               </h3>
               <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                {Object.values(filters).some(f => f) 
-                  ? 'Try adjusting your filters or search terms to find what you\'re looking for.'
-                  : 'Enter search terms or use filters to discover amazing listings from across Algeria.'
+                {Object.values(filters).some(f => f)
+                  ? t('adjustFiltersDesc')
+                  : t('enterSearchDesc')
                 }
               </p>
               {Object.values(filters).some(f => f) ? (
@@ -788,7 +799,7 @@ function BrowsePageContent() {
                   onClick={clearFilters}
                   className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
                 >
-                  Clear All Filters
+                  {t('clearAllFilters')}
                 </button>
               ) : (
                 <button
@@ -798,7 +809,7 @@ function BrowsePageContent() {
                   }}
                   className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
                 >
-                  Browse All Listings
+                  {t('browseAllListings')}
                 </button>
               )}
             </div>
@@ -854,9 +865,9 @@ function BrowsePageContent() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none"></div>
 
                         {/* Category Badge */}
-                        <div className="absolute top-4 left-4">
+                        <div className="absolute top-4 start-4">
                           <div className={`bg-gradient-to-r ${categoryBadge.color} text-white px-3 py-1 rounded-full text-sm font-medium flex items-center shadow-lg backdrop-blur-sm`}>
-                            <span className="mr-1">{categoryBadge.emoji}</span>
+                            <span className="me-1">{categoryBadge.emoji}</span>
                             {categoryBadge.text}
                           </div>
                         </div>
@@ -864,7 +875,7 @@ function BrowsePageContent() {
                         {/* Enhanced Favorite Button */}
                         <div
                           data-favorite-button="true"
-                          className="absolute top-4 right-4 z-10 pointer-events-auto"
+                          className="absolute top-4 end-4 z-10 pointer-events-auto"
                           onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
@@ -881,7 +892,7 @@ function BrowsePageContent() {
                         </div>
 
                         {/* Enhanced Time Badge */}
-                        <div className="absolute bottom-4 right-4">
+                        <div className="absolute bottom-4 end-4">
                           <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs shadow-lg">
                             {getTimeAgo(listing.created_at)}
                           </div>
@@ -889,7 +900,7 @@ function BrowsePageContent() {
 
                         {/* Location Badge */}
                         {(listing.city || listing.wilaya) && (
-                          <div className="absolute bottom-4 left-4">
+                          <div className="absolute bottom-4 start-4">
                             <div className="bg-white/10 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs flex items-center">
                               📍 {listing.city ? `${listing.city}${listing.wilaya ? `, ${listing.wilaya}` : ''}` : listing.wilaya}
                             </div>
@@ -914,10 +925,10 @@ function BrowsePageContent() {
 
                           {listing.search_rank && listing.search_rank > 0 && (
                             <div className="flex items-center text-xs text-white/70">
-                              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
-                              Top Match
+                              {t('topMatch')}
                             </div>
                           )}
                         </div>
@@ -938,12 +949,12 @@ function BrowsePageContent() {
                                 <img
                                   src={listing.user.avatar_url}
                                   alt={`${listing.user.first_name} ${listing.user.last_name}`}
-                                  className="w-8 h-8 rounded-full mr-2 border-2 border-white/20"
+                                  className="w-8 h-8 rounded-full me-2 border-2 border-white/20"
                                   loading="lazy"
                                   decoding="async"
                                 />
                               ) : (
-                                <div className="w-8 h-8 rounded-full bg-white/10 mr-2 flex items-center justify-center border-2 border-white/20">
+                                <div className="w-8 h-8 rounded-full bg-white/10 me-2 flex items-center justify-center border-2 border-white/20">
                                   <span className="text-xs text-white">
                                     {listing.user.first_name?.[0]}{listing.user.last_name?.[0]}
                                   </span>
@@ -954,7 +965,7 @@ function BrowsePageContent() {
                                 {listing.user.rating > 0 && (
                                   <div className="flex items-center mt-1">
                                     <StarRating rating={listing.user.rating} readonly size="sm" />
-                                    <span className="text-xs text-white/50 ml-1">
+                                    <span className="text-xs text-white/50 ms-1">
                                       ({listing.user.rating.toFixed(1)})
                                     </span>
                                   </div>
@@ -979,11 +990,11 @@ function BrowsePageContent() {
                   >
                     {loading ? (
                       <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Loading More...
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white me-2"></div>
+                        {t('loadingMore')}
                       </>
                     ) : (
-                      `Load More (${pagination.totalItems - listings.length} remaining)`
+                      t('loadMoreRemaining', { count: pagination.totalItems - listings.length })
                     )}
                   </button>
                 </div>
@@ -992,7 +1003,7 @@ function BrowsePageContent() {
               {/* Pagination Info */}
               <div className="text-center mt-6 text-sm text-gray-500">
                 {pagination.totalPages > 1 && (
-                  <span>Page {pagination.currentPage} of {pagination.totalPages}</span>
+                  <span>{t('pageOf', { current: pagination.currentPage, total: pagination.totalPages })}</span>
                 )}
               </div>
             </>

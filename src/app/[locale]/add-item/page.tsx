@@ -1,8 +1,9 @@
-// src/app/add-item/page.tsx
+// src/app/[locale]/add-item/page.tsx
 'use client'
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 
 interface User {
@@ -12,51 +13,13 @@ interface User {
   last_name: string
 }
 
-const categories = [
-  {
-    id: 'for_sale',
-    title: 'For Sale',
-    description: 'Sell your items to buyers across Algeria',
-    subtitle: 'Electronics, vehicles, furniture, clothing...',
-    icon: '🛒',
-    color: 'from-blue-400 to-blue-600'
-  },
-  {
-    id: 'for_rent',
-    title: 'For Rent',
-    description: 'Rent out your properties and equipment',
-    subtitle: 'Apartments, houses, rooms, offices...',
-    icon: '🏠',
-    color: 'from-green-400 to-green-600'
-  },
-  {
-    id: 'job',
-    title: 'Jobs',
-    description: 'Post job opportunities for job seekers',
-    subtitle: 'Full-time, part-time, contracts, internships...',
-    icon: '💼',
-    color: 'from-purple-400 to-purple-600'
-  },
-  {
-    id: 'service',
-    title: 'Services',
-    description: 'Offer your professional services',
-    subtitle: 'Home services, consulting, tutoring...',
-    icon: '🔧',
-    color: 'from-orange-400 to-orange-600'
-  },
-  {
-    id: 'urgent',
-    title: 'Urgent Help',
-    description: 'Request urgent humanitarian assistance',
-    subtitle: 'Blood donations, medicine, food assistance...',
-    icon: '🚨',
-    color: 'from-red-500 to-red-700'
-  }
-]
-
 export default function AddItemPage() {
   const router = useRouter()
+  const t = useTranslations('addItem')
+  const tNav = useTranslations('nav')
+  const tCommon = useTranslations('common')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isPWA, setIsPWA] = useState(false)
@@ -145,6 +108,14 @@ export default function AddItemPage() {
     checkAuth()
   }, [router])
 
+  const categories = [
+    { id: 'for_sale', title: t('categories.forSale'), description: t('categories.forSaleDesc'), subtitle: t('categories.forSaleSubtitle'), icon: '🛒', color: 'from-blue-400 to-blue-600' },
+    { id: 'for_rent', title: t('categories.forRent'), description: t('categories.forRentDesc'), subtitle: t('categories.forRentSubtitle'), icon: '🏠', color: 'from-green-400 to-green-600' },
+    { id: 'job', title: t('categories.job'), description: t('categories.jobDesc'), subtitle: t('categories.jobSubtitle'), icon: '💼', color: 'from-purple-400 to-purple-600' },
+    { id: 'service', title: t('categories.service'), description: t('categories.serviceDesc'), subtitle: t('categories.serviceSubtitle'), icon: '🔧', color: 'from-orange-400 to-orange-600' },
+    { id: 'urgent', title: t('categories.urgent'), description: t('categories.urgentDesc'), subtitle: t('categories.urgentSubtitle'), icon: '🚨', color: 'from-red-500 to-red-700' }
+  ]
+
   const handleCategorySelect = (categoryId: string) => {
     router.push(`/add-item/${categoryId}`)
   }
@@ -162,7 +133,7 @@ export default function AddItemPage() {
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <div className="text-center text-white">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
-            <p>Loading...</p>
+            <p>{t('loading')}</p>
           </div>
         </div>
       </div>
@@ -201,11 +172,11 @@ export default function AddItemPage() {
 
       <div className="relative z-10 flex">
       {/* Sidebar Navigation - Hidden on mobile/PWA, visible on desktop */}
-      <div className={`hidden lg:block ${isPWA ? 'lg:w-44' : 'lg:w-64'} bg-black/20 backdrop-blur-lg border-r border-white/10`}>
+      <div className={`hidden lg:block ${isPWA ? 'lg:w-44' : 'lg:w-64'} bg-black/20 backdrop-blur-lg ${isRtl ? 'border-l' : 'border-r'} border-white/10`}>
         <div className={isPWA ? 'p-4' : 'p-6'}>
           {/* Logo */}
           <div className="flex items-center mb-8">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3 relative">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl me-3 relative">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -219,10 +190,10 @@ export default function AddItemPage() {
             onClick={() => router.back()}
             className="flex items-center text-white/80 hover:text-white transition-colors mb-6 group"
           >
-            <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back
+            {tCommon('back')}
           </button>
 
           {/* Navigation Menu */}
@@ -231,65 +202,65 @@ export default function AddItemPage() {
               onClick={() => router.push('/')}
               className="flex items-center w-full p-3 text-white/80 rounded-xl hover:bg-white/10 hover:text-white transition-all duration-200"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              Home
+              {tNav('home')}
             </button>
 
-            <button 
+            <button
               onClick={() => router.push('/browse')}
               className="flex items-center w-full p-3 text-white/80 rounded-xl hover:bg-white/10 hover:text-white transition-all duration-200"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              Browse
+              {tNav('browse')}
             </button>
 
-            <button 
+            <button
               className="flex items-center w-full p-3 text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-xl"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Create Listing
-              <span className="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded-full">NEW</span>
+              {t('createTitle')}
+              <span className="ms-2 px-2 py-1 bg-red-500 text-white text-xs rounded-full">{t('new')}</span>
             </button>
 
-            <button 
+            <button
               onClick={() => router.push('/browse')}
               className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              Search
+              {tNav('browse')}
             </button>
 
             <button className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors">
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              Favorites
-              <span className="ml-auto bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full">0</span>
+              {tNav('favorites')}
+              <span className="ms-auto bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full">0</span>
             </button>
 
             <button className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors">
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              Messages
+              {tNav('messages')}
             </button>
 
-            <button 
+            <button
               onClick={() => router.push('/profile')}
               className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              Profile
+              {tNav('profile')}
             </button>
 
             <div className="pt-4 border-t border-white border-opacity-20 mt-4">
@@ -306,30 +277,30 @@ export default function AddItemPage() {
                   }}
                   className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
                 >
-                  <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  Sign Out
+                  {tNav('signOut')}
                 </button>
               ) : (
                 <>
-                  <button 
+                  <button
                     onClick={() => router.push('/signin')}
                     className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors mb-2"
                   >
-                    <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
-                    Login
+                    {tNav('signIn')}
                   </button>
-                  <button 
+                  <button
                     onClick={() => router.push('/signup')}
                     className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
                   >
-                    <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
-                    Register
+                    {tNav('signUp')}
                   </button>
                 </>
               )}
@@ -339,10 +310,10 @@ export default function AddItemPage() {
 
         {/* User Info at Bottom */}
         {user && (
-          <div className="absolute bottom-4 left-4 right-4 max-w-56">
+          <div className="absolute bottom-4 start-4 end-4 max-w-56">
             <div className="bg-black/30 backdrop-blur-sm border border-white/10 p-3 rounded-lg">
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center me-3">
                   <span className="text-white font-semibold">
                     {user.first_name[0]}
                   </span>
@@ -370,13 +341,13 @@ export default function AddItemPage() {
               onClick={() => router.back()}
               className="flex items-center text-white/80 hover:text-white transition-colors group"
             >
-              <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              <span className="font-medium">Back</span>
+              <span className="font-medium">{tCommon('back')}</span>
             </button>
             <div className="flex items-center">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-2 relative">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl me-2 relative">
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
@@ -388,14 +359,14 @@ export default function AddItemPage() {
 
         {/* Header */}
         <div className="text-center mb-12 relative">
-  <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center">
-            ✨ Create Your Listing
+          <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center">
+            ✨ {t('createTitle')}
           </h1>
           <p className="text-xl text-white text-opacity-90 mb-2">
-            Choose the type of listing you'd like to create
+            {t('createSubtitle')}
           </p>
           <p className="text-white text-opacity-70">
-            Select a category to get started
+            {t('selectCategory')}
           </p>
         </div>
 
@@ -431,7 +402,7 @@ export default function AddItemPage() {
 
                   {/* Arrow Icon */}
                   <div className="mt-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg className="w-6 h-6 text-white mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className={`w-6 h-6 text-white mx-auto ${isRtl ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
@@ -441,16 +412,16 @@ export default function AddItemPage() {
           </div>
         </div>
 
-        {/* Back Button */}
+        {/* Back to Home */}
         <div className="text-center mt-12">
           <button
             onClick={() => router.push('/')}
             className="text-white text-opacity-70 hover:text-opacity-100 transition-colors flex items-center mx-auto"
           >
-            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Home
+            {t('backToHome')}
           </button>
         </div>
       </div>

@@ -1,8 +1,9 @@
-// src/app/search-advanced/page.tsx - Advanced Search Page
+// src/app/[locale]/search-advanced/page.tsx - Advanced Search Page
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, MapPin, Star, X, Eye, Calendar } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { fixPhotoUrl } from '@/lib/storage';
 
 interface Listing {
@@ -39,6 +40,11 @@ interface SearchResponse {
 }
 
 export default function AdvancedSearchPage() {
+  const t = useTranslations('searchAdvanced');
+  const tCommon = useTranslations('common');
+  const tBrowse = useTranslations('browse');
+  const tCategories = useTranslations('categories');
+
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [wilaya, setWilaya] = useState('');
@@ -51,10 +57,10 @@ export default function AdvancedSearchPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const categories = [
-    { value: 'for_sale', label: 'À vendre' },
-    { value: 'job', label: 'Emplois' },
-    { value: 'service', label: 'Services' },
-    { value: 'for_rent', label: 'À louer' }
+    { value: 'for_sale', label: tCategories('for_sale') },
+    { value: 'job', label: tCategories('job') },
+    { value: 'service', label: tCategories('service') },
+    { value: 'for_rent', label: tCategories('for_rent') }
   ];
 
   const wilayas = [
@@ -128,25 +134,20 @@ export default function AdvancedSearchPage() {
     }).format(price);
   };
 
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'for_sale': return 'À vendre';
-      case 'job': return 'Emploi';
-      case 'service': return 'Service';
-      case 'for_rent': return 'À louer';
-      default: return category;
-    }
+  const getCategoryLabel = (cat: string) => {
+    try { return tCategories(cat as 'for_sale' | 'for_rent' | 'job' | 'service' | 'urgent'); }
+    catch { return cat; }
   };
 
   const timeAgo = (date: string) => {
     const now = new Date();
     const posted = new Date(date);
     const diffInHours = Math.floor((now.getTime() - posted.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Il y a moins d\'une heure';
-    if (diffInHours < 24) return `Il y a ${diffInHours}h`;
-    if (diffInHours < 168) return `Il y a ${Math.floor(diffInHours / 24)}j`;
-    return posted.toLocaleDateString('fr-FR');
+
+    if (diffInHours < 1) return tBrowse('timeJustNow');
+    if (diffInHours < 24) return tBrowse('timeHoursAgo', { n: diffInHours });
+    if (diffInHours < 168) return tBrowse('timeDaysAgo', { n: Math.floor(diffInHours / 24) });
+    return posted.toLocaleDateString();
   };
 
   return (
@@ -178,10 +179,10 @@ export default function AdvancedSearchPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">
-            Advanced Search
+            {tCommon('search')}
           </h1>
           <p className="text-lg text-white/80">
-            Find exactly what you're looking for with our advanced filters
+            {t('subtitle')}
           </p>
         </div>
 
@@ -198,7 +199,7 @@ export default function AdvancedSearchPage() {
                   handleSearch();
                 }
               }}
-              placeholder="Search for products, services or jobs..."
+              placeholder={tBrowse('filters.searchPlaceholder')}
               className="w-full pl-10 pr-12 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-lg"
             />
             {query && (
@@ -250,13 +251,13 @@ export default function AdvancedSearchPage() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center space-x-2 mb-4">
             <Filter className="w-5 h-5 text-gray-400" />
-            <h2 className="text-lg font-semibold text-gray-900">Search Filters</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{tBrowse('filters.title')}</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <label htmlFor="category-select" className="block text-sm font-medium text-gray-700 mb-2">
-                Catégorie
+                {tBrowse('filters.category')}
               </label>
               <select
                 id="category-select"
@@ -264,7 +265,7 @@ export default function AdvancedSearchPage() {
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">Toutes les catégories</option>
+                <option value="">{tBrowse('allCategories')}</option>
                 {categories.map((cat) => (
                   <option key={cat.value} value={cat.value}>
                     {cat.label}
@@ -275,7 +276,7 @@ export default function AdvancedSearchPage() {
 
             <div>
               <label htmlFor="wilaya-select" className="block text-sm font-medium text-gray-700 mb-2">
-                Wilaya
+                {tBrowse('filters.wilaya')}
               </label>
               <select
                 id="wilaya-select"
@@ -283,7 +284,7 @@ export default function AdvancedSearchPage() {
                 onChange={(e) => setWilaya(e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">Toutes les wilayas</option>
+                <option value="">{tBrowse('filters.allWilayas')}</option>
                 {wilayas.map((w) => (
                   <option key={w.code} value={w.name}>
                     {w.name}
@@ -294,7 +295,7 @@ export default function AdvancedSearchPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Minimum Price (DZD)
+                {tBrowse('filters.minPrice')}
               </label>
               <input
                 type="number"
@@ -307,7 +308,7 @@ export default function AdvancedSearchPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Maximum Price (DZD)
+                {tBrowse('filters.maxPrice')}
               </label>
               <input
                 type="number"
@@ -320,7 +321,7 @@ export default function AdvancedSearchPage() {
 
             <div>
               <label htmlFor="sort-select" className="block text-sm font-medium text-gray-700 mb-2">
-                Sort by
+                {tBrowse('sortBy')}
               </label>
               <select
                 id="sort-select"
@@ -328,11 +329,11 @@ export default function AdvancedSearchPage() {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="created_at">Plus récents</option>
-                <option value="price_asc">Prix croissant</option>
-                <option value="price_desc">Prix décroissant</option>
-                <option value="popularity">Popularité</option>
-                <option value="relevance">Pertinence</option>
+                <option value="created_at">{tBrowse('sortNewest')}</option>
+                <option value="price_asc">{tBrowse('sortPriceAsc')}</option>
+                <option value="price_desc">{tBrowse('sortPriceDesc')}</option>
+                <option value="popularity">{t('sortPopularity')}</option>
+                <option value="relevance">{tBrowse('sortRelevance')}</option>
               </select>
             </div>
           </div>
@@ -343,7 +344,7 @@ export default function AdvancedSearchPage() {
               className="flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
             >
               <Search className="w-5 h-5" />
-              <span>Search</span>
+              <span>{tCommon('search')}</span>
             </button>
           </div>
         </div>
@@ -357,8 +358,9 @@ export default function AdvancedSearchPage() {
                 <div className="text-sm text-gray-600">
                   {results.pagination?.totalItems > 0 ? (
                     <span>
-                      {results.pagination.totalItems.toLocaleString()} résultat(s)
-                      {query && <span> pour "{query}"</span>}
+                      {query
+                        ? t('resultsFor', { count: results.pagination.totalItems.toLocaleString(), query })
+                        : t('results', { count: results.pagination.totalItems.toLocaleString() })}
                       {results.metadata?.executionTime && (
                         <span className="text-gray-400 ml-2">
                           ({results.metadata.executionTime}ms)
@@ -366,14 +368,14 @@ export default function AdvancedSearchPage() {
                       )}
                     </span>
                   ) : (
-                    <span>No results found</span>
+                    <span>{tBrowse('noResultsFound')}</span>
                   )}
                 </div>
                 
                 {/* Search Strategy Indicator (dev mode) */}
                 {process.env.NODE_ENV === 'development' && results.metadata?.strategy && (
                   <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    Strategy: {results.metadata.strategy}
+                    {t('strategy')}: {results.metadata.strategy}
                   </span>
                 )}
               </div>
@@ -398,15 +400,17 @@ export default function AdvancedSearchPage() {
               <div className="text-center py-12">
                 <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-medium text-gray-900 mb-2">
-                  No results found
+                  {tBrowse('noResultsFound')}
                 </h3>
                 <p className="text-gray-500 mb-6">
-                  {query ? `No results for "${query}"` : 'Try modifying your search criteria'}
+                  {query
+                    ? tBrowse('noResultsDesc', { query })
+                    : tBrowse('adjustFiltersDesc')}
                 </p>
                 <div className="space-y-2 text-sm text-gray-600">
-                  <p>• Vérifiez l'orthographe de vos mots-clés</p>
-                  <p>• Essayez des termes plus généraux</p>
-                  <p>• Réduisez le nombre de filtres appliqués</p>
+                  <p>• {t('noResultsTip1')}</p>
+                  <p>• {t('noResultsTip2')}</p>
+                  <p>• {t('noResultsTip3')}</p>
                 </div>
               </div>
             )}

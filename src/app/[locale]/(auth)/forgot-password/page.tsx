@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations, useLocale } from 'next-intl'
 import { isValidEmail } from '@/lib/utils'
 
 interface FormData {
@@ -13,6 +14,12 @@ interface FormErrors {
 }
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('auth.forgotPassword')
+  const tCommon = useTranslations('common')
+  const tSignIn = useTranslations('auth.signIn')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   const [formData, setFormData] = useState<FormData>({
     email: ''
   })
@@ -93,10 +100,10 @@ export default function ForgotPasswordPage() {
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
-            DlalaDZ
+            {tCommon('appName')}
           </h1>
           <h2 className="text-center text-xl text-gray-600">
-            Email Sent!
+            {t('success')}
           </h2>
         </div>
 
@@ -123,11 +130,11 @@ export default function ForgotPasswordPage() {
               </p>
               
               <div className="space-y-3">
-                <Link 
+                <Link
                   href="/signin"
                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  Back to Sign In
+                  {t('backToSignIn')}
                 </Link>
                 
                 <button
@@ -152,25 +159,25 @@ export default function ForgotPasswordPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Back button */}
         <div className="mb-4">
-          <Link 
-            href="/signin" 
+          <Link
+            href="/signin"
             className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-4 h-4 me-2 ${isRtl ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Sign In
+            {t('backToSignIn')}
           </Link>
         </div>
         
         <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
-          DlalaDZ
+          {tCommon('appName')}
         </h1>
         <h2 className="text-center text-xl text-gray-600">
-          Forgot Password
+          {t('title')}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Enter your email address to receive reset instructions
+          {t('subtitle')}
         </p>
       </div>
 
@@ -187,7 +194,7 @@ export default function ForgotPasswordPage() {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
+                {t('email')}
               </label>
               <input
                 type="email"
@@ -195,10 +202,11 @@ export default function ForgotPasswordPage() {
                 id="email"
                 value={formData.email}
                 onChange={handleInputChange}
+                dir="ltr"
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.email ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="your@email.com"
+                placeholder={tSignIn('emailPlaceholder')}
                 autoComplete="email"
                 autoFocus
               />
@@ -216,7 +224,7 @@ export default function ForgotPasswordPage() {
                     : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                 }`}
               >
-                {isLoading ? 'Sending...' : 'Send Instructions'}
+                {isLoading ? tCommon('loading') : t('submit')}
               </button>
             </div>
           </form>
@@ -224,22 +232,16 @@ export default function ForgotPasswordPage() {
           {/* Links */}
           <div className="mt-6 space-y-4">
             <div className="text-center">
-              <Link 
-                href="/signin" 
-                className="text-sm text-blue-600 hover:text-blue-500"
-              >
-                ← Back to Sign In
+              <Link href="/signin" className="text-sm text-blue-600 hover:text-blue-500">
+                {t('backToSignIn')}
               </Link>
             </div>
-            
+
             <div className="text-center">
               <span className="text-sm text-gray-600">
-                Don&apos;t have an account?{' '}
-                <Link 
-                  href="/signup" 
-                  className="font-medium text-blue-600 hover:text-blue-500"
-                >
-                  Create Account
+                {tSignIn('noAccount')}{' '}
+                <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+                  {tSignIn('createAccount')}
                 </Link>
               </span>
             </div>

@@ -16,6 +16,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useFavoriteStatus } from '@/hooks/useFavorites';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -38,6 +39,7 @@ export default function FavoriteButton({
 }: FavoriteButtonProps) {
   const { isFavorited, loading, toggleFavorite } = useFavoriteStatus(listingId);
   const { user } = useAuth();
+  const t = useTranslations('listing');
   const [isToggling, setIsToggling] = useState(false);
   const router = useRouter();
   const isAuthenticated = !!user;
@@ -158,8 +160,8 @@ export default function FavoriteButton({
       `}
       title={
         !isAuthenticated
-          ? 'Sign in to add to favorites'
-          : (isFavorited ? 'Remove from favorites' : 'Add to favorites')
+          ? t('addToFavorites')
+          : (isFavorited ? t('removeFromFavorites') : t('addToFavorites'))
       }
     >
       {isActive ? (
@@ -183,8 +185,8 @@ export default function FavoriteButton({
       )}
       
       {showText && (
-        <span className="ml-1 text-sm font-medium">
-          {isFavorited ? 'Favorited' : 'Add'}
+        <span className="ms-1 text-sm font-medium">
+          {isFavorited ? t('removeFromFavorites') : t('addToFavorites')}
         </span>
       )}
     </button>

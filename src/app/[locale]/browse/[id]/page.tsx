@@ -1,8 +1,9 @@
-// src/app/browse/[id]/page.tsx
+// src/app/[locale]/browse/[id]/page.tsx
 'use client'
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 import { useUserRating } from '@/hooks/useReviews'
 import StarRating from '@/components/common/StarRating'
@@ -42,6 +43,10 @@ interface Seller {
 export default function ListingDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const { id: listingId } = use(params)
+  const t = useTranslations('listing')
+  const tBrowse = useTranslations('browse')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   
   const [listing, setListing] = useState<Listing | null>(null)
   const [seller, setSeller] = useState<Seller | null>(null)
@@ -140,11 +145,11 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
 
   const formatPrice = (price: number | null, category: string, rentalPeriod?: string | null) => {
     if (!price) {
-      if (category === 'job') return 'Salary negotiable'
-      if (category === 'service') return 'Quote on request'
-      if (category === 'for_rent') return 'Contact for price'
-      if (category === 'urgent') return 'Free / Donation'
-      return 'Price negotiable'
+      if (category === 'job') return tBrowse('priceSalaryNegotiable')
+      if (category === 'service') return t('priceQuoteOnRequest')
+      if (category === 'for_rent') return tBrowse('priceContactForPrice')
+      if (category === 'urgent') return tBrowse('priceFree')
+      return tBrowse('priceNegotiable')
     }
 
     const formattedPrice = new Intl.NumberFormat('en-US', {
@@ -153,17 +158,15 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
       minimumFractionDigits: 0
     }).format(price)
 
-    // Add rental period for rental listings
     if (category === 'for_rent' && rentalPeriod) {
       const periodMap: Record<string, string> = {
-        'hourly': '/hour',
-        'daily': '/day',
-        'weekly': '/week',
-        'monthly': '/month',
-        'yearly': '/year'
+        'hourly': tBrowse('rentalHour'),
+        'daily': tBrowse('rentalDay'),
+        'weekly': tBrowse('rentalWeek'),
+        'monthly': tBrowse('rentalMonth'),
+        'yearly': tBrowse('rentalYear')
       }
-      const periodText = periodMap[rentalPeriod] || ''
-      return `${formattedPrice}${periodText}`
+      return `${formattedPrice}${periodMap[rentalPeriod] || ''}`
     }
 
     return formattedPrice
@@ -171,11 +174,11 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
 
   const getCategoryInfo = (category: string) => {
     const categories = {
-      'for_sale': { text: 'For Sale', color: 'bg-green-500', emoji: '💰' },
-      'for_rent': { text: 'For Rent', color: 'bg-blue-500', emoji: '🏠' },
-      'job': { text: 'Jobs', color: 'bg-red-500', emoji: '💼' },
-      'service': { text: 'Services', color: 'bg-purple-500', emoji: '🔧' },
-      'urgent': { text: 'Urgent Help', color: 'bg-red-500', emoji: '🚨' }
+      'for_sale': { text: tBrowse('categorySale'), color: 'bg-green-500', emoji: '💰' },
+      'for_rent': { text: tBrowse('categoryRent'), color: 'bg-blue-500', emoji: '🏠' },
+      'job': { text: tBrowse('categoryJob'), color: 'bg-red-500', emoji: '💼' },
+      'service': { text: tBrowse('categoryService'), color: 'bg-purple-500', emoji: '🔧' },
+      'urgent': { text: t('urgentHelp'), color: 'bg-red-500', emoji: '🚨' }
     }
     return categories[category as keyof typeof categories] || { text: category, color: 'bg-gray-500', emoji: '📦' }
   }
@@ -184,13 +187,12 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
     const now = new Date()
     const date = new Date(dateString)
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
-    
-    if (diffInHours < 1) return 'Just now'
-    if (diffInHours < 24) return `${diffInHours} hours ago`
+
+    if (diffInHours < 1) return tBrowse('timeJustNow')
+    if (diffInHours < 24) return tBrowse('timeHoursAgo', { n: diffInHours })
     const diffInDays = Math.floor(diffInHours / 24)
-    if (diffInDays < 7) return `${diffInDays} days ago`
-    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`
-    return date.toLocaleDateString()
+    if (diffInDays < 7) return tBrowse('timeDaysAgo', { n: diffInDays })
+    return date.toLocaleDateString(locale === 'ar' ? 'ar-DZ' : locale)
   }
 
   const nextImage = () => {
@@ -210,7 +212,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading listing...</p>
+          <p className="text-gray-600">{t('loading')}</p>
         </div>
       </div>
     )
@@ -225,13 +227,13 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">{error || 'Listing not found'}</h2>
-          <p className="text-gray-600 mb-4">The listing you're looking for doesn't exist or has been removed.</p>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">{error || t('notFound')}</h2>
+          <p className="text-gray-600 mb-4">{t('notFoundDesc')}</p>
           <button
             onClick={() => router.push('/browse')}
             className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
           >
-            Browse All Listings
+            {t('browseAll')}
           </button>
         </div>
       </div>
@@ -249,12 +251,12 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
           <div className="flex items-center justify-between py-4">
             <button
               onClick={() => router.back()}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors group"
             >
-              <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              Back to Listings
+              {t('backToListings')}
             </button>
 
             <div className="flex items-center space-x-4">
@@ -301,9 +303,9 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                   {listing.photos.length > 1 && (
                     <>
                       <button
-                        onClick={previousImage}
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-colors"
-                        aria-label="Previous image"
+                        onClick={isRtl ? nextImage : previousImage}
+                        className="absolute start-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-colors"
+                        aria-label={t('prevImage')}
                       >
                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -311,9 +313,9 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                       </button>
 
                       <button
-                        onClick={nextImage}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-colors"
-                        aria-label="Next image"
+                        onClick={isRtl ? previousImage : nextImage}
+                        className="absolute end-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-colors"
+                        aria-label={t('nextImage')}
                       >
                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -321,14 +323,14 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                       </button>
 
                       {/* Image Counter */}
-                      <div className="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                        {currentImageIndex + 1} / {listing.photos.length}
+                      <div className="absolute bottom-4 end-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                        {t('imageCounter', { current: currentImageIndex + 1, total: listing.photos.length })}
                       </div>
                     </>
                   )}
 
                   {/* Category Badge */}
-                  <div className="absolute top-4 left-4">
+                  <div className="absolute top-4 start-4">
                     <span className={`${categoryInfo.color} text-white px-4 py-2 rounded-full font-medium`}>
                       {categoryInfo.emoji} {categoryInfo.text}
                     </span>
@@ -340,7 +342,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                     <svg className="mx-auto h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <p>No photos available</p>
+                    <p>{t('noPhotos')}</p>
                   </div>
                 </div>
               )}
@@ -371,7 +373,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
 
             {/* Description */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('description')}</h2>
               <div className="prose prose-gray max-w-none">
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {listing.description}
@@ -381,33 +383,33 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
 
             {/* Listing Details */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Listing Details</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('details')}</h2>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="font-medium text-gray-600">Category:</span>
+                  <span className="font-medium text-gray-600">{t('category')}:</span>
                   <p className="text-gray-900">{categoryInfo.text}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-600">Posted:</span>
+                  <span className="font-medium text-gray-600">{t('posted')}:</span>
                   <p className="text-gray-900">{getTimeAgo(listing.created_at)}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-600">Listing ID:</span>
-                  <p className="text-gray-900 font-mono">{listing.id.slice(-8)}</p>
+                  <span className="font-medium text-gray-600">{t('listingId')}:</span>
+                  <p className="text-gray-900 font-mono" dir="ltr">{listing.id.slice(-8)}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-600">Status:</span>
+                  <span className="font-medium text-gray-600">{t('status')}:</span>
                   <p className="text-gray-900 capitalize">{listing.status}</p>
                 </div>
                 {listing.location_wilaya && (
                   <div>
-                    <span className="font-medium text-gray-600">Wilaya:</span>
+                    <span className="font-medium text-gray-600">{t('wilaya')}:</span>
                     <p className="text-gray-900">{listing.location_wilaya}</p>
                   </div>
                 )}
                 {listing.location_city && (
                   <div>
-                    <span className="font-medium text-gray-600">City:</span>
+                    <span className="font-medium text-gray-600">{t('city')}:</span>
                     <p className="text-gray-900">{listing.location_city}</p>
                   </div>
                 )}
@@ -429,11 +431,11 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                 {listing.category === 'service' && !!listing.metadata?.service_phone && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <div className="flex items-center justify-center">
-                      <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-5 h-5 text-blue-600 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
                       <div className="text-center">
-                        <p className="text-sm text-blue-600 font-medium">Direct Contact</p>
+                        <p className="text-sm text-blue-600 font-medium">{t('directContact')}</p>
                         <a
                           href={`tel:${listing.metadata.service_phone as string}`}
                           className="text-lg font-bold text-blue-800 hover:text-blue-900 transition-colors"
@@ -449,15 +451,15 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                 {listing.category === 'job' && listing.metadata && (!!listing.metadata.application_email || !!listing.metadata.application_phone || !!listing.metadata.application_instructions) && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                     <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center">
-                      <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-4 h-4 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6z" />
                       </svg>
-                      How to Apply
+                      {t('howToApply')}
                     </h4>
                     <div className="space-y-2">
                       {!!listing.metadata.application_email && (
                         <div className="flex items-center">
-                          <svg className="w-4 h-4 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-4 h-4 text-green-600 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
                           <a
@@ -470,7 +472,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                       )}
                       {!!listing.metadata.application_phone && (
                         <div className="flex items-center">
-                          <svg className="w-4 h-4 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-4 h-4 text-green-600 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                           </svg>
                           <a
@@ -483,7 +485,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                       )}
                       {!!listing.metadata.application_instructions && (
                         <div className="mt-3 pt-3 border-t border-green-200">
-                          <p className="text-sm text-green-700 font-medium mb-1">Application Instructions:</p>
+                          <p className="text-sm text-green-700 font-medium mb-1">{t('applicationInstructions')}:</p>
                           <p className="text-sm text-green-800 whitespace-pre-wrap">
                             {listing.metadata.application_instructions as string}
                           </p>
@@ -506,13 +508,13 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
               {isOwner && (
                 <div className="space-y-3">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                    <p className="text-green-800 font-medium">This is your listing</p>
+                    <p className="text-green-800 font-medium">{t('yourListing')}</p>
                   </div>
                   <button
                     onClick={() => router.push(`/edit-listing/${listing.id}`)}
                     className="w-full bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
                   >
-                    Edit Listing
+                    {t('editListing')}
                   </button>
                 </div>
               )}
@@ -520,13 +522,13 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
 
             {/* Seller Information */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Seller Information</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('sellerInfo')}</h3>
+
               {seller ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                      <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center me-4 flex-shrink-0">
                         <span className="text-white font-semibold text-lg">
                           {seller.first_name?.[0] || 'U'}
                         </span>
@@ -534,23 +536,23 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                       <div>
                         <button
                           onClick={() => router.push(`/profile/${listing?.user_id}`)}
-                          className="font-semibold text-gray-900 hover:text-purple-600 transition-colors text-left"
+                          className="font-semibold text-gray-900 hover:text-purple-600 transition-colors text-start"
                         >
                           {seller.first_name} {seller.last_name}
                         </button>
                         <p className="text-sm text-gray-600">
-                          Member since {new Date(seller.created_at).getFullYear()}
+                          {t('memberSince', { year: new Date(seller.created_at).getFullYear() })}
                         </p>
-                        
+
                         {/* Seller Rating */}
                         {!ratingLoading && (
                           <div className="flex items-center mt-1">
                             <StarRating rating={sellerRating} readonly size="sm" />
-                            <span className="text-sm text-gray-600 ml-2">
+                            <span className="text-sm text-gray-600 ms-2">
                               {sellerRating > 0 ? (
-                                <>({sellerRating.toFixed(1)} - {sellerReviewCount} reviews)</>
+                                <>({sellerRating.toFixed(1)} — {sellerReviewCount} {t('reviews')})</>
                               ) : (
-                                '(No reviews yet)'
+                                `(${t('noReviews')})`
                               )}
                             </span>
                           </div>
@@ -558,21 +560,21 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Rating Actions */}
                   {user && user.id !== listing?.user_id && (
-                    <div className="flex space-x-3 pt-3 border-t border-gray-100">
+                    <div className="flex gap-3 pt-3 border-t border-gray-100">
                       <button
                         onClick={() => router.push(`/profile/${listing?.user_id}`)}
                         className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
                       >
-                        View profile and rate
+                        {t('viewProfileRate')}
                       </button>
                       <button
                         onClick={() => router.push(`/profile/${listing?.user_id}#reviews`)}
                         className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
                       >
-                        View reviews
+                        {t('viewReviews')}
                       </button>
                     </div>
                   )}
@@ -580,7 +582,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
               ) : (
                 <div className="animate-pulse">
                   <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full mr-4"></div>
+                    <div className="w-12 h-12 bg-gray-200 rounded-full me-4"></div>
                     <div className="space-y-2">
                       <div className="h-4 bg-gray-200 rounded w-24"></div>
                       <div className="h-3 bg-gray-200 rounded w-20"></div>
@@ -592,12 +594,12 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
 
             {/* Safety Tips */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-yellow-800 mb-3">Safety Tips</h3>
+              <h3 className="text-lg font-semibold text-yellow-800 mb-3">{t('safetyTips')}</h3>
               <ul className="text-sm text-yellow-700 space-y-2">
-                <li>• Meet in a public place for transactions</li>
-                <li>• Don't send money before seeing the item</li>
-                <li>• Trust your instincts</li>
-                <li>• Report suspicious activity</li>
+                <li>• {t('safetyTip1')}</li>
+                <li>• {t('safetyTip2')}</li>
+                <li>• {t('safetyTip3')}</li>
+                <li>• {t('safetyTip4')}</li>
               </ul>
             </div>
           </div>

@@ -10,7 +10,19 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-cairo: var(--font-cairo);
 }
+
+/* Arabic RTL typography */
+[lang="ar"] body,
+[lang="ar"] .font-cairo {
+  font-family: var(--font-cairo), 'Cairo', Arial, sans-serif;
+}
+
+/* Tailwind logical-property utilities (Tailwind v4 built-in, listed for clarity) */
+/* ms-* = margin-inline-start, me-* = margin-inline-end */
+/* ps-* = padding-inline-start, pe-* = padding-inline-end */
+/* start-* = inset-inline-start, end-* = inset-inline-end */
 
 @media (prefers-color-scheme: dark) {
   :root {

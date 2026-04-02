@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Home, User, MessageCircle, Bell, Zap, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users, AlertCircle } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase/client'
 import { fixPhotoUrl, getCategoryPlaceholder } from '@/lib/storage'
@@ -11,6 +12,7 @@ import MobileListingCard from '@/components/common/MobileListingCard'
 import FavoriteButton from '@/components/common/FavoriteButton'
 import BrowserGuidanceBanner from '@/components/BrowserGuidanceBanner'
 import { detectBrowserInfo } from '@/lib/browser-detection'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 interface Profile {
   id: string;
@@ -39,6 +41,12 @@ interface Listing {
 
 export default function CompleteKickAssHomepage() {
   const { user, loading } = useAuth()
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+  const tNav = useTranslations('nav')
+  const tHome = useTranslations('home')
+  const tCommon = useTranslations('common')
+  const tBrowse = useTranslations('browse')
   const [profile, setProfile] = useState<Profile | null>(null)
   const [featuredListings, setFeaturedListings] = useState<Listing[]>([])
   const [listingsLoading, setListingsLoading] = useState(true)
@@ -173,10 +181,10 @@ export default function CompleteKickAssHomepage() {
 
   const formatPrice = (price: number | null, category: string, rentalPeriod?: string | null): string => {
     if (!price) {
-      if (category === 'job') return 'Salary negotiable'
-      if (category === 'for_rent') return 'Contact for price'
-      if (category === 'urgent') return 'Free / Donation'
-      return 'Price negotiable'
+      if (category === 'job') return tBrowse('priceSalaryNegotiable')
+      if (category === 'for_rent') return tBrowse('priceContactForPrice')
+      if (category === 'urgent') return tBrowse('priceFree')
+      return tBrowse('priceNegotiable')
     }
 
     const formattedPrice = new Intl.NumberFormat('en-US', {
@@ -185,17 +193,15 @@ export default function CompleteKickAssHomepage() {
       minimumFractionDigits: 0
     }).format(price)
 
-    // Add rental period for rental listings
     if (category === 'for_rent') {
       const periodMap: Record<string, string> = {
-        'hourly': '/hour',
-        'daily': '/day',
-        'weekly': '/week',
-        'monthly': '/month',
-        'yearly': '/year'
+        'hourly': tBrowse('rentalHour'),
+        'daily': tBrowse('rentalDay'),
+        'weekly': tBrowse('rentalWeek'),
+        'monthly': tBrowse('rentalMonth'),
+        'yearly': tBrowse('rentalYear')
       }
-      // Default to /month if rental_period is not specified
-      const periodText = rentalPeriod ? (periodMap[rentalPeriod] || '/month') : '/month'
+      const periodText = rentalPeriod ? (periodMap[rentalPeriod] || tBrowse('rentalMonth')) : tBrowse('rentalMonth')
       return `${formattedPrice}${periodText}`
     }
 
@@ -204,11 +210,11 @@ export default function CompleteKickAssHomepage() {
 
   const getCategoryBadge = (category: string) => {
     const badges: Record<string, { text: string; color: string; emoji: string; icon: React.ElementType }> = {
-      'for_sale': { text: 'For Sale', color: 'from-emerald-400 to-emerald-600', emoji: '💰', icon: DollarSign },
-      'for_rent': { text: 'For Rent', color: 'from-blue-400 to-blue-600', emoji: '🏠', icon: Home },
-      'job': { text: 'Jobs', color: 'from-purple-400 to-purple-600', emoji: '💼', icon: User },
-      'service': { text: 'Services', color: 'from-orange-400 to-orange-600', emoji: '🔧', icon: Zap },
-      'urgent': { text: 'URGENT', color: 'from-red-500 to-red-700', emoji: '🚨', icon: AlertCircle }
+      'for_sale': { text: tHome('categories.forSale'), color: 'from-emerald-400 to-emerald-600', emoji: '💰', icon: DollarSign },
+      'for_rent': { text: tHome('categories.forRent'), color: 'from-blue-400 to-blue-600', emoji: '🏠', icon: Home },
+      'job': { text: tHome('categories.jobs'), color: 'from-purple-400 to-purple-600', emoji: '💼', icon: User },
+      'service': { text: tHome('categories.services'), color: 'from-orange-400 to-orange-600', emoji: '🔧', icon: Zap },
+      'urgent': { text: tHome('categories.urgent'), color: 'from-red-500 to-red-700', emoji: '🚨', icon: AlertCircle }
     }
     return badges[category] || { text: category, color: 'from-gray-400 to-gray-600', emoji: '📦', icon: Grid }
   }
@@ -351,7 +357,7 @@ export default function CompleteKickAssHomepage() {
       </div>
 
       {/* Enhanced Desktop Sidebar */}
-      <div className="hidden lg:flex w-52 fixed left-0 top-0 bottom-0 bg-black/20 backdrop-blur-xl border-r border-white/10 pointer-events-auto">
+      <div className={`hidden lg:flex w-52 fixed top-0 bottom-0 bg-black/20 backdrop-blur-xl pointer-events-auto ${isRtl ? 'right-0 border-l border-white/10' : 'left-0 border-r border-white/10'}`}>
         <div className="p-6 flex flex-col h-full">
           {/* Enhanced Logo */}
           <div className="flex items-center mb-12">
@@ -359,54 +365,56 @@ export default function CompleteKickAssHomepage() {
             <div className="flex-1">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">DlalaDZ</h1>
               <p className="text-white/60 text-sm">
-                Algeria&apos;s Premier
+                {tHome('hero.subtitle')}
               </p>
             </div>
           </div>
 
+          <LanguageSwitcher compact className="mb-6 border border-white/10 rounded-xl px-2 py-1.5 bg-white/5" />
+
           {/* Enhanced Navigation Menu */}
           <nav className="space-y-3 flex-1">
             <Link href="/" className="flex items-center w-full p-4 text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl border border-purple-500/20 hover:from-purple-500/30 hover:to-pink-500/30 transition-all duration-300 group shadow-lg">
-              <Home className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Home</span>
-              <div className="ml-auto w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+              <Home className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">{tNav('home')}</span>
+              <div className="ms-auto w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
             </Link>
 
             <Link href="/browse" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
-              <Search className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Browse</span>
-              <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+              <Search className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">{tNav('browse')}</span>
+              <ChevronRight className={`w-4 h-4 ms-auto opacity-0 group-hover:opacity-100 transition-all ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
             </Link>
 
             {user ? (
               <Link href="/my-listings" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
-                <Grid className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
-                <span className="font-medium">My Listings</span>
+                <Grid className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
+                <span className="font-medium">{tNav('myListings')}</span>
               </Link>
             ) : null}
 
             <Link href="/add-item" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group relative overflow-hidden">
-              <Plus className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Create Listing</span>
-              <div className="ml-auto bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
-                NEW
+              <Plus className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">{tNav('post')}</span>
+              <div className="ms-auto bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
+                {tCommon('new')}
               </div>
             </Link>
 
             <Link href="/favorites" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
-              <Heart className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Favorites</span>
+              <Heart className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">{tNav('favorites')}</span>
             </Link>
 
             <Link href="/messages" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
-              <MessageCircle className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Messages</span>
-              <div className="ml-auto w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              <MessageCircle className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">{tNav('messages')}</span>
+              <div className="ms-auto w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
             </Link>
 
             <Link href="/profile" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
-              <User className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Profile</span>
+              <User className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">{tNav('profile')}</span>
             </Link>
           </nav>
 
@@ -445,8 +453,8 @@ export default function CompleteKickAssHomepage() {
                   <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  <span className="font-medium">Sign Out</span>
-                  <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  <span className="font-medium">{tNav('signOut')}</span>
+                  <ChevronRight className={`w-4 h-4 ms-auto opacity-0 group-hover:opacity-100 transition-all ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
                 </button>
               </>
             ) : (
@@ -459,19 +467,18 @@ export default function CompleteKickAssHomepage() {
                   <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                   </svg>
-                  <span className="font-medium">Sign In</span>
-                  <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  <span className="font-medium">{tNav('signIn')}</span>
+                  <ChevronRight className={`w-4 h-4 ms-auto opacity-0 group-hover:opacity-100 transition-all ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
                 </Link>
-                {/* Register Button */}
-                <Link 
-                  href="/signup" 
+                <Link
+                  href="/signup"
                   className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-blue-500/10 hover:text-blue-300 transition-all duration-300 border border-blue-500/20 group"
                 >
-                  <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                   </svg>
-                  <span className="font-medium">Register</span>
-                  <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  <span className="font-medium">{tNav('signUp')}</span>
+                  <ChevronRight className={`w-4 h-4 ms-auto opacity-0 group-hover:opacity-100 transition-all ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
                 </Link>
               </>
             )}
@@ -480,7 +487,7 @@ export default function CompleteKickAssHomepage() {
       </div>
 
       {/* Main Content */}
-      <div className="lg:ml-52 min-h-screen pointer-events-auto">
+      <div className={`min-h-screen pointer-events-auto ${isRtl ? 'lg:mr-52' : 'lg:ml-52'}`}>
         <div className="p-8 pt-24 lg:pt-8 pb-32">
           {/* Search Bar Section */}
           <div className="max-w-4xl mx-auto mb-16">
@@ -488,28 +495,29 @@ export default function CompleteKickAssHomepage() {
               <div className="flex bg-white/95 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300">
                 <input
                   type="text"
-                  placeholder="What are you looking for today?"
+                  placeholder={tHome('hero.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleSearchKeyPress}
                   className="flex-1 px-6 py-4 bg-transparent text-gray-800 placeholder-gray-500 outline-none text-lg"
+                  dir={isRtl ? 'rtl' : 'ltr'}
                 />
                 <button
                   onClick={handleSearch}
                   className="bg-[#7c3f00] hover:bg-[#5f2e00] text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
-                  <Search className="w-5 h-5 mr-2" />
-                  Search
+                  <Search className="w-5 h-5 me-2" />
+                  {tHome('hero.searchButton')}
                 </button>
               </div>
 
               {/* Quick filters */}
               <div className="flex flex-wrap gap-3 mt-4">
                 {[
-                  { label: 'Electronics', href: '/browse?category=for_sale' },
-                  { label: 'Real Estate', href: '/browse?category=for_rent' },
-                  { label: 'Jobs', href: '/browse?category=job' },
-                  { label: 'Services', href: '/browse?category=service' },
+                  { label: tHome('quickFilters.electronics'), href: '/browse?category=for_sale' },
+                  { label: tHome('quickFilters.realEstate'), href: '/browse?category=for_rent' },
+                  { label: tHome('categories.jobs'), href: '/browse?category=job' },
+                  { label: tHome('categories.services'), href: '/browse?category=service' },
                 ].map((tag) => (
                   <Link
                     key={tag.label}
@@ -537,12 +545,12 @@ export default function CompleteKickAssHomepage() {
                   <div className="text-3xl font-bold text-white mb-1 group-hover:scale-110 transition-transform">
                     {stats.totalListings.toLocaleString()}
                   </div>
-                  <div className="text-green-400 font-medium">Active Listings</div>
+                  <div className="text-green-400 font-medium">{tHome('recentActivity.newListings')}</div>
                 </div>
               </div>
               <div className="flex items-center text-green-300 text-sm">
-                <ArrowRight className="w-4 h-4 mr-1 group-hover:translate-x-1 transition-transform" />
-                Browse all listings
+                <ArrowRight className={`w-4 h-4 me-1 transition-transform ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+                {tCommon('seeAll')}
               </div>
             </Link>
 
@@ -569,11 +577,11 @@ export default function CompleteKickAssHomepage() {
                       HOT
                     </div>
                   </div>
-                  <div className="text-orange-400 font-medium">Hot Deals</div>
+                  <div className="text-orange-400 font-medium">{tHome('recentActivity.recentSales')}</div>
                 </div>
               </div>
               <div className="flex items-center text-orange-300 text-sm">
-                <ArrowRight className="w-4 h-4 mr-1 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className={`w-4 h-4 me-1 transition-transform ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
                 Premium Feature
               </div>
             </button>
@@ -599,11 +607,11 @@ export default function CompleteKickAssHomepage() {
                     {stats.newToday}
                     <div className="ml-2 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
                   </div>
-                  <div className="text-blue-400 font-medium">New Today</div>
+                  <div className="text-blue-400 font-medium">{tHome('recentActivity.newListings')}</div>
                 </div>
               </div>
               <div className="flex items-center text-blue-300 text-sm">
-                <ArrowRight className="w-4 h-4 mr-1 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className={`w-4 h-4 me-1 transition-transform ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
                 Premium Feature
               </div>
             </button>
@@ -612,8 +620,8 @@ export default function CompleteKickAssHomepage() {
           {/* Enhanced Category Pills */}
           <div className="mb-16">
             <h2 className="text-3xl font-bold text-white mb-8 flex items-center">
-              <Grid className="w-8 h-8 mr-3 text-purple-400" />
-              Browse by Category
+              <Grid className="w-8 h-8 me-3 text-purple-400" />
+              {tHome('categories.title')}
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {['for_sale', 'for_rent', 'job', 'service'].map((category) => {
@@ -630,10 +638,10 @@ export default function CompleteKickAssHomepage() {
                     </div>
                     <h3 className="text-white font-semibold text-lg mb-2">{badge.text}</h3>
                     <p className="text-white/60 text-sm">
-                      {category === 'for_sale' && 'Electronics, furniture, cars & more'}
-                      {category === 'for_rent' && 'Apartments, houses & commercial spaces'}
-                      {category === 'job' && 'Full-time, part-time & remote positions'}
-                      {category === 'service' && 'Professional services & expertise'}
+                      {category === 'for_sale' && tHome('quickFilters.electronics')}
+                      {category === 'for_rent' && tHome('quickFilters.realEstate')}
+                      {category === 'job' && tHome('categories.jobs')}
+                      {category === 'service' && tHome('categories.services')}
                     </p>
                   </Link>
                 )
@@ -646,18 +654,18 @@ export default function CompleteKickAssHomepage() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-3xl font-bold text-white mb-2 flex items-center">
-                  <Star className="w-8 h-8 mr-3 text-yellow-400" />
-                  Featured Listings
+                  <Star className="w-8 h-8 me-3 text-yellow-400" />
+                  {tHome('featured.title')}
                 </h2>
                 <p className="text-white/60">
-                  {listingsLoading ? 'Loading latest listings...' :
-                   featuredListings.length === 0 ? 'No listings available yet' :
-                   `${featuredListings.length} recent ${featuredListings.length === 1 ? 'listing' : 'listings'}`}
+                  {listingsLoading ? tCommon('loading') :
+                   featuredListings.length === 0 ? tCommon('noResults') :
+                   tHome('featured.subtitle')}
                 </p>
               </div>
               <Link href="/browse" className="flex items-center text-purple-400 hover:text-purple-300 font-medium transition-colors group">
-                View All
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                {tCommon('seeAll')}
+                <ArrowRight className={`w-5 h-5 ms-2 transition-transform ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
               </Link>
             </div>
 
@@ -697,14 +705,14 @@ export default function CompleteKickAssHomepage() {
               <div className="text-center py-16">
                 <div className="bg-white/5 rounded-3xl p-12 max-w-md mx-auto">
                   <Star className="w-16 h-16 text-white/30 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-white mb-2">No Listings Yet</h3>
-                  <p className="text-white/60 mb-6">Be the first to create a listing!</p>
+                  <h3 className="text-xl font-semibold text-white mb-2">{tCommon('noResults')}</h3>
+                  <p className="text-white/60 mb-6">{tHome('featured.subtitle')}</p>
                   <Link
                     href="/add-item"
                     className="inline-flex items-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
                   >
-                    <Plus className="w-5 h-5 mr-2" />
-                    Create Listing
+                    <Plus className="w-5 h-5 me-2" />
+                    {tNav('post')}
                   </Link>
                 </div>
               </div>
@@ -843,8 +851,8 @@ export default function CompleteKickAssHomepage() {
 
                       {/* Enhanced Action Button (switched to #7c3f00) */}
                       <div className="w-full bg-[#7c3f00] hover:bg-[#5f2e00] text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
-                        View Details
-                        <ArrowRight className="w-4 h-4 ml-2 transition-transform" />
+                        {tCommon('viewDetails')}
+                        <ArrowRight className={`w-4 h-4 ms-2 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
                       </div>
                     </div>
                   </Link>
@@ -858,19 +866,19 @@ export default function CompleteKickAssHomepage() {
           <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-3xl p-12 border border-purple-500/30 text-center mb-16 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-4xl font-bold text-white mb-6">
-                Ready to Post Your Listing?
+                {tHome('hero.cta')}
               </h2>
               <p className="text-xl text-white/80 mb-8 leading-relaxed">
-                Join thousands of users on DlalaDZ. Post items for sale, rentals, jobs, or services in minutes and reach millions of people across Algeria.
+                {tHome('featured.subtitle')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/add-item" className="bg-[#7c3f00] hover:bg-[#5f2e00] text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-xl hover:shadow-2xl">
-                  <Plus className="w-6 h-6 mr-3" />
-                  Create Your Listing
+                  <Plus className="w-6 h-6 me-3" />
+                  {tNav('post')}
                 </Link>
                 <Link href="/help" className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold hover:bg-white/20 transition-all duration-300 border border-white/20 flex items-center justify-center shadow-lg hover:shadow-xl">
-                  <Award className="w-6 h-6 mr-3" />
-                  Learn More
+                  <Award className="w-6 h-6 me-3" />
+                  {tCommon('seeAll')}
                 </Link>
               </div>
             </div>

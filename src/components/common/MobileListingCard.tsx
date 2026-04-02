@@ -20,6 +20,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import { Clock, MapPin, DollarSign, Home, User, Zap, AlertCircle } from 'lucide-react'
 import FavoriteButton from './FavoriteButton'
 import { fixPhotoUrl, getCategoryPlaceholder } from '@/lib/utils'
@@ -54,13 +55,15 @@ interface MobileListingCardProps {
 
 export default function MobileListingCard({ listing, onClick }: MobileListingCardProps) {
   const router = useRouter()
+  const t = useTranslations('browse')
+  const locale = useLocale()
 
   const formatPrice = (price: number | null, category: string, rentalPeriod?: string | null): string => {
     if (!price) {
-      if (category === 'job') return 'Salary negotiable'
-      if (category === 'for_rent') return 'Contact for price'
-      if (category === 'urgent') return 'Free / Donation'
-      return 'Price negotiable'
+      if (category === 'job') return t('priceSalaryNegotiable')
+      if (category === 'for_rent') return t('priceContactForPrice')
+      if (category === 'urgent') return t('priceFree')
+      return t('priceNegotiable')
     }
 
     const formattedPrice = new Intl.NumberFormat('en-US', {
@@ -69,14 +72,13 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
       minimumFractionDigits: 0
     }).format(price)
 
-    // Add rental period for rental listings
     if (category === 'for_rent' && rentalPeriod) {
       const periodMap: Record<string, string> = {
-        'hourly': '/hour',
-        'daily': '/day',
-        'weekly': '/week',
-        'monthly': '/month',
-        'yearly': '/year'
+        'hourly': t('rentalHour'),
+        'daily': t('rentalDay'),
+        'weekly': t('rentalWeek'),
+        'monthly': t('rentalMonth'),
+        'yearly': t('rentalYear')
       }
       const periodText = periodMap[rentalPeriod] || ''
       return `${formattedPrice}${periodText}`
@@ -88,25 +90,25 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
   const getCategoryConfig = (category: string) => {
     const configs = {
       'for_sale': {
-        text: 'For Sale',
+        text: t('categorySale'),
         color: 'from-emerald-400 to-emerald-600',
         bgColor: 'bg-emerald-500',
         icon: DollarSign
       },
       'for_rent': {
-        text: 'For Rent',
+        text: t('categoryRent'),
         color: 'from-blue-400 to-blue-600',
         bgColor: 'bg-blue-500',
         icon: Home
       },
       'job': {
-        text: 'Jobs',
+        text: t('categoryJob'),
         color: 'from-purple-400 to-purple-600',
         bgColor: 'bg-purple-500',
         icon: User
       },
       'service': {
-        text: 'Services',
+        text: t('categoryService'),
         color: 'from-orange-400 to-orange-600',
         bgColor: 'bg-orange-500',
         icon: Zap
@@ -131,11 +133,11 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
     const date = new Date(dateString)
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
 
-    if (diffInHours < 1) return 'Just now'
-    if (diffInHours < 24) return `${diffInHours}h ago`
+    if (diffInHours < 1) return t('timeJustNow')
+    if (diffInHours < 24) return t('timeHoursAgo', { n: diffInHours })
     const diffInDays = Math.floor(diffInHours / 24)
-    if (diffInDays < 7) return `${diffInDays}d ago`
-    return date.toLocaleDateString()
+    if (diffInDays < 7) return t('timeDaysAgo', { n: diffInDays })
+    return date.toLocaleDateString(locale === 'ar' ? 'ar-DZ' : locale === 'fr' ? 'fr-FR' : 'en-US')
   }
 
   const categoryConfig = getCategoryConfig(listing.category)
@@ -196,21 +198,21 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none"></div>
 
-        {/* Category Badge - Top Left - Compact */}
-        <div className="absolute top-2 left-2">
+        {/* Category Badge - Top Start */}
+        <div className="absolute top-2 start-2">
           <div className={`bg-gradient-to-r ${categoryConfig.color} text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center shadow-lg ${
             isUrgent ? 'animate-pulse' : ''
           }`}>
-            <CategoryIcon className="w-3 h-3 mr-1" />
+            <CategoryIcon className="w-3 h-3 me-1" />
             <span className="hidden sm:inline">{categoryConfig.text}</span>
           </div>
         </div>
 
-        {/* URGENT Badge Overlay - Center - Only for urgent listings */}
+        {/* URGENT Badge Overlay - Center */}
         {isUrgent && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="bg-red-600/95 text-white px-6 py-3 rounded-xl shadow-2xl transform rotate-[-5deg] animate-pulse">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <AlertCircle className="w-6 h-6" />
                 <span className="text-2xl font-black tracking-wider">URGENT</span>
                 <AlertCircle className="w-6 h-6" />
@@ -219,12 +221,11 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
           </div>
         )}
 
-        {/* Favorite Button - Top Right - Compact */}
-        <div 
-          className="absolute top-2 right-2 z-10"
+        {/* Favorite Button - Top End */}
+        <div
+          className="absolute top-2 end-2 z-10"
           data-favorite-button="true"
           onClick={(e) => {
-            console.log('❤️ Favorite wrapper clicked - stopping propagation');
             e.stopPropagation();
             e.preventDefault();
           }}
@@ -237,10 +238,10 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
           />
         </div>
 
-        {/* Time Badge - Bottom Right - Compact */}
-        <div className="absolute bottom-2 right-2">
+        {/* Time Badge - Bottom End */}
+        <div className="absolute bottom-2 end-2">
           <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs flex items-center shadow-lg">
-            <Clock className="w-3 h-3 mr-1" />
+            <Clock className="w-3 h-3 me-1" />
             <span className="text-[10px]">{getTimeAgo(listing.created_at)}</span>
           </div>
         </div>
@@ -267,7 +268,7 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
         {/* Location - Compact */}
         {(listing.city || listing.wilaya) && (
           <div className="flex items-center text-white/60 text-xs mb-2">
-            <MapPin className="w-3 h-3 mr-1" />
+            <MapPin className="w-3 h-3 me-1" />
             <span className="truncate">{listing.city || listing.wilaya}</span>
           </div>
         )}
