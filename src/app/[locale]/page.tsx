@@ -339,18 +339,21 @@ export default function CompleteKickAssHomepage() {
               </button>
             )}
           </div>
-          {/* Profile Icon */}
-          <Link href="/profile" className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
-            {profile?.avatar_url ? (
-              <img
-                src={fixPhotoUrl(profile.avatar_url)}
-                alt="Profile"
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              <User className="w-5 h-5 text-white" />
-            )}
-          </Link>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher compact className="border border-white/10 rounded-lg px-1.5 py-1 bg-white/5" />
+            {/* Profile Icon */}
+            <Link href="/profile" className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+              {profile?.avatar_url ? (
+                <img
+                  src={fixPhotoUrl(profile.avatar_url)}
+                  alt="Profile"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <User className="w-5 h-5 text-white" />
+              )}
+            </Link>
+          </div>
         </div>
         {/* Browser Guidance Banner - between header and content */}
         <BrowserGuidanceBanner />
