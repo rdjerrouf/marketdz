@@ -5,6 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Filter, MapPin, Star, X, ChevronDown, Heart, Eye, Calendar } from 'lucide-react';
 import { fixPhotoUrl } from '@/lib/storage';
 import { useLocale } from 'next-intl';
+import { ALGERIA_WILAYAS } from '@/lib/constants/algeria';
 
 // Type definitions
 interface SearchParams {
@@ -64,6 +65,7 @@ interface Category {
 interface Wilaya {
   code: string;
   name: string;
+  nameAr: string;
 }
 
 // Main Advanced Search Component
@@ -95,13 +97,7 @@ const SimpleAdvancedSearch = () => {
     { value: 'for_rent', label: 'À louer' }
   ];
 
-  const wilayas: Wilaya[] = [
-    { code: '16', name: 'Alger' },
-    { code: '31', name: 'Oran' },
-    { code: '25', name: 'Constantine' },
-    { code: '09', name: 'Blida' },
-    { code: '35', name: 'Boumerdès' }
-  ];
+  const wilayas: Wilaya[] = ALGERIA_WILAYAS;
 
   // Debounced suggestions
   useEffect(() => {

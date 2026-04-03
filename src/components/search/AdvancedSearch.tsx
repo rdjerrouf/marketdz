@@ -5,6 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Filter, MapPin, Star, Clock, TrendingUp, X, ChevronDown, Heart, Eye, Calendar } from 'lucide-react';
 import { fixPhotoUrl } from '@/lib/storage';
 import { useLocale } from 'next-intl';
+import { ALGERIA_WILAYAS } from '@/lib/constants/algeria';
 
 // Types
 interface SearchParams {
@@ -27,6 +28,7 @@ interface Category {
 interface Wilaya {
   code: string;
   name: string;
+  nameAr: string;
 }
 
 interface Listing {
@@ -226,6 +228,7 @@ interface AdvancedFiltersProps {
 }
 
 const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFiltersChange, categories, wilayas }) => {
+  const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [localFilters, setLocalFilters] = useState<Record<string, string>>({
     category: filters.category,
@@ -731,7 +734,6 @@ const SearchPagination: React.FC<SearchPaginationProps> = ({ pagination, onPageC
 
 // Main Advanced Search Component
 const AdvancedSearch = () => {
-  const locale = useLocale();
   const [searchParams, setSearchParams] = useState<SearchParams>({
     query: '',
     category: '',
@@ -756,14 +758,7 @@ const AdvancedSearch = () => {
     { value: 'for_rent', label: 'À louer' }
   ];
 
-  const wilayas: Wilaya[] = [
-    { code: '16', name: 'Alger' },
-    { code: '31', name: 'Oran' },
-    { code: '25', name: 'Constantine' },
-    { code: '09', name: 'Blida' },
-    { code: '35', name: 'Boumerdès' },
-    // Add more wilayas as needed
-  ];
+  const wilayas: Wilaya[] = ALGERIA_WILAYAS;
 
   const performSearch = useCallback(async (params: SearchParams) => {
     setIsLoading(true);
