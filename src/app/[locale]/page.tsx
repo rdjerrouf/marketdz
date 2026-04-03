@@ -284,7 +284,7 @@ export default function CompleteKickAssHomepage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: '#06402B' }}>
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#06402B' }}>
       {/* Animated background elements with enhanced effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
