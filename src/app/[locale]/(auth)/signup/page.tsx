@@ -471,7 +471,7 @@ export default function SignUpPage() {
                 <option value="">Select a province</option>
                 {ALGERIA_WILAYAS.map(wilaya => (
                   <option key={wilaya.code} value={wilaya.code}>
-                    {wilaya.code} - {wilaya.name}
+                    {wilaya.code} - {locale === 'ar' ? wilaya.nameAr : wilaya.name}
                   </option>
                 ))}
               </select>

@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Filter, MapPin, Star, X, ChevronDown, Heart, Eye, Calendar } from 'lucide-react';
 import { fixPhotoUrl } from '@/lib/storage';
+import { useLocale } from 'next-intl';
 
 // Type definitions
 interface SearchParams {
@@ -67,6 +68,7 @@ interface Wilaya {
 
 // Main Advanced Search Component
 const SimpleAdvancedSearch = () => {
+  const locale = useLocale();
   const [searchParams, setSearchParams] = useState<SearchParams>({
     query: '',
     category: '',
@@ -294,7 +296,7 @@ const SimpleAdvancedSearch = () => {
             <option value="">Toutes les wilayas</option>
             {wilayas.map((wilaya) => (
               <option key={wilaya.code} value={wilaya.name}>
-                {wilaya.name}
+                {locale === 'ar' ? wilaya.nameAr : wilaya.name}
               </option>
             ))}
           </select>

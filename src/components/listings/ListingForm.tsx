@@ -446,7 +446,7 @@ export default function ListingForm({
               <option value="">{t('form.selectWilayaOption')}</option>
               {ALGERIA_WILAYAS.map((wilaya) => (
                 <option key={wilaya.code} value={wilaya.name}>
-                  {wilaya.code} - {wilaya.name}
+                  {wilaya.code} - {locale === 'ar' ? wilaya.nameAr : wilaya.name}
                 </option>
               ))}
             </select>

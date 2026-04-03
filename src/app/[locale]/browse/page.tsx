@@ -589,7 +589,7 @@ function BrowsePageContent() {
                   <option value="">{t('filters.allWilayas')}</option>
                   {ALGERIA_WILAYAS.map((wilaya: any) => (
                     <option key={wilaya.code} value={wilaya.name}>
-                      {wilaya.name}
+                      {locale === 'ar' ? wilaya.nameAr : wilaya.name}
                     </option>
                   ))}
                 </select>

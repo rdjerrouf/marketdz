@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
 import { normalizePhoneNumber, generateWhatsAppLink } from '@/lib/utils'
@@ -36,6 +36,7 @@ interface Listing {
 export default function ProfilePage() {
   const router = useRouter()
   const t = useTranslations('profile')
+  const locale = useLocale()
   const [user, setUser] = useState<User | null>(null)
   const [userListings, setUserListings] = useState<Listing[]>([])
   const [activeTab, setActiveTab] = useState<'profile' | 'listings' | 'settings'>('profile')
@@ -558,7 +559,7 @@ export default function ProfilePage() {
                           <option value="">Select wilaya</option>
                           {ALGERIA_WILAYAS.map((wilaya: any) => (
                             <option key={wilaya.code} value={wilaya.code}>
-                              {wilaya.name}
+                              {locale === 'ar' ? wilaya.nameAr : wilaya.name}
                             </option>
                           ))}
                         </select>
@@ -672,7 +673,7 @@ export default function ProfilePage() {
                       <h3 className="font-semibold text-gray-800 mb-2">Location</h3>
                       <p className="text-gray-900">
                         {user?.city && user?.wilaya 
-                          ? `${user.city}, ${ALGERIA_WILAYAS.find(w => w.code === user.wilaya)?.name || user.wilaya}`
+                          ? `${user.city}, ${ALGERIA_WILAYAS.find(w => w.code === user.wilaya)?.[locale === 'ar' ? 'nameAr' : 'name'] || user.wilaya}`
                           : 'Not provided'
                         }
                       </p>

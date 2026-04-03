@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useLocale } from 'next-intl';
 import { ALGERIA_WILAYAS } from '@/lib/constants/algeria';
 
 interface LocationFilterProps {
@@ -19,6 +20,7 @@ export function LocationFilter({
   onCityChange,
   className = ''
 }: LocationFilterProps) {
+  const locale = useLocale();
   const [availableCities, setAvailableCities] = useState<string[]>([]);
 
   useEffect(() => {
@@ -56,9 +58,9 @@ export function LocationFilter({
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
         >
           <option value="">All Wilayas</option>
-          {ALGERIA_WILAYAS.map((wilaya: { code: string; name: string }) => (
+          {ALGERIA_WILAYAS.map((wilaya) => (
             <option key={wilaya.code} value={wilaya.name}>
-              {wilaya.code} - {wilaya.name}
+              {wilaya.code} - {locale === 'ar' ? wilaya.nameAr : wilaya.name}
             </option>
           ))}
         </select>
