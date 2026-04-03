@@ -27,9 +27,15 @@ function getSupabaseClient(): SupabaseClient<Database> {
   return supabaseInstance
 }
 
-// Export the singleton instance for use throughout the app
-// IMPORTANT: Auth state listener is in AuthContext.tsx, not here
-export const supabase = getSupabaseClient()
+// Export a lazy proxy so the client is only created on first property access,
+// not at module evaluation time. This prevents @supabase/ssr from throwing
+// during Next.js static pre-rendering when NEXT_PUBLIC_* vars aren't set yet.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const supabase: SupabaseClient<Database> = new Proxy({} as any, {
+  get(_: unknown, prop: string | symbol) {
+    return Reflect.get(getSupabaseClient(), prop)
+  }
+})
 
 /**
  * Global error handler for auth errors
