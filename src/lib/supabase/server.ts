@@ -10,6 +10,7 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 import { NextRequest } from 'next/server'
+import { getDockerAwareFetch } from './server-fetch'
 
 /**
  * Create Supabase client for Server Components and API routes
@@ -23,7 +24,7 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
     const token = request.headers.get('Authorization')?.replace('Bearer ', '');
     if (token) {
       return createClient<Database>(
-        process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
           global: {
@@ -40,10 +41,12 @@ export const createServerSupabaseClient = async (request?: NextRequest) => {
   }
 
   // Default: Cookie-based auth for Server Components
+  // Use NEXT_PUBLIC_SUPABASE_URL for consistent cookie naming with the browser client.
   return createServerClient<Database>(
-    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: { fetch: getDockerAwareFetch() },
       cookies: {
         getAll() {
           return cookieStore.getAll()
@@ -84,11 +87,14 @@ export const createApiSupabaseClient = (request: NextRequest) => {
     headersWithoutAuth.delete('Authorization')
   }
 
-  // Create client that reads cookies set by middleware
+  // IMPORTANT: Use NEXT_PUBLIC_SUPABASE_URL (not SUPABASE_URL) so the cookie name
+  // derives from `localhost` — consistent with the browser client and middleware.
+  // Docker network rewriting is handled by getDockerAwareFetch() at the fetch layer.
   const client = createServerClient<Database>(
-    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: { fetch: getDockerAwareFetch() },
       cookies: {
         getAll() {
           console.log('🔧 getAll() returning', allCookies.length, 'cookies')
