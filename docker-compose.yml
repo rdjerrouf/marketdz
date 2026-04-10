@@ -1,40 +1,37 @@
-version: '3.8'
+# ============================================================================
+# MarketDZ – Production-like Docker Compose
+# ============================================================================
+# Expects Supabase running locally via `supabase start`.
+# Usage:
+#   cp .env.example .env.docker   (fill in real keys)
+#   docker compose --env-file .env.docker up --build -d
+# ============================================================================
 
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+        - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
     ports:
-      - "3001:3000"
-    environment:
-      - NODE_ENV=production
-      # Client-side Supabase URL (for browser access)
-      - NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      # Server-side Supabase URL (for container-to-container access)  
-      - SUPABASE_URL=http://supabase_kong_dlaladz:8000
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - NEXT_PUBLIC_APP_URL=http://localhost:3001
+      - "3000:3000"
+    env_file:
+      - .env.docker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
-    networks:
-      - supabase_network_dlaladz
-    # Health check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    # Production labels
     labels:
-      - "com.docker.compose.service=dlaladz-prod"
-      - "environment=production"
+      - "com.marketdz.service=app"
+      - "com.marketdz.env=docker-local"
 
-networks:
-  supabase_network_dlaladz:
-    external: true
-
-# Note: Supabase services are already running separately
-# Use 'supabase start' to start all Supabase services
-# This compose file only handles the main Next.js application
+# No external network needed — the app reaches Supabase on the host via host.docker.internal
