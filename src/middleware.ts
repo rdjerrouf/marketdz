@@ -11,6 +11,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 import { routing } from './i18n/routing'
+import { getDockerAwareFetch } from './lib/supabase/server-fetch'
 
 // next-intl locale middleware
 const intlMiddleware = createMiddleware(routing)
@@ -39,6 +40,7 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: { fetch: getDockerAwareFetch() },
       cookies: {
         getAll() {
           return request.cookies.getAll()

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations, useLocale } from 'next-intl'
-import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
+import { ALGERIA_WILAYAS, getLocalizedName } from '@/lib/constants/algeria'
 import { isValidEmail, isValidAlgerianPhone } from '@/lib/utils'
 
 interface FormData {
@@ -471,7 +471,7 @@ export default function SignUpPage() {
                 <option value="">Select a province</option>
                 {ALGERIA_WILAYAS.map(wilaya => (
                   <option key={wilaya.code} value={wilaya.code}>
-                    {wilaya.code} - {locale === 'ar' ? wilaya.nameAr : wilaya.name}
+                    {wilaya.code} - {getLocalizedName(wilaya, locale)}
                   </option>
                 ))}
               </select>
@@ -495,8 +495,8 @@ export default function SignUpPage() {
               >
                 <option value="">Select a city</option>
                 {availableCities.map(city => (
-                  <option key={city} value={city}>
-                    {city}
+                  <option key={city.name} value={city.name}>
+                    {getLocalizedName(city, locale)}
                   </option>
                 ))}
               </select>

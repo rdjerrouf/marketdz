@@ -6,7 +6,7 @@ README.md
 .env
 .env.local
 .env.production.local
-.env.local
+.env.docker
 .git
 .gitignore
 .next
@@ -15,3 +15,18 @@ README.md
 coverage
 dist
 .turbo
+
+# Test & tooling
+tests/
+playwright-report/
+test_photos/
+scripts/
+docs/
+deployment_ready/
+
+# Supabase (not needed inside the Docker build)
+supabase/
+
+# IDE
+.vscode/
+.idea/

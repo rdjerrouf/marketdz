@@ -137,7 +137,7 @@ export default function CompleteKickAssHomepage() {
         // This uses proper indexes and server-side optimization for 250k+ listings
         const [listingsResponse, countResponse] = await Promise.all([
           fetch('/api/search?limit=9&sortBy=created_at', { cache: 'no-store' }),
-          fetch('/api/search/count', { cache: 'no-store' })
+          fetch('/api/search/count') // respects server Cache-Control (5 min) — no-store was hitting DB on every homepage load
         ])
 
         if (!listingsResponse.ok) {

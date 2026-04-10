@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Filter, MapPin, Star, Clock, TrendingUp, X, ChevronDown, Heart, Eye, Calendar } from 'lucide-react';
 import { fixPhotoUrl } from '@/lib/storage';
 import { useLocale } from 'next-intl';
-import { ALGERIA_WILAYAS } from '@/lib/constants/algeria';
+import { ALGERIA_WILAYAS, getLocalizedName } from '@/lib/constants/algeria';
 
 // Types
 interface SearchParams {
@@ -29,6 +29,7 @@ interface Wilaya {
   code: string;
   name: string;
   nameAr: string;
+  nameFr: string;
 }
 
 interface Listing {
@@ -320,7 +321,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFiltersCha
                 <option value="">Toutes les wilayas</option>
                 {wilayas.map((wilaya) => (
                   <option key={wilaya.code} value={wilaya.name}>
-                    {locale === 'ar' ? wilaya.nameAr : wilaya.name}
+                    {getLocalizedName(wilaya, locale)}
                   </option>
                 ))}
               </select>

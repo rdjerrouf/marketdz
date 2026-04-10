@@ -4,7 +4,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import BottomNavigation from '@/components/common/BottomNavigation';
+import BottomNavigation from '@/components/common/BottomNavigation'
+import GlobalMobileNav from '@/components/GlobalMobileNav';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,8 +92,9 @@ export default async function LocaleLayout({ children, params }: Props) {
       dir={isRtl ? 'rtl' : 'ltr'}
       className={`${geistSans.variable} ${geistMono.variable} ${isRtl ? cairo.variable : ''}`}
     >
-      <body className={isRtl ? 'font-cairo' : ''}>
+      <body className={isRtl ? 'font-cairo antialiased' : 'antialiased'}>
         <NextIntlClientProvider messages={messages}>
+          <GlobalMobileNav />
           {children}
           <BottomNavigation />
         </NextIntlClientProvider>

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Photo Check with Port 3007', () => {
   test('should check if photos load on browse page', async ({ page }) => {
     // Navigate to the correct port
-    await page.goto('http://localhost:3007/browse');
+    await page.goto('http://localhost:3000/browse');
     
     // Wait for page to load
     await page.waitForSelector('body', { timeout: 15000 });
@@ -50,7 +50,7 @@ test.describe('Photo Check with Port 3007', () => {
   });
   
   test('should navigate to homepage and check for content', async ({ page }) => {
-    await page.goto('http://localhost:3007/');
+    await page.goto('http://localhost:3000/');
     
     await page.waitForSelector('body', { timeout: 15000 });
     

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { getDockerAwareFetch } from '@/lib/supabase/server-fetch'
 
 export async function signIn(formData: FormData) {
   const email = formData.get('email') as string
@@ -15,6 +16,7 @@ export async function signIn(formData: FormData) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: { fetch: getDockerAwareFetch() },
       cookies: {
         getAll() {
           return cookieStore.getAll()

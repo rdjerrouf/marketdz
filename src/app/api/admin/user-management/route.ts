@@ -1,13 +1,15 @@
 // src/app/api/admin/user-management/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { createApiSupabaseClient } from '@/lib/supabase/server'
+import { createApiSupabaseClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = createApiSupabaseClient(request)
 
-    // Get the current user and verify admin access
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Authenticate via JWT in Authorization header
+    const authHeader = request.headers.get('Authorization')
+    const jwt = authHeader?.replace('Bearer ', '') || undefined
+    const { data: { user }, error: authError } = await supabase.auth.getUser(jwt)
 
     if (authError || !user) {
       return NextResponse.json(
@@ -16,9 +18,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check admin status using RLS
-    const { data: currentAdmin, error: adminError } = await supabase
-      .from('admin_users' as any)
+    // Check admin status with service role (bypasses RLS on admin_users)
+    const adminClient = createSupabaseAdminClient()
+    const { data: currentAdmin, error: adminError } = await (adminClient as any)
+      .from('admin_users')
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)
@@ -110,8 +113,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action, userId, newStatus } = body
 
-    // Get the current user and verify admin access
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Authenticate via JWT in Authorization header
+    const authHeader = request.headers.get('Authorization')
+    const jwt = authHeader?.replace('Bearer ', '') || undefined
+    const { data: { user }, error: authError } = await supabase.auth.getUser(jwt)
 
     if (authError || !user) {
       return NextResponse.json(
@@ -120,9 +125,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check admin status using RLS
-    const { data: currentAdmin, error: adminError } = await supabase
-      .from('admin_users' as any)
+    // Check admin status with service role (bypasses RLS on admin_users)
+    const adminClient = createSupabaseAdminClient()
+    const { data: currentAdmin, error: adminError } = await (adminClient as any)
+      .from('admin_users')
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)

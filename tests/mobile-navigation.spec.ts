@@ -2,6 +2,9 @@ import { test, expect, devices } from '@playwright/test';
 
 test.describe('Mobile Navigation Tests', () => {
   test('should open and close mobile sidebar on iOS Safari', async ({ browser }) => {
+    // Firefox does not support isMobile in device emulation
+    test.skip(browser.browserType().name() === 'firefox', 'isMobile not supported in Firefox');
+
     const iPhone = devices['iPhone 12 Pro'];
     const context = await browser.newContext({
       ...iPhone,
@@ -9,14 +12,15 @@ test.describe('Mobile Navigation Tests', () => {
     const page = await context.newPage();
 
     console.log('🍎 Testing on iOS Safari emulation...');
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    // Navigate to a page where GlobalMobileNav renders (not '/' or '/browse')
+    await page.goto('/add-item');
+    await page.waitForLoadState('domcontentloaded');
 
     // Take initial screenshot
     await page.screenshot({ path: 'mobile-ios-initial.png', fullPage: false });
 
     // Find the hamburger menu button
-    const menuButton = page.locator('button[aria-label*="menu" i], button:has(svg.lucide-menu)').first();
+    const menuButton = page.locator('button[data-testid="hamburger-menu"]').first();
     await expect(menuButton).toBeVisible({ timeout: 10000 });
 
     console.log('📍 Found menu button, attempting to click...');
@@ -63,6 +67,9 @@ test.describe('Mobile Navigation Tests', () => {
   });
 
   test('should open and close mobile sidebar on Android Chrome', async ({ browser }) => {
+    // Firefox does not support isMobile in device emulation
+    test.skip(browser.browserType().name() === 'firefox', 'isMobile not supported in Firefox');
+
     const pixel5 = devices['Pixel 5'];
     const context = await browser.newContext({
       ...pixel5,
@@ -70,14 +77,15 @@ test.describe('Mobile Navigation Tests', () => {
     const page = await context.newPage();
 
     console.log('🤖 Testing on Android Chrome emulation...');
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    // Navigate to a page where GlobalMobileNav renders (not '/' or '/browse')
+    await page.goto('/add-item');
+    await page.waitForLoadState('domcontentloaded');
 
     // Take initial screenshot
     await page.screenshot({ path: 'mobile-android-initial.png', fullPage: false });
 
     // Find the hamburger menu button
-    const menuButton = page.locator('button[aria-label*="menu" i], button:has(svg.lucide-menu)').first();
+    const menuButton = page.locator('button[data-testid="hamburger-menu"]').first();
     await expect(menuButton).toBeVisible({ timeout: 10000 });
 
     console.log('📍 Found menu button, attempting to tap...');
@@ -124,17 +132,22 @@ test.describe('Mobile Navigation Tests', () => {
   });
 
   test('should verify touch event handlers are present', async ({ browser }) => {
+    // Firefox does not support isMobile in device emulation
+    test.skip(browser.browserType().name() === 'firefox', 'isMobile not supported in Firefox');
+
     const iPhone = devices['iPhone 12 Pro'];
     const context = await browser.newContext({
       ...iPhone,
     });
     const page = await context.newPage();
 
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    // Navigate to a page where GlobalMobileNav renders (not '/' or '/browse')
+    await page.goto('/add-item');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check if menu button has proper touch attributes
-    const menuButton = page.locator('button[aria-label*="menu" i], button:has(svg.lucide-menu)').first();
+    const menuButton = page.locator('button[data-testid="hamburger-menu"]').first();
+    await expect(menuButton).toBeVisible({ timeout: 10000 });
 
     const styles = await menuButton.evaluate(el => {
       const computed = window.getComputedStyle(el);
@@ -157,6 +170,9 @@ test.describe('Mobile Navigation Tests', () => {
   });
 
   test('should check for pointer-events blocking on home page', async ({ browser }) => {
+    // Firefox does not support isMobile in device emulation
+    test.skip(browser.browserType().name() === 'firefox', 'isMobile not supported in Firefox');
+
     const iPhone = devices['iPhone 12 Pro'];
     const context = await browser.newContext({
       ...iPhone,
@@ -164,7 +180,7 @@ test.describe('Mobile Navigation Tests', () => {
     const page = await context.newPage();
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check background container has pointer-events-none
     const backgroundContainer = page.locator('.absolute.inset-0.overflow-hidden').first();
@@ -179,17 +195,13 @@ test.describe('Mobile Navigation Tests', () => {
       expect(hasPointerEventsNone).toBeTruthy();
     }
 
-    // Check mobile header has pointer-events-auto
-    const mobileHeader = page.locator('.lg\\:hidden.fixed.top-0').first();
+    // Check bottom navigation is visible on mobile (replaces mobile header check)
+    const bottomNav = page.locator('nav.fixed.bottom-0').first();
 
-    if (await mobileHeader.count() > 0) {
-      const hasPointerEventsAuto = await mobileHeader.evaluate(el => {
-        const computed = window.getComputedStyle(el);
-        return computed.pointerEvents === 'auto' || el.classList.contains('pointer-events-auto');
-      });
-
-      console.log(`🔍 Mobile header has pointer-events-auto: ${hasPointerEventsAuto ? '✅ YES' : '❌ NO'}`);
-      expect(hasPointerEventsAuto).toBeTruthy();
+    if (await bottomNav.count() > 0) {
+      const isVisible = await bottomNav.isVisible();
+      console.log(`🔍 Bottom nav visible on mobile: ${isVisible ? '✅ YES' : '❌ NO'}`);
+      expect(isVisible).toBeTruthy();
     }
 
     await context.close();

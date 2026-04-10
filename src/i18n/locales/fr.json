@@ -589,5 +589,81 @@
     "results": "{count} résultat(s)",
     "searchFailed": "Échec de la recherche",
     "strategy": "Stratégie"
+  },
+  "help": {
+    "back": "Retour à l'accueil",
+    "title": "Centre d'aide",
+    "subtitle": "Tout ce que vous devez savoir sur DlalaDZ",
+    "faqTitle": "Questions fréquentes",
+    "accountTitle": "Compte & Paramètres",
+    "contactTitle": "Besoin d'aide supplémentaire ?",
+    "contactDesc": "Notre équipe de support est là pour vous.",
+    "contactEmail": "Contacter le support",
+    "features": [
+      { "title": "Gérer votre compte", "desc": "Modifiez votre profil, changez votre mot de passe, gérez vos paramètres.", "link": "/profile", "linkText": "Aller au profil" },
+      { "title": "Préférences de notifications", "desc": "Contrôlez comment et quand vous recevez des notifications sur les messages et les annonces.", "link": "/notifications", "linkText": "Gérer les notifications" }
+    ],
+    "faqs": [
+      { "q": "Est-ce gratuit de publier une annonce ?", "a": "Oui, publier sur DlalaDZ est entièrement gratuit. Créez un compte et commencez à vendre en quelques minutes." },
+      { "q": "Comment fonctionnent les paiements ?", "a": "DlalaDZ ne traite pas les paiements. Acheteurs et vendeurs s'accordent directement — le paiement en espèces à la remise est le plus courant en Algérie." },
+      { "q": "Y a-t-il une livraison ?", "a": "La livraison est organisée directement entre acheteurs et vendeurs. Certains vendeurs proposent la livraison, d'autres exigent le retrait en main propre. Confirmez toujours avant de conclure." },
+      { "q": "Comment contacter un vendeur ?", "a": "Cliquez sur \"Envoyer un message\" sur n'importe quelle annonce pour commencer une conversation via notre messagerie intégrée." },
+      { "q": "Comment signaler une arnaque ou une annonce suspecte ?", "a": "Sur la page de l'annonce, utilisez l'option \"Signaler\". Notre équipe examine tous les signalements sous 24h. Ne jamais envoyer d'argent avant de voir l'article en personne." },
+      { "q": "Puis-je modifier ou supprimer mon annonce ?", "a": "Oui. Allez dans \"Mes annonces\" depuis votre profil, trouvez l'annonce et utilisez les options de modification ou de suppression." },
+      { "q": "Pourquoi mon annonce a-t-elle été supprimée ?", "a": "Les annonces qui violent nos conditions (contrefaçons, articles interdits, doublons) sont supprimées. Contactez le support si vous pensez que c'est une erreur." },
+      { "q": "Mes informations personnelles sont-elles protégées ?", "a": "Votre numéro de téléphone et votre email ne sont jamais affichés publiquement. Seuls votre nom d'affichage et votre wilaya sont visibles." }
+    ]
+  },
+  "privacy": {
+    "back": "Retour à l'accueil",
+    "title": "Politique de confidentialité",
+    "updated": "Dernière mise à jour : 26 mars 2026",
+    "sections": [
+      { "h": "1. Introduction", "p": "DlalaDZ (« nous », « notre » ou « nos ») s'engage à protéger votre vie privée. Cette politique de confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations lorsque vous visitez notre site et utilisez nos services." },
+      { "h": "2. Informations que nous collectons", "subsections": [
+        { "h": "Informations personnelles", "items": ["Nom et coordonnées (email, numéro de téléphone)", "Informations de profil (biographie, localisation, photo de profil)", "Identifiants de compte et données d'authentification", "Préférences de communication"] },
+        { "h": "Informations d'utilisation", "items": ["Comportement de navigation et interaction avec nos services", "Requêtes de recherche et préférences d'annonces", "Messages et communications via notre plateforme", "Informations sur l'appareil et adresses IP"] }
+      ]},
+      { "h": "3. Comment nous utilisons vos informations", "items": ["Pour fournir et maintenir nos services de marketplace", "Pour faciliter la communication entre acheteurs et vendeurs", "Pour améliorer notre plateforme et l'expérience utilisateur", "Pour envoyer des notifications sur votre compte et vos transactions", "Pour prévenir la fraude et assurer la sécurité de la plateforme", "Pour respecter nos obligations légales"] },
+      { "h": "4. Partage des informations", "p": "Nous ne vendons, n'échangeons ni ne transférons vos informations personnelles à des tiers, sauf :", "items": ["Avec votre consentement explicite", "Pour faciliter les transactions entre utilisateurs", "Pour respecter les exigences légales", "Pour protéger nos droits et prévenir la fraude", "Avec des prestataires de confiance qui nous aident à exploiter notre plateforme"] },
+      { "h": "5. Sécurité des données", "p": "Nous mettons en œuvre des mesures de sécurité appropriées pour protéger vos informations personnelles contre tout accès, modification, divulgation ou destruction non autorisés. Cependant, aucun mode de transmission sur Internet n'est sécurisé à 100 %." },
+      { "h": "6. Vos droits", "pre": "Vous avez le droit de :", "items": ["Accéder à vos informations personnelles et les consulter", "Corriger les données inexactes ou incomplètes", "Supprimer votre compte et les données associées", "Vous désabonner des communications marketing", "Exporter vos données dans un format portable"] },
+      { "h": "7. Cookies et suivi", "p": "Nous utilisons des cookies et des technologies de suivi similaires pour améliorer votre expérience, analyser les comportements d'utilisation et améliorer nos services. Vous pouvez contrôler les paramètres des cookies via les préférences de votre navigateur." },
+      { "h": "8. Services tiers", "p": "Notre plateforme peut contenir des liens vers des sites ou services tiers. Nous ne sommes pas responsables des pratiques de confidentialité de ces sites externes. Nous vous encourageons à consulter leurs politiques de confidentialité." },
+      { "h": "9. Confidentialité des mineurs", "p": "Nos services ne sont pas destinés aux enfants de moins de 13 ans. Nous ne collectons pas sciemment d'informations personnelles auprès d'enfants de moins de 13 ans. Si nous apprenons avoir collecté de telles informations, nous prendrons des mesures pour les supprimer." },
+      { "h": "10. Modifications de cette politique", "p": "Nous pouvons mettre à jour cette politique de confidentialité de temps à autre. Nous vous informerons de tout changement en publiant la nouvelle politique sur cette page et en mettant à jour la date de « Dernière mise à jour »." },
+      { "h": "11. Nous contacter", "p": "Si vous avez des questions sur cette politique de confidentialité ou nos pratiques en matière de données, veuillez nous contacter :", "contact": { "email": "privacy@dlaladz.com", "address": "Équipe Confidentialité DlalaDZ, Alger, Algérie" } }
+    ]
+  },
+  "terms": {
+    "back": "Retour à l'accueil",
+    "title": "Conditions d'utilisation",
+    "updated": "Dernière mise à jour : 26 mars 2026",
+    "sections": [
+      { "h": "1. Acceptation des conditions", "p": "En accédant à DlalaDZ (« Service ») et en l'utilisant, vous acceptez d'être lié par les termes de cet accord. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser ce service." },
+      { "h": "2. Description du service", "p": "DlalaDZ est une marketplace en ligne qui met en relation acheteurs et vendeurs en Algérie. Nous fournissons une plateforme permettant aux utilisateurs de publier des annonces, de parcourir les produits disponibles et de communiquer entre eux." },
+      { "h": "3. Comptes utilisateurs", "subsections": [
+        { "h": "Inscription", "items": ["Vous devez avoir au moins 18 ans pour créer un compte", "Vous devez fournir des informations exactes et complètes", "Vous êtes responsable de la sécurité de votre compte", "Une personne ne peut pas gérer plusieurs comptes"] },
+        { "h": "Responsabilités du compte", "items": ["Gardez vos identifiants de connexion en sécurité", "Informez-nous immédiatement de toute utilisation non autorisée", "Mettez à jour vos informations si nécessaire", "Respectez toutes les lois et réglementations applicables"] }
+      ]},
+      { "h": "4. Règles pour les annonces", "subsections": [
+        { "h": "Articles autorisés", "items": ["Biens et services légaux que vous possédez ou êtes autorisé à vendre", "Descriptions précises et photos authentiques", "Prix et sélection de catégorie appropriés"] },
+        { "h": "Articles interdits", "items": ["Biens ou services illégaux", "Articles volés ou contrefaits", "Armes, drogues ou matières dangereuses", "Contenu ou services pour adultes", "Annonces trompeuses ou frauduleuses"] }
+      ]},
+      { "h": "5. Conduite des utilisateurs", "pre": "Les utilisateurs s'engagent à ne pas :", "items": ["Harceler, abuser ou nuire à d'autres utilisateurs", "Publier du spam ou du contenu non pertinent", "Utiliser des outils automatisés ou des bots", "Porter atteinte aux droits de propriété intellectuelle", "Se livrer à des activités frauduleuses"] },
+      { "h": "6. Transactions", "subsections": [
+        { "h": "Rôle de la plateforme", "p": "DlalaDZ agit en tant que plateforme mettant en relation acheteurs et vendeurs. Nous ne participons pas aux transactions réelles et ne sommes pas responsables de la qualité, de la sécurité ou de la légalité des articles listés." },
+        { "h": "Responsabilité de l'utilisateur", "items": ["Vérifiez l'état de l'article avant l'achat", "Rencontrez-vous dans des lieux publics et sûrs", "Gérez les paiements de manière sécurisée", "Résolvez les litiges directement avec l'autre partie"] }
+      ]},
+      { "h": "7. Frais et paiements", "p": "Actuellement, DlalaDZ est gratuit. Nous nous réservons le droit d'introduire des frais pour certains services moyennant un préavis approprié aux utilisateurs." },
+      { "h": "8. Propriété intellectuelle", "p": "La plateforme DlalaDZ, y compris son design, ses fonctionnalités et son contenu, est protégée par les lois sur la propriété intellectuelle. Les utilisateurs conservent leurs droits sur leur propre contenu, mais nous accordent une licence pour l'utiliser sur notre plateforme." },
+      { "h": "9. Confidentialité et données", "p": "Votre vie privée est importante pour nous. Veuillez consulter notre Politique de confidentialité pour comprendre comment nous collectons, utilisons et protégeons vos informations." },
+      { "h": "10. Avertissements", "items": ["Le service est fourni « tel quel » sans garanties", "Nous ne garantissons pas un fonctionnement continu ou sans erreur", "Les utilisateurs assument tous les risques liés aux transactions", "Nous ne sommes pas responsables du contenu généré par les utilisateurs"] },
+      { "h": "11. Limitation de responsabilité", "p": "DlalaDZ ne sera pas responsable des dommages indirects, accessoires, spéciaux, consécutifs ou punitifs résultant de votre utilisation du service." },
+      { "h": "12. Résiliation", "p": "Nous nous réservons le droit de résilier ou de suspendre les comptes qui violent ces conditions. Les utilisateurs peuvent également supprimer leur compte à tout moment via les paramètres du compte." },
+      { "h": "13. Droit applicable", "p": "Ces conditions sont régies par les lois algériennes. Tout litige sera résolu devant les tribunaux algériens." },
+      { "h": "14. Modifications des conditions", "p": "Nous pouvons modifier ces conditions à tout moment. La poursuite de l'utilisation du service après les modifications constitue une acceptation des nouvelles conditions." },
+      { "h": "15. Informations de contact", "p": "Si vous avez des questions sur ces Conditions d'utilisation, veuillez nous contacter :", "contact": { "email": "legal@dlaladz.com", "address": "Équipe Juridique DlalaDZ, Alger, Algérie" } }
+    ]
   }
 }

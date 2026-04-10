@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useLocale } from 'next-intl';
-import { ALGERIA_WILAYAS } from '@/lib/constants/algeria';
+import { ALGERIA_WILAYAS, getLocalizedName, getCityNames, type City } from '@/lib/constants/algeria';
 
 interface LocationFilterProps {
   selectedWilaya: string;
@@ -21,14 +21,15 @@ export function LocationFilter({
   className = ''
 }: LocationFilterProps) {
   const locale = useLocale();
-  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [availableCities, setAvailableCities] = useState<City[]>([]);
 
   useEffect(() => {
     if (selectedWilaya) {
-      const wilayaData = ALGERIA_WILAYAS.find((w: { name: string; cities: string[] }) => w.name === selectedWilaya);
-      setAvailableCities(wilayaData?.cities || []);
-      // Reset city if it's not available in the new wilaya
-      if (selectedCity && !wilayaData?.cities.includes(selectedCity)) {
+      const wilayaData = ALGERIA_WILAYAS.find(w => w.name === selectedWilaya || w.code === selectedWilaya);
+      const cities = wilayaData?.cities ?? [];
+      setAvailableCities(cities);
+      // Reset city if it's not available in the new wilaya (compare against Latin name keys)
+      if (selectedCity && !cities.some(c => c.name === selectedCity)) {
         onCityChange('');
       }
     } else {
@@ -60,7 +61,7 @@ export function LocationFilter({
           <option value="">All Wilayas</option>
           {ALGERIA_WILAYAS.map((wilaya) => (
             <option key={wilaya.code} value={wilaya.name}>
-              {wilaya.code} - {locale === 'ar' ? wilaya.nameAr : wilaya.name}
+              {wilaya.code} - {getLocalizedName(wilaya, locale)}
             </option>
           ))}
         </select>
@@ -80,8 +81,8 @@ export function LocationFilter({
           >
             <option value="">All Cities</option>
             {availableCities.map((city) => (
-              <option key={city} value={city}>
-                {city}
+              <option key={city.name} value={city.name}>
+                {getLocalizedName(city, locale)}
               </option>
             ))}
           </select>

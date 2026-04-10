@@ -589,5 +589,81 @@
     "results": "{count} result(s)",
     "searchFailed": "Search failed",
     "strategy": "Strategy"
+  },
+  "help": {
+    "back": "Back to Home",
+    "title": "Help Center",
+    "subtitle": "Everything you need to know about DlalaDZ",
+    "faqTitle": "Frequently Asked Questions",
+    "accountTitle": "Account & Settings",
+    "contactTitle": "Still need help?",
+    "contactDesc": "Our support team is here for you.",
+    "contactEmail": "Email Support",
+    "features": [
+      { "title": "Manage your account", "desc": "Update your profile, change your password, manage account settings.", "link": "/profile", "linkText": "Go to Profile" },
+      { "title": "Notification preferences", "desc": "Control how and when you receive notifications about messages, favorites, and listing updates.", "link": "/notifications", "linkText": "Manage Notifications" }
+    ],
+    "faqs": [
+      { "q": "Is it free to post a listing?", "a": "Yes, posting on DlalaDZ is completely free. Create an account and start listing in minutes." },
+      { "q": "How do payments work?", "a": "DlalaDZ does not process payments. Buyers and sellers agree on payment directly — cash in hand on pickup is the most common method in Algeria." },
+      { "q": "Is there delivery?", "a": "Delivery is arranged between buyers and sellers directly. Some sellers offer delivery, others require pickup. Always confirm before agreeing to a deal." },
+      { "q": "How do I contact a seller?", "a": "Click the \"Send Message\" button on any listing to start a conversation with the seller through our built-in messaging system." },
+      { "q": "How do I report a scammer or suspicious listing?", "a": "On any listing page, use the \"Report\" option. Our team reviews all reports within 24 hours. Never send money before seeing the item in person." },
+      { "q": "Can I edit or delete my listing?", "a": "Yes. Go to \"My Listings\" from your profile, find the listing, and use the edit or delete options." },
+      { "q": "Why was my listing removed?", "a": "Listings that violate our terms (counterfeit goods, prohibited items, duplicate posts) are removed. Contact support if you think it was a mistake." },
+      { "q": "Is my personal information safe?", "a": "Your phone number and email are never shown publicly. Only your display name and wilaya are visible to other users." }
+    ]
+  },
+  "privacy": {
+    "back": "Back to Home",
+    "title": "Privacy Policy",
+    "updated": "Last updated: March 26, 2026",
+    "sections": [
+      { "h": "1. Introduction", "p": "DlalaDZ (\"we,\" \"our,\" or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services." },
+      { "h": "2. Information We Collect", "subsections": [
+        { "h": "Personal Information", "items": ["Name and contact information (email, phone number)", "Profile information (bio, location, profile picture)", "Account credentials and authentication data", "Communication preferences"] },
+        { "h": "Usage Information", "items": ["Browsing behavior and interaction with our services", "Search queries and listing preferences", "Messages and communications through our platform", "Device information and IP addresses"] }
+      ]},
+      { "h": "3. How We Use Your Information", "items": ["To provide and maintain our marketplace services", "To facilitate communication between buyers and sellers", "To improve our platform and user experience", "To send notifications about your account and transactions", "To prevent fraud and ensure platform security", "To comply with legal obligations"] },
+      { "h": "4. Information Sharing", "p": "We do not sell, trade, or otherwise transfer your personal information to outside parties except:", "items": ["With your explicit consent", "To facilitate transactions between users", "To comply with legal requirements", "To protect our rights and prevent fraud", "With trusted service providers who assist in operating our platform"] },
+      { "h": "5. Data Security", "p": "We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the internet is 100% secure." },
+      { "h": "6. Your Rights", "pre": "You have the right to:", "items": ["Access and review your personal information", "Correct inaccurate or incomplete data", "Delete your account and associated data", "Opt-out of marketing communications", "Export your data in a portable format"] },
+      { "h": "7. Cookies and Tracking", "p": "We use cookies and similar tracking technologies to enhance your experience, analyze usage patterns, and improve our services. You can control cookie settings through your browser preferences." },
+      { "h": "8. Third-Party Services", "p": "Our platform may contain links to third-party websites or services. We are not responsible for the privacy practices of these external sites. We encourage you to review their privacy policies." },
+      { "h": "9. Children's Privacy", "p": "Our services are not directed to children under 13. We do not knowingly collect personal information from children under 13. If we become aware that we have collected such information, we will take steps to delete it." },
+      { "h": "10. Changes to This Policy", "p": "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the \"Last updated\" date." },
+      { "h": "11. Contact Us", "p": "If you have any questions about this Privacy Policy or our data practices, please contact us:", "contact": { "email": "privacy@dlaladz.com", "address": "DlalaDZ Privacy Team, Algiers, Algeria" } }
+    ]
+  },
+  "terms": {
+    "back": "Back to Home",
+    "title": "Terms of Service",
+    "updated": "Last updated: March 26, 2026",
+    "sections": [
+      { "h": "1. Acceptance of Terms", "p": "By accessing and using DlalaDZ (\"Service\"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service." },
+      { "h": "2. Description of Service", "p": "DlalaDZ is an online marketplace that connects buyers and sellers in Algeria. We provide a platform for users to list items for sale, browse available products, and communicate with other users." },
+      { "h": "3. User Accounts", "subsections": [
+        { "h": "Registration", "items": ["You must be at least 18 years old to create an account", "You must provide accurate and complete information", "You are responsible for maintaining account security", "One person may not maintain multiple accounts"] },
+        { "h": "Account Responsibilities", "items": ["Keep your login credentials secure", "Notify us immediately of any unauthorized use", "Update your information when necessary", "Comply with all applicable laws and regulations"] }
+      ]},
+      { "h": "4. Listing Guidelines", "subsections": [
+        { "h": "Permitted Items", "items": ["Legal goods and services you own or have authority to sell", "Accurate descriptions and genuine photos", "Appropriate pricing and category selection"] },
+        { "h": "Prohibited Items", "items": ["Illegal goods or services", "Stolen or counterfeit items", "Weapons, drugs, or hazardous materials", "Adult content or services", "Misleading or fraudulent listings"] }
+      ]},
+      { "h": "5. User Conduct", "pre": "Users agree not to:", "items": ["Harass, abuse, or harm other users", "Post spam or irrelevant content", "Use automated tools or bots", "Infringe on intellectual property rights", "Engage in fraudulent activities"] },
+      { "h": "6. Transactions", "subsections": [
+        { "h": "Platform Role", "p": "DlalaDZ acts as a platform connecting buyers and sellers. We do not participate in actual transactions and are not responsible for the quality, safety, or legality of items listed." },
+        { "h": "User Responsibility", "items": ["Verify item condition before purchase", "Meet in safe, public locations", "Handle payments securely", "Resolve disputes directly with other party"] }
+      ]},
+      { "h": "7. Fees and Payments", "p": "Currently, DlalaDZ is free to use. We reserve the right to introduce fees for certain services with appropriate notice to users." },
+      { "h": "8. Intellectual Property", "p": "The DlalaDZ platform, including its design, functionality, and content, is protected by intellectual property laws. Users retain rights to their own content but grant us license to use it on our platform." },
+      { "h": "9. Privacy and Data", "p": "Your privacy is important to us. Please review our Privacy Policy to understand how we collect, use, and protect your information." },
+      { "h": "10. Disclaimers", "items": ["The service is provided \"as is\" without warranties", "We do not guarantee continuous or error-free operation", "Users assume all risks associated with transactions", "We are not liable for user-generated content"] },
+      { "h": "11. Limitation of Liability", "p": "DlalaDZ shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the service." },
+      { "h": "12. Termination", "p": "We reserve the right to terminate or suspend accounts that violate these terms. Users may also delete their accounts at any time through account settings." },
+      { "h": "13. Governing Law", "p": "These terms are governed by the laws of Algeria. Any disputes will be resolved in Algerian courts." },
+      { "h": "14. Changes to Terms", "p": "We may modify these terms at any time. Continued use of the service after changes constitutes acceptance of the new terms." },
+      { "h": "15. Contact Information", "p": "If you have questions about these Terms of Service, please contact us:", "contact": { "email": "legal@dlaladz.com", "address": "DlalaDZ Legal Team, Algiers, Algeria" } }
+    ]
   }
 }

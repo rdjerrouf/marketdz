@@ -1,38 +1,44 @@
 
-# Use the official Node.js 20 image as the base image
+# ============================================================================
+# MarketDZ Docker Build (Production + Dev)
+# ============================================================================
+# Build:  docker build -t marketdz .
+# Run:    docker run -p 3000:3000 --env-file .env.docker marketdz
+# ============================================================================
+
 FROM node:20-alpine AS base
 
-# Install dependencies only when needed
+# --- Stage 1: Install dependencies ---
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-
-# Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
 RUN npm ci
 
-# Rebuild the source code only when needed
+# --- Stage 2: Build the Next.js app ---
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Add environment variables for build
-ENV NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
-ENV SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
-ENV NEXT_PUBLIC_APP_URL=http://localhost:3000
+# Build-time env vars injected via docker-compose build args
+# These get baked into the client JS bundle (NEXT_PUBLIC_*)
+ARG NEXT_PUBLIC_SUPABASE_URL=http://host.docker.internal:54321
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+ARG SUPABASE_SERVICE_ROLE_KEY
+
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 
 ENV ESLINT_NO_DEV_ERRORS=true
 RUN npm run build
 
-# Production image, copy all the files and run next
+# --- Stage 3: Production runner ---
 FROM base AS runner
 WORKDIR /app
 
@@ -44,16 +50,10 @@ RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+RUN mkdir .next && chown nextjs:nodejs .next
+RUN chmod -R 755 ./public && chown -R nextjs:nodejs ./public
 
-# Ensure public directory and subdirectories are readable by nextjs user
-RUN chmod -R 755 ./public
-RUN chown -R nextjs:nodejs ./public
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
+# Output traces for minimal image size
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
@@ -63,5 +63,10 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+# Install curl for health checks
+USER root
+RUN apk add --no-cache curl
+USER nextjs
 
 CMD ["node", "server.js"]

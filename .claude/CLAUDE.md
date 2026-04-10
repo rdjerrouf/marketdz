@@ -4,76 +4,55 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## Vercel Best Practices
+## 🎯 PURPOSE OF THIS WORKSPACE
 
-- Treat Vercel Functions as stateless + ephemeral (no durable RAM/FS, no background daemons)
-- Edge Functions (standalone) are deprecated; prefer Vercel Functions
-- Store secrets in Vercel Env Variables; not in git or `NEXT_PUBLIC_*`
-- Use `waitUntil` for post-response work; avoid the deprecated Function `context` parameter
-- Set Function regions near your primary data source; avoid cross-region DB/service roundtrips
-- Use Cron Jobs for schedules; cron runs in UTC and triggers your production URL via HTTP GET
-- Use Vercel Blob for uploads/media; Use Edge Config for small, globally-read config
-- Add OpenTelemetry via `@vercel/otel` on Node
+**This is a Docker-only testing sandbox.** It is NOT the production repo and should NEVER be pushed to GitHub.
+
+- **Goal**: Build, test, and experiment with MarketDZ inside Docker containers
+- **Workflow**: Make changes here → test in Docker → if it works, manually carry improvements to the production repo
+- **No git pushes**: Do not `git push`, create PRs, or sync with GitHub from here
+- **Safe to break**: Feel free to experiment — this is disposable
 
 ---
 
-## 🚨 CRITICAL POLICIES
-
-### Cloud Database Rules
-**The cloud Supabase database is PRODUCTION-READY. Local and Cloud are synchronized (27 migrations).**
-
-- ✅ **ALLOWED**: Inspect cloud (READ-ONLY), apply tested migrations with user approval
-- ❌ **FORBIDDEN**: Ad-hoc "fixes", automatic migrations, experimental queries
-- 🔒 **ALWAYS**: Test migrations locally first (`npx supabase db reset`), then apply via MCP with approval
-
-### Environment Switching
-When switching between Local and Cloud environments:
-1. Clear browser cookies (DevTools → Application → Cookies → Delete all)
-2. Restart dev server after changing `.env.local`
-3. Sign out before switching
-
-**Why**: JWT tokens from one environment cause "permission denied" errors in another.
-
----
-
-## 🚀 ESSENTIAL COMMANDS
+## 🚀 DOCKER COMMANDS (the only way to run this project)
 
 ```bash
-# Quick Start
-npx supabase start       # Start local Supabase
-npm install              # Install dependencies
-npm run dev              # Dev server at localhost:3000
+# Prerequisites: Docker Desktop running + local Supabase
+npx supabase start
 
-# Development
-npm run build            # Production build
-npm run lint             # ESLint (before committing)
-npx supabase db reset    # Reset local database
+# === Production-like build (tests how the real deploy works) ===
+npm run docker:build       # Build production image
+npm run docker:up          # Start container → http://localhost:3000
+npm run docker:logs        # Tail logs
+npm run docker:down        # Stop
+npm run docker:reset       # Full rebuild + restart
+npm run docker:shell       # Shell into running container
+npm run docker:status      # See containers + networks
 
-# Testing
-npm run test             # All Playwright tests
-npm run test:headed      # Tests with browser UI
-npm run test:ui          # Playwright UI mode (interactive)
-npx playwright test --grep "auth"  # Run specific tests
-
-# Docker (production-like testing)
-npm run docker:build && npm run docker:up  # App at localhost:3001
-npm run docker:logs      # View logs
-npm run docker:down      # Stop containers
-
-# Mock Data (LOCAL ONLY)
-node scripts/create-10-test-users.js   # user1-10@email.com / password123
-node scripts/generate-10k-listings.js  # 10k test listings
-npm run mock:test                      # Quick mock data (small)
-npm run mock:medium                    # Medium dataset
-npm run mock:full                      # Full dataset
-npm run admin:seed                     # Seed admin user
-npm run listings:create                # Create listings with photos
-
-# MCP Tools
-npm run chrome:debug     # Start Chrome with debugging (port 9222)
+# === Dev mode (hot-reload, edit src/ and see changes live) ===
+npm run docker:dev         # Start dev container → http://localhost:3000
+npm run docker:dev:down    # Stop dev container
 ```
 
-**Test Credentials**: user1@email.com through user10@email.com / password123
+### When to use which mode
+| Mode | Command | Use For |
+|------|---------|---------|
+| **Dev** | `npm run docker:dev` | Editing code, seeing changes instantly |
+| **Production** | `npm run docker:build && npm run docker:up` | Testing the real build pipeline, performance, final QA |
+
+---
+
+## 🔧 ENVIRONMENT
+
+- **`.env.docker`** — environment variables (local Supabase keys, pre-filled)
+- **`docker-compose.yml`** — production-like container
+- **`docker-compose.dev.yml`** — dev container with volume mounts + hot-reload
+- **`Dockerfile`** — multi-stage production build
+- **`Dockerfile.dev`** — lightweight dev image (`next dev --turbopack`)
+
+Container reaches host Supabase via `host.docker.internal:54321`.
+Browser reaches Supabase via `localhost:54321`.
 
 ---
 
@@ -81,52 +60,26 @@ npm run chrome:debug     # Start Chrome with debugging (port 9222)
 
 ### Project Overview
 DlalaDZ is a Next.js 15 marketplace for Algeria with:
-- **Trilingual**: Arabic RTL + French + English (EN/FR/AR switcher on Help, Privacy, Terms pages)
-- **Auth**: Supabase PKCE with email verification + TOTP MFA (`otplib`)
+- **Trilingual**: Arabic RTL + French + English
+- **Auth**: Supabase PKCE with email verification + TOTP MFA
 - **Search**: Arabic full-text search with geographic filtering
 - **Admin**: Role-based panel (`super_admin`, `admin`, `moderator`)
 - **Messaging**: Real-time chat between buyers/sellers
 - **PWA**: Installable with offline support
-- **Rate Limiting**: Upstash Redis (`src/lib/rate-limit/`)
-- **Scale**: Optimized for 250k+ listings
 
-**Tech**: Next.js 15 + Turbopack, Supabase (PostgreSQL + PostGIS), Tailwind CSS 4, Radix UI, TypeScript 5, Playwright
+**Tech**: Next.js 15 + Turbopack, Supabase (PostgreSQL + PostGIS), Tailwind CSS 4, Radix UI, TypeScript 5
 
 ### Key Directories
 ```
-src/app/api/          # API routes (auth, listings, search, admin, favorites, messages, reviews, upload)
+src/app/api/          # API routes
 src/app/admin/        # Admin panel pages
-src/app/chat/         # Real-time messaging UI
-src/app/favorites/    # Saved listings
-src/app/my-listings/  # User's own listings
-src/app/edit-listing/ # Edit existing listing
-src/app/search-advanced/ # Advanced search filters
-src/components/       # React components (common/, listings/, chat/, search/, navigation/)
+src/components/       # React components
 src/lib/supabase/     # Supabase clients (client.ts, server.ts, serverPool.ts)
-src/lib/rate-limit/   # Upstash Redis rate limiting
-src/lib/validations/  # Input validation schemas
-src/lib/notifications/ # Notification helpers
 src/contexts/         # AuthContext (single source of truth)
 src/types/            # TypeScript types (database.ts)
-supabase/migrations/  # Database migrations (27 total)
-supabase/functions/   # Edge Functions
+supabase/migrations/  # Database migrations
 tests/                # Playwright E2E tests
-scripts/              # Utility scripts
 ```
-
-### Authentication System
-- `src/lib/supabase/client.ts` - Browser singleton client
-- `src/lib/supabase/server.ts` - SSR client + admin client
-- `src/lib/supabase/serverPool.ts` - Pooled service-role client for API routes (reused across invocations, optimized for Supabase Nano tier)
-- `src/contexts/AuthContext.tsx` - Single auth listener (prevents "Multiple GoTrueClient" warning)
-- `middleware.ts` - Session validation
-
-### Development Environments
-| Mode | URL | Supabase | Use For |
-|------|-----|----------|---------|
-| Local Dev | localhost:3000 | localhost:54321 | Day-to-day development |
-| Docker | localhost:3001 | localhost:54321 | Production-like testing |
-| Cloud | - | vrlzwxoiglzwmhndpolj.supabase.co | READ-ONLY inspection |
 
 ---
 
@@ -190,120 +143,63 @@ WHERE created_at < :cursor ORDER BY created_at DESC LIMIT 50
 
 ---
 
-## 🐛 TROUBLESHOOTING
+## 🐛 DOCKER TROUBLESHOOTING
 
-### "Permission Denied" (42501) Errors
-```
-Step 1: Check environment (Network tab → Supabase URL)
-        Should be: localhost:54321 for local, NOT cloud URL
-
-Step 2: Clear browser cookies + restart dev server + sign in again
-
-Step 3: For API routes, verify using createApiSupabaseClient(request)
-
-Step 4: Check RLS policies allow the operation for auth.uid()
-```
-
-### Common Issues
 | Issue | Solution |
 |-------|----------|
-| Auth fails after env switch | Clear cookies, restart server |
-| Photos not loading | Use `fixPhotoUrl()` for Docker URLs |
-| Container won't start | Run `npx supabase status`, check `.env.docker` exists |
-| Build failures | Ensure `.env.local` has all vars, clear `.next` cache |
+| Container can't reach Supabase | Ensure `npx supabase start` is running on host; container uses `host.docker.internal:54321` |
+| Port 3000 already in use | Stop other dev servers or change port in `docker-compose.yml` |
+| Build fails on TypeScript | Run `npm run docker:logs` to see build errors; fix in `src/` |
+| Hot-reload not working (dev mode) | `WATCHPACK_POLLING=true` is set; if still broken, restart with `npm run docker:dev:down && npm run docker:dev` |
+| Photos not loading | Use `fixPhotoUrl()` to translate Docker internal URLs |
+| "Permission Denied" (42501) | Clear browser cookies; ensure you're hitting local Supabase, not cloud |
+| Need a clean slate | `npx supabase db reset` to reset DB; `npm run docker:reset` to rebuild container |
 
-### Debugging
+### Useful Debug Commands
 ```bash
-docker logs dlaladz-app-1 --follow | grep "Middleware"  # Auth issues
-npm run docker:status                                     # Container/network status
+npm run docker:logs          # Tail app logs
+npm run docker:shell         # Shell into container
+npm run docker:status        # Container + network overview
+docker compose exec app sh -c "curl http://localhost:3000/api/health"  # Health check from inside
 ```
 
 ---
 
-## 🗄️ DATABASE PHILOSOPHY
+## 🗄️ DATABASE (local only)
 
-### Keep It Lean
-Previous issues were caused by excessive indexes, triggers, and materialized views.
-
-**Golden Rules**:
-1. NEVER manually add indexes without performance testing proof
-2. ALWAYS use migrations - never manual SQL
-3. TEST first with `scripts/performance-test-suite.js`
-4. AVOID materialized views on write path (use scheduled jobs)
-5. LOCAL TESTING ONLY - never experiment on cloud
-
-### Preferred Patterns
-```sql
--- ✅ Partial indexes for common queries
-CREATE INDEX idx_listings_active ON listings(category, created_at DESC) WHERE status = 'active';
-
--- ✅ Use CONCURRENTLY for production
-CREATE INDEX CONCURRENTLY idx_name ON table(column);
-
--- ❌ Avoid: refreshing materialized views on every write
--- ❌ Avoid: overly broad compound indexes
+```bash
+npx supabase start           # Start local Supabase
+npx supabase db reset        # Reset + re-run all migrations
+npx supabase status          # Show URLs and keys
 ```
+
+All database work happens locally. No cloud database access from this workspace.
 
 ---
 
-## ⚙️ ENVIRONMENT VARIABLES
+## ⚠️ RULES FOR THIS WORKSPACE
 
-**Local Development** (`.env.local`) - get from `npx supabase status`:
-```env
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_local_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_local_service_role_key
-```
-
-**Docker** (`.env.docker`) - copy from `.env.docker.example`:
-- Uses dual URL setup: `NEXT_PUBLIC_SUPABASE_URL` for browser, `SUPABASE_URL` for container networking
+1. **Docker only** — never run `npm run dev` directly; always use Docker
+2. **No git push** — this is a sandbox, not the production repo
+3. **Local Supabase only** — no cloud keys, no production database
+4. **Experiment freely** — break things, try ideas, iterate fast
+5. **Carry wins manually** — when something works, take the diff to your production repo
+6. **Document every change** — after every modification to the project (code, config, DB schema, scripts, etc.), log it in `docs/DAILY_TASK.md` with the date, what changed, and why
 
 ---
 
-## 🔌 MCP SERVERS
+## 🔌 MCP TOOLS
 
 ### Chrome DevTools MCP
 ```bash
-npm run chrome:debug     # Start Chrome with debugging
+npm run chrome:debug     # Start Chrome with debugging on port 9222
 ```
-Use for: screenshots, clicking elements, filling forms, viewing console/network
+Use for: screenshots, clicking elements, filling forms, inspecting console/network errors in the Dockerized app.
 
-### Supabase MCP
-Configured in `.mcp.json` for cloud database inspection (READ-ONLY).
+### Docker MCP (via VS Code Container Tools)
+Docker container management is available through VS Code's built-in container tools. Use it to:
+- Inspect running containers, images, and networks
+- View container logs and stats
+- Manage container lifecycle (start/stop/restart/remove)
 
-**Token Refresh**: If auth fails, regenerate at supabase.com/dashboard/account/tokens and update `.mcp.json`.
-
----
-
-## 📧 EMAIL SETUP (partially done)
-
-Email verification sends via Resend on signup. Still has 5–30 min delays due to missing DNS auth records.
-
-**Remaining**:
-1. Add SPF/DKIM/DMARC records to `dlaladz.com` (Resend provides exact values)
-2. Target: emails arrive in <5 seconds
-
-See `docs/EMAIL_VERIFICATION_SETUP.md` for details.
-
----
-
-## 📚 REFERENCE
-
-### Key Files
-- **Database types**: `src/types/database.ts`
-- **Auth context**: `src/contexts/AuthContext.tsx`
-- **Supabase clients**: `src/lib/supabase/*.ts`
-- **Middleware**: `middleware.ts`
-- **Admin secure functions**: Database `admin_secure` schema
-
-### Image Placeholders
-When a listing has no photos, use `getCategoryPlaceholder(category)` from `src/lib/utils.ts` — never the old "No Image" grey SVG. The function returns a coloured gradient + emoji per category (for_sale=🛒 blue, for_rent=🏠 green, job=💼 purple, service=🔧 orange, urgent=🚨 red). It is re-exported from `src/lib/storage.ts` for components that import from there. Always pass `listing.category` to `fixPhotoUrl(url, category)` when displaying listing images so the fallback is category-aware.
-
----
-
-### Resolved Issues
-Historical context on solved problems:
-- **Profile Update 42501 error** (2025-10-29): Fixed with service role pattern in `src/app/api/profile/route.ts`
-- **Favorites 500 error**: Replaced upsert with plain INSERT in favorites API route
-- **"My Profile" invisible title**: Header has dark background — title must be `text-white` not `text-gray-900`
-- **Mobile sidebar Sign Out hidden**: Fixed with `height: 100dvh` + `overflow-y: scroll` on the nav element in `MobileSidebar.tsx`
+Both are configured in `.mcp.json` and available to Claude Code / Copilot in this workspace.

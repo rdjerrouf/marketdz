@@ -56,7 +56,7 @@ export default function RootLayout({
     // lang/dir are set by the [locale]/layout.tsx — this shell has no lang attribute
     // so Next.js will merge the locale layout's <html> attributes correctly
     <html suppressHydrationWarning>
-      <body className="antialiased">
+      <body>
         <AuthProvider>
           <NotificationsProvider>
             {children}

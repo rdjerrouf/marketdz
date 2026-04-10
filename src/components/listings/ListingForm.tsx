@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 import { LISTING_CATEGORIES } from '@/lib/constants/categories'
-import { ALGERIA_WILAYAS, getWilayaByName } from '@/lib/constants/algeria'
+import { ALGERIA_WILAYAS, getWilayaByName, getLocalizedName } from '@/lib/constants/algeria'
 import ImageUpload from './ImageUpload'
 import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import { Zap } from 'lucide-react'
@@ -446,7 +446,7 @@ export default function ListingForm({
               <option value="">{t('form.selectWilayaOption')}</option>
               {ALGERIA_WILAYAS.map((wilaya) => (
                 <option key={wilaya.code} value={wilaya.name}>
-                  {wilaya.code} - {locale === 'ar' ? wilaya.nameAr : wilaya.name}
+                  {wilaya.code} - {getLocalizedName(wilaya, locale)}
                 </option>
               ))}
             </select>
@@ -465,8 +465,8 @@ export default function ListingForm({
               >
                 <option value="">{t('form.selectCityOption')}</option>
                 {availableCities.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
+                  <option key={city.name} value={city.name}>
+                    {getLocalizedName(city, locale)}
                   </option>
                 ))}
                 <option value="other">{t('form.cityOther')}</option>

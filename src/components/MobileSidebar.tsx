@@ -225,6 +225,7 @@ function MobileSidebarComponent({
           handleButtonClick(e)
         }}
         className="p-2 rounded-lg bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 lg:hidden relative"
+        data-testid="hamburger-menu"
         aria-label={isOpen ? t('closeMenu') : t('openMenu')}
         title={isOpen ? t('closeMenu') : t('openMenu')}
         style={{

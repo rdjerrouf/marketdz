@@ -82,5 +82,8 @@ supabase/migrations_backup/
 test-results/
 playwright-report/data/
 
+# Playwright auth state (contains session cookies)
+.playwright/
+
 # Seed scripts with embedded credentials
 scripts/seed-cloud-users-listings.js

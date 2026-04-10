@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, useMemo, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
-import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
+import { ALGERIA_WILAYAS, getLocalizedName } from '@/lib/constants/algeria'
 import { getSubcategories } from '@/lib/constants/categories'
 import FavoriteButton from '@/components/common/FavoriteButton'
 import StarRating from '@/components/common/StarRating'
@@ -109,6 +109,8 @@ function BrowsePageContent() {
     return wilaya ? wilaya.cities : []
   }, [filters.wilaya])
 
+
+
   // Reset subcategory when category changes
   useEffect(() => {
     if (filters.category && filters.subcategory && availableSubcategories.length > 0 && !availableSubcategories.includes(filters.subcategory)) {
@@ -118,7 +120,7 @@ function BrowsePageContent() {
 
   // Reset city when wilaya changes
   useEffect(() => {
-    if (filters.wilaya && filters.city && availableCities.length > 0 && !availableCities.includes(filters.city)) {
+    if (filters.wilaya && filters.city && availableCities.length > 0 && !availableCities.some(c => c.name === filters.city)) {
       setFilters(prev => ({ ...prev, city: '' }))
     }
   }, [filters.wilaya, filters.city, availableCities])
@@ -589,7 +591,7 @@ function BrowsePageContent() {
                   <option value="">{t('filters.allWilayas')}</option>
                   {ALGERIA_WILAYAS.map((wilaya: any) => (
                     <option key={wilaya.code} value={wilaya.name}>
-                      {locale === 'ar' ? wilaya.nameAr : wilaya.name}
+                      {getLocalizedName(wilaya, locale)}
                     </option>
                   ))}
                 </select>
@@ -610,9 +612,9 @@ function BrowsePageContent() {
                   <option value="">
                     {filters.wilaya ? t('filters.allCities') : t('filters.selectWilayaFirst')}
                   </option>
-                  {availableCities.map((city: string) => (
-                    <option key={city} value={city}>
-                      {city}
+                  {availableCities.map((city) => (
+                    <option key={city.name} value={city.name}>
+                      {getLocalizedName(city, locale)}
                     </option>
                   ))}
                 </select>
