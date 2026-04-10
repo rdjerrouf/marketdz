@@ -3,9 +3,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 import { useUser } from '@/hooks/useUser'
-import { ALGERIA_WILAYAS, wilaya } from '@/lib/constants/algeria'
+import { ALGERIA_WILAYAS, getLocalizedName, type Wilaya } from '@/lib/constants/algeria'
 
 interface UserProfile {
   id: string
@@ -21,6 +22,7 @@ interface UserProfile {
 export default function SettingsPage() {
   const { user, loading: userLoading } = useUser()
   const router = useRouter()
+  const locale = useLocale()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
@@ -216,9 +218,9 @@ export default function SettingsPage() {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                 >
                   <option value="">Select Wilaya</option>
-                  {ALGERIA_WILAYAS.map((w: wilaya) => (
+                  {ALGERIA_WILAYAS.map((w: Wilaya) => (
                     <option key={w.code} value={w.name}>
-                      {w.code} - {w.name}
+                      {w.code} - {getLocalizedName(w, locale)}
                     </option>
                   ))}
                 </select>

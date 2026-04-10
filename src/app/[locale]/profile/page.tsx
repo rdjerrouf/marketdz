@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
-import { ALGERIA_WILAYAS } from '@/lib/constants/algeria'
+import { ALGERIA_WILAYAS, getLocalizedName } from '@/lib/constants/algeria'
 import { normalizePhoneNumber, generateWhatsAppLink } from '@/lib/utils'
 import { fixPhotoUrl } from '@/lib/storage'
 
@@ -286,6 +286,7 @@ export default function ProfilePage() {
     const wilaya = ALGERIA_WILAYAS.find((w: any) => w.code === formData.wilaya)
     return wilaya ? wilaya.cities : []
   }
+  const cities = getCities()
 
   if (loading) {
     return (
@@ -559,7 +560,7 @@ export default function ProfilePage() {
                           <option value="">Select wilaya</option>
                           {ALGERIA_WILAYAS.map((wilaya: any) => (
                             <option key={wilaya.code} value={wilaya.code}>
-                              {locale === 'ar' ? wilaya.nameAr : wilaya.name}
+                              {getLocalizedName(wilaya, locale)}
                             </option>
                           ))}
                         </select>
@@ -577,9 +578,9 @@ export default function ProfilePage() {
                             className={selectClassName}
                           >
                             <option value="">Select city</option>
-                            {getCities().map((city: string) => (
-                              <option key={city} value={city}>
-                                {city}
+                            {cities.map((city) => (
+                              <option key={city.name} value={city.name}>
+                                {getLocalizedName(city, locale)}
                               </option>
                             ))}
                           </select>
@@ -673,7 +674,7 @@ export default function ProfilePage() {
                       <h3 className="font-semibold text-gray-800 mb-2">Location</h3>
                       <p className="text-gray-900">
                         {user?.city && user?.wilaya 
-                          ? `${user.city}, ${ALGERIA_WILAYAS.find(w => w.code === user.wilaya)?.[locale === 'ar' ? 'nameAr' : 'name'] || user.wilaya}`
+                          ? `${user.city}, ${getLocalizedName(ALGERIA_WILAYAS.find(w => w.code === user.wilaya) ?? { name: user.wilaya, nameAr: user.wilaya, nameFr: user.wilaya }, locale)}`
                           : 'Not provided'
                         }
                       </p>
