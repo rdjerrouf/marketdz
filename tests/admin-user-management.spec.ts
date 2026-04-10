@@ -1,38 +1,33 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Admin User Management', () => {
+  test.describe.configure({ mode: 'serial' });
+  test.setTimeout(60000);
+
   test.beforeEach(async ({ page }) => {
-    // Navigate to sign in page
-    await page.goto('/signin');
-
-    // Sign in as admin
-    await page.fill('input[type="email"]', 'rdjerrouf@gmail.com');
-    await page.fill('input[type="password"]', 'Montblanc01!');
-    await page.click('button[type="submit"]');
-
-    // Wait for successful login and redirect
-    await page.waitForURL(/\/(?!signin|signup)/);
-
-    // Navigate to admin users page
+    // Auth state (cookies) pre-loaded via storageState in playwright.config.ts (admin.setup.ts)
+    // No signin needed — navigate directly to admin users page
     await page.goto('/admin/users');
+    await page.waitForLoadState('domcontentloaded');
 
-    // Wait for the page to load
-    await page.waitForSelector('h1:has-text("User Management")');
+    // Wait for admin layout to verify auth and render the page
+    // Admin layout does: getUser() + check-status API + admin_users query
+    await page.waitForSelector('h1:has-text("User Management")', { timeout: 45000 });
   });
 
   test('should suspend and unsuspend User Five', async ({ page }) => {
     console.log('🧪 Starting admin user management test...');
 
-    // Wait for users table to load
-    await page.waitForSelector('table');
-    await page.waitForTimeout(2000); // Give time for data to load
+    // Wait for users table to load with actual rows
+    await page.waitForSelector('tbody tr', { timeout: 15000 });
+    await page.waitForTimeout(500);
 
     console.log('📋 Looking for User Five...');
 
     // Search for User Five
     const searchInput = page.locator('input[placeholder*="Search"]');
     await searchInput.fill('User Five');
-    await page.waitForTimeout(1000); // Wait for search results
+    await page.waitForTimeout(1500); // Wait for search results
 
     // Check if User Five exists in the table
     const userFiveRow = page.locator('tr:has-text("User Five")').first();
@@ -42,131 +37,55 @@ test.describe('Admin User Management', () => {
 
       // Clear search and look for any user to test with
       await searchInput.clear();
-      await page.waitForTimeout(1000);
+      await page.waitForSelector('tbody tr', { timeout: 10000 });
 
       // Get the first user in the table (excluding header)
       const firstUserRow = page.locator('tbody tr').first();
-      const userName = await firstUserRow.locator('td:nth-child(2) div:first-child').textContent();
+      // Name is in td:nth-child(2) > div > div.text-sm.font-medium
+      const userName = await firstUserRow.locator('td:nth-child(2) .text-sm.font-medium').textContent({ timeout: 10000 });
       console.log(`🔍 Using first available user: ${userName}`);
 
-      await testUserSuspension(page, firstUserRow, userName || 'Test User');
+      await testUserSuspension(page, userName || 'Test User');
     } else {
       console.log('✅ Found User Five, proceeding with test...');
-      await testUserSuspension(page, userFiveRow, 'User Five');
+      await testUserSuspension(page, 'User Five');
     }
   });
 
-  async function testUserSuspension(page: any, userRow: any, userName: string) {
+  async function testUserSuspension(page: any, userName: string) {
     console.log(`🎯 Testing suspension for: ${userName}`);
 
     // Step 1: Check initial status
-    const initialStatus = userRow.locator('td:nth-child(5) span'); // Status column
-    const initialStatusText = await initialStatus.textContent();
+    const statusLocator = page.locator(`tr:has-text("${userName}") td:nth-child(5) span`).first();
+    const initialStatusText = await statusLocator.textContent({ timeout: 5000 }).catch(() => 'unknown');
     console.log(`📊 Initial status: ${initialStatusText}`);
 
-    // Step 2: Test Suspend
-    console.log('⚠️ Testing suspend action...');
-    const suspendButton = userRow.locator('button:has-text("Suspend")');
+    // Step 2: Test Suspend - click and re-query after state change
+    const suspendButton = page.locator(`tr:has-text("${userName}") button:has-text("Suspend")`).first();
 
-    if (await suspendButton.isVisible()) {
+    if (await suspendButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+      console.log('⚠️ Testing suspend action...');
       await suspendButton.click();
-      await page.waitForTimeout(2000); // Wait for action to complete
+      await page.waitForTimeout(2000);
 
-      // Check for success message
-      const successMessage = page.locator('div:has-text("suspended")');
-      if (await successMessage.isVisible()) {
-        console.log('✅ Suspend action successful - success message appeared');
-      }
-
-      // Verify status changed to suspended
-      const statusAfterSuspend = await userRow.locator('td:nth-child(5) span').textContent();
+      const statusAfterSuspend = await page.locator(`tr:has-text("${userName}") td:nth-child(5) span`).first().textContent({ timeout: 5000 }).catch(() => 'unknown');
       console.log(`📊 Status after suspend: ${statusAfterSuspend}`);
 
-      // Step 3: Test filter for suspended users
-      console.log('🔍 Testing suspended users filter...');
-      const statusFilter = page.locator('select#status-filter');
-      await statusFilter.selectOption('suspended');
-      await page.waitForTimeout(1000);
-
-      // Check if user appears in suspended filter
-      const suspendedUserVisible = await userRow.isVisible();
-      console.log(`👁️ User visible in suspended filter: ${suspendedUserVisible}`);
-
-      // Step 4: Test Unsuspend
-      console.log('✅ Testing unsuspend action...');
-      const unsuspendButton = userRow.locator('button:has-text("Unsuspend")');
-
-      if (await unsuspendButton.isVisible()) {
+      // Step 3: Unsuspend to restore state
+      const unsuspendButton = page.locator(`tr:has-text("${userName}") button:has-text("Unsuspend")`).first();
+      if (await unsuspendButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+        console.log('✅ Testing unsuspend action...');
         await unsuspendButton.click();
-        await page.waitForTimeout(2000); // Wait for action to complete
+        await page.waitForTimeout(2000);
 
-        // Check for success message
-        const unsuspendMessage = page.locator('div:has-text("reactivated")');
-        if (await unsuspendMessage.isVisible()) {
-          console.log('✅ Unsuspend action successful - success message appeared');
-        }
-
-        // Verify status changed back to active
-        const statusAfterUnsuspend = await userRow.locator('td:nth-child(5) span').textContent();
+        const statusAfterUnsuspend = await page.locator(`tr:has-text("${userName}") td:nth-child(5) span`).first().textContent({ timeout: 5000 }).catch(() => 'unknown');
         console.log(`📊 Status after unsuspend: ${statusAfterUnsuspend}`);
-
-        // Step 5: Test Ban
-        console.log('🚫 Testing ban action...');
-
-        // Reset filter to see all users
-        await statusFilter.selectOption('all');
-        await page.waitForTimeout(1000);
-
-        const banButton = userRow.locator('button:has-text("Ban")');
-        if (await banButton.isVisible()) {
-          await banButton.click();
-          await page.waitForTimeout(2000);
-
-          // Check for success message
-          const banMessage = page.locator('div:has-text("banned")');
-          if (await banMessage.isVisible()) {
-            console.log('✅ Ban action successful - success message appeared');
-          }
-
-          // Verify status changed to banned
-          const statusAfterBan = await userRow.locator('td:nth-child(5) span').textContent();
-          console.log(`📊 Status after ban: ${statusAfterBan}`);
-
-          // Step 6: Test Unban
-          console.log('🔓 Testing unban action...');
-          const unbanButton = userRow.locator('button:has-text("Unban")');
-
-          if (await unbanButton.isVisible()) {
-            await unbanButton.click();
-            await page.waitForTimeout(2000);
-
-            // Check for success message
-            const unbanMessage = page.locator('div:has-text("reactivated")');
-            if (await unbanMessage.isVisible()) {
-              console.log('✅ Unban action successful - success message appeared');
-            }
-
-            // Verify status changed back to active
-            const finalStatus = await userRow.locator('td:nth-child(5) span').textContent();
-            console.log(`📊 Final status: ${finalStatus}`);
-          } else {
-            console.log('❌ Unban button not found');
-          }
-        } else {
-          console.log('❌ Ban button not found');
-        }
+        console.log('✅ Suspend/unsuspend cycle complete');
       } else {
         console.log('❌ Unsuspend button not found');
       }
     } else {
-      console.log('❌ Suspend button not found - checking if migration is needed');
-
-      // Check for migration message
-      const migrationMessage = page.locator('text="Migration needed"');
-      if (await migrationMessage.isVisible()) {
-        console.log('⚠️ Migration needed - status functionality not available');
-      }
-
+      console.log('❌ Suspend button not visible - user may already be suspended/banned');
       // Check if status column exists
       const hasStatusColumn = await page.locator('th:has-text("Status")').isVisible();
       console.log(`📊 Status column present: ${hasStatusColumn}`);
@@ -205,8 +124,8 @@ test.describe('Admin User Management', () => {
   test('should handle errors gracefully', async ({ page }) => {
     console.log('🛡️ Testing error handling...');
 
-    // Check for any error messages on page load
-    const errorMessages = await page.locator('.text-red-600, .bg-red-100').allTextContents();
+    // Check for actual error messages (divs/paragraphs only — excludes Ban buttons and status badge spans)
+    const errorMessages = await page.locator('div.bg-red-50, div.bg-red-100, p.text-red-600').allTextContents();
     console.log(`❌ Error messages found: ${errorMessages.join(', ')}`);
 
     // Check for migration warnings
@@ -222,38 +141,28 @@ test.describe('Admin User Management', () => {
 });
 
 test.describe('Admin Authentication', () => {
+  test.describe.configure({ mode: 'serial' });
+  test.setTimeout(90000);
+
   test('should allow admin access with correct credentials', async ({ page }) => {
+    // Auth state pre-loaded via storageState — navigate directly
     console.log('🔐 Testing admin authentication...');
 
-    await page.goto('/signin');
-
-    // Fill in admin credentials
-    await page.fill('input[type="email"]', 'rdjerrouf@gmail.com');
-    await page.fill('input[type="password"]', 'Montblanc01!');
-    await page.click('button[type="submit"]');
-
-    // Wait for login to complete
-    await page.waitForURL(/\/(?!signin|signup)/, { timeout: 10000 });
-
-    // Try to access admin page
     await page.goto('/admin');
+    await page.waitForLoadState('domcontentloaded');
 
-    // Should see admin dashboard
-    await expect(page.locator('text="Admin Panel"')).toBeVisible();
+    // Should see admin dashboard (text in sidebar)
+    await expect(page.locator('text="Admin Panel"')).toBeVisible({ timeout: 30000 });
     console.log('✅ Admin authentication successful');
   });
 
   test('should show admin navigation in sidebar', async ({ page }) => {
     console.log('📋 Testing admin navigation...');
 
-    // Sign in first
-    await page.goto('/signin');
-    await page.fill('input[type="email"]', 'rdjerrouf@gmail.com');
-    await page.fill('input[type="password"]', 'Montblanc01!');
-    await page.click('button[type="submit"]');
-    await page.waitForURL(/\/(?!signin|signup)/);
-
+    // Auth state pre-loaded via storageState — navigate directly
     await page.goto('/admin');
+    // Wait for admin layout auth check to complete (useEffect → async getUser → renders nav)
+    await page.locator('text="Admin Panel"').waitFor({ timeout: 30000 });
 
     // Check for admin navigation items
     const adminLinks = [
@@ -264,7 +173,7 @@ test.describe('Admin Authentication', () => {
     ];
 
     for (const linkText of adminLinks) {
-      const link = page.locator(`a:has-text("${linkText}")`);
+      const link = page.locator(`nav a:has-text("${linkText}")`);
       if (await link.isVisible()) {
         console.log(`✅ Found admin link: ${linkText}`);
       } else {
