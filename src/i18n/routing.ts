@@ -5,4 +5,6 @@ export const routing = defineRouting({
   defaultLocale: 'ar',
   // Arabic is default: /browse → Arabic, /fr/browse → French, /en/browse → English
   localePrefix: 'as-needed',
+  // Never auto-redirect based on browser Accept-Language — users pick the language manually
+  localeDetection: false,
 })
