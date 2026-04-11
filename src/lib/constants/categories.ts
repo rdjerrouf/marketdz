@@ -1,6 +1,13 @@
 // src/lib/constants/categories.ts
 // Listing categories specific to DlalaDZ
 
+// RULE: name = English key stored in DB. nameAr / nameFr = display only, never stored.
+export interface Subcategory {
+  name: string    // stored in DB
+  nameAr: string  // display only
+  nameFr: string  // display only
+}
+
 export const LISTING_CATEGORIES = {
   FOR_SALE: {
     value: 'for_sale',
@@ -8,134 +15,133 @@ export const LISTING_CATEGORIES = {
     labelAr: 'للبيع',
     subcategories: [
       // Electronics & Tech
-      'Electronics',
-      'Phones & Accessories',
-      'Computers & Tablets',
-      'Cameras & Photography',
-      'Video Games & Consoles',
+      { name: 'Electronics',               nameAr: 'إلكترونيات',              nameFr: 'Électronique' },
+      { name: 'Phones & Accessories',      nameAr: 'هواتف وملحقات',           nameFr: 'Téléphones et Accessoires' },
+      { name: 'Computers & Tablets',       nameAr: 'أجهزة كمبيوتر وأقراص',   nameFr: 'Ordinateurs et Tablettes' },
+      { name: 'Cameras & Photography',     nameAr: 'كاميرات وتصوير',          nameFr: 'Appareils Photo et Photographie' },
+      { name: 'Video Games & Consoles',    nameAr: 'ألعاب فيديو وأجهزة',     nameFr: 'Jeux Vidéo et Consoles' },
 
       // Home & Living
-      'Home Appliances',
-      'Furniture & Decor',
-      'Home & Garden',
-      'Garden & DIY',
+      { name: 'Home Appliances',           nameAr: 'أجهزة منزلية',            nameFr: 'Électroménager' },
+      { name: 'Furniture & Decor',         nameAr: 'أثاث وديكور',             nameFr: 'Meubles et Décoration' },
+      { name: 'Home & Garden',             nameAr: 'منزل وحديقة',             nameFr: 'Maison et Jardin' },
+      { name: 'Garden & DIY',              nameAr: 'حديقة وأعمال يدوية',      nameFr: 'Jardin et Bricolage' },
 
       // Fashion & Personal
-      'Fashion & Accessories',
-      'Watches & Jewelry',
-      'Health & Beauty',
+      { name: 'Fashion & Accessories',     nameAr: 'موضة وإكسسوارات',         nameFr: 'Mode et Accessoires' },
+      { name: 'Watches & Jewelry',         nameAr: 'ساعات ومجوهرات',          nameFr: 'Montres et Bijoux' },
+      { name: 'Health & Beauty',           nameAr: 'صحة وجمال',               nameFr: 'Santé et Beauté' },
 
       // Entertainment & Hobbies
-      'Sports & Outdoors',
-      'Musical Instruments',
-      'Books & Media',
-      'Toys & Games',
-      'Art & Collectibles',
+      { name: 'Sports & Outdoors',         nameAr: 'رياضة وأنشطة خارجية',    nameFr: 'Sports et Loisirs' },
+      { name: 'Musical Instruments',       nameAr: 'آلات موسيقية',            nameFr: 'Instruments de Musique' },
+      { name: 'Books & Media',             nameAr: 'كتب ووسائل إعلام',        nameFr: 'Livres et Médias' },
+      { name: 'Toys & Games',              nameAr: 'ألعاب وترفيه',            nameFr: 'Jouets et Jeux' },
+      { name: 'Art & Collectibles',        nameAr: 'فن وتحف',                 nameFr: 'Art et Collections' },
 
       // Family & Kids
-      'Baby & Kids',
+      { name: 'Baby & Kids',              nameAr: 'أطفال ورضع',              nameFr: 'Bébé et Enfants' },
 
       // Tools & Professional
-      'Tools & Equipment',
-      'Industrial Supplies & Equipment',
+      { name: 'Tools & Equipment',         nameAr: 'أدوات ومعدات',            nameFr: 'Outils et Équipements' },
+      { name: 'Industrial Supplies & Equipment', nameAr: 'مستلزمات صناعية',  nameFr: 'Fournitures Industrielles' },
 
       // Big Ticket Items
-      'Vehicles',
-      'Motorcycles',
-      'Boats & Watercraft',
-      'Trailers & Towing',
-      'RV & Campers',
-      'Heavy Equipment',
-      'Construction Vehiclest',
-      'Real Estate',
+      { name: 'Vehicles',                  nameAr: 'مركبات',                  nameFr: 'Véhicules' },
+      { name: 'Motorcycles',               nameAr: 'دراجات نارية',            nameFr: 'Motos' },
+      { name: 'Boats & Watercraft',        nameAr: 'قوارب وسفن',              nameFr: 'Bateaux' },
+      { name: 'Trailers & Towing',         nameAr: 'مقطورات',                 nameFr: 'Remorques' },
+      { name: 'RV & Campers',              nameAr: 'عربات تخييم',             nameFr: 'Camping-cars' },
+      { name: 'Heavy Equipment',           nameAr: 'معدات ثقيلة',             nameFr: 'Engins Lourds' },
+      { name: 'Construction Vehiclest',    nameAr: 'مركبات بناء',             nameFr: 'Engins de Chantier' },
+      { name: 'Real Estate',               nameAr: 'عقارات',                  nameFr: 'Immobilier' },
 
       // Business & Industry
-      'Construction Materials',
-      'Agriculture',
-      'Mining',
-      'Construction',
-      'Manufacturing',
+      { name: 'Construction Materials',    nameAr: 'مواد بناء',               nameFr: 'Matériaux de Construction' },
+      { name: 'Agriculture',               nameAr: 'زراعة',                   nameFr: 'Agriculture' },
+      { name: 'Mining',                    nameAr: 'تعدين',                   nameFr: 'Exploitation Minière' },
+      { name: 'Construction',              nameAr: 'بناء',                    nameFr: 'Construction' },
+      { name: 'Manufacturing',             nameAr: 'تصنيع',                   nameFr: 'Industrie' },
 
       // Miscellaneous
-      'Other'
-    ]
+      { name: 'Other',                     nameAr: 'أخرى',                    nameFr: 'Autre' },
+    ] as Subcategory[]
   },
   JOB: {
     value: 'job',
     label: 'Jobs',
     labelAr: 'وظائف',
     subcategories: [
-      'Information Technology',
-      'Engineering',
-      'Healthcare',
-      'Education',
-      'Sales & Marketing',
-      'Administration',
-      'Construction',
-      'Transportation',
-      'Hospitality',
-      'Crafts',
-      'Agriculture',
-      'Other'
-    ]
+      { name: 'Information Technology', nameAr: 'تكنولوجيا المعلومات', nameFr: 'Informatique' },
+      { name: 'Engineering',            nameAr: 'هندسة',               nameFr: 'Ingénierie' },
+      { name: 'Healthcare',             nameAr: 'رعاية صحية',          nameFr: 'Santé' },
+      { name: 'Education',              nameAr: 'تعليم',               nameFr: 'Éducation' },
+      { name: 'Sales & Marketing',      nameAr: 'مبيعات وتسويق',       nameFr: 'Ventes et Marketing' },
+      { name: 'Administration',         nameAr: 'إدارة',               nameFr: 'Administration' },
+      { name: 'Construction',           nameAr: 'بناء',                nameFr: 'Construction' },
+      { name: 'Transportation',         nameAr: 'نقل',                 nameFr: 'Transport' },
+      { name: 'Hospitality',            nameAr: 'ضيافة',               nameFr: 'Hôtellerie' },
+      { name: 'Crafts',                 nameAr: 'حرف يدوية',           nameFr: 'Artisanat' },
+      { name: 'Agriculture',            nameAr: 'زراعة',               nameFr: 'Agriculture' },
+      { name: 'Other',                  nameAr: 'أخرى',                nameFr: 'Autre' },
+    ] as Subcategory[]
   },
   SERVICE: {
     value: 'service',
     label: 'Services',
     labelAr: 'خدمات',
     subcategories: [
-      'Cleaning',
-      'Repair & Maintenance',
-      'Tutoring',
-      'Transportation',
-      'Gardening',
-      'Plumbing',
-      'Electrical',
-      'Painting',
-      'Beauty & Hair',
-      'Physical Therapy',
-      'Senior Care',
-      'Translation',
-      'Photography',
-      'Event Planning',
-      'Catering',
-      'IT & Tech Support',
-      'Other'
-    ]
+      { name: 'Cleaning',            nameAr: 'تنظيف',              nameFr: 'Nettoyage' },
+      { name: 'Repair & Maintenance',nameAr: 'إصلاح وصيانة',       nameFr: 'Réparation et Entretien' },
+      { name: 'Tutoring',            nameAr: 'تدريس خصوصي',        nameFr: 'Cours Particuliers' },
+      { name: 'Transportation',      nameAr: 'نقل',                nameFr: 'Transport' },
+      { name: 'Gardening',           nameAr: 'بستنة',              nameFr: 'Jardinage' },
+      { name: 'Plumbing',            nameAr: 'سباكة',              nameFr: 'Plomberie' },
+      { name: 'Electrical',          nameAr: 'كهرباء',             nameFr: 'Électricité' },
+      { name: 'Painting',            nameAr: 'دهان',               nameFr: 'Peinture' },
+      { name: 'Beauty & Hair',       nameAr: 'تجميل وشعر',         nameFr: 'Beauté et Coiffure' },
+      { name: 'Physical Therapy',    nameAr: 'علاج طبيعي',         nameFr: 'Kinésithérapie' },
+      { name: 'Senior Care',         nameAr: 'رعاية المسنين',      nameFr: 'Aide aux Personnes Âgées' },
+      { name: 'Translation',         nameAr: 'ترجمة',              nameFr: 'Traduction' },
+      { name: 'Photography',         nameAr: 'تصوير',              nameFr: 'Photographie' },
+      { name: 'Event Planning',      nameAr: 'تنظيم فعاليات',      nameFr: "Organisation d'Événements" },
+      { name: 'Catering',            nameAr: 'تقديم طعام',         nameFr: 'Traiteur' },
+      { name: 'IT & Tech Support',   nameAr: 'دعم تقني',           nameFr: 'Support Informatique' },
+      { name: 'Other',               nameAr: 'أخرى',               nameFr: 'Autre' },
+    ] as Subcategory[]
   },
   FOR_RENT: {
     value: 'for_rent',
     label: 'For Rent',
     labelAr: 'للإيجار',
     subcategories: [
-      'Apartments',
-      'Houses',
-      'Offices',
-      'Commercial Space',
-      'Vehicles',
-      'Equipment',
-      'Event Halls (Salle des Fêtes)',
-      'Other'
-    ]
+      { name: 'Apartments',                  nameAr: 'شقق',             nameFr: 'Appartements' },
+      { name: 'Houses',                      nameAr: 'منازل',           nameFr: 'Maisons' },
+      { name: 'Offices',                     nameAr: 'مكاتب',           nameFr: 'Bureaux' },
+      { name: 'Commercial Space',            nameAr: 'مساحات تجارية',   nameFr: 'Espaces Commerciaux' },
+      { name: 'Vehicles',                    nameAr: 'مركبات',          nameFr: 'Véhicules' },
+      { name: 'Equipment',                   nameAr: 'معدات',           nameFr: 'Équipements' },
+      { name: 'Event Halls (Salle des Fêtes)', nameAr: 'قاعات مناسبات', nameFr: 'Salles des Fêtes' },
+      { name: 'Other',                       nameAr: 'أخرى',            nameFr: 'Autre' },
+    ] as Subcategory[]
   },
   URGENT: {
     value: 'urgent',
     label: 'Urgent Help',
     labelAr: 'مساعدة عاجلة',
     subcategories: [
-      'Blood Donation',
-      'Medicine Needed',
-      'Food Assistance',
-      'Medical Equipment',
-      'Emergency Housing'
-    ]
+      { name: 'Blood Donation',    nameAr: 'تبرع بالدم',       nameFr: 'Don de Sang' },
+      { name: 'Medicine Needed',   nameAr: 'دواء مطلوب',       nameFr: 'Médicament Nécessaire' },
+      { name: 'Food Assistance',   nameAr: 'مساعدة غذائية',    nameFr: 'Aide Alimentaire' },
+      { name: 'Medical Equipment', nameAr: 'معدات طبية',       nameFr: 'Équipement Médical' },
+      { name: 'Emergency Housing', nameAr: 'إيواء طارئ',       nameFr: "Hébergement d'Urgence" },
+    ] as Subcategory[]
   }
 } as const
 
 export type ListingCategory = keyof typeof LISTING_CATEGORIES
 export type ListingCategoryValue = typeof LISTING_CATEGORIES[ListingCategory]['value']
 
-// Helper functions for categories
 export function getCategoryByValue(value: string): typeof LISTING_CATEGORIES[ListingCategory] | undefined {
   return Object.values(LISTING_CATEGORIES).find(category => category.value === value)
 }
@@ -144,7 +150,7 @@ export function getAllCategories() {
   return Object.values(LISTING_CATEGORIES)
 }
 
-export function getSubcategories(categoryValue: ListingCategoryValue): readonly string[] {
+export function getSubcategories(categoryValue: ListingCategoryValue): readonly Subcategory[] {
   const category = getCategoryByValue(categoryValue)
   return category ? category.subcategories : []
 }

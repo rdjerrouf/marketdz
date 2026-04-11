@@ -399,8 +399,8 @@ export default function ListingForm({
               >
                 <option value="">{t('form.selectSubcategoryOption')}</option>
                 {categoryData?.subcategories.map((sub) => (
-                  <option key={sub} value={sub}>
-                    {sub}
+                  <option key={sub.name} value={sub.name}>
+                    {getLocalizedName(sub, locale)}
                   </option>
                 ))}
               </select>

@@ -113,7 +113,7 @@ function BrowsePageContent() {
 
   // Reset subcategory when category changes
   useEffect(() => {
-    if (filters.category && filters.subcategory && availableSubcategories.length > 0 && !availableSubcategories.includes(filters.subcategory)) {
+    if (filters.category && filters.subcategory && availableSubcategories.length > 0 && !availableSubcategories.some(s => s.name === filters.subcategory)) {
       setFilters(prev => ({ ...prev, subcategory: '' }))
     }
   }, [filters.category, filters.subcategory, availableSubcategories])
@@ -569,9 +569,9 @@ function BrowsePageContent() {
                   <option value="">
                     {filters.category ? t('filters.allSubcategories') : t('filters.selectCategoryFirst')}
                   </option>
-                  {availableSubcategories.map((subcategory: string) => (
-                    <option key={subcategory} value={subcategory}>
-                      {subcategory}
+                  {availableSubcategories.map((subcategory) => (
+                    <option key={subcategory.name} value={subcategory.name}>
+                      {getLocalizedName(subcategory, locale)}
                     </option>
                   ))}
                 </select>
