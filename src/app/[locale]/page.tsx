@@ -534,8 +534,8 @@ export default function CompleteKickAssHomepage() {
             </div>
           </div>
 
-          {/* Enhanced Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          {/* Enhanced Stats Grid — hidden until real data is available, re-enable by removing {false && ...} */}
+          {false && <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
             <Link
               href="/browse"
               className="bg-gradient-to-br from-green-400/10 to-green-600/10 backdrop-blur-sm rounded-2xl p-8 border border-green-500/20 hover:border-green-400/40 transition-all duration-300 group hover:scale-105 shadow-lg hover:shadow-2xl block"
@@ -618,7 +618,7 @@ export default function CompleteKickAssHomepage() {
                 Premium Feature
               </div>
             </button>
-          </div>
+          </div>}
 
           {/* Enhanced Category Pills */}
           <div className="mb-16">
