@@ -1,7 +1,7 @@
 // src/app/add-item/edit/[id]/page.tsx - Redirect to correct edit listing URL
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useEffect, use } from 'react';
 
 export default function RedirectToEditListing({ params }: { params: Promise<{ id: string }> }) {

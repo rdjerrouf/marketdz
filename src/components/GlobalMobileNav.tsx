@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname } from '@/i18n/navigation'
 import MobileSidebar from './MobileSidebar'
 
 export default function GlobalMobileNav() {

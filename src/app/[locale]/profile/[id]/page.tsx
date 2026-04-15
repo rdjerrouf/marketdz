@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { useReviews, useCreateReview, useUserRating } from '@/hooks/useReviews'
 import { useUser } from '@/hooks/useUser'
 import StarRating from '@/components/common/StarRating'

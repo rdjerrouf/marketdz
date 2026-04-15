@@ -2,9 +2,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabase/client'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { fixPhotoUrl, getCategoryPlaceholder } from '@/lib/storage'
 
 interface ListingWithStats {

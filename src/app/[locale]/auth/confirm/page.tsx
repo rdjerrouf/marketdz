@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import { useRouter } from '@/i18n/navigation'
+import { useSearchParams } from 'next/navigation'
+import { Link } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabase/client'
 
 function ConfirmEmailContent() {

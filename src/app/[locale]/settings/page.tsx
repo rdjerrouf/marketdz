@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 import { useUser } from '@/hooks/useUser'

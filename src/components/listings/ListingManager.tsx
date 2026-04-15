@@ -2,10 +2,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, Link } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { fixPhotoUrl } from '@/lib/storage'
-import Link from 'next/link'
 
 interface Listing {
   id: string

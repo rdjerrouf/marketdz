@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { AdminUser, AdminRole, getAdminUser, createAdminSession, verifyAdminSession } from '@/lib/admin/auth'
 import type { User } from '@supabase/supabase-js'

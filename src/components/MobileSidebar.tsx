@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef, memo, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { usePathname, useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { usePathname, useRouter, Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import {
   Menu, X, Home, User, MessageCircle, Heart, Grid,

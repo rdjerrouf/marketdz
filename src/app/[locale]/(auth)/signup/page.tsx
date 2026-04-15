@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useRouter } from '@/i18n/navigation'
+import { Link } from '@/i18n/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { ALGERIA_WILAYAS, getLocalizedName } from '@/lib/constants/algeria'
 import { isValidEmail, isValidAlgerianPhone } from '@/lib/utils'

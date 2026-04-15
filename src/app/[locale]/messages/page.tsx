@@ -1,7 +1,7 @@
 // src/app/[locale]/messages/page.tsx
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { useConversations } from '@/hooks/useSimpleMessages';
 import { useUser } from '@/hooks/useUser';

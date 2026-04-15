@@ -1,7 +1,7 @@
 // src/app/[locale]/add-item/page.tsx
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { useEffect, useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useStartConversation } from '@/hooks/useSimpleMessages';
 import { useUser } from '@/hooks/useUser';
 

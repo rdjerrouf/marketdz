@@ -19,7 +19,7 @@
 
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { Clock, MapPin, DollarSign, Home, User, Zap, AlertCircle } from 'lucide-react'
 import FavoriteButton from './FavoriteButton'

@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { Settings, Bell, ChevronDown, ChevronUp } from 'lucide-react'

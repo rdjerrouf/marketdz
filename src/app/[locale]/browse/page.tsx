@@ -2,7 +2,8 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, Suspense, useRef } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { ALGERIA_WILAYAS, getLocalizedName } from '@/lib/constants/algeria'
 import { getSubcategories } from '@/lib/constants/categories'
