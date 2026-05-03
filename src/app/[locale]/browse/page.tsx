@@ -303,10 +303,33 @@ function BrowsePageContent() {
     }
   }, [])
 
-  // Load initial results and when filters change
+  // Skip the search when no filter is set — avoids a DB hit on every cold /browse landing
+  const hasActiveFilter = useMemo(() => {
+    return Boolean(
+      filters.query.trim() ||
+      filters.category ||
+      filters.subcategory ||
+      filters.wilaya ||
+      filters.city ||
+      filters.minPrice ||
+      filters.maxPrice
+    )
+  }, [filters])
+
   useEffect(() => {
-    performSearch(1)
-  }, [performSearch])
+    if (hasActiveFilter) {
+      performSearch(1)
+    } else {
+      setListings([])
+      setPagination({
+        currentPage: 1,
+        totalPages: 0,
+        totalItems: 0,
+        hasNextPage: false,
+        hasPreviousPage: false
+      })
+    }
+  }, [performSearch, hasActiveFilter])
 
   const handleFilterChange = useCallback((key: keyof SearchFilters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }))

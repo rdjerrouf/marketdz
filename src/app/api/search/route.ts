@@ -37,7 +37,14 @@ export async function GET(request: NextRequest) {
     // SECURITY: status='active' enforced via applySearchSecurityConstraints()
     const supabase = createSupabaseAdminClient();
     const urlSearchParams = request.nextUrl.searchParams;
-    const query = urlSearchParams.get('q')?.trim() || '';
+    const rawQuery = urlSearchParams.get('q')?.trim() || '';
+    if (rawQuery.length > 100) {
+      return NextResponse.json(
+        { error: 'Query too long (max 100 characters)' },
+        { status: 400 }
+      );
+    }
+    const query = rawQuery;
     const category = urlSearchParams.get('category')?.trim();
     const subcategory = urlSearchParams.get('subcategory')?.trim();
     const wilaya = urlSearchParams.get('wilaya')?.trim();
@@ -72,17 +79,11 @@ export async function GET(request: NextRequest) {
     });
 
     if (!validation.isValid) {
-      console.error('❌ Invalid search parameters:', validation.errors);
       return NextResponse.json(
         { error: 'Invalid search parameters', details: validation.errors },
         { status: 400 }
       );
     }
-
-    console.log('🔍 Search params:', {
-      query, category, subcategory, wilaya, city, minPrice, maxPrice, sortBy, safePage, safeLimit,
-      availableFrom, availableTo, rentalPeriod, minSalary, maxSalary, jobType, companyName, condition
-    });
 
     // Build the query with explicit column selection
     // PERFORMANCE: No exact count, no profile join for maximum speed at 250k scale
@@ -162,8 +163,7 @@ export async function GET(request: NextRequest) {
         supabaseQuery = supabaseQuery.or(
           `search_vector_ar.wfts.${query},search_vector_fr.wfts.${query}`
         );
-      } catch (error) {
-        console.warn('Full-text search error, falling back to ILIKE:', error);
+      } catch {
         // Fallback to ILIKE (slower but works if FTS fails)
         supabaseQuery = supabaseQuery.or(
           `title.ilike.%${query}%,description.ilike.%${query}%,company_name.ilike.%${query}%`
@@ -196,7 +196,6 @@ export async function GET(request: NextRequest) {
     const { data: listings, error } = await supabaseQuery;
 
     if (error) {
-      console.error('❌ Database error:', error);
       return NextResponse.json(
         { error: 'Failed to fetch listings' },
         { status: 500 }
@@ -204,7 +203,6 @@ export async function GET(request: NextRequest) {
     }
 
     const resultCount = listings?.length || 0;
-    console.log(`✅ Found ${resultCount} listings`);
 
     // Audit logging for service role usage (security requirement)
     logServiceRoleQuery({
@@ -261,8 +259,7 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(response, { headers });
-  } catch (error) {
-    console.error('❌ Search API error:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
