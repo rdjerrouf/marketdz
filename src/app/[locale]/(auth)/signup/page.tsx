@@ -436,7 +436,7 @@ export default function SignUpPage() {
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                 {t('phone')}
-                <span className="text-xs text-gray-500 ms-2">- {t('phoneHint')}</span>
+                <span className="text-xs text-gray-500 ms-2">({t('phoneHint')})</span>
               </label>
               <input
                 type="tel"
