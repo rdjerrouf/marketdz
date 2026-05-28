@@ -209,7 +209,7 @@ function ResetPasswordPageContent() {
                   id="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`mt-1 block w-full ps-3 pe-20 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder="Entrez votre nouveau mot de passe"
@@ -218,7 +218,7 @@ function ResetPasswordPageContent() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600"
+                  className="absolute inset-y-0 end-0 pe-3 flex items-center text-sm text-gray-600"
                 >
                   {showPassword ? 'Hide' : 'Show'}
                 </button>
@@ -241,7 +241,7 @@ function ResetPasswordPageContent() {
                   id="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`mt-1 block w-full ps-3 pe-20 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder="Confirmez votre nouveau mot de passe"
@@ -250,7 +250,7 @@ function ResetPasswordPageContent() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-600"
+                  className="absolute inset-y-0 end-0 pe-3 flex items-center text-sm text-gray-600"
                 >
                   {showConfirmPassword ? 'Hide' : 'Show'}
                 </button>
