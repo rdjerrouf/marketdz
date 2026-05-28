@@ -60,42 +60,42 @@ export default function SignUpPage() {
 
     // Email validation
     if (!formData.email) {
-      newErrors.email = 'Email is required'
+      newErrors.email = t('errors.emailRequired')
     } else if (!isValidEmail(formData.email)) {
-      newErrors.email = 'Invalid email format'
+      newErrors.email = t('errors.emailInvalid')
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Password is required'
+      newErrors.password = t('errors.passwordRequired')
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
+      newErrors.password = t('errors.passwordTooShort')
     }
 
     // Confirm password
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
+      newErrors.confirmPassword = t('errors.passwordMismatch')
     }
 
     // Name validation
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required'
+      newErrors.firstName = t('errors.firstNameRequired')
     }
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required'
+      newErrors.lastName = t('errors.lastNameRequired')
     }
 
     // Phone validation (optional but if provided must be valid)
     if (formData.phone && !isValidAlgerianPhone(formData.phone)) {
-      newErrors.phone = 'Invalid phone number (ex: 0551234567 or +213551234567)'
+      newErrors.phone = t('errors.invalidPhone')
     }
 
     // Location validation
     if (!formData.wilaya) {
-      newErrors.wilaya = 'Province is required'
+      newErrors.wilaya = t('errors.provinceRequired')
     }
     if (!formData.city) {
-      newErrors.city = 'City is required'
+      newErrors.city = t('errors.cityRequired')
     }
 
     return newErrors
@@ -118,14 +118,14 @@ export default function SignUpPage() {
       const result = await response.json()
 
       if (!response.ok) {
-        setResendMessage(result.error || 'Failed to resend email. Please try again.')
+        setResendMessage(result.error || t('resendFailed'))
         return
       }
 
-      setResendMessage('Verification email sent! Please check your inbox.')
+      setResendMessage(t('resendSuccess'))
     } catch (error) {
       console.error('Resend email error:', error)
-      setResendMessage('An error occurred. Please try again.')
+      setResendMessage(t('errors.generic'))
     } finally {
       setIsResending(false)
     }
@@ -183,7 +183,7 @@ export default function SignUpPage() {
 
       if (!response.ok) {
         if (result.error.includes('already registered') || result.error.includes('User already registered')) {
-          setErrors({ email: 'This email address is already in use' })
+          setErrors({ email: t('errors.emailExists') })
         } else {
           setErrors({ general: result.error })
         }
@@ -196,12 +196,12 @@ export default function SignUpPage() {
         setShowVerificationMessage(true)
       } else {
         // Fallback: redirect to sign in if no verification required
-        router.push('/signin?message=Account created successfully! Please sign in.')
+        router.push('/signin')
       }
 
     } catch (error) {
       console.error('Sign up error:', error)
-      setErrors({ general: 'An error occurred. Please try again.' })
+      setErrors({ general: t('errors.generic') })
     } finally {
       setIsLoading(false)
     }
@@ -266,17 +266,17 @@ export default function SignUpPage() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Verify Your Email
+                {t('verifyEmailTitle')}
               </h3>
               <p className="text-sm text-gray-600 mb-4">
-                We&apos;ve sent a verification email to:
+                {t('verifyEmailIntro')}
               </p>
               <p className="text-sm font-medium text-gray-900 mb-6">
                 {userEmail}
               </p>
               <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
                 <p className="text-sm text-blue-800">
-                  Please check your inbox and click the verification link to activate your account.
+                  {t('verifyEmailInstructions')}
                 </p>
               </div>
               <div className="space-y-3">
@@ -284,17 +284,17 @@ export default function SignUpPage() {
                   href="/signin"
                   className="block w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  Go to Sign In
+                  {t('goToSignIn')}
                 </Link>
                 <button
                   onClick={() => setShowVerificationMessage(false)}
                   className="block w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  Back to Sign Up
+                  {t('backToSignUp')}
                 </button>
               </div>
               <p className="mt-4 text-xs text-gray-500">
-                Didn&apos;t receive the email? Check your spam folder.
+                {t('verifyEmailSpamHint')}
               </p>
               <div className="mt-4 border-t border-gray-200 pt-4">
                 <button
@@ -306,7 +306,7 @@ export default function SignUpPage() {
                       : 'text-blue-600 hover:text-blue-500'
                   }`}
                 >
-                  {isResending ? 'Sending...' : 'Resend Verification Email'}
+                  {isResending ? t('resending') : t('resendEmail')}
                 </button>
                 {resendMessage && (
                   <p className={`mt-2 text-sm ${
@@ -351,7 +351,7 @@ export default function SignUpPage() {
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password *
+                {t('password')} *
               </label>
               <div className="relative">
                 <input
@@ -363,14 +363,14 @@ export default function SignUpPage() {
                   className={`mt-1 block w-full ps-3 pe-20 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Minimum 6 characters"
+                  placeholder={t('passwordPlaceholder')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 end-0 pe-3 flex items-center text-sm text-gray-600"
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? t('hidePassword') : t('showPassword')}
                 </button>
               </div>
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
@@ -379,7 +379,7 @@ export default function SignUpPage() {
             {/* Confirm Password */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password *
+                {t('confirmPassword')} *
               </label>
               <input
                 type="password"
@@ -390,6 +390,7 @@ export default function SignUpPage() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                 }`}
+                placeholder={t('confirmPasswordPlaceholder')}
               />
               {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
             </div>
@@ -398,7 +399,7 @@ export default function SignUpPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  First Name *
+                  {t('firstName')} *
                 </label>
                 <input
                   type="text"
@@ -412,10 +413,10 @@ export default function SignUpPage() {
                 />
                 {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>}
               </div>
-              
+
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  Last Name *
+                  {t('lastName')} *
                 </label>
                 <input
                   type="text"
@@ -434,8 +435,8 @@ export default function SignUpPage() {
             {/* Phone */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone (optional)
-                <span className="text-xs text-gray-500 ml-2">- Will be saved in WhatsApp format</span>
+                {t('phone')}
+                <span className="text-xs text-gray-500 ms-2">- {t('phoneHint')}</span>
               </label>
               <input
                 type="tel"
@@ -443,21 +444,22 @@ export default function SignUpPage() {
                 id="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
+                dir="ltr"
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   errors.phone ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="0551234567 or +213551234567"
+                placeholder={t('phonePlaceholder')}
               />
               {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
               <p className="mt-1 text-xs text-gray-500">
-                📱 Phone will be formatted as +213xxxxxxxxx for WhatsApp compatibility
+                {t('phoneFormat')}
               </p>
             </div>
 
             {/* Wilaya */}
             <div>
               <label htmlFor="wilaya" className="block text-sm font-medium text-gray-700">
-                Province *
+                {t('province')} *
               </label>
               <select
                 name="wilaya"
@@ -468,7 +470,7 @@ export default function SignUpPage() {
                   errors.wilaya ? 'border-red-300' : 'border-gray-300'
                 }`}
               >
-                <option value="">Select a province</option>
+                <option value="">{t('selectProvince')}</option>
                 {ALGERIA_WILAYAS.map(wilaya => (
                   <option key={wilaya.code} value={wilaya.code}>
                     {wilaya.code} - {getLocalizedName(wilaya, locale)}
@@ -481,7 +483,7 @@ export default function SignUpPage() {
             {/* City */}
             <div>
               <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                City *
+                {t('city')} *
               </label>
               <select
                 name="city"
@@ -493,7 +495,7 @@ export default function SignUpPage() {
                   errors.city ? 'border-red-300' : 'border-gray-300'
                 } ${!formData.wilaya ? 'bg-gray-100' : ''}`}
               >
-                <option value="">Select a city</option>
+                <option value="">{t('selectCity')}</option>
                 {availableCities.map(city => (
                   <option key={city.name} value={city.name}>
                     {getLocalizedName(city, locale)}
@@ -506,7 +508,7 @@ export default function SignUpPage() {
             {/* Bio */}
             <div>
               <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
-                Bio (optional)
+                {t('bio')}
               </label>
               <textarea
                 name="bio"
@@ -515,7 +517,7 @@ export default function SignUpPage() {
                 value={formData.bio}
                 onChange={handleInputChange}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Tell us about yourself..."
+                placeholder={t('bioPlaceholder')}
               />
             </div>
 
@@ -530,7 +532,7 @@ export default function SignUpPage() {
                     : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                 }`}
               >
-                {isLoading ? 'Creating account...' : 'Create Account'}
+                {isLoading ? t('submitting') : t('submit')}
               </button>
             </div>
           </form>
@@ -540,12 +542,12 @@ export default function SignUpPage() {
             <div className="mt-6">
               <div className="text-center">
                 <span className="text-sm text-gray-600">
-                  Already have an account?{' '}
+                  {t('hasAccount')}{' '}
                   <Link
                     href="/signin"
                     className="font-medium text-blue-600 hover:text-blue-500"
                   >
-                    Sign In
+                    {t('signIn')}
                   </Link>
                 </span>
               </div>
