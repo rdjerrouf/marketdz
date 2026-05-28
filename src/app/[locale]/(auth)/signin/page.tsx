@@ -225,8 +225,7 @@ function SignInPageContent() {
                   id="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  dir="ltr"
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`mt-1 block w-full ps-3 pe-32 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder={t('passwordPlaceholder')}
