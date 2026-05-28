@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from '@/i18n/navigation'
 import { useSearchParams } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 
 interface FormData {
   password: string
@@ -17,6 +18,8 @@ interface FormErrors {
 function ResetPasswordPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const t = useTranslations('auth.resetPassword')
+  const tCommon = useTranslations('common')
   
   const [formData, setFormData] = useState<FormData>({
     password: '',
@@ -46,15 +49,15 @@ function ResetPasswordPageContent() {
     const newErrors: FormErrors = {}
 
     if (!formData.password) {
-      newErrors.password = 'Nouveau mot de passe est requis'
+      newErrors.password = t('errors.passwordRequired')
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Le mot de passe doit contenir au moins 8 caractères'
+      newErrors.password = t('errors.passwordTooShort')
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirmation du mot de passe est requise'
+      newErrors.confirmPassword = t('errors.confirmRequired')
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Les mots de passe ne correspondent pas'
+      newErrors.confirmPassword = t('errors.passwordMismatch')
     }
 
     return newErrors
@@ -110,7 +113,7 @@ function ResetPasswordPageContent() {
 
     } catch (error) {
       console.error('Password update error:', error)
-      setErrors({ general: 'Une erreur est survenue. Veuillez réessayer.' })
+      setErrors({ general: t('errors.generic') })
     } finally {
       setIsLoading(false)
     }
@@ -123,7 +126,7 @@ function ResetPasswordPageContent() {
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-sm text-gray-600">Vérification du lien...</p>
+            <p className="mt-2 text-sm text-gray-600">{t('verifyingLink')}</p>
           </div>
         </div>
       </div>
@@ -135,10 +138,10 @@ function ResetPasswordPageContent() {
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
-            DlalaDZ
+            {tCommon('appName')}
           </h1>
           <h2 className="text-center text-xl text-gray-600">
-            Mot de passe mis à jour!
+            {t('successTitle')}
           </h2>
         </div>
 
@@ -150,21 +153,20 @@ function ResetPasswordPageContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
-              
+
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Succès!
+                {t('successTitle')}
               </h3>
-              
+
               <p className="text-sm text-gray-600 mb-6">
-                Votre mot de passe a été mis à jour avec succès. 
-                Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.
+                {t('successBody')}
               </p>
-              
-              <Link 
+
+              <Link
                 href="/signin"
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Sign In
+                {t('signIn')}
               </Link>
             </div>
           </div>
@@ -177,13 +179,13 @@ function ResetPasswordPageContent() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
-          DlalaDZ
+          {tCommon('appName')}
         </h1>
         <h2 className="text-center text-xl text-gray-600">
-          Nouveau mot de passe
+          {t('title')}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Entrez votre nouveau mot de passe ci-dessous
+          {t('subtitle')}
         </p>
       </div>
 
@@ -200,7 +202,7 @@ function ResetPasswordPageContent() {
             {/* New Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Nouveau mot de passe
+                {t('newPassword')}
               </label>
               <div className="relative">
                 <input
@@ -212,7 +214,7 @@ function ResetPasswordPageContent() {
                   className={`mt-1 block w-full ps-3 pe-20 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Entrez votre nouveau mot de passe"
+                  placeholder={t('newPasswordPlaceholder')}
                   autoComplete="new-password"
                 />
                 <button
@@ -220,19 +222,19 @@ function ResetPasswordPageContent() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 end-0 pe-3 flex items-center text-sm text-gray-600"
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? t('hidePassword') : t('showPassword')}
                 </button>
               </div>
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
               <p className="mt-1 text-xs text-gray-500">
-                Au moins 8 caractères
+                {t('minLength')}
               </p>
             </div>
 
             {/* Confirm Password */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
+                {t('confirmPassword')}
               </label>
               <div className="relative">
                 <input
@@ -244,7 +246,7 @@ function ResetPasswordPageContent() {
                   className={`mt-1 block w-full ps-3 pe-20 py-2 border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Confirmez votre nouveau mot de passe"
+                  placeholder={t('confirmPasswordPlaceholder')}
                   autoComplete="new-password"
                 />
                 <button
@@ -252,7 +254,7 @@ function ResetPasswordPageContent() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 end-0 pe-3 flex items-center text-sm text-gray-600"
                 >
-                  {showConfirmPassword ? 'Hide' : 'Show'}
+                  {showConfirmPassword ? t('hidePassword') : t('showPassword')}
                 </button>
               </div>
               {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
@@ -269,18 +271,18 @@ function ResetPasswordPageContent() {
                     : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                 }`}
               >
-                {isLoading ? 'Updating...' : 'Update Password'}
+                {isLoading ? t('submitting') : t('submit')}
               </button>
             </div>
           </form>
 
           {/* Links */}
           <div className="mt-6 text-center">
-            <Link 
-              href="/signin" 
+            <Link
+              href="/signin"
               className="text-sm text-blue-600 hover:text-blue-500"
             >
-              ← Back to Sign In
+              {t('backToSignIn')}
             </Link>
           </div>
         </div>
@@ -291,7 +293,13 @@ function ResetPasswordPageContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      }
+    >
       <ResetPasswordPageContent />
     </Suspense>
   )
