@@ -52,13 +52,13 @@ function SignInPageContent() {
     const newErrors: FormErrors = {}
 
     if (!formData.email) {
-      newErrors.email = 'Email is required'
+      newErrors.email = t('errors.emailRequired')
     } else if (!isValidEmail(formData.email)) {
-      newErrors.email = 'Invalid email format'
+      newErrors.email = t('errors.emailInvalid')
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required'
+      newErrors.password = t('errors.passwordRequired')
     }
 
     return newErrors
@@ -102,9 +102,9 @@ function SignInPageContent() {
       if (result?.error) {
         console.log('🔑 Signin: Authentication error:', result.error)
         if (result.error.includes('Invalid login credentials')) {
-          setErrors({ general: 'Incorrect email or password.' })
+          setErrors({ general: t('errors.invalidCredentials') })
         } else if (result.error.includes('Email not confirmed')) {
-          setErrors({ general: 'Please verify your email before signing in. Check your inbox for the verification link.' })
+          setErrors({ general: t('errors.emailNotConfirmed') })
         } else {
           setErrors({ general: result.error })
         }
@@ -121,7 +121,7 @@ function SignInPageContent() {
 
     } catch (error: unknown) {
       console.error('Sign in error:', error)
-      setErrors({ general: 'An error occurred. Please try again.' })
+      setErrors({ general: t('errors.generic') })
     } finally {
       setIsLoading(false)
     }
