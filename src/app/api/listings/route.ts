@@ -80,7 +80,15 @@ export async function POST(request: NextRequest) {
       // Urgent category fields
       urgent_type,
       urgent_expires_at,
-      urgent_contact_preference
+      urgent_contact_preference,
+      // Vehicle-specific fields
+      vehicle_make,
+      vehicle_model,
+      vehicle_year,
+      vehicle_mileage,
+      vehicle_transmission,
+      vehicle_fuel_type,
+      vehicle_body_type
     } = body
 
     // Validate required fields
@@ -160,6 +168,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (vehicle_transmission && !['manual', 'automatic', 'semi-automatic'].includes(vehicle_transmission)) {
+      return NextResponse.json({ error: 'Invalid vehicle transmission' }, { status: 400 })
+    }
+
+    if (vehicle_fuel_type && !['petrol', 'diesel', 'electric', 'hybrid', 'lpg'].includes(vehicle_fuel_type)) {
+      return NextResponse.json({ error: 'Invalid vehicle fuel type' }, { status: 400 })
+    }
+
+    if (vehicle_body_type && !['sedan', 'suv', 'hatchback', 'pickup', 'van', 'coupe', 'wagon', 'convertible', 'minivan', 'scooter', 'sport', 'cruiser', 'other'].includes(vehicle_body_type)) {
+      return NextResponse.json({ error: 'Invalid vehicle body type' }, { status: 400 })
+    }
+
     if (job_type && !['full-time', 'part-time', 'contract', 'freelance', 'internship'].includes(job_type)) {
       return NextResponse.json(
         { error: 'Invalid job type' },
@@ -213,6 +233,17 @@ export async function POST(request: NextRequest) {
         urgent_type: urgent_type || null,
         urgent_expires_at: convertExpirationToTimestamp(urgent_expires_at), // Convert "24h"/"48h"/"72h" to timestamp
         urgent_contact_preference: urgent_contact_preference || null,
+        // Vehicle-specific columns
+        vehicle_make: vehicle_make?.trim() || null,
+        vehicle_model: vehicle_model?.trim() || null,
+        vehicle_year: vehicle_year ? parseInt(vehicle_year) : null,
+        vehicle_mileage: vehicle_mileage !== undefined && vehicle_mileage !== null && vehicle_mileage !== '' ? parseInt(vehicle_mileage) : null,
+        vehicle_transmission: vehicle_transmission || null,
+        vehicle_fuel_type: vehicle_fuel_type || null,
+        vehicle_body_type: vehicle_body_type || null,
+        // Generic subcategory details (JSONB)
+        listing_details: (body.listing_details && Object.keys(body.listing_details).length > 0)
+          ? body.listing_details : null,
         // Contact info stored in metadata (normalized for WhatsApp)
         metadata: {
           ...metadata || {},
@@ -228,7 +259,10 @@ export async function POST(request: NextRequest) {
         user_id, location_city, location_wilaya, photos, metadata,
         available_from, available_to, rental_period, salary_min, salary_max,
         job_type, company_name, condition,
-        urgent_type, urgent_expires_at, urgent_contact_preference
+        urgent_type, urgent_expires_at, urgent_contact_preference,
+        vehicle_make, vehicle_model, vehicle_year, vehicle_mileage,
+        vehicle_transmission, vehicle_fuel_type, vehicle_body_type,
+        listing_details
       `)
       .single()
 

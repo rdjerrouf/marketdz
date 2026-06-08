@@ -77,7 +77,15 @@ export async function PUT(
       salary_max,
       job_type,
       company_name,
-      condition
+      condition,
+      // Vehicle-specific fields
+      vehicle_make,
+      vehicle_model,
+      vehicle_year,
+      vehicle_mileage,
+      vehicle_transmission,
+      vehicle_fuel_type,
+      vehicle_body_type
     } = body
 
     // First check if the listing exists and belongs to the user
@@ -126,6 +134,19 @@ export async function PUT(
     if (job_type !== undefined) updateData.job_type = job_type
     if (company_name !== undefined) updateData.company_name = company_name
     if (condition !== undefined) updateData.condition = condition
+    // Vehicle-specific fields
+    if (vehicle_make !== undefined) updateData.vehicle_make = vehicle_make?.trim() || null
+    if (vehicle_model !== undefined) updateData.vehicle_model = vehicle_model?.trim() || null
+    if (vehicle_year !== undefined) updateData.vehicle_year = vehicle_year ? parseInt(vehicle_year) : null
+    if (vehicle_mileage !== undefined) updateData.vehicle_mileage = vehicle_mileage !== '' && vehicle_mileage !== null ? parseInt(vehicle_mileage) : null
+    if (vehicle_transmission !== undefined) updateData.vehicle_transmission = vehicle_transmission || null
+    if (vehicle_fuel_type !== undefined) updateData.vehicle_fuel_type = vehicle_fuel_type || null
+    if (vehicle_body_type !== undefined) updateData.vehicle_body_type = vehicle_body_type || null
+    // Generic subcategory details (JSONB)
+    if (body.listing_details !== undefined) {
+      updateData.listing_details = (body.listing_details && Object.keys(body.listing_details).length > 0)
+        ? body.listing_details : null
+    }
 
     const { data, error } = await supabase
       .from('listings')

@@ -66,6 +66,13 @@ export async function GET(request: NextRequest) {
     const jobType = urlSearchParams.get('jobType');
     const companyName = urlSearchParams.get('companyName');
     const condition = urlSearchParams.get('condition');
+    // Vehicle-specific filters
+    const vehicleMake = urlSearchParams.get('vehicleMake')?.trim();
+    const vehicleTransmission = urlSearchParams.get('vehicleTransmission')?.trim();
+    const vehicleFuelType = urlSearchParams.get('vehicleFuelType')?.trim();
+    const vehicleYearMin = urlSearchParams.get('vehicleYearMin');
+    const vehicleYearMax = urlSearchParams.get('vehicleYearMax');
+    const vehicleMileageMax = urlSearchParams.get('vehicleMileageMax');
 
     // SECURITY: Validate all parameters before processing
     const validation = validateSearchParams({
@@ -129,7 +136,7 @@ export async function GET(request: NextRequest) {
         supabaseQuery = supabaseQuery.lte('available_to', availableTo);
       }
       if (rentalPeriod) {
-        supabaseQuery = supabaseQuery.eq('rental_period', rentalPeriod);
+        supabaseQuery = supabaseQuery.eq('rental_period', rentalPeriod as any);
       }
     }
 
@@ -141,7 +148,7 @@ export async function GET(request: NextRequest) {
         supabaseQuery = supabaseQuery.lte('salary_max', parseFloat(maxSalary));
       }
       if (jobType) {
-        supabaseQuery = supabaseQuery.eq('job_type', jobType);
+        supabaseQuery = supabaseQuery.eq('job_type', jobType as any);
       }
       if (companyName) {
         supabaseQuery = supabaseQuery.ilike('company_name', `%${companyName}%`);
@@ -149,7 +156,27 @@ export async function GET(request: NextRequest) {
     }
 
     if (category === 'for_sale' && condition) {
-      supabaseQuery = supabaseQuery.eq('condition', condition);
+      supabaseQuery = supabaseQuery.eq('condition', condition as any);
+    }
+
+    // Vehicle-specific filters (only meaningful on for_sale vehicle subcategories)
+    if (vehicleMake) {
+      supabaseQuery = supabaseQuery.ilike('vehicle_make', `%${vehicleMake}%`);
+    }
+    if (vehicleTransmission) {
+      supabaseQuery = supabaseQuery.eq('vehicle_transmission', vehicleTransmission as any);
+    }
+    if (vehicleFuelType) {
+      supabaseQuery = supabaseQuery.eq('vehicle_fuel_type', vehicleFuelType as any);
+    }
+    if (vehicleYearMin && !isNaN(parseInt(vehicleYearMin))) {
+      supabaseQuery = supabaseQuery.gte('vehicle_year', parseInt(vehicleYearMin));
+    }
+    if (vehicleYearMax && !isNaN(parseInt(vehicleYearMax))) {
+      supabaseQuery = supabaseQuery.lte('vehicle_year', parseInt(vehicleYearMax));
+    }
+    if (vehicleMileageMax && !isNaN(parseInt(vehicleMileageMax))) {
+      supabaseQuery = supabaseQuery.lte('vehicle_mileage', parseInt(vehicleMileageMax));
     }
 
     // Full-text search using precomputed vectors (CRITICAL for performance)

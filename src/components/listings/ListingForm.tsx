@@ -11,6 +11,21 @@ import ImageUpload from './ImageUpload'
 import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import { Zap } from 'lucide-react'
 
+// Subcategory groups that trigger specialised detail sections
+const VEHICLE_SUBCATS = new Set([
+  'Vehicles', 'Motorcycles', 'Auto & Motorcycle Parts',
+  'Construction Vehicles & Trucks', 'Heavy Equipment & Machinery',
+])
+const REAL_ESTATE_SUBCATS = new Set(['Real Estate'])
+const ELECTRONICS_SUBCATS = new Set(['Phones & Accessories', 'Electronics & Computers'])
+const FASHION_SUBCATS = new Set(['Fashion & Clothing'])
+const HOME_SUBCATS = new Set(['Home Appliances', 'Furniture & Home Decor'])
+const BOOKS_SUBCATS = new Set(['Books & Media'])
+const SPORTS_TOOLS_SUBCATS = new Set([
+  'Sports & Outdoors', 'Tools & Equipment', 'Agriculture',
+  'Baby & Kids', 'Construction Materials & Supplies',
+])
+
 interface ListingFormData {
   title: string
   description: string
@@ -41,6 +56,16 @@ interface ListingFormData {
   urgent_type?: string
   urgent_expires_at?: string
   urgent_contact_preference?: string
+  // Vehicle dedicated columns
+  vehicle_make?: string
+  vehicle_model?: string
+  vehicle_year?: string
+  vehicle_mileage?: string
+  vehicle_transmission?: string
+  vehicle_fuel_type?: string
+  vehicle_body_type?: string
+  // Generic subcategory details (→ listing_details JSONB)
+  listing_details: Record<string, string | number | null>
   metadata: {
     brand?: string
     experience?: string
@@ -59,7 +84,7 @@ interface ListingFormProps {
   listingId?: string
   mode?: 'create' | 'edit'
   onSuccess?: () => void
-  fixedCategory?: boolean // New prop to disable category selection when category is pre-selected from route
+  fixedCategory?: boolean
 }
 
 export default function ListingForm({
@@ -87,7 +112,6 @@ export default function ListingForm({
     location_city: '',
     location_wilaya: '',
     photos: [],
-    // Category-specific fields
     available_from: '',
     available_to: '',
     rental_period: '',
@@ -98,153 +122,137 @@ export default function ListingForm({
     job_type: '',
     company_name: '',
     condition: '',
-    // Application fields initialization
     application_email: '',
     application_phone: '',
     application_instructions: '',
-    // Service fields initialization
     service_phone: '',
-    // Urgent fields initialization
     urgent_type: '',
     urgent_expires_at: '',
     urgent_contact_preference: '',
+    vehicle_make: '',
+    vehicle_model: '',
+    vehicle_year: '',
+    vehicle_mileage: '',
+    vehicle_transmission: '',
+    vehicle_fuel_type: '',
+    vehicle_body_type: '',
+    listing_details: {},
     metadata: {},
-    ...initialData
+    ...initialData,
   })
 
   const categoryData = LISTING_CATEGORIES[formData.category.toUpperCase() as keyof typeof LISTING_CATEGORIES]
   const requiresImages = formData.category === 'for_sale' || formData.category === 'for_rent'
   const requiresPrice = formData.category !== 'job' && formData.category !== 'service' && formData.category !== 'urgent'
-  
-  // Get cities for selected wilaya
+
   const selectedWilaya = getWilayaByName(formData.location_wilaya)
   const availableCities = selectedWilaya ? selectedWilaya.cities : []
+
+  // Subcategory type flags
+  const sub = formData.subcategory
+  const isVehicleListing  = VEHICLE_SUBCATS.has(sub)
+  const isRealEstate      = REAL_ESTATE_SUBCATS.has(sub)
+  const isElectronics     = ELECTRONICS_SUBCATS.has(sub)
+  const isFashion         = FASHION_SUBCATS.has(sub)
+  const isHome            = HOME_SUBCATS.has(sub)
+  const isBooks           = BOOKS_SUBCATS.has(sub)
+  const isSportsOrTools   = SPORTS_TOOLS_SUBCATS.has(sub)
+  const showDetailsSection = formData.category === 'for_sale' && sub &&
+    (isVehicleListing || isRealEstate || isElectronics || isFashion || isHome || isBooks || isSportsOrTools)
 
   const handleInputChange = (field: keyof ListingFormData, value: any) => {
     setFormData(prev => {
       const newData = { ...prev, [field]: value }
-      
-      // Clear city when wilaya changes
-      if (field === 'location_wilaya') {
-        newData.location_city = ''
+      if (field === 'location_wilaya') newData.location_city = ''
+      // Reset subcategory-specific data when subcategory changes
+      if (field === 'subcategory') {
+        newData.listing_details = {}
+        newData.vehicle_make = ''
+        newData.vehicle_model = ''
+        newData.vehicle_year = ''
+        newData.vehicle_mileage = ''
+        newData.vehicle_transmission = ''
+        newData.vehicle_fuel_type = ''
+        newData.vehicle_body_type = ''
       }
-      
       return newData
     })
     if (error) setError('')
   }
 
+  const handleDetailsChange = (key: string, value: string | number | null) => {
+    setFormData(prev => ({
+      ...prev,
+      listing_details: { ...prev.listing_details, [key]: value || null },
+    }))
+  }
+
   const validateForm = (): boolean => {
-    if (!formData.title.trim()) {
-      setError(t('validation.titleRequired'))
-      return false
-    }
-    if (formData.title.length < 3 || formData.title.length > 200) {
-      setError(t('validation.titleLength'))
-      return false
-    }
-    if (!formData.description.trim()) {
-      setError(t('validation.descriptionRequired'))
-      return false
-    }
-    if (!formData.location_wilaya) {
-      setError(t('validation.wilayaRequired'))
-      return false
-    }
-    if (!formData.location_city.trim()) {
-      setError(t('validation.cityRequired'))
-      return false
-    }
+    if (!formData.title.trim()) { setError(t('validation.titleRequired')); return false }
+    if (formData.title.length < 3 || formData.title.length > 200) { setError(t('validation.titleLength')); return false }
+    if (!formData.description.trim()) { setError(t('validation.descriptionRequired')); return false }
+    if (!formData.location_wilaya) { setError(t('validation.wilayaRequired')); return false }
+    if (!formData.location_city.trim()) { setError(t('validation.cityRequired')); return false }
     if (requiresPrice && (!formData.price.trim() || isNaN(Number(formData.price)) || Number(formData.price) <= 0)) {
-      setError(t('validation.priceRequired'))
-      return false
+      setError(t('validation.priceRequired')); return false
     }
-    // Rental-specific validation
     if (formData.category === 'for_rent' && !formData.rental_period) {
-      setError(t('validation.rentalPeriodRequired'))
-      return false
+      setError(t('validation.rentalPeriodRequired')); return false
     }
-    // Job-specific salary validation
     if (formData.category === 'job') {
       if (formData.salary_type === 'fixed' && (!formData.salary_amount || isNaN(Number(formData.salary_amount)) || Number(formData.salary_amount) <= 0)) {
-        setError(t('validation.fixedSalaryRequired'))
-        return false
+        setError(t('validation.fixedSalaryRequired')); return false
       }
       if (formData.salary_type === 'range') {
-        if (!formData.salary_min || !formData.salary_max ||
-            isNaN(Number(formData.salary_min)) || isNaN(Number(formData.salary_max)) ||
+        if (!formData.salary_min || !formData.salary_max || isNaN(Number(formData.salary_min)) || isNaN(Number(formData.salary_max)) ||
             Number(formData.salary_min) <= 0 || Number(formData.salary_max) <= 0) {
-          setError(t('validation.salaryRangeRequired'))
-          return false
+          setError(t('validation.salaryRangeRequired')); return false
         }
         if (Number(formData.salary_min) >= Number(formData.salary_max)) {
-          setError(t('validation.salaryRangeOrder'))
-          return false
+          setError(t('validation.salaryRangeOrder')); return false
         }
       }
-    }
-    // Job application validation - require at least one contact method
-    if (formData.category === 'job') {
       if (!formData.application_email?.trim() && !formData.application_phone?.trim()) {
-        setError(t('validation.jobContactRequired'))
-        return false
+        setError(t('validation.jobContactRequired')); return false
       }
     }
-    // Service contact validation - require phone number
-    if (formData.category === 'service') {
-      if (!formData.service_phone?.trim()) {
-        setError(t('validation.servicePhoneRequired'))
-        return false
-      }
+    if (formData.category === 'service' && !formData.service_phone?.trim()) {
+      setError(t('validation.servicePhoneRequired')); return false
     }
-    // Urgent category validation
     if (formData.category === 'urgent') {
-      if (!formData.urgent_type) {
-        setError(t('validation.urgentTypeRequired'))
-        return false
-      }
-      if (!formData.urgent_contact_preference) {
-        setError(t('validation.urgentContactRequired'))
-        return false
-      }
+      if (!formData.urgent_type) { setError(t('validation.urgentTypeRequired')); return false }
+      if (!formData.urgent_contact_preference) { setError(t('validation.urgentContactRequired')); return false }
     }
     if (requiresImages && formData.photos.length === 0) {
-      setError(t('validation.imageRequired'))
-      return false
+      setError(t('validation.imageRequired')); return false
     }
-    // Photo limits: 5 for rentals, 3 for sale, 2 for urgent
     let maxPhotos = 3
     if (formData.category === 'for_rent') maxPhotos = 5
     if (formData.category === 'urgent') maxPhotos = 2
     if (formData.photos.length > maxPhotos) {
-      setError(t('validation.maxImages', { max: maxPhotos }))
-      return false
+      setError(t('validation.maxImages', { max: maxPhotos })); return false
     }
     return true
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
     if (!validateForm()) return
-
     setLoading(true)
     setError('')
     setSuccess('')
 
     try {
-      // Get the current session to include auth token
       const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session?.access_token) {
-        throw new Error(t('validation.signedInRequired'))
-      }
+      if (!session?.access_token) throw new Error(t('validation.signedInRequired'))
 
-      const url = mode === 'edit' && listingId 
-        ? `/api/listings/${listingId}`
-        : '/api/listings'
-      
+      const url = mode === 'edit' && listingId ? `/api/listings/${listingId}` : '/api/listings'
       const method = mode === 'edit' ? 'PUT' : 'POST'
+
+      // Clean listing_details: remove nulls and empty strings
+      const cleanedDetails = Object.fromEntries(
+        Object.entries(formData.listing_details).filter(([, v]) => v !== null && v !== '')
+      )
 
       const response = await fetch(url, {
         method,
@@ -262,7 +270,6 @@ export default function ListingForm({
           location_city: formData.location_city.trim(),
           location_wilaya: formData.location_wilaya,
           photos: formData.photos,
-          // Category-specific fields
           available_from: formData.available_from || null,
           available_to: formData.available_to || null,
           rental_period: formData.rental_period || null,
@@ -273,36 +280,37 @@ export default function ListingForm({
           job_type: formData.job_type || null,
           company_name: formData.company_name?.trim() || null,
           condition: formData.condition || null,
-          // Application information for jobs
           application_email: formData.application_email?.trim() || null,
           application_phone: formData.application_phone?.trim() || null,
           application_instructions: formData.application_instructions?.trim() || null,
-          // Service contact information
           service_phone: formData.service_phone?.trim() || null,
-          // Urgent category fields
           urgent_type: formData.urgent_type || null,
           urgent_expires_at: formData.urgent_expires_at || null,
           urgent_contact_preference: formData.urgent_contact_preference || null,
-          metadata: formData.metadata
-        })
+          // Vehicle dedicated columns
+          vehicle_make: formData.vehicle_make?.trim() || null,
+          vehicle_model: formData.vehicle_model?.trim() || null,
+          vehicle_year: formData.vehicle_year ? parseInt(formData.vehicle_year) : null,
+          vehicle_mileage: formData.vehicle_mileage !== '' && formData.vehicle_mileage !== undefined
+            ? parseInt(formData.vehicle_mileage!) : null,
+          vehicle_transmission: formData.vehicle_transmission || null,
+          vehicle_fuel_type: formData.vehicle_fuel_type || null,
+          vehicle_body_type: formData.vehicle_body_type || null,
+          // Subcategory details JSONB
+          listing_details: Object.keys(cleanedDetails).length > 0 ? cleanedDetails : null,
+          metadata: formData.metadata,
+        }),
       })
 
       const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to save listing')
-      }
+      if (!response.ok) throw new Error(result.error || 'Failed to save listing')
 
       setSuccess(mode === 'edit' ? t('form.successUpdated') : t('form.successCreated'))
-      
       if (onSuccess) {
         onSuccess()
       } else {
-        setTimeout(() => {
-          router.push('/')
-        }, 2000)
+        setTimeout(() => router.push('/'), 2000)
       }
-
     } catch (err) {
       console.error('Error saving listing:', err)
       setError(err instanceof Error ? err.message : t('form.failedSave'))
@@ -323,7 +331,6 @@ export default function ListingForm({
           <p className="text-red-600 font-medium">{error}</p>
         </div>
       )}
-      
       {success && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <p className="text-green-600 font-medium">{success}</p>
@@ -333,12 +340,9 @@ export default function ListingForm({
       {/* Basic Information */}
       <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('form.basicInfo')}</h2>
-
         <div className="space-y-6">
           <div>
-            <label htmlFor="title" className={labelClassName}>
-              {t('form.titleLabel')} *
-            </label>
+            <label htmlFor="title" className={labelClassName}>{t('form.titleLabel')} *</label>
             <input
               id="title"
               type="text"
@@ -348,15 +352,11 @@ export default function ListingForm({
               className={inputClassName}
               maxLength={200}
             />
-            <p className="mt-1 text-sm text-gray-500">
-              {t('form.charCount', { count: formData.title.length })}
-            </p>
+            <p className="mt-1 text-sm text-gray-500">{t('form.charCount', { count: formData.title.length })}</p>
           </div>
 
           <div>
-            <label htmlFor="description" className={labelClassName}>
-              {t('form.descriptionLabel')} *
-            </label>
+            <label htmlFor="description" className={labelClassName}>{t('form.descriptionLabel')} *</label>
             <textarea
               id="description"
               value={formData.description}
@@ -369,9 +369,7 @@ export default function ListingForm({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="category" className={labelClassName}>
-                {t('form.categoryLabel')} *
-              </label>
+              <label htmlFor="category" className={labelClassName}>{t('form.categoryLabel')} *</label>
               <select
                 id="category"
                 value={formData.category}
@@ -380,17 +378,13 @@ export default function ListingForm({
                 disabled={mode === 'edit' || fixedCategory}
               >
                 {Object.entries(LISTING_CATEGORIES).map(([key, cat]) => (
-                  <option key={key} value={cat.value}>
-                    {cat.label}
-                  </option>
+                  <option key={key} value={cat.value}>{cat.label}</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label htmlFor="subcategory" className={labelClassName}>
-                {t('form.subcategoryLabel')}
-              </label>
+              <label htmlFor="subcategory" className={labelClassName}>{t('form.subcategoryLabel')}</label>
               <select
                 id="subcategory"
                 value={formData.subcategory}
@@ -399,9 +393,7 @@ export default function ListingForm({
               >
                 <option value="">{t('form.selectSubcategoryOption')}</option>
                 {categoryData?.subcategories.map((sub) => (
-                  <option key={sub.name} value={sub.name}>
-                    {getLocalizedName(sub, locale)}
-                  </option>
+                  <option key={sub.name} value={sub.name}>{getLocalizedName(sub, locale)}</option>
                 ))}
               </select>
             </div>
@@ -409,9 +401,7 @@ export default function ListingForm({
 
           {requiresPrice && formData.category !== 'for_rent' && (
             <div>
-              <label htmlFor="price" className={labelClassName}>
-                {t('form.priceLabel')} *
-              </label>
+              <label htmlFor="price" className={labelClassName}>{t('form.priceLabel')} *</label>
               <input
                 id="price"
                 type="number"
@@ -431,12 +421,9 @@ export default function ListingForm({
       {/* Location */}
       <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('form.locationSection')}</h2>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="wilaya" className={labelClassName}>
-              {t('form.wilayaLabel')} *
-            </label>
+            <label htmlFor="wilaya" className={labelClassName}>{t('form.wilayaLabel')} *</label>
             <select
               id="wilaya"
               value={formData.location_wilaya}
@@ -453,9 +440,7 @@ export default function ListingForm({
           </div>
 
           <div>
-            <label htmlFor="city" className={labelClassName}>
-              {t('form.cityLabel')} *
-            </label>
+            <label htmlFor="city" className={labelClassName}>{t('form.cityLabel')} *</label>
             {availableCities.length > 0 ? (
               <select
                 id="city"
@@ -465,9 +450,7 @@ export default function ListingForm({
               >
                 <option value="">{t('form.selectCityOption')}</option>
                 {availableCities.map((city) => (
-                  <option key={city.name} value={city.name}>
-                    {getLocalizedName(city, locale)}
-                  </option>
+                  <option key={city.name} value={city.name}>{getLocalizedName(city, locale)}</option>
                 ))}
                 <option value="other">{t('form.cityOther')}</option>
               </select>
@@ -494,69 +477,39 @@ export default function ListingForm({
              formData.category === 'service' ? t('form.serviceDetails') :
              formData.category === 'urgent' ? t('form.urgentDetails') : t('form.itemDetails')}
           </h2>
-          
+
           <div className="space-y-6">
-            {/* For Rent specific fields */}
+            {/* For Rent */}
             {formData.category === 'for_rent' && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="available_from" className={labelClassName}>
-                      {t('form.availableFrom')}
-                    </label>
-                    <input
-                      id="available_from"
-                      type="date"
-                      dir="ltr"
-                      value={formData.available_from}
+                    <label htmlFor="available_from" className={labelClassName}>{t('form.availableFrom')}</label>
+                    <input id="available_from" type="date" dir="ltr" value={formData.available_from}
                       onChange={(e) => handleInputChange('available_from', e.target.value)}
-                      min={new Date().toISOString().split('T')[0]}
-                      className={inputClassName}
-                    />
+                      min={new Date().toISOString().split('T')[0]} className={inputClassName} />
                   </div>
                   <div>
-                    <label htmlFor="available_to" className={labelClassName}>
-                      {t('form.availableUntil')}
-                    </label>
-                    <input
-                      id="available_to"
-                      type="date"
-                      dir="ltr"
-                      value={formData.available_to}
+                    <label htmlFor="available_to" className={labelClassName}>{t('form.availableUntil')}</label>
+                    <input id="available_to" type="date" dir="ltr" value={formData.available_to}
                       onChange={(e) => handleInputChange('available_to', e.target.value)}
-                      min={formData.available_from || new Date().toISOString().split('T')[0]}
-                      className={inputClassName}
-                    />
+                      min={formData.available_from || new Date().toISOString().split('T')[0]} className={inputClassName} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="price" className={labelClassName}>
-                      {t('form.rentalPrice')} *
-                    </label>
-                    <input
-                      id="price"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      dir="ltr"
-                      value={formData.price}
+                    <label htmlFor="price" className={labelClassName}>{t('form.rentalPrice')} *</label>
+                    <input id="price" type="number" min="0" step="0.01" dir="ltr" value={formData.price}
                       onChange={(e) => handleInputChange('price', e.target.value)}
-                      placeholder={t('form.rentalPricePlaceholder')}
-                      className={inputClassName}
-                    />
+                      placeholder={t('form.rentalPricePlaceholder')} className={inputClassName} />
                   </div>
                   <div>
                     <label htmlFor="rental_period" className={labelClassName}>
                       {t('form.rentalPeriodLabel')} <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      id="rental_period"
-                      value={formData.rental_period}
+                    <select id="rental_period" value={formData.rental_period}
                       onChange={(e) => handleInputChange('rental_period', e.target.value)}
-                      className={selectClassName}
-                      required
-                    >
+                      className={selectClassName} required>
                       <option value="">{t('form.selectRentalPeriod')}</option>
                       <option value="hourly">{t('form.rentalHourly')}</option>
                       <option value="daily">{t('form.rentalDaily')}</option>
@@ -569,34 +522,19 @@ export default function ListingForm({
               </>
             )}
 
-            {/* Job specific fields */}
+            {/* Job */}
             {formData.category === 'job' && (
               <>
                 <div>
-                  <label htmlFor="company_name" className={labelClassName}>
-                    {t('form.companyName')}
-                  </label>
-                  <input
-                    id="company_name"
-                    type="text"
-                    value={formData.company_name}
+                  <label htmlFor="company_name" className={labelClassName}>{t('form.companyName')}</label>
+                  <input id="company_name" type="text" value={formData.company_name}
                     onChange={(e) => handleInputChange('company_name', e.target.value)}
-                    placeholder={t('form.enterCompanyName')}
-                    className={inputClassName}
-                  />
+                    placeholder={t('form.enterCompanyName')} className={inputClassName} />
                 </div>
-
-                {/* Salary Type Selection */}
                 <div>
-                  <label htmlFor="salary_type" className={labelClassName}>
-                    {t('form.salaryInfo')}
-                  </label>
-                  <select
-                    id="salary_type"
-                    value={formData.salary_type}
-                    onChange={(e) => handleInputChange('salary_type', e.target.value)}
-                    className={selectClassName}
-                  >
+                  <label htmlFor="salary_type" className={labelClassName}>{t('form.salaryInfo')}</label>
+                  <select id="salary_type" value={formData.salary_type}
+                    onChange={(e) => handleInputChange('salary_type', e.target.value)} className={selectClassName}>
                     <option value="">{t('form.selectSalaryType')}</option>
                     <option value="fixed">{t('form.salaryFixed')}</option>
                     <option value="range">{t('form.salaryRange')}</option>
@@ -607,71 +545,34 @@ export default function ListingForm({
                     <option value="interview">{t('form.salaryInterview')}</option>
                   </select>
                 </div>
-
-                {/* Conditional Salary Fields */}
                 {formData.salary_type === 'fixed' && (
                   <div>
-                    <label htmlFor="salary_amount" className={labelClassName}>
-                      {t('form.fixedSalaryAmount')}
-                    </label>
-                    <input
-                      id="salary_amount"
-                      type="number"
-                      min="0"
-                      dir="ltr"
-                      value={formData.salary_amount}
+                    <label htmlFor="salary_amount" className={labelClassName}>{t('form.fixedSalaryAmount')}</label>
+                    <input id="salary_amount" type="number" min="0" dir="ltr" value={formData.salary_amount}
                       onChange={(e) => handleInputChange('salary_amount', e.target.value)}
-                      placeholder={t('form.enterFixedSalary')}
-                      className={inputClassName}
-                    />
+                      placeholder={t('form.enterFixedSalary')} className={inputClassName} />
                   </div>
                 )}
-
                 {formData.salary_type === 'range' && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="salary_min" className={labelClassName}>
-                        {t('form.minSalary')}
-                      </label>
-                      <input
-                        id="salary_min"
-                        type="number"
-                        min="0"
-                        dir="ltr"
-                        value={formData.salary_min}
+                      <label htmlFor="salary_min" className={labelClassName}>{t('form.minSalary')}</label>
+                      <input id="salary_min" type="number" min="0" dir="ltr" value={formData.salary_min}
                         onChange={(e) => handleInputChange('salary_min', e.target.value)}
-                        placeholder={t('form.minSalaryPlaceholder')}
-                        className={inputClassName}
-                      />
+                        placeholder={t('form.minSalaryPlaceholder')} className={inputClassName} />
                     </div>
                     <div>
-                      <label htmlFor="salary_max" className={labelClassName}>
-                        {t('form.maxSalary')}
-                      </label>
-                      <input
-                        id="salary_max"
-                        type="number"
-                        min="0"
-                        dir="ltr"
-                        value={formData.salary_max}
+                      <label htmlFor="salary_max" className={labelClassName}>{t('form.maxSalary')}</label>
+                      <input id="salary_max" type="number" min="0" dir="ltr" value={formData.salary_max}
                         onChange={(e) => handleInputChange('salary_max', e.target.value)}
-                        placeholder={t('form.maxSalaryPlaceholder')}
-                        className={inputClassName}
-                      />
+                        placeholder={t('form.maxSalaryPlaceholder')} className={inputClassName} />
                     </div>
                   </div>
                 )}
-
                 <div>
-                  <label htmlFor="job_type" className={labelClassName}>
-                    {t('form.jobTypeLabel')}
-                  </label>
-                  <select
-                    id="job_type"
-                    value={formData.job_type}
-                    onChange={(e) => handleInputChange('job_type', e.target.value)}
-                    className={selectClassName}
-                  >
+                  <label htmlFor="job_type" className={labelClassName}>{t('form.jobTypeLabel')}</label>
+                  <select id="job_type" value={formData.job_type}
+                    onChange={(e) => handleInputChange('job_type', e.target.value)} className={selectClassName}>
                     <option value="">{t('form.selectJobType')}</option>
                     <option value="full-time">{t('form.jobFullTime')}</option>
                     <option value="part-time">{t('form.jobPartTime')}</option>
@@ -683,18 +584,12 @@ export default function ListingForm({
               </>
             )}
 
-            {/* For Sale specific fields */}
+            {/* For Sale: condition */}
             {formData.category === 'for_sale' && (
               <div>
-                <label htmlFor="condition" className={labelClassName}>
-                  {t('form.conditionLabel')}
-                </label>
-                <select
-                  id="condition"
-                  value={formData.condition}
-                  onChange={(e) => handleInputChange('condition', e.target.value)}
-                  className={selectClassName}
-                >
+                <label htmlFor="condition" className={labelClassName}>{t('form.conditionLabel')}</label>
+                <select id="condition" value={formData.condition}
+                  onChange={(e) => handleInputChange('condition', e.target.value)} className={selectClassName}>
                   <option value="">{t('form.selectCondition')}</option>
                   <option value="new">{t('form.conditionNew')}</option>
                   <option value="like_new">{t('form.conditionLikeNew')}</option>
@@ -705,27 +600,16 @@ export default function ListingForm({
               </div>
             )}
 
-            {/* Service specific fields */}
+            {/* Service */}
             {formData.category === 'service' && (
               <div className="space-y-6">
                 <div>
-                  <label htmlFor="service_phone" className={labelClassName}>
-                    {t('form.servicePhoneLabel')} *
-                  </label>
-                  <input
-                    id="service_phone"
-                    type="tel"
-                    dir="ltr"
-                    value={formData.service_phone}
+                  <label htmlFor="service_phone" className={labelClassName}>{t('form.servicePhoneLabel')} *</label>
+                  <input id="service_phone" type="tel" dir="ltr" value={formData.service_phone}
                     onChange={(e) => handleInputChange('service_phone', e.target.value)}
-                    placeholder="+213 XX XX XX XX"
-                    className={inputClassName}
-                  />
-                  <p className="mt-1 text-sm text-gray-500">
-                    {t('form.servicePhoneVisible')}
-                  </p>
+                    placeholder="+213 XX XX XX XX" className={inputClassName} />
+                  <p className="mt-1 text-sm text-gray-500">{t('form.servicePhoneVisible')}</p>
                 </div>
-
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                   <div className="flex items-center mb-3">
                     <div className="flex-shrink-0">
@@ -734,57 +618,36 @@ export default function ListingForm({
                       </svg>
                     </div>
                     <div className="ms-3">
-                      <h3 className="text-lg font-medium text-blue-900">
-                        {t('form.servicePricingTitle')}
-                      </h3>
+                      <h3 className="text-lg font-medium text-blue-900">{t('form.servicePricingTitle')}</h3>
                     </div>
                   </div>
-                  <p className="text-blue-800 font-medium">
-                    💬 {t('form.servicePricingNote')}
-                  </p>
-                  <p className="text-blue-700 text-sm mt-2">
-                    {t('form.servicePricingDesc')}
-                  </p>
+                  <p className="text-blue-800 font-medium">💬 {t('form.servicePricingNote')}</p>
+                  <p className="text-blue-700 text-sm mt-2">{t('form.servicePricingDesc')}</p>
                   <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 mt-3">
-                    <p className="text-blue-800 text-sm font-medium">
-                      📞 {t('form.servicePricingReminder')}
-                    </p>
+                    <p className="text-blue-800 text-sm font-medium">📞 {t('form.servicePricingReminder')}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Urgent category specific fields */}
+            {/* Urgent */}
             {formData.category === 'urgent' && (
               <div className="space-y-6">
-                {/* Urgent alert banner */}
                 <div className="bg-red-50 border-2 border-red-300 rounded-lg p-6">
                   <div className="flex items-center mb-3">
                     <span className="text-3xl me-3">🚨</span>
-                    <h3 className="text-lg font-bold text-red-900">
-                      {t('form.urgentBannerTitle')}
-                    </h3>
+                    <h3 className="text-lg font-bold text-red-900">{t('form.urgentBannerTitle')}</h3>
                   </div>
-                  <p className="text-red-800 font-medium mb-2">
-                    {t('form.urgentBannerNote')}
-                  </p>
-                  <p className="text-red-700 text-sm">
-                    {t('form.urgentBannerDesc')}
-                  </p>
+                  <p className="text-red-800 font-medium mb-2">{t('form.urgentBannerNote')}</p>
+                  <p className="text-red-700 text-sm">{t('form.urgentBannerDesc')}</p>
                 </div>
-
-                {/* Urgent Type */}
                 <div>
                   <label htmlFor="urgent_type" className={labelClassName}>
                     {t('form.urgentTypeLabel')} <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    id="urgent_type"
-                    value={formData.urgent_type}
+                  <select id="urgent_type" value={formData.urgent_type}
                     onChange={(e) => handleInputChange('urgent_type', e.target.value)}
-                    className={selectClassName}
-                    required
-                  >
+                    className={selectClassName} required>
                     <option value="">{t('form.selectUrgentType')}</option>
                     <option value="blood_donation">🩸 {t('form.urgentBlood')}</option>
                     <option value="medicine_needed">💊 {t('form.urgentMedicine')}</option>
@@ -793,51 +656,400 @@ export default function ListingForm({
                     <option value="emergency_housing">🏠 {t('form.urgentHousing')}</option>
                   </select>
                 </div>
-
-                {/* Expiration Time */}
                 <div>
-                  <label htmlFor="urgent_expires_at" className={labelClassName}>
-                    {t('form.urgentExpiresLabel')}
-                  </label>
-                  <select
-                    id="urgent_expires_at"
-                    value={formData.urgent_expires_at}
-                    onChange={(e) => handleInputChange('urgent_expires_at', e.target.value)}
-                    className={selectClassName}
-                  >
+                  <label htmlFor="urgent_expires_at" className={labelClassName}>{t('form.urgentExpiresLabel')}</label>
+                  <select id="urgent_expires_at" value={formData.urgent_expires_at}
+                    onChange={(e) => handleInputChange('urgent_expires_at', e.target.value)} className={selectClassName}>
                     <option value="">{t('form.urgentExpiresDefault')}</option>
                     <option value="24h">{t('form.urgentExpires24')}</option>
                     <option value="48h">{t('form.urgentExpires48')}</option>
                     <option value="72h">{t('form.urgentExpires72')}</option>
                   </select>
-                  <p className="mt-1 text-sm text-gray-600">
-                    {t('form.urgentExpiresHint')}
-                  </p>
+                  <p className="mt-1 text-sm text-gray-600">{t('form.urgentExpiresHint')}</p>
                 </div>
-
-                {/* Contact Preference */}
                 <div>
                   <label htmlFor="urgent_contact_preference" className={labelClassName}>
                     {t('form.urgentContactLabel')} <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    id="urgent_contact_preference"
-                    value={formData.urgent_contact_preference}
+                  <select id="urgent_contact_preference" value={formData.urgent_contact_preference}
                     onChange={(e) => handleInputChange('urgent_contact_preference', e.target.value)}
-                    className={selectClassName}
-                    required
-                  >
+                    className={selectClassName} required>
                     <option value="">{t('form.selectContactPreference')}</option>
                     <option value="phone">📞 {t('form.contactPhone')}</option>
                     <option value="whatsapp">💬 {t('form.contactWhatsapp')}</option>
                     <option value="both">📞💬 {t('form.contactBoth')}</option>
                   </select>
-                  <p className="mt-1 text-sm text-gray-600">
-                    {t('form.urgentContactHint')}
-                  </p>
+                  <p className="mt-1 text-sm text-gray-600">{t('form.urgentContactHint')}</p>
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Subcategory-Specific Details ── */}
+      {showDetailsSection && (
+        <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-green-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            {isVehicleListing ? t('form.vehicleDetails') :
+             isRealEstate ? t('form.realEstateDetails') :
+             isBooks ? t('form.booksDetails') :
+             isFashion ? t('form.fashionDetails') :
+             t('form.productDetails')}
+          </h2>
+
+          <div className="space-y-6">
+
+            {/* ── VEHICLES ── */}
+            {isVehicleListing && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="vehicle_make" className={labelClassName}>{t('form.vehicleMake')}</label>
+                    <input id="vehicle_make" type="text" dir="ltr" value={formData.vehicle_make}
+                      onChange={(e) => handleInputChange('vehicle_make', e.target.value)}
+                      placeholder={t('form.vehicleMakePlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="vehicle_model" className={labelClassName}>{t('form.vehicleModel')}</label>
+                    <input id="vehicle_model" type="text" dir="ltr" value={formData.vehicle_model}
+                      onChange={(e) => handleInputChange('vehicle_model', e.target.value)}
+                      placeholder={t('form.vehicleModelPlaceholder')} className={inputClassName} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="vehicle_year" className={labelClassName}>{t('form.vehicleYear')}</label>
+                    <input id="vehicle_year" type="number" dir="ltr" min="1900" max="2030"
+                      value={formData.vehicle_year}
+                      onChange={(e) => handleInputChange('vehicle_year', e.target.value)}
+                      placeholder={t('form.vehicleYearPlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="vehicle_mileage" className={labelClassName}>{t('form.vehicleMileage')}</label>
+                    <input id="vehicle_mileage" type="number" dir="ltr" min="0"
+                      value={formData.vehicle_mileage}
+                      onChange={(e) => handleInputChange('vehicle_mileage', e.target.value)}
+                      placeholder={t('form.vehicleMileagePlaceholder')} className={inputClassName} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="vehicle_transmission" className={labelClassName}>{t('form.vehicleTransmission')}</label>
+                    <select id="vehicle_transmission" value={formData.vehicle_transmission}
+                      onChange={(e) => handleInputChange('vehicle_transmission', e.target.value)} className={selectClassName}>
+                      <option value="">{t('form.selectVehicleTransmission')}</option>
+                      <option value="manual">{t('form.transmissionManual')}</option>
+                      <option value="automatic">{t('form.transmissionAutomatic')}</option>
+                      <option value="semi-automatic">{t('form.transmissionSemiAuto')}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="vehicle_fuel_type" className={labelClassName}>{t('form.vehicleFuelType')}</label>
+                    <select id="vehicle_fuel_type" value={formData.vehicle_fuel_type}
+                      onChange={(e) => handleInputChange('vehicle_fuel_type', e.target.value)} className={selectClassName}>
+                      <option value="">{t('form.selectVehicleFuelType')}</option>
+                      <option value="petrol">{t('form.fuelPetrol')}</option>
+                      <option value="diesel">{t('form.fuelDiesel')}</option>
+                      <option value="electric">{t('form.fuelElectric')}</option>
+                      <option value="hybrid">{t('form.fuelHybrid')}</option>
+                      <option value="lpg">{t('form.fuelLpg')}</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="vehicle_body_type" className={labelClassName}>{t('form.vehicleBodyType')}</label>
+                  <select id="vehicle_body_type" value={formData.vehicle_body_type}
+                    onChange={(e) => handleInputChange('vehicle_body_type', e.target.value)} className={selectClassName}>
+                    <option value="">{t('form.selectVehicleBodyType')}</option>
+                    {sub === 'Motorcycles' ? (
+                      <>
+                        <option value="sport">{t('form.bodySport')}</option>
+                        <option value="cruiser">{t('form.bodyCruiser')}</option>
+                        <option value="scooter">{t('form.bodyScooter')}</option>
+                        <option value="other">{t('form.bodyOther')}</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="sedan">{t('form.bodySedan')}</option>
+                        <option value="suv">{t('form.bodySuv')}</option>
+                        <option value="hatchback">{t('form.bodyHatchback')}</option>
+                        <option value="pickup">{t('form.bodyPickup')}</option>
+                        <option value="van">{t('form.bodyVan')}</option>
+                        <option value="coupe">{t('form.bodyCoupe')}</option>
+                        <option value="wagon">{t('form.bodyWagon')}</option>
+                        <option value="convertible">{t('form.bodyConvertible')}</option>
+                        <option value="minivan">{t('form.bodyMinivan')}</option>
+                        <option value="other">{t('form.bodyOther')}</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+              </>
+            )}
+
+            {/* ── REAL ESTATE ── */}
+            {isRealEstate && (
+              <>
+                <div>
+                  <label htmlFor="property_type" className={labelClassName}>{t('form.propertyType')}</label>
+                  <select id="property_type"
+                    value={(formData.listing_details.property_type as string) || ''}
+                    onChange={(e) => handleDetailsChange('property_type', e.target.value)}
+                    className={selectClassName}>
+                    <option value="">{t('form.selectPropertyType')}</option>
+                    <option value="apartment">{t('form.propApartment')}</option>
+                    <option value="house">{t('form.propHouse')}</option>
+                    <option value="villa">{t('form.propVilla')}</option>
+                    <option value="land">{t('form.propLand')}</option>
+                    <option value="studio">{t('form.propStudio')}</option>
+                    <option value="office">{t('form.propOffice')}</option>
+                    <option value="commercial">{t('form.propCommercial')}</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label htmlFor="bedrooms" className={labelClassName}>{t('form.bedrooms')}</label>
+                    <input id="bedrooms" type="number" dir="ltr" min="0" max="20"
+                      value={(formData.listing_details.bedrooms as string) || ''}
+                      onChange={(e) => handleDetailsChange('bedrooms', e.target.value ? parseInt(e.target.value) : null)}
+                      placeholder={t('form.bedroomsPlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="bathrooms" className={labelClassName}>{t('form.bathrooms')}</label>
+                    <input id="bathrooms" type="number" dir="ltr" min="0" max="10"
+                      value={(formData.listing_details.bathrooms as string) || ''}
+                      onChange={(e) => handleDetailsChange('bathrooms', e.target.value ? parseInt(e.target.value) : null)}
+                      placeholder={t('form.bathroomsPlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="size_sqm" className={labelClassName}>{t('form.sizeSqm')}</label>
+                    <input id="size_sqm" type="number" dir="ltr" min="0"
+                      value={(formData.listing_details.size_sqm as string) || ''}
+                      onChange={(e) => handleDetailsChange('size_sqm', e.target.value ? parseInt(e.target.value) : null)}
+                      placeholder={t('form.sizeSqmPlaceholder')} className={inputClassName} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="floor" className={labelClassName}>{t('form.floor')}</label>
+                    <input id="floor" type="number" dir="ltr" min="0"
+                      value={(formData.listing_details.floor as string) || ''}
+                      onChange={(e) => handleDetailsChange('floor', e.target.value ? parseInt(e.target.value) : null)}
+                      placeholder={t('form.floorPlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="furnished" className={labelClassName}>{t('form.furnished')}</label>
+                    <select id="furnished"
+                      value={(formData.listing_details.furnished as string) || ''}
+                      onChange={(e) => handleDetailsChange('furnished', e.target.value)}
+                      className={selectClassName}>
+                      <option value="">{t('form.selectFurnished')}</option>
+                      <option value="yes">{t('form.furnishedYes')}</option>
+                      <option value="no">{t('form.furnishedNo')}</option>
+                      <option value="partial">{t('form.furnishedPartial')}</option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── ELECTRONICS ── */}
+            {isElectronics && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="brand" className={labelClassName}>{t('form.brand')}</label>
+                    <input id="brand" type="text"
+                      value={(formData.listing_details.brand as string) || ''}
+                      onChange={(e) => handleDetailsChange('brand', e.target.value)}
+                      placeholder={t('form.brandPlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="model_name" className={labelClassName}>{t('form.modelName')}</label>
+                    <input id="model_name" type="text"
+                      value={(formData.listing_details.model_name as string) || ''}
+                      onChange={(e) => handleDetailsChange('model_name', e.target.value)}
+                      placeholder={t('form.modelNamePlaceholder')} className={inputClassName} />
+                  </div>
+                </div>
+                {sub === 'Computers & Tablets' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <label htmlFor="ram_gb" className={labelClassName}>{t('form.ramGb')}</label>
+                      <input id="ram_gb" type="text"
+                        value={(formData.listing_details.ram_gb as string) || ''}
+                        onChange={(e) => handleDetailsChange('ram_gb', e.target.value)}
+                        placeholder={t('form.ramGbPlaceholder')} className={inputClassName} />
+                    </div>
+                    <div>
+                      <label htmlFor="storage_gb" className={labelClassName}>{t('form.storage')}</label>
+                      <input id="storage_gb" type="text"
+                        value={(formData.listing_details.storage_gb as string) || ''}
+                        onChange={(e) => handleDetailsChange('storage_gb', e.target.value)}
+                        placeholder={t('form.storagePlaceholder')} className={inputClassName} />
+                    </div>
+                    <div>
+                      <label htmlFor="processor" className={labelClassName}>{t('form.processor')}</label>
+                      <input id="processor" type="text"
+                        value={(formData.listing_details.processor as string) || ''}
+                        onChange={(e) => handleDetailsChange('processor', e.target.value)}
+                        placeholder={t('form.processorPlaceholder')} className={inputClassName} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="storage" className={labelClassName}>{t('form.storage')}</label>
+                      <input id="storage" type="text"
+                        value={(formData.listing_details.storage as string) || ''}
+                        onChange={(e) => handleDetailsChange('storage', e.target.value)}
+                        placeholder={t('form.storagePlaceholder')} className={inputClassName} />
+                    </div>
+                    <div>
+                      <label htmlFor="color" className={labelClassName}>{t('form.color')}</label>
+                      <input id="color" type="text"
+                        value={(formData.listing_details.color as string) || ''}
+                        onChange={(e) => handleDetailsChange('color', e.target.value)}
+                        placeholder={t('form.colorPlaceholder')} className={inputClassName} />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* ── FASHION ── */}
+            {isFashion && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="brand" className={labelClassName}>{t('form.brand')}</label>
+                    <input id="brand" type="text"
+                      value={(formData.listing_details.brand as string) || ''}
+                      onChange={(e) => handleDetailsChange('brand', e.target.value)}
+                      placeholder={t('form.brandPlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="size" className={labelClassName}>{t('form.size')}</label>
+                    <input id="size" type="text"
+                      value={(formData.listing_details.size as string) || ''}
+                      onChange={(e) => handleDetailsChange('size', e.target.value)}
+                      placeholder={t('form.sizePlaceholder')} className={inputClassName} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="color" className={labelClassName}>{t('form.color')}</label>
+                    <input id="color" type="text"
+                      value={(formData.listing_details.color as string) || ''}
+                      onChange={(e) => handleDetailsChange('color', e.target.value)}
+                      placeholder={t('form.colorPlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="material" className={labelClassName}>{t('form.material')}</label>
+                    <input id="material" type="text"
+                      value={(formData.listing_details.material as string) || ''}
+                      onChange={(e) => handleDetailsChange('material', e.target.value)}
+                      placeholder={t('form.materialPlaceholder')} className={inputClassName} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── HOME / APPLIANCES / FURNITURE ── */}
+            {isHome && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="brand" className={labelClassName}>{t('form.brand')}</label>
+                    <input id="brand" type="text"
+                      value={(formData.listing_details.brand as string) || ''}
+                      onChange={(e) => handleDetailsChange('brand', e.target.value)}
+                      placeholder={t('form.brandPlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="color" className={labelClassName}>{t('form.color')}</label>
+                    <input id="color" type="text"
+                      value={(formData.listing_details.color as string) || ''}
+                      onChange={(e) => handleDetailsChange('color', e.target.value)}
+                      placeholder={t('form.colorPlaceholder')} className={inputClassName} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="material" className={labelClassName}>{t('form.material')}</label>
+                    <input id="material" type="text"
+                      value={(formData.listing_details.material as string) || ''}
+                      onChange={(e) => handleDetailsChange('material', e.target.value)}
+                      placeholder={t('form.materialPlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="dimensions" className={labelClassName}>{t('form.dimensions')}</label>
+                    <input id="dimensions" type="text"
+                      value={(formData.listing_details.dimensions as string) || ''}
+                      onChange={(e) => handleDetailsChange('dimensions', e.target.value)}
+                      placeholder={t('form.dimensionsPlaceholder')} className={inputClassName} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── BOOKS ── */}
+            {isBooks && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="author" className={labelClassName}>{t('form.author')}</label>
+                    <input id="author" type="text"
+                      value={(formData.listing_details.author as string) || ''}
+                      onChange={(e) => handleDetailsChange('author', e.target.value)}
+                      placeholder={t('form.authorPlaceholder')} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label htmlFor="book_language" className={labelClassName}>{t('form.bookLanguage')}</label>
+                    <select id="book_language"
+                      value={(formData.listing_details.book_language as string) || ''}
+                      onChange={(e) => handleDetailsChange('book_language', e.target.value)}
+                      className={selectClassName}>
+                      <option value="">{t('form.selectLanguage')}</option>
+                      <option value="arabic">{t('form.langArabic')}</option>
+                      <option value="french">{t('form.langFrench')}</option>
+                      <option value="english">{t('form.langEnglish')}</option>
+                      <option value="other">{t('form.langOther')}</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="genre" className={labelClassName}>{t('form.genre')}</label>
+                  <input id="genre" type="text"
+                    value={(formData.listing_details.genre as string) || ''}
+                    onChange={(e) => handleDetailsChange('genre', e.target.value)}
+                    placeholder={t('form.genrePlaceholder')} className={inputClassName} />
+                </div>
+              </>
+            )}
+
+            {/* ── MUSICAL INSTRUMENTS ── */}
+            {/* ── SPORTS / TOOLS / OTHER ── */}
+            {isSportsOrTools && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="brand" className={labelClassName}>{t('form.brand')}</label>
+                  <input id="brand" type="text"
+                    value={(formData.listing_details.brand as string) || ''}
+                    onChange={(e) => handleDetailsChange('brand', e.target.value)}
+                    placeholder={t('form.brandPlaceholder')} className={inputClassName} />
+                </div>
+                <div>
+                  <label htmlFor="model_name" className={labelClassName}>{t('form.modelName')}</label>
+                  <input id="model_name" type="text"
+                    value={(formData.listing_details.model_name as string) || ''}
+                    onChange={(e) => handleDetailsChange('model_name', e.target.value)}
+                    placeholder={t('form.modelNamePlaceholder')} className={inputClassName} />
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       )}
@@ -846,63 +1058,38 @@ export default function ListingForm({
       {formData.category === 'job' && (
         <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('form.howToApply')}</h2>
-
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="application_email" className={labelClassName}>
-                  {t('form.applicationEmail')}
-                </label>
-                <input
-                  id="application_email"
-                  type="email"
-                  dir="ltr"
-                  value={formData.application_email}
+                <label htmlFor="application_email" className={labelClassName}>{t('form.applicationEmail')}</label>
+                <input id="application_email" type="email" dir="ltr" value={formData.application_email}
                   onChange={(e) => handleInputChange('application_email', e.target.value)}
-                  placeholder="jobs@company.com"
-                  className={inputClassName}
-                />
+                  placeholder="jobs@company.com" className={inputClassName} />
               </div>
               <div>
-                <label htmlFor="application_phone" className={labelClassName}>
-                  {t('form.applicationPhone')}
-                </label>
-                <input
-                  id="application_phone"
-                  type="tel"
-                  dir="ltr"
-                  value={formData.application_phone}
+                <label htmlFor="application_phone" className={labelClassName}>{t('form.applicationPhone')}</label>
+                <input id="application_phone" type="tel" dir="ltr" value={formData.application_phone}
                   onChange={(e) => handleInputChange('application_phone', e.target.value)}
-                  placeholder="+213 XX XX XX XX"
-                  className={inputClassName}
-                />
+                  placeholder="+213 XX XX XX XX" className={inputClassName} />
               </div>
             </div>
-
             <div>
-              <label htmlFor="application_instructions" className={labelClassName}>
-                {t('form.applicationInstructions')}
-              </label>
-              <textarea
-                id="application_instructions"
-                value={formData.application_instructions}
+              <label htmlFor="application_instructions" className={labelClassName}>{t('form.applicationInstructions')}</label>
+              <textarea id="application_instructions" value={formData.application_instructions}
                 onChange={(e) => handleInputChange('application_instructions', e.target.value)}
                 placeholder={t('form.applicationInstructionsPlaceholder')}
-                className={`${inputClassName} min-h-[100px] resize-y`}
-                rows={4}
-              />
+                className={`${inputClassName} min-h-[100px] resize-y`} rows={4} />
             </div>
           </div>
         </div>
       )}
 
-      {/* Images - Hide for job, service, and urgent categories */}
+      {/* Images */}
       {formData.category !== 'job' && formData.category !== 'service' && formData.category !== 'urgent' && (
         <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             {t('form.imagesSection')} {requiresImages && <span className="text-red-500">*</span>}
           </h2>
-
           <ImageUpload
             images={formData.photos}
             onImagesChange={(photos) => handleInputChange('photos', photos)}
@@ -913,76 +1100,57 @@ export default function ListingForm({
         </div>
       )}
 
-      {/* Hot Deal Section - Coming Soon - Hide for urgent category */}
+      {/* Hot Deal — Coming Soon */}
       {formData.category !== 'urgent' && (
-      <div className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-8 shadow-lg relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-200/30 to-red-200/30 rounded-full blur-2xl"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-red-200/30 to-orange-200/30 rounded-full blur-2xl"></div>
-
-        <div className="relative">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center">
-              <div className="bg-gradient-to-r from-orange-500 to-red-600 p-3 rounded-xl me-4 shadow-lg">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3">
-                  {t('form.hotDealTitle')}
-                  <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs px-3 py-1 rounded-full font-bold shadow-md">
-                    {t('form.hotDealComingSoon')}
-                  </span>
-                </h3>
-                <p className="text-gray-600 mt-1">{t('form.hotDealSubtitle')}</p>
+        <div className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-8 shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-200/30 to-red-200/30 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-red-200/30 to-orange-200/30 rounded-full blur-2xl"></div>
+          <div className="relative">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center">
+                <div className="bg-gradient-to-r from-orange-500 to-red-600 p-3 rounded-xl me-4 shadow-lg">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                    {t('form.hotDealTitle')}
+                    <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs px-3 py-1 rounded-full font-bold shadow-md">
+                      {t('form.hotDealComingSoon')}
+                    </span>
+                  </h3>
+                  <p className="text-gray-600 mt-1">{t('form.hotDealSubtitle')}</p>
+                </div>
               </div>
             </div>
-          </div>
-
-          <p className="text-gray-700 mb-6">
-            {t('form.hotDealDesc')}
-          </p>
-
-          {/* Disabled Toggle */}
-          <div className="flex items-center justify-between bg-white rounded-lg p-4 border-2 border-gray-200 opacity-60 cursor-not-allowed">
-            <div className="flex items-center">
-              <div className="relative inline-block w-12 h-6 me-3">
-                <div className="absolute inset-0 bg-gray-300 rounded-full"></div>
-                <div className="absolute start-1 top-1 bg-white w-4 h-4 rounded-full shadow"></div>
+            <p className="text-gray-700 mb-6">{t('form.hotDealDesc')}</p>
+            <div className="flex items-center justify-between bg-white rounded-lg p-4 border-2 border-gray-200 opacity-60 cursor-not-allowed">
+              <div className="flex items-center">
+                <div className="relative inline-block w-12 h-6 me-3">
+                  <div className="absolute inset-0 bg-gray-300 rounded-full"></div>
+                  <div className="absolute start-1 top-1 bg-white w-4 h-4 rounded-full shadow"></div>
+                </div>
+                <span className="text-gray-600 font-medium">{t('form.hotDealToggle')}</span>
               </div>
-              <span className="text-gray-600 font-medium">{t('form.hotDealToggle')}</span>
+              <button type="button" onClick={() => setShowHotDealModal(true)}
+                className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                {t('form.hotDealLearnMore')}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowHotDealModal(true)}
-              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
-            >
-              {t('form.hotDealLearnMore')}
-            </button>
-          </div>
-
-          <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
-            <p className="text-sm text-orange-800">
-              <strong>🔥</strong> {t('form.hotDealPremium')}
-            </p>
+            <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <p className="text-sm text-orange-800"><strong>🔥</strong> {t('form.hotDealPremium')}</p>
+            </div>
           </div>
         </div>
-      </div>
       )}
 
-      {/* Submit Buttons */}
+      {/* Submit */}
       <div className="flex justify-end gap-4 pt-4">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-8 py-3 border-2 border-white rounded-lg text-white font-semibold hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
-        >
+        <button type="button" onClick={() => router.back()}
+          className="px-8 py-3 border-2 border-white rounded-lg text-white font-semibold hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
           {t('form.cancel')}
         </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transition-colors"
-        >
+        <button type="submit" disabled={loading}
+          className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transition-colors">
           {loading ? (
             <div className="flex items-center gap-3">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -994,7 +1162,6 @@ export default function ListingForm({
         </button>
       </div>
 
-      {/* Coming Soon Modal for Hot Deals */}
       <ComingSoonModal
         isOpen={showHotDealModal}
         onClose={() => setShowHotDealModal(false)}
@@ -1006,7 +1173,7 @@ export default function ListingForm({
           'Special hot deal badges and highlights',
           'Priority placement in homepage carousel',
           'Sell faster with urgency indicators',
-          'Stand out from regular listings'
+          'Stand out from regular listings',
         ]}
       />
     </form>

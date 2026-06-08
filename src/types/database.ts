@@ -75,10 +75,36 @@ export interface Database {
           status: 'active' | 'sold' | 'rented' | 'completed' | 'expired'
           photos: string[]
           location: Json
+          location_wilaya: string | null
+          location_city: string | null
           metadata: Json
+          condition: 'new' | 'like_new' | 'good' | 'fair' | 'poor' | null
+          available_from: string | null
+          available_to: string | null
+          rental_period: 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+          salary_min: number | null
+          salary_max: number | null
+          salary_amount: number | null
+          salary_type: string | null
+          job_type: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | null
+          company_name: string | null
           urgent_type: 'blood_donation' | 'medicine_needed' | 'food_assistance' | 'medical_equipment' | 'emergency_housing' | null
           urgent_expires_at: string | null
           urgent_contact_preference: 'phone' | 'whatsapp' | 'both' | null
+          is_hot_deal: boolean
+          hot_deal_expires_at: string | null
+          search_vector_ar: unknown | null
+          search_vector_fr: unknown | null
+          // Vehicle dedicated columns
+          vehicle_make: string | null
+          vehicle_model: string | null
+          vehicle_year: number | null
+          vehicle_mileage: number | null
+          vehicle_transmission: 'manual' | 'automatic' | 'semi-automatic' | null
+          vehicle_fuel_type: 'petrol' | 'diesel' | 'electric' | 'hybrid' | 'lpg' | null
+          vehicle_body_type: string | null
+          // Generic subcategory details
+          listing_details: Json | null
           created_at: string
           updated_at: string
         }
@@ -93,10 +119,32 @@ export interface Database {
           status?: 'active' | 'sold' | 'rented' | 'completed' | 'expired'
           photos?: string[]
           location?: Json
+          location_wilaya?: string | null
+          location_city?: string | null
           metadata?: Json
+          condition?: 'new' | 'like_new' | 'good' | 'fair' | 'poor' | null
+          available_from?: string | null
+          available_to?: string | null
+          rental_period?: 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+          salary_min?: number | null
+          salary_max?: number | null
+          salary_amount?: number | null
+          salary_type?: string | null
+          job_type?: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | null
+          company_name?: string | null
           urgent_type?: 'blood_donation' | 'medicine_needed' | 'food_assistance' | 'medical_equipment' | 'emergency_housing' | null
           urgent_expires_at?: string | null
           urgent_contact_preference?: 'phone' | 'whatsapp' | 'both' | null
+          is_hot_deal?: boolean
+          hot_deal_expires_at?: string | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_year?: number | null
+          vehicle_mileage?: number | null
+          vehicle_transmission?: 'manual' | 'automatic' | 'semi-automatic' | null
+          vehicle_fuel_type?: 'petrol' | 'diesel' | 'electric' | 'hybrid' | 'lpg' | null
+          vehicle_body_type?: string | null
+          listing_details?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -111,10 +159,32 @@ export interface Database {
           status?: 'active' | 'sold' | 'rented' | 'completed' | 'expired'
           photos?: string[]
           location?: Json
+          location_wilaya?: string | null
+          location_city?: string | null
           metadata?: Json
+          condition?: 'new' | 'like_new' | 'good' | 'fair' | 'poor' | null
+          available_from?: string | null
+          available_to?: string | null
+          rental_period?: 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+          salary_min?: number | null
+          salary_max?: number | null
+          salary_amount?: number | null
+          salary_type?: string | null
+          job_type?: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | null
+          company_name?: string | null
           urgent_type?: 'blood_donation' | 'medicine_needed' | 'food_assistance' | 'medical_equipment' | 'emergency_housing' | null
           urgent_expires_at?: string | null
           urgent_contact_preference?: 'phone' | 'whatsapp' | 'both' | null
+          is_hot_deal?: boolean
+          hot_deal_expires_at?: string | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_year?: number | null
+          vehicle_mileage?: number | null
+          vehicle_transmission?: 'manual' | 'automatic' | 'semi-automatic' | null
+          vehicle_fuel_type?: 'petrol' | 'diesel' | 'electric' | 'hybrid' | 'lpg' | null
+          vehicle_body_type?: string | null
+          listing_details?: Json | null
           created_at?: string
           updated_at?: string
         }

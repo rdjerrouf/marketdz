@@ -14,57 +14,41 @@ export const LISTING_CATEGORIES = {
     label: 'For Sale',
     labelAr: 'للبيع',
     subcategories: [
-      // Electronics & Tech
-      { name: 'Electronics',               nameAr: 'إلكترونيات',              nameFr: 'Électronique' },
-      { name: 'Phones & Accessories',      nameAr: 'هواتف وملحقات',           nameFr: 'Téléphones et Accessoires' },
-      { name: 'Computers & Tablets',       nameAr: 'أجهزة كمبيوتر وأقراص',   nameFr: 'Ordinateurs et Tablettes' },
-      { name: 'Cameras & Photography',     nameAr: 'كاميرات وتصوير',          nameFr: 'Appareils Photo et Photographie' },
-      { name: 'Video Games & Consoles',    nameAr: 'ألعاب فيديو وأجهزة',     nameFr: 'Jeux Vidéo et Consoles' },
+      // Vehicles
+      { name: 'Vehicles',                          nameAr: 'مركبات',                               nameFr: 'Véhicules' },
+      { name: 'Motorcycles',                       nameAr: 'دراجات نارية',                         nameFr: 'Motos' },
+      { name: 'Auto & Motorcycle Parts',           nameAr: 'قطع غيار السيارات والدراجات',          nameFr: 'Pièces Auto & Moto' },
 
-      // Home & Living
-      { name: 'Home Appliances',           nameAr: 'أجهزة منزلية',            nameFr: 'Électroménager' },
-      { name: 'Furniture & Decor',         nameAr: 'أثاث وديكور',             nameFr: 'Meubles et Décoration' },
-      { name: 'Home & Garden',             nameAr: 'منزل وحديقة',             nameFr: 'Maison et Jardin' },
-      { name: 'Garden & DIY',              nameAr: 'حديقة وأعمال يدوية',      nameFr: 'Jardin et Bricolage' },
+      // Construction
+      { name: 'Construction Vehicles & Trucks',    nameAr: 'شاحنات ومركبات البناء',                nameFr: 'Véhicules & Camions de Chantier' },
+      { name: 'Heavy Equipment & Machinery',       nameAr: 'معدات ثقيلة وآلات',                    nameFr: 'Engins Lourds & Machinerie' },
+      { name: 'Construction Materials & Supplies', nameAr: 'مواد وإمدادات البناء',                 nameFr: 'Matériaux & Fournitures de Construction' },
 
-      // Fashion & Personal
-      { name: 'Fashion & Accessories',     nameAr: 'موضة وإكسسوارات',         nameFr: 'Mode et Accessoires' },
-      { name: 'Watches & Jewelry',         nameAr: 'ساعات ومجوهرات',          nameFr: 'Montres et Bijoux' },
-      { name: 'Health & Beauty',           nameAr: 'صحة وجمال',               nameFr: 'Santé et Beauté' },
+      // Property
+      { name: 'Real Estate',                       nameAr: 'عقارات',                               nameFr: 'Immobilier' },
 
-      // Entertainment & Hobbies
-      { name: 'Sports & Outdoors',         nameAr: 'رياضة وأنشطة خارجية',    nameFr: 'Sports et Loisirs' },
-      { name: 'Musical Instruments',       nameAr: 'آلات موسيقية',            nameFr: 'Instruments de Musique' },
-      { name: 'Books & Media',             nameAr: 'كتب ووسائل إعلام',        nameFr: 'Livres et Médias' },
-      { name: 'Toys & Games',              nameAr: 'ألعاب وترفيه',            nameFr: 'Jouets et Jeux' },
-      { name: 'Art & Collectibles',        nameAr: 'فن وتحف',                 nameFr: 'Art et Collections' },
+      // Electronics
+      { name: 'Phones & Accessories',              nameAr: 'هواتف وملحقات',                        nameFr: 'Téléphones & Accessoires' },
+      { name: 'Electronics & Computers',           nameAr: 'إلكترونيات وحواسيب',                   nameFr: 'Électronique & Informatique' },
 
-      // Family & Kids
-      { name: 'Baby & Kids',              nameAr: 'أطفال ورضع',              nameFr: 'Bébé et Enfants' },
+      // Home
+      { name: 'Home Appliances',                   nameAr: 'أجهزة منزلية',                         nameFr: 'Électroménager' },
+      { name: 'Furniture & Home Decor',            nameAr: 'أثاث وديكور منزلي',                    nameFr: 'Meubles & Décoration' },
 
-      // Tools & Professional
-      { name: 'Tools & Equipment',         nameAr: 'أدوات ومعدات',            nameFr: 'Outils et Équipements' },
-      { name: 'Industrial Supplies & Equipment', nameAr: 'مستلزمات صناعية',  nameFr: 'Fournitures Industrielles' },
+      // Personal
+      { name: 'Fashion & Clothing',                nameAr: 'موضة وملابس',                          nameFr: 'Mode & Vêtements' },
+      { name: 'Baby & Kids',                       nameAr: 'أطفال ورضع',                           nameFr: 'Bébé & Enfants' },
 
-      // Big Ticket Items
-      { name: 'Vehicles',                  nameAr: 'مركبات',                  nameFr: 'Véhicules' },
-      { name: 'Motorcycles',               nameAr: 'دراجات نارية',            nameFr: 'Motos' },
-      { name: 'Boats & Watercraft',        nameAr: 'قوارب وسفن',              nameFr: 'Bateaux' },
-      { name: 'Trailers & Towing',         nameAr: 'مقطورات',                 nameFr: 'Remorques' },
-      { name: 'RV & Campers',              nameAr: 'عربات تخييم',             nameFr: 'Camping-cars' },
-      { name: 'Heavy Equipment',           nameAr: 'معدات ثقيلة',             nameFr: 'Engins Lourds' },
-      { name: 'Construction Vehiclest',    nameAr: 'مركبات بناء',             nameFr: 'Engins de Chantier' },
-      { name: 'Real Estate',               nameAr: 'عقارات',                  nameFr: 'Immobilier' },
+      // Hobbies
+      { name: 'Sports & Outdoors',                 nameAr: 'رياضة وأنشطة خارجية',                  nameFr: 'Sports & Loisirs' },
+      { name: 'Books & Media',                     nameAr: 'كتب ووسائل إعلام',                     nameFr: 'Livres & Médias' },
 
-      // Business & Industry
-      { name: 'Construction Materials',    nameAr: 'مواد بناء',               nameFr: 'Matériaux de Construction' },
-      { name: 'Agriculture',               nameAr: 'زراعة',                   nameFr: 'Agriculture' },
-      { name: 'Mining',                    nameAr: 'تعدين',                   nameFr: 'Exploitation Minière' },
-      { name: 'Construction',              nameAr: 'بناء',                    nameFr: 'Construction' },
-      { name: 'Manufacturing',             nameAr: 'تصنيع',                   nameFr: 'Industrie' },
+      // Professional
+      { name: 'Tools & Equipment',                 nameAr: 'أدوات ومعدات',                         nameFr: 'Outils & Équipements' },
+      { name: 'Agriculture',                       nameAr: 'زراعة',                                nameFr: 'Agriculture' },
 
-      // Miscellaneous
-      { name: 'Other',                     nameAr: 'أخرى',                    nameFr: 'Autre' },
+      // Catch-all
+      { name: 'Other',                             nameAr: 'أخرى',                                 nameFr: 'Autre' },
     ] as Subcategory[]
   },
   JOB: {

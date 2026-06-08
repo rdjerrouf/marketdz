@@ -16,6 +16,7 @@ interface Listing {
   description: string | null
   price: number | null
   category: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
+  subcategory: string | null
   photos: string[]
   created_at: string
   status: string
@@ -23,7 +24,18 @@ interface Listing {
   rental_period?: string | null
   location_wilaya: string | null
   location_city: string | null
+  condition: string | null
   metadata: Record<string, unknown> | null
+  // Vehicle dedicated columns
+  vehicle_make: string | null
+  vehicle_model: string | null
+  vehicle_year: number | null
+  vehicle_mileage: number | null
+  vehicle_transmission: string | null
+  vehicle_fuel_type: string | null
+  vehicle_body_type: string | null
+  // Generic subcategory details
+  listing_details: Record<string, string | number | boolean | null> | null
 }
 
 interface User {
@@ -93,7 +105,14 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
         // Fetch listing data
         const { data: listingData, error: listingError } = await supabase
           .from('listings')
-          .select('*')
+          .select(`
+            id, title, description, price, category, subcategory, photos,
+            created_at, status, user_id, rental_period, location_wilaya, location_city,
+            condition, metadata,
+            vehicle_make, vehicle_model, vehicle_year, vehicle_mileage,
+            vehicle_transmission, vehicle_fuel_type, vehicle_body_type,
+            listing_details
+          `)
           .eq('id', listingId)
           .single()
 
@@ -109,12 +128,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
         }
 
         console.log('Listing data:', listingData)
-        setListing({
-          ...listingData,
-          location_wilaya: (listingData as any).location_wilaya ?? null,
-          location_city: (listingData as any).location_city ?? null,
-          metadata: listingData.metadata as Record<string, unknown> | null
-        } as Listing)
+        setListing(listingData as Listing)
 
         // Fetch seller profile
         const { data: sellerData, error: sellerError } = await supabase
@@ -380,6 +394,121 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                 </p>
               </div>
             </div>
+
+            {/* Vehicle Specifications */}
+            {listing.category === 'for_sale' && (listing.vehicle_make || listing.vehicle_model || listing.vehicle_year || listing.vehicle_mileage || listing.vehicle_transmission || listing.vehicle_fuel_type) && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('vehicleSpecs')}</h2>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {listing.vehicle_make && (
+                    <div><span className="font-medium text-gray-600">{t('make')}:</span><p className="text-gray-900">{listing.vehicle_make}</p></div>
+                  )}
+                  {listing.vehicle_model && (
+                    <div><span className="font-medium text-gray-600">{t('model')}:</span><p className="text-gray-900">{listing.vehicle_model}</p></div>
+                  )}
+                  {listing.vehicle_year && (
+                    <div><span className="font-medium text-gray-600">{t('year')}:</span><p className="text-gray-900" dir="ltr">{listing.vehicle_year}</p></div>
+                  )}
+                  {listing.vehicle_mileage !== null && listing.vehicle_mileage !== undefined && (
+                    <div><span className="font-medium text-gray-600">{t('mileage')}:</span><p className="text-gray-900" dir="ltr">{listing.vehicle_mileage.toLocaleString()} {t('kmUnit')}</p></div>
+                  )}
+                  {listing.vehicle_transmission && (
+                    <div><span className="font-medium text-gray-600">{t('transmission')}:</span>
+                      <p className="text-gray-900">{
+                        listing.vehicle_transmission === 'manual' ? t('manual') :
+                        listing.vehicle_transmission === 'automatic' ? t('automatic') : t('semiAutomatic')
+                      }</p>
+                    </div>
+                  )}
+                  {listing.vehicle_fuel_type && (
+                    <div><span className="font-medium text-gray-600">{t('fuelType')}:</span>
+                      <p className="text-gray-900">{
+                        listing.vehicle_fuel_type === 'petrol' ? t('petrol') :
+                        listing.vehicle_fuel_type === 'diesel' ? t('diesel') :
+                        listing.vehicle_fuel_type === 'electric' ? t('electric') :
+                        listing.vehicle_fuel_type === 'hybrid' ? t('hybrid') : t('lpg')
+                      }</p>
+                    </div>
+                  )}
+                  {listing.vehicle_body_type && (
+                    <div><span className="font-medium text-gray-600">{t('bodyType')}:</span><p className="text-gray-900 capitalize">{listing.vehicle_body_type}</p></div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Generic Subcategory Specifications */}
+            {listing.listing_details && Object.keys(listing.listing_details).length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('specsSection')}</h2>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {/* Real Estate */}
+                  {listing.listing_details.property_type && (
+                    <div><span className="font-medium text-gray-600">{t('propertyType')}:</span><p className="text-gray-900 capitalize">{listing.listing_details.property_type as string}</p></div>
+                  )}
+                  {listing.listing_details.bedrooms != null && (
+                    <div><span className="font-medium text-gray-600">{t('bedrooms')}:</span><p className="text-gray-900" dir="ltr">{listing.listing_details.bedrooms as number}</p></div>
+                  )}
+                  {listing.listing_details.bathrooms != null && (
+                    <div><span className="font-medium text-gray-600">{t('bathrooms')}:</span><p className="text-gray-900" dir="ltr">{listing.listing_details.bathrooms as number}</p></div>
+                  )}
+                  {listing.listing_details.size_sqm != null && (
+                    <div><span className="font-medium text-gray-600">{t('sizeSqm')}:</span><p className="text-gray-900" dir="ltr">{listing.listing_details.size_sqm as number} {t('sqmUnit')}</p></div>
+                  )}
+                  {listing.listing_details.floor != null && (
+                    <div><span className="font-medium text-gray-600">{t('floor')}:</span><p className="text-gray-900" dir="ltr">{listing.listing_details.floor as number}</p></div>
+                  )}
+                  {listing.listing_details.furnished && (
+                    <div><span className="font-medium text-gray-600">{t('furnished')}:</span><p className="text-gray-900 capitalize">{listing.listing_details.furnished as string}</p></div>
+                  )}
+                  {/* Electronics / Fashion / Home */}
+                  {listing.listing_details.brand && (
+                    <div><span className="font-medium text-gray-600">{t('brand')}:</span><p className="text-gray-900">{listing.listing_details.brand as string}</p></div>
+                  )}
+                  {listing.listing_details.model_name && (
+                    <div><span className="font-medium text-gray-600">{t('model')}:</span><p className="text-gray-900">{listing.listing_details.model_name as string}</p></div>
+                  )}
+                  {listing.listing_details.storage && (
+                    <div><span className="font-medium text-gray-600">{t('storage')}:</span><p className="text-gray-900" dir="ltr">{listing.listing_details.storage as string}</p></div>
+                  )}
+                  {listing.listing_details.storage_gb && (
+                    <div><span className="font-medium text-gray-600">{t('storage')}:</span><p className="text-gray-900" dir="ltr">{listing.listing_details.storage_gb as string}</p></div>
+                  )}
+                  {listing.listing_details.ram_gb && (
+                    <div><span className="font-medium text-gray-600">{t('ram')}:</span><p className="text-gray-900" dir="ltr">{listing.listing_details.ram_gb as string}</p></div>
+                  )}
+                  {listing.listing_details.processor && (
+                    <div><span className="font-medium text-gray-600">{t('processor')}:</span><p className="text-gray-900">{listing.listing_details.processor as string}</p></div>
+                  )}
+                  {listing.listing_details.size && (
+                    <div><span className="font-medium text-gray-600">{t('size')}:</span><p className="text-gray-900">{listing.listing_details.size as string}</p></div>
+                  )}
+                  {listing.listing_details.color && (
+                    <div><span className="font-medium text-gray-600">{t('color')}:</span><p className="text-gray-900">{listing.listing_details.color as string}</p></div>
+                  )}
+                  {listing.listing_details.material && (
+                    <div><span className="font-medium text-gray-600">{t('material')}:</span><p className="text-gray-900">{listing.listing_details.material as string}</p></div>
+                  )}
+                  {listing.listing_details.dimensions && (
+                    <div><span className="font-medium text-gray-600">{t('dimensions')}:</span><p className="text-gray-900" dir="ltr">{listing.listing_details.dimensions as string}</p></div>
+                  )}
+                  {/* Books */}
+                  {listing.listing_details.author && (
+                    <div><span className="font-medium text-gray-600">{t('author')}:</span><p className="text-gray-900">{listing.listing_details.author as string}</p></div>
+                  )}
+                  {listing.listing_details.book_language && (
+                    <div><span className="font-medium text-gray-600">{t('language')}:</span><p className="text-gray-900 capitalize">{listing.listing_details.book_language as string}</p></div>
+                  )}
+                  {listing.listing_details.genre && (
+                    <div><span className="font-medium text-gray-600">{t('genre')}:</span><p className="text-gray-900">{listing.listing_details.genre as string}</p></div>
+                  )}
+                  {/* Musical */}
+                  {listing.listing_details.instrument_type && (
+                    <div><span className="font-medium text-gray-600">{t('instrumentType')}:</span><p className="text-gray-900">{listing.listing_details.instrument_type as string}</p></div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Listing Details */}
             <div className="bg-white rounded-xl shadow-lg p-6">

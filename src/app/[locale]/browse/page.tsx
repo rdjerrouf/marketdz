@@ -44,7 +44,18 @@ interface SearchFilters {
   minPrice: string
   maxPrice: string
   sortBy: 'relevance' | 'newest' | 'oldest' | 'price_low' | 'price_high'
+  vehicleMake: string
+  vehicleTransmission: string
+  vehicleFuelType: string
+  vehicleYearMin: string
+  vehicleYearMax: string
+  vehicleMileageMax: string
 }
+
+const VEHICLE_SUBCATS = new Set([
+  'Vehicles', 'Motorcycles', 'Auto & Motorcycle Parts',
+  'Construction Vehicles & Trucks', 'Heavy Equipment & Machinery',
+])
 
 // Updated to match our API response structure
 interface SearchResponse {
@@ -94,8 +105,16 @@ function BrowsePageContent() {
     city: searchParams.get('city') || '',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
-    sortBy: (searchParams.get('sortBy') as any) || 'relevance'
+    sortBy: (searchParams.get('sortBy') as any) || 'relevance',
+    vehicleMake: '',
+    vehicleTransmission: '',
+    vehicleFuelType: '',
+    vehicleYearMin: '',
+    vehicleYearMax: '',
+    vehicleMileageMax: ''
   })
+
+  const isVehicleSubcat = useMemo(() => VEHICLE_SUBCATS.has(filters.subcategory), [filters.subcategory])
 
   // Memoized subcategories list based on selected category
   const availableSubcategories = useMemo(() => {
@@ -200,6 +219,12 @@ function BrowsePageContent() {
       if (filters.maxPrice && !isNaN(Number(filters.maxPrice))) {
         queryParams.set('maxPrice', filters.maxPrice)
       }
+      if (filters.vehicleMake) queryParams.set('vehicleMake', filters.vehicleMake)
+      if (filters.vehicleTransmission) queryParams.set('vehicleTransmission', filters.vehicleTransmission)
+      if (filters.vehicleFuelType) queryParams.set('vehicleFuelType', filters.vehicleFuelType)
+      if (filters.vehicleYearMin && !isNaN(Number(filters.vehicleYearMin))) queryParams.set('vehicleYearMin', filters.vehicleYearMin)
+      if (filters.vehicleYearMax && !isNaN(Number(filters.vehicleYearMax))) queryParams.set('vehicleYearMax', filters.vehicleYearMax)
+      if (filters.vehicleMileageMax && !isNaN(Number(filters.vehicleMileageMax))) queryParams.set('vehicleMileageMax', filters.vehicleMileageMax)
       queryParams.set('sortBy', mapSortBy(filters.sortBy))
       queryParams.set('page', page.toString())
       queryParams.set('limit', '20')
@@ -312,7 +337,13 @@ function BrowsePageContent() {
       filters.wilaya ||
       filters.city ||
       filters.minPrice ||
-      filters.maxPrice
+      filters.maxPrice ||
+      filters.vehicleMake ||
+      filters.vehicleTransmission ||
+      filters.vehicleFuelType ||
+      filters.vehicleYearMin ||
+      filters.vehicleYearMax ||
+      filters.vehicleMileageMax
     )
   }, [filters])
 
@@ -332,7 +363,20 @@ function BrowsePageContent() {
   }, [performSearch, hasActiveFilter])
 
   const handleFilterChange = useCallback((key: keyof SearchFilters, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }))
+    if (key === 'subcategory') {
+      setFilters(prev => ({
+        ...prev,
+        subcategory: value,
+        vehicleMake: '',
+        vehicleTransmission: '',
+        vehicleFuelType: '',
+        vehicleYearMin: '',
+        vehicleYearMax: '',
+        vehicleMileageMax: ''
+      }))
+    } else {
+      setFilters(prev => ({ ...prev, [key]: value }))
+    }
   }, [])
 
   const clearFilters = () => {
@@ -344,7 +388,13 @@ function BrowsePageContent() {
       city: '',
       minPrice: '',
       maxPrice: '',
-      sortBy: 'relevance'
+      sortBy: 'relevance',
+      vehicleMake: '',
+      vehicleTransmission: '',
+      vehicleFuelType: '',
+      vehicleYearMin: '',
+      vehicleYearMax: '',
+      vehicleMileageMax: ''
     })
   }
 
@@ -698,6 +748,122 @@ function BrowsePageContent() {
                 />
               </div>
             </div>
+
+            {/* Vehicle-specific filters */}
+            {isVehicleSubcat && (
+              <div className="border-t border-gray-200 pt-5 mb-6">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('filters.vehicleFilters')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                  {/* Make */}
+                  <div>
+                    <label htmlFor="vehicle-make" className="block text-sm font-semibold text-gray-700 mb-2">
+                      {t('filters.vehicleMake')}
+                    </label>
+                    <input
+                      id="vehicle-make"
+                      type="text"
+                      value={filters.vehicleMake}
+                      onChange={(e) => handleFilterChange('vehicleMake', e.target.value)}
+                      placeholder={t('filters.vehicleMakePlaceholder')}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                    />
+                  </div>
+
+                  {/* Transmission */}
+                  <div>
+                    <label htmlFor="vehicle-transmission" className="block text-sm font-semibold text-gray-700 mb-2">
+                      {t('filters.vehicleTransmission')}
+                    </label>
+                    <select
+                      id="vehicle-transmission"
+                      value={filters.vehicleTransmission}
+                      onChange={(e) => handleFilterChange('vehicleTransmission', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                    >
+                      <option value="">{t('filters.allTransmissions')}</option>
+                      <option value="manual">{t('filters.manual')}</option>
+                      <option value="automatic">{t('filters.automatic')}</option>
+                      <option value="semi-automatic">{t('filters.semiAutomatic')}</option>
+                    </select>
+                  </div>
+
+                  {/* Fuel Type */}
+                  <div>
+                    <label htmlFor="vehicle-fuel" className="block text-sm font-semibold text-gray-700 mb-2">
+                      {t('filters.vehicleFuelType')}
+                    </label>
+                    <select
+                      id="vehicle-fuel"
+                      value={filters.vehicleFuelType}
+                      onChange={(e) => handleFilterChange('vehicleFuelType', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                    >
+                      <option value="">{t('filters.allFuelTypes')}</option>
+                      <option value="petrol">{t('filters.petrol')}</option>
+                      <option value="diesel">{t('filters.diesel')}</option>
+                      <option value="electric">{t('filters.electric')}</option>
+                      <option value="hybrid">{t('filters.hybrid')}</option>
+                      <option value="lpg">{t('filters.lpg')}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Year Min */}
+                  <div>
+                    <label htmlFor="vehicle-year-min" className="block text-sm font-semibold text-gray-700 mb-2">
+                      {t('filters.vehicleYearMin')}
+                    </label>
+                    <input
+                      id="vehicle-year-min"
+                      type="number"
+                      value={filters.vehicleYearMin}
+                      onChange={(e) => handleFilterChange('vehicleYearMin', e.target.value)}
+                      placeholder="1990"
+                      min="1900"
+                      max="2030"
+                      dir="ltr"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                    />
+                  </div>
+
+                  {/* Year Max */}
+                  <div>
+                    <label htmlFor="vehicle-year-max" className="block text-sm font-semibold text-gray-700 mb-2">
+                      {t('filters.vehicleYearMax')}
+                    </label>
+                    <input
+                      id="vehicle-year-max"
+                      type="number"
+                      value={filters.vehicleYearMax}
+                      onChange={(e) => handleFilterChange('vehicleYearMax', e.target.value)}
+                      placeholder="2025"
+                      min="1900"
+                      max="2030"
+                      dir="ltr"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                    />
+                  </div>
+
+                  {/* Max Mileage */}
+                  <div>
+                    <label htmlFor="vehicle-mileage-max" className="block text-sm font-semibold text-gray-700 mb-2">
+                      {t('filters.vehicleMileageMax')}
+                    </label>
+                    <input
+                      id="vehicle-mileage-max"
+                      type="number"
+                      value={filters.vehicleMileageMax}
+                      onChange={(e) => handleFilterChange('vehicleMileageMax', e.target.value)}
+                      placeholder="200000"
+                      min="0"
+                      dir="ltr"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">

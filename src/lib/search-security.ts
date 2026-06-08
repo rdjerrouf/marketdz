@@ -46,7 +46,15 @@ const ALLOWED_LISTING_COLUMNS = [
   'job_type',
   'company_name',
   'favorites_count',
-  'views_count'
+  'views_count',
+  'vehicle_make',
+  'vehicle_model',
+  'vehicle_year',
+  'vehicle_mileage',
+  'vehicle_transmission',
+  'vehicle_fuel_type',
+  'vehicle_body_type',
+  'listing_details'
 ] as const;
 
 /**
