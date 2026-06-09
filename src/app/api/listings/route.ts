@@ -302,6 +302,7 @@ export async function GET(request: NextRequest) {
 
     const userId = searchParams.get('userId') ?? undefined
     const category = searchParams.get('category') ?? undefined
+    const subcategory = searchParams.get('subcategory') ?? undefined
     const status = searchParams.get('status') ?? undefined
 
     // Input validation with bounds (max 50 items per page)
@@ -352,6 +353,10 @@ export async function GET(request: NextRequest) {
 
     if (category) {
       query = query.eq('category', category as 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent')
+    }
+
+    if (subcategory) {
+      query = query.eq('subcategory', subcategory)
     }
 
     if (status) {
