@@ -7,6 +7,8 @@ import { useSearchParams } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { ALGERIA_WILAYAS, getLocalizedName } from '@/lib/constants/algeria'
 import { getSubcategories } from '@/lib/constants/categories'
+import { getSubcategoryConfig } from '@/lib/constants/subcategory-fields'
+import type { FieldDef } from '@/lib/constants/subcategory-fields'
 import FavoriteButton from '@/components/common/FavoriteButton'
 import StarRating from '@/components/common/StarRating'
 import MobileListingCard from '@/components/common/MobileListingCard'
@@ -50,11 +52,11 @@ interface SearchFilters {
   vehicleYearMin: string
   vehicleYearMax: string
   vehicleMileageMax: string
+  detailFilters: Record<string, string>
 }
 
 const VEHICLE_SUBCATS = new Set([
-  'Vehicles', 'Motorcycles', 'Auto & Motorcycle Parts',
-  'Construction Vehicles & Trucks', 'Heavy Equipment & Machinery',
+  'Vehicles', 'Motorcycles', 'Construction Vehicles & Trucks',
 ])
 
 // Updated to match our API response structure
@@ -75,6 +77,7 @@ function BrowsePageContent() {
   const searchParams = useSearchParams()
   const t = useTranslations('browse')
   const tNav = useTranslations('nav')
+  const tForm = useTranslations('addItem')
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
@@ -111,10 +114,21 @@ function BrowsePageContent() {
     vehicleFuelType: '',
     vehicleYearMin: '',
     vehicleYearMax: '',
-    vehicleMileageMax: ''
+    vehicleMileageMax: '',
+    detailFilters: {}
   })
 
   const isVehicleSubcat = useMemo(() => VEHICLE_SUBCATS.has(filters.subcategory), [filters.subcategory])
+
+  const subcatConfig = useMemo(
+    () => getSubcategoryConfig(filters.category, filters.subcategory),
+    [filters.category, filters.subcategory]
+  )
+
+  const jsonbEqualityFilters = useMemo<FieldDef[]>(
+    () => subcatConfig?.fields.filter(f => f.searchable && !f.rangeFilter && f.storage === 'jsonb') ?? [],
+    [subcatConfig]
+  )
 
   // Memoized subcategories list based on selected category
   const availableSubcategories = useMemo(() => {
@@ -225,6 +239,9 @@ function BrowsePageContent() {
       if (filters.vehicleYearMin && !isNaN(Number(filters.vehicleYearMin))) queryParams.set('vehicleYearMin', filters.vehicleYearMin)
       if (filters.vehicleYearMax && !isNaN(Number(filters.vehicleYearMax))) queryParams.set('vehicleYearMax', filters.vehicleYearMax)
       if (filters.vehicleMileageMax && !isNaN(Number(filters.vehicleMileageMax))) queryParams.set('vehicleMileageMax', filters.vehicleMileageMax)
+      Object.entries(filters.detailFilters).forEach(([key, value]) => {
+        if (value) queryParams.set(`d_${key}`, value)
+      })
       queryParams.set('sortBy', mapSortBy(filters.sortBy))
       queryParams.set('page', page.toString())
       queryParams.set('limit', '20')
@@ -343,7 +360,8 @@ function BrowsePageContent() {
       filters.vehicleFuelType ||
       filters.vehicleYearMin ||
       filters.vehicleYearMax ||
-      filters.vehicleMileageMax
+      filters.vehicleMileageMax ||
+      Object.values(filters.detailFilters).some(Boolean)
     )
   }, [filters])
 
@@ -372,11 +390,19 @@ function BrowsePageContent() {
         vehicleFuelType: '',
         vehicleYearMin: '',
         vehicleYearMax: '',
-        vehicleMileageMax: ''
+        vehicleMileageMax: '',
+        detailFilters: {}
       }))
     } else {
       setFilters(prev => ({ ...prev, [key]: value }))
     }
+  }, [])
+
+  const handleDetailFilterChange = useCallback((key: string, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      detailFilters: { ...prev.detailFilters, [key]: value }
+    }))
   }, [])
 
   const clearFilters = () => {
@@ -394,7 +420,8 @@ function BrowsePageContent() {
       vehicleFuelType: '',
       vehicleYearMin: '',
       vehicleYearMax: '',
-      vehicleMileageMax: ''
+      vehicleMileageMax: '',
+      detailFilters: {}
     })
   }
 
@@ -861,6 +888,51 @@ function BrowsePageContent() {
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                     />
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Dynamic subcategory-specific JSONB filters */}
+            {jsonbEqualityFilters.length > 0 && (
+              <div className="border-t border-gray-200 pt-5 mb-6">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('filters.detailFilters')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {jsonbEqualityFilters.map(field => (
+                    <div key={field.key}>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        {tForm(field.labelKey as Parameters<typeof tForm>[0])}
+                      </label>
+                      {field.options ? (
+                        <select
+                          value={filters.detailFilters[field.key] || ''}
+                          onChange={(e) => handleDetailFilterChange(field.key, e.target.value)}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                        >
+                          <option value="">
+                            {field.selectPlaceholderKey
+                              ? tForm(field.selectPlaceholderKey as Parameters<typeof tForm>[0])
+                              : tForm(field.labelKey as Parameters<typeof tForm>[0])}
+                          </option>
+                          {field.options.map(opt => (
+                            <option key={opt.value} value={opt.value}>
+                              {tForm(opt.labelKey as Parameters<typeof tForm>[0])}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          value={filters.detailFilters[field.key] || ''}
+                          onChange={(e) => handleDetailFilterChange(field.key, e.target.value)}
+                          placeholder={field.placeholderKey
+                            ? tForm(field.placeholderKey as Parameters<typeof tForm>[0])
+                            : undefined}
+                          dir={field.dir ?? 'auto'}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
+                        />
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

@@ -30,8 +30,9 @@ npm run lint
 npx supabase db reset    # Reset + re-run all migrations locally
 npx supabase migration new <name>   # Create a new migration file
 
-# Push local migrations to cloud (requires SUPABASE_DB_PASSWORD from .env.local)
-SUPABASE_ACCESS_TOKEN=<token> SUPABASE_DB_PASSWORD=<pass> npx supabase db push
+# Push local migrations to cloud
+# NOTE: db push DOES NOT WORK — project uses GitHub OAuth login, no Postgres password is set.
+# Always apply cloud migrations via the Management REST API instead (see section below).
 
 # E2E tests (requires dev server running on localhost:3000)
 npm test                                              # All tests
@@ -79,6 +80,8 @@ src/hooks/                 # useRealtime* hooks (messages, conversations, notifi
 src/types/                 # TypeScript types (database.ts — update manually when adding DB columns)
 supabase/migrations/       # All DB migrations (apply with `npx supabase db reset`)
 src/i18n/locales/          # next-intl translation files (en.json, fr.json, ar.json)
+src/lib/constants/subcategory-fields.ts  # Subcategory field registry — single source of truth for form fields, browse filters, and JSONB indexes
+src/components/listings/SubcategoryFields.tsx  # Dynamic field renderer — reads from subcategory-fields.ts, replaces hardcoded JSX blocks
 tests/                     # Playwright E2E tests
 ```
 
@@ -216,7 +219,7 @@ npx playwright test --project=chromium-admin    # Admin tests only
 
 All migrations live in `supabase/migrations/`. Apply locally with `npx supabase db reset` (full reset) or `npx supabase migration up` (incremental).
 
-**Indexes on `listings` (14 total):**
+**Indexes on `listings` (~36 total after migrations 20260608000001-2):**
 
 | Index | Purpose |
 |-------|---------|
@@ -229,8 +232,9 @@ All migrations live in `supabase/migrations/`. Apply locally with `npx supabase 
 | `idx_listings_active_created_at` | Default newest-first sort |
 | `idx_listings_user_created` | User's own listings |
 | `idx_listings_hot_deals` | Hot deals widget |
-| `idx_listings_details_gin` | JSONB GIN on `listing_details` (subcategory filter equality) |
-| Others | FK lookups, urgent expiry |
+| `idx_listings_details_gin` | JSONB GIN on `listing_details` (containment `@>`) |
+| `idx_listings_details_*` | ~22 partial expression indexes on `listing_details` JSONB fields (moto_type, engine_cc, part_category, truck_type, equipment_type, hours_used, property_type, bedrooms, size_sqm, furnished, parking, brand, gender, age_range, sport_type, tool_type, power_source, capacity_persons, usage_type, material_type, payload_capacity, finishing) |
+| Others | FK lookups, urgent expiry, vehicle columns |
 
 **Deferred — do NOT drop without checking `pg_stat_user_indexes.idx_scan` on cloud after real traffic:**  
 `idx_listings_user_id` (0 scans locally, may be used in production)
@@ -242,24 +246,41 @@ All migrations live in `supabase/migrations/`. Apply locally with `npx supabase 
 **Vehicle columns** (dedicated, filterable by range):
 `vehicle_make`, `vehicle_model`, `vehicle_year` (SMALLINT), `vehicle_mileage` (INTEGER), `vehicle_transmission`, `vehicle_fuel_type`, `vehicle_body_type`
 
-**Subcategory → `listing_details` JSONB key mapping:**
+**Subcategory field registry — `src/lib/constants/subcategory-fields.ts`:**
 
-| Subcategory group | Keys stored |
+This is the single source of truth for which fields each subcategory shows. Adding a new subcategory = add one `SubcategoryConfig` entry here. Zero JSX changes required.
+
+- `getSubcategoryConfig(category, subcategory)` → returns the config or `null`
+- `ListingForm.tsx` calls this and passes the result to `<SubcategoryFields />` — no hardcoded detection sets
+- `SubcategoryFields.tsx` renders each field dynamically (text/integer/select/boolean_select) writing to either a vehicle column or `listing_details` JSONB based on `field.storage`
+
+**Subcategory → `listing_details` JSONB key mapping (current):**
+
+| Subcategory | Keys stored |
 |---|---|
-| Real Estate | `property_type`, `bedrooms`, `bathrooms`, `size_sqm`, `floor`, `furnished` |
-| Electronics / Phones | `brand`, `model_name`, `storage`, `color` |
-| Computers & Tablets | `brand`, `model_name`, `ram_gb`, `storage_gb`, `processor` |
-| Fashion / Watches | `brand`, `size`, `color`, `material` |
-| Home / Furniture | `brand`, `color`, `material`, `dimensions` |
+| Motorcycles | `moto_type`, `engine_cc` |
+| Auto & Motorcycle Parts | `part_category` |
+| Construction Vehicles & Trucks | `truck_type`, `payload_capacity_kg` |
+| Heavy Equipment & Machinery | `equipment_type`, `hours_used`, `engine_power_kw` |
+| Construction Materials & Supplies | `material_type`, `brand`, `unit` |
+| Real Estate (sale) | `property_type`, `bedrooms`, `bathrooms`, `size_sqm`, `floor`, `furnished`, `parking`, `finishing` |
+| Phones & Accessories | `brand`, `model_name`, `storage_gb`, `color` |
+| Electronics & Computers | `brand`, `model_name`, `screen_size`, `processor`, `ram_gb`, `storage_gb`, `dedicated_gpu` |
+| Home Appliances | `brand`, `appliance_type` |
+| Furniture & Home Decor | `brand`, `material`, `color`, `dimensions` |
+| Fashion & Clothing | `brand`, `size`, `gender`, `color`, `material` |
+| Baby & Kids | `brand`, `age_range` |
+| Sports & Outdoors | `brand`, `sport_type` |
 | Books & Media | `author`, `book_language`, `genre` |
-| Musical Instruments | `brand`, `instrument_type` |
-| Sports / Tools / Other | `brand`, `model_name` |
+| Tools & Equipment | `brand`, `tool_type`, `power_source` |
+| Agriculture | `brand`, `product_type` |
+| Apartments / Houses (rent) | `property_type`, `furnished`, `bedrooms`, `bathrooms`, `size_sqm`, `floor`, `parking` |
+| Offices / Commercial (rent) | `usage_type`, `size_sqm`, `floor`, `parking` |
+| Event Halls (rent) | `capacity_persons`, `size_sqm`, `catering_included`, `parking` |
+| Vehicles (rent) | `rate_unit`, `deposit_required`, `driver_included`, `mileage_limit_km` |
+| Equipment (rent) | `equipment_type`, `brand`, `rate_unit`, `deposit_required` |
 
-**Subcategory detection sets** (defined at top of `ListingForm.tsx`):
-```typescript
-VEHICLE_SUBCATS, REAL_ESTATE_SUBCATS, ELECTRONICS_SUBCATS,
-FASHION_SUBCATS, HOME_SUBCATS, BOOKS_SUBCATS, MUSIC_SUBCATS, SPORTS_TOOLS_SUBCATS
-```
+Vehicles (Cars) use only dedicated columns — no JSONB keys except `engine_spec` (display only).
 
 **RULE — never use `SELECT *` in listing hot paths.** The browse detail page and listing API routes select named columns explicitly to avoid pulling NULL vehicle/detail columns on every non-vehicle listing. See `src/app/[locale]/browse/[id]/page.tsx`.
 
@@ -290,7 +311,7 @@ SUPABASE_ACCESS_TOKEN=...   ← update .mcp.json args when this changes
 SUPABASE_DB_PASSWORD=...    ← needed for npx supabase db push
 ```
 
-When the MCP token is expired and cannot be refreshed mid-session, apply migrations via the Management REST API:
+**`npx supabase db push` never works** — the project was connected via GitHub OAuth so no Postgres password exists. Always apply cloud migrations via the Management REST API:
 ```bash
 curl -X POST "https://api.supabase.com/v1/projects/vrlzwxoiglzwmhndpolj/database/query" \
   -H "Authorization: Bearer <SUPABASE_ACCESS_TOKEN>" \

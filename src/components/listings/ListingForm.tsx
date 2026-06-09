@@ -8,25 +8,13 @@ import { supabase } from '@/lib/supabase/client'
 import { LISTING_CATEGORIES } from '@/lib/constants/categories'
 import { ALGERIA_WILAYAS, getWilayaByName, getLocalizedName } from '@/lib/constants/algeria'
 import ImageUpload from './ImageUpload'
+import SubcategoryFields from './SubcategoryFields'
 import ComingSoonModal from '@/components/premium/ComingSoonModal'
 import { Zap } from 'lucide-react'
+import { getSubcategoryConfig } from '@/lib/constants/subcategory-fields'
 
-// Subcategory groups that trigger specialised detail sections
-const VEHICLE_SUBCATS = new Set([
-  'Vehicles', 'Motorcycles', 'Auto & Motorcycle Parts',
-  'Construction Vehicles & Trucks', 'Heavy Equipment & Machinery',
-])
-const REAL_ESTATE_SUBCATS = new Set(['Real Estate'])
-const ELECTRONICS_SUBCATS = new Set(['Phones & Accessories', 'Electronics & Computers'])
-const FASHION_SUBCATS = new Set(['Fashion & Clothing'])
-const HOME_SUBCATS = new Set(['Home Appliances', 'Furniture & Home Decor'])
-const BOOKS_SUBCATS = new Set(['Books & Media'])
-const SPORTS_TOOLS_SUBCATS = new Set([
-  'Sports & Outdoors', 'Tools & Equipment', 'Agriculture',
-  'Baby & Kids', 'Construction Materials & Supplies',
-])
 
-interface ListingFormData {
+export interface ListingFormData {
   title: string
   description: string
   category: 'for_sale' | 'job' | 'service' | 'for_rent' | 'urgent'
@@ -148,17 +136,10 @@ export default function ListingForm({
   const selectedWilaya = getWilayaByName(formData.location_wilaya)
   const availableCities = selectedWilaya ? selectedWilaya.cities : []
 
-  // Subcategory type flags
   const sub = formData.subcategory
-  const isVehicleListing  = VEHICLE_SUBCATS.has(sub)
-  const isRealEstate      = REAL_ESTATE_SUBCATS.has(sub)
-  const isElectronics     = ELECTRONICS_SUBCATS.has(sub)
-  const isFashion         = FASHION_SUBCATS.has(sub)
-  const isHome            = HOME_SUBCATS.has(sub)
-  const isBooks           = BOOKS_SUBCATS.has(sub)
-  const isSportsOrTools   = SPORTS_TOOLS_SUBCATS.has(sub)
-  const showDetailsSection = formData.category === 'for_sale' && sub &&
-    (isVehicleListing || isRealEstate || isElectronics || isFashion || isHome || isBooks || isSportsOrTools)
+  const subcatConfig = getSubcategoryConfig(formData.category, sub)
+  const showDetailsSection = formData.category === 'for_sale' && !!subcatConfig
+  const showRentSubcatFields = formData.category === 'for_rent' && !!subcatConfig
 
   const handleInputChange = (field: keyof ListingFormData, value: any) => {
     setFormData(prev => {
@@ -519,6 +500,19 @@ export default function ListingForm({
                     </select>
                   </div>
                 </div>
+
+                {/* Subcategory-specific rent fields (data-driven from subcategory-fields.ts) */}
+                {showRentSubcatFields && subcatConfig && (
+                  <SubcategoryFields
+                    config={subcatConfig}
+                    formData={formData}
+                    onColumnChange={handleInputChange}
+                    onJsonbChange={handleDetailsChange}
+                    inputClassName={inputClassName}
+                    selectClassName={selectClassName}
+                    labelClassName={labelClassName}
+                  />
+                )}
               </>
             )}
 
@@ -688,371 +682,25 @@ export default function ListingForm({
       )}
 
       {/* ── Subcategory-Specific Details ── */}
-      {showDetailsSection && (
+      {showDetailsSection && subcatConfig && (
         <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-green-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            {isVehicleListing ? t('form.vehicleDetails') :
-             isRealEstate ? t('form.realEstateDetails') :
-             isBooks ? t('form.booksDetails') :
-             isFashion ? t('form.fashionDetails') :
-             t('form.productDetails')}
+            {t(subcatConfig.sectionTitleKey as Parameters<typeof t>[0])}
           </h2>
-
           <div className="space-y-6">
-
-            {/* ── VEHICLES ── */}
-            {isVehicleListing && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="vehicle_make" className={labelClassName}>{t('form.vehicleMake')}</label>
-                    <input id="vehicle_make" type="text" dir="ltr" value={formData.vehicle_make}
-                      onChange={(e) => handleInputChange('vehicle_make', e.target.value)}
-                      placeholder={t('form.vehicleMakePlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="vehicle_model" className={labelClassName}>{t('form.vehicleModel')}</label>
-                    <input id="vehicle_model" type="text" dir="ltr" value={formData.vehicle_model}
-                      onChange={(e) => handleInputChange('vehicle_model', e.target.value)}
-                      placeholder={t('form.vehicleModelPlaceholder')} className={inputClassName} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="vehicle_year" className={labelClassName}>{t('form.vehicleYear')}</label>
-                    <input id="vehicle_year" type="number" dir="ltr" min="1900" max="2030"
-                      value={formData.vehicle_year}
-                      onChange={(e) => handleInputChange('vehicle_year', e.target.value)}
-                      placeholder={t('form.vehicleYearPlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="vehicle_mileage" className={labelClassName}>{t('form.vehicleMileage')}</label>
-                    <input id="vehicle_mileage" type="number" dir="ltr" min="0"
-                      value={formData.vehicle_mileage}
-                      onChange={(e) => handleInputChange('vehicle_mileage', e.target.value)}
-                      placeholder={t('form.vehicleMileagePlaceholder')} className={inputClassName} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="vehicle_transmission" className={labelClassName}>{t('form.vehicleTransmission')}</label>
-                    <select id="vehicle_transmission" value={formData.vehicle_transmission}
-                      onChange={(e) => handleInputChange('vehicle_transmission', e.target.value)} className={selectClassName}>
-                      <option value="">{t('form.selectVehicleTransmission')}</option>
-                      <option value="manual">{t('form.transmissionManual')}</option>
-                      <option value="automatic">{t('form.transmissionAutomatic')}</option>
-                      <option value="semi-automatic">{t('form.transmissionSemiAuto')}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="vehicle_fuel_type" className={labelClassName}>{t('form.vehicleFuelType')}</label>
-                    <select id="vehicle_fuel_type" value={formData.vehicle_fuel_type}
-                      onChange={(e) => handleInputChange('vehicle_fuel_type', e.target.value)} className={selectClassName}>
-                      <option value="">{t('form.selectVehicleFuelType')}</option>
-                      <option value="petrol">{t('form.fuelPetrol')}</option>
-                      <option value="diesel">{t('form.fuelDiesel')}</option>
-                      <option value="electric">{t('form.fuelElectric')}</option>
-                      <option value="hybrid">{t('form.fuelHybrid')}</option>
-                      <option value="lpg">{t('form.fuelLpg')}</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="vehicle_body_type" className={labelClassName}>{t('form.vehicleBodyType')}</label>
-                  <select id="vehicle_body_type" value={formData.vehicle_body_type}
-                    onChange={(e) => handleInputChange('vehicle_body_type', e.target.value)} className={selectClassName}>
-                    <option value="">{t('form.selectVehicleBodyType')}</option>
-                    {sub === 'Motorcycles' ? (
-                      <>
-                        <option value="sport">{t('form.bodySport')}</option>
-                        <option value="cruiser">{t('form.bodyCruiser')}</option>
-                        <option value="scooter">{t('form.bodyScooter')}</option>
-                        <option value="other">{t('form.bodyOther')}</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="sedan">{t('form.bodySedan')}</option>
-                        <option value="suv">{t('form.bodySuv')}</option>
-                        <option value="hatchback">{t('form.bodyHatchback')}</option>
-                        <option value="pickup">{t('form.bodyPickup')}</option>
-                        <option value="van">{t('form.bodyVan')}</option>
-                        <option value="coupe">{t('form.bodyCoupe')}</option>
-                        <option value="wagon">{t('form.bodyWagon')}</option>
-                        <option value="convertible">{t('form.bodyConvertible')}</option>
-                        <option value="minivan">{t('form.bodyMinivan')}</option>
-                        <option value="other">{t('form.bodyOther')}</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              </>
-            )}
-
-            {/* ── REAL ESTATE ── */}
-            {isRealEstate && (
-              <>
-                <div>
-                  <label htmlFor="property_type" className={labelClassName}>{t('form.propertyType')}</label>
-                  <select id="property_type"
-                    value={(formData.listing_details.property_type as string) || ''}
-                    onChange={(e) => handleDetailsChange('property_type', e.target.value)}
-                    className={selectClassName}>
-                    <option value="">{t('form.selectPropertyType')}</option>
-                    <option value="apartment">{t('form.propApartment')}</option>
-                    <option value="house">{t('form.propHouse')}</option>
-                    <option value="villa">{t('form.propVilla')}</option>
-                    <option value="land">{t('form.propLand')}</option>
-                    <option value="studio">{t('form.propStudio')}</option>
-                    <option value="office">{t('form.propOffice')}</option>
-                    <option value="commercial">{t('form.propCommercial')}</option>
-                  </select>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label htmlFor="bedrooms" className={labelClassName}>{t('form.bedrooms')}</label>
-                    <input id="bedrooms" type="number" dir="ltr" min="0" max="20"
-                      value={(formData.listing_details.bedrooms as string) || ''}
-                      onChange={(e) => handleDetailsChange('bedrooms', e.target.value ? parseInt(e.target.value) : null)}
-                      placeholder={t('form.bedroomsPlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="bathrooms" className={labelClassName}>{t('form.bathrooms')}</label>
-                    <input id="bathrooms" type="number" dir="ltr" min="0" max="10"
-                      value={(formData.listing_details.bathrooms as string) || ''}
-                      onChange={(e) => handleDetailsChange('bathrooms', e.target.value ? parseInt(e.target.value) : null)}
-                      placeholder={t('form.bathroomsPlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="size_sqm" className={labelClassName}>{t('form.sizeSqm')}</label>
-                    <input id="size_sqm" type="number" dir="ltr" min="0"
-                      value={(formData.listing_details.size_sqm as string) || ''}
-                      onChange={(e) => handleDetailsChange('size_sqm', e.target.value ? parseInt(e.target.value) : null)}
-                      placeholder={t('form.sizeSqmPlaceholder')} className={inputClassName} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="floor" className={labelClassName}>{t('form.floor')}</label>
-                    <input id="floor" type="number" dir="ltr" min="0"
-                      value={(formData.listing_details.floor as string) || ''}
-                      onChange={(e) => handleDetailsChange('floor', e.target.value ? parseInt(e.target.value) : null)}
-                      placeholder={t('form.floorPlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="furnished" className={labelClassName}>{t('form.furnished')}</label>
-                    <select id="furnished"
-                      value={(formData.listing_details.furnished as string) || ''}
-                      onChange={(e) => handleDetailsChange('furnished', e.target.value)}
-                      className={selectClassName}>
-                      <option value="">{t('form.selectFurnished')}</option>
-                      <option value="yes">{t('form.furnishedYes')}</option>
-                      <option value="no">{t('form.furnishedNo')}</option>
-                      <option value="partial">{t('form.furnishedPartial')}</option>
-                    </select>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* ── ELECTRONICS ── */}
-            {isElectronics && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="brand" className={labelClassName}>{t('form.brand')}</label>
-                    <input id="brand" type="text"
-                      value={(formData.listing_details.brand as string) || ''}
-                      onChange={(e) => handleDetailsChange('brand', e.target.value)}
-                      placeholder={t('form.brandPlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="model_name" className={labelClassName}>{t('form.modelName')}</label>
-                    <input id="model_name" type="text"
-                      value={(formData.listing_details.model_name as string) || ''}
-                      onChange={(e) => handleDetailsChange('model_name', e.target.value)}
-                      placeholder={t('form.modelNamePlaceholder')} className={inputClassName} />
-                  </div>
-                </div>
-                {sub === 'Computers & Tablets' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <label htmlFor="ram_gb" className={labelClassName}>{t('form.ramGb')}</label>
-                      <input id="ram_gb" type="text"
-                        value={(formData.listing_details.ram_gb as string) || ''}
-                        onChange={(e) => handleDetailsChange('ram_gb', e.target.value)}
-                        placeholder={t('form.ramGbPlaceholder')} className={inputClassName} />
-                    </div>
-                    <div>
-                      <label htmlFor="storage_gb" className={labelClassName}>{t('form.storage')}</label>
-                      <input id="storage_gb" type="text"
-                        value={(formData.listing_details.storage_gb as string) || ''}
-                        onChange={(e) => handleDetailsChange('storage_gb', e.target.value)}
-                        placeholder={t('form.storagePlaceholder')} className={inputClassName} />
-                    </div>
-                    <div>
-                      <label htmlFor="processor" className={labelClassName}>{t('form.processor')}</label>
-                      <input id="processor" type="text"
-                        value={(formData.listing_details.processor as string) || ''}
-                        onChange={(e) => handleDetailsChange('processor', e.target.value)}
-                        placeholder={t('form.processorPlaceholder')} className={inputClassName} />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="storage" className={labelClassName}>{t('form.storage')}</label>
-                      <input id="storage" type="text"
-                        value={(formData.listing_details.storage as string) || ''}
-                        onChange={(e) => handleDetailsChange('storage', e.target.value)}
-                        placeholder={t('form.storagePlaceholder')} className={inputClassName} />
-                    </div>
-                    <div>
-                      <label htmlFor="color" className={labelClassName}>{t('form.color')}</label>
-                      <input id="color" type="text"
-                        value={(formData.listing_details.color as string) || ''}
-                        onChange={(e) => handleDetailsChange('color', e.target.value)}
-                        placeholder={t('form.colorPlaceholder')} className={inputClassName} />
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* ── FASHION ── */}
-            {isFashion && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="brand" className={labelClassName}>{t('form.brand')}</label>
-                    <input id="brand" type="text"
-                      value={(formData.listing_details.brand as string) || ''}
-                      onChange={(e) => handleDetailsChange('brand', e.target.value)}
-                      placeholder={t('form.brandPlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="size" className={labelClassName}>{t('form.size')}</label>
-                    <input id="size" type="text"
-                      value={(formData.listing_details.size as string) || ''}
-                      onChange={(e) => handleDetailsChange('size', e.target.value)}
-                      placeholder={t('form.sizePlaceholder')} className={inputClassName} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="color" className={labelClassName}>{t('form.color')}</label>
-                    <input id="color" type="text"
-                      value={(formData.listing_details.color as string) || ''}
-                      onChange={(e) => handleDetailsChange('color', e.target.value)}
-                      placeholder={t('form.colorPlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="material" className={labelClassName}>{t('form.material')}</label>
-                    <input id="material" type="text"
-                      value={(formData.listing_details.material as string) || ''}
-                      onChange={(e) => handleDetailsChange('material', e.target.value)}
-                      placeholder={t('form.materialPlaceholder')} className={inputClassName} />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* ── HOME / APPLIANCES / FURNITURE ── */}
-            {isHome && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="brand" className={labelClassName}>{t('form.brand')}</label>
-                    <input id="brand" type="text"
-                      value={(formData.listing_details.brand as string) || ''}
-                      onChange={(e) => handleDetailsChange('brand', e.target.value)}
-                      placeholder={t('form.brandPlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="color" className={labelClassName}>{t('form.color')}</label>
-                    <input id="color" type="text"
-                      value={(formData.listing_details.color as string) || ''}
-                      onChange={(e) => handleDetailsChange('color', e.target.value)}
-                      placeholder={t('form.colorPlaceholder')} className={inputClassName} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="material" className={labelClassName}>{t('form.material')}</label>
-                    <input id="material" type="text"
-                      value={(formData.listing_details.material as string) || ''}
-                      onChange={(e) => handleDetailsChange('material', e.target.value)}
-                      placeholder={t('form.materialPlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="dimensions" className={labelClassName}>{t('form.dimensions')}</label>
-                    <input id="dimensions" type="text"
-                      value={(formData.listing_details.dimensions as string) || ''}
-                      onChange={(e) => handleDetailsChange('dimensions', e.target.value)}
-                      placeholder={t('form.dimensionsPlaceholder')} className={inputClassName} />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* ── BOOKS ── */}
-            {isBooks && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="author" className={labelClassName}>{t('form.author')}</label>
-                    <input id="author" type="text"
-                      value={(formData.listing_details.author as string) || ''}
-                      onChange={(e) => handleDetailsChange('author', e.target.value)}
-                      placeholder={t('form.authorPlaceholder')} className={inputClassName} />
-                  </div>
-                  <div>
-                    <label htmlFor="book_language" className={labelClassName}>{t('form.bookLanguage')}</label>
-                    <select id="book_language"
-                      value={(formData.listing_details.book_language as string) || ''}
-                      onChange={(e) => handleDetailsChange('book_language', e.target.value)}
-                      className={selectClassName}>
-                      <option value="">{t('form.selectLanguage')}</option>
-                      <option value="arabic">{t('form.langArabic')}</option>
-                      <option value="french">{t('form.langFrench')}</option>
-                      <option value="english">{t('form.langEnglish')}</option>
-                      <option value="other">{t('form.langOther')}</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="genre" className={labelClassName}>{t('form.genre')}</label>
-                  <input id="genre" type="text"
-                    value={(formData.listing_details.genre as string) || ''}
-                    onChange={(e) => handleDetailsChange('genre', e.target.value)}
-                    placeholder={t('form.genrePlaceholder')} className={inputClassName} />
-                </div>
-              </>
-            )}
-
-            {/* ── MUSICAL INSTRUMENTS ── */}
-            {/* ── SPORTS / TOOLS / OTHER ── */}
-            {isSportsOrTools && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="brand" className={labelClassName}>{t('form.brand')}</label>
-                  <input id="brand" type="text"
-                    value={(formData.listing_details.brand as string) || ''}
-                    onChange={(e) => handleDetailsChange('brand', e.target.value)}
-                    placeholder={t('form.brandPlaceholder')} className={inputClassName} />
-                </div>
-                <div>
-                  <label htmlFor="model_name" className={labelClassName}>{t('form.modelName')}</label>
-                  <input id="model_name" type="text"
-                    value={(formData.listing_details.model_name as string) || ''}
-                    onChange={(e) => handleDetailsChange('model_name', e.target.value)}
-                    placeholder={t('form.modelNamePlaceholder')} className={inputClassName} />
-                </div>
-              </div>
-            )}
-
+            <SubcategoryFields
+              config={subcatConfig}
+              formData={formData}
+              onColumnChange={handleInputChange}
+              onJsonbChange={handleDetailsChange}
+              inputClassName={inputClassName}
+              selectClassName={selectClassName}
+              labelClassName={labelClassName}
+            />
           </div>
         </div>
       )}
+
 
       {/* Application Information for Jobs */}
       {formData.category === 'job' && (

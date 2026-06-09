@@ -179,6 +179,32 @@ export async function GET(request: NextRequest) {
       supabaseQuery = supabaseQuery.lte('vehicle_mileage', parseInt(vehicleMileageMax));
     }
 
+    // JSONB subcategory detail filters (equality + partial text search)
+    // Key allowlist prevents column injection; d_ prefix namespaces these from other params
+    const ALLOWED_DETAIL_KEYS = new Set([
+      'moto_type', 'part_category', 'truck_type', 'equipment_type', 'material_type',
+      'property_type', 'furnished', 'parking', 'finishing', 'gender', 'age_range',
+      'sport_type', 'appliance_type', 'tool_type', 'power_source', 'dedicated_gpu',
+      'usage_type', 'catering_included', 'deposit_required', 'driver_included',
+      'rate_unit', 'book_language', 'product_type',
+      'brand', 'model_name', 'screen_size', 'processor', 'ram_gb', 'storage_gb',
+      'size', 'genre',
+    ]);
+    const TEXT_DETAIL_KEYS = new Set([
+      'brand', 'model_name', 'screen_size', 'processor', 'ram_gb', 'storage_gb', 'size', 'genre',
+    ]);
+    for (const [paramKey, paramValue] of urlSearchParams.entries()) {
+      if (!paramKey.startsWith('d_')) continue;
+      const detailKey = paramKey.slice(2);
+      const value = paramValue.trim();
+      if (!value || !ALLOWED_DETAIL_KEYS.has(detailKey)) continue;
+      if (TEXT_DETAIL_KEYS.has(detailKey)) {
+        supabaseQuery = supabaseQuery.filter(`listing_details->>${detailKey}`, 'ilike', `%${value}%`);
+      } else {
+        supabaseQuery = supabaseQuery.contains('listing_details', { [detailKey]: value });
+      }
+    }
+
     // Full-text search using precomputed vectors (CRITICAL for performance)
     // WHY: to_tsvector() on every query = 4.5s timeout at 250k scale
     // SOLUTION: Use search_vector_ar/fr columns (updated by trigger)
