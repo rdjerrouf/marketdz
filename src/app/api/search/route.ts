@@ -161,7 +161,16 @@ export async function GET(request: NextRequest) {
 
     // Vehicle-specific filters (only meaningful on for_sale vehicle subcategories)
     if (vehicleMake) {
-      supabaseQuery = supabaseQuery.ilike('vehicle_make', `%${vehicleMake}%`);
+      // Match against make OR model, one token at a time, so users can type
+      // "Mazda", "Maz", "Mazda3", or "Mazda 3" and still find Mazda Mazda3 rows.
+      // Each whitespace-separated token must match either column (AND of ORs).
+      const tokens = vehicleMake.trim().split(/\s+/).filter(Boolean).slice(0, 3);
+      for (const token of tokens) {
+        const escaped = token.replace(/[%_,]/g, (c) => `\\${c}`);
+        supabaseQuery = supabaseQuery.or(
+          `vehicle_make.ilike.%${escaped}%,vehicle_model.ilike.%${escaped}%`
+        );
+      }
     }
     if (vehicleTransmission) {
       supabaseQuery = supabaseQuery.eq('vehicle_transmission', vehicleTransmission as any);
