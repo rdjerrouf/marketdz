@@ -644,7 +644,7 @@ function BrowsePageContent() {
                 <select
                   id="category-select"
                   value={filters.category}
-                  onChange={(e) => handleFilterChange('category', e.target.value)}
+                  onChange={(e) => { handleFilterChange('category', e.target.value); e.target.blur() }}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                 >
                   <option value="">{t('allCategories')}</option>
@@ -663,7 +663,7 @@ function BrowsePageContent() {
                 <select
                   id="subcategory-select"
                   value={filters.subcategory}
-                  onChange={(e) => handleFilterChange('subcategory', e.target.value)}
+                  onChange={(e) => { handleFilterChange('subcategory', e.target.value); e.target.blur() }}
                   disabled={!filters.category}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
                 >
@@ -686,7 +686,7 @@ function BrowsePageContent() {
                 <select
                   id="wilaya-select"
                   value={filters.wilaya}
-                  onChange={(e) => handleFilterChange('wilaya', e.target.value)}
+                  onChange={(e) => { handleFilterChange('wilaya', e.target.value); e.target.blur() }}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                 >
                   <option value="">{t('filters.allWilayas')}</option>
@@ -706,7 +706,7 @@ function BrowsePageContent() {
                 <select
                   id="city-select"
                   value={filters.city}
-                  onChange={(e) => handleFilterChange('city', e.target.value)}
+                  onChange={(e) => { handleFilterChange('city', e.target.value); e.target.blur() }}
                   disabled={!filters.wilaya}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
                 >
@@ -729,7 +729,7 @@ function BrowsePageContent() {
                 <select
                   id="sort-select"
                   value={filters.sortBy}
-                  onChange={(e) => handleFilterChange('sortBy', e.target.value as any)}
+                  onChange={(e) => { handleFilterChange('sortBy', e.target.value as any); e.target.blur() }}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                 >
                   <option value="relevance">{t('sortRelevance')}</option>
@@ -804,7 +804,7 @@ function BrowsePageContent() {
                     <select
                       id="vehicle-transmission"
                       value={filters.vehicleTransmission}
-                      onChange={(e) => handleFilterChange('vehicleTransmission', e.target.value)}
+                      onChange={(e) => { handleFilterChange('vehicleTransmission', e.target.value); e.target.blur() }}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                     >
                       <option value="">{t('filters.allTransmissions')}</option>
@@ -822,7 +822,7 @@ function BrowsePageContent() {
                     <select
                       id="vehicle-fuel"
                       value={filters.vehicleFuelType}
-                      onChange={(e) => handleFilterChange('vehicleFuelType', e.target.value)}
+                      onChange={(e) => { handleFilterChange('vehicleFuelType', e.target.value); e.target.blur() }}
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                     >
                       <option value="">{t('filters.allFuelTypes')}</option>
@@ -905,7 +905,7 @@ function BrowsePageContent() {
                       {field.options ? (
                         <select
                           value={filters.detailFilters[field.key] || ''}
-                          onChange={(e) => handleDetailFilterChange(field.key, e.target.value)}
+                          onChange={(e) => { handleDetailFilterChange(field.key, e.target.value); e.target.blur() }}
                           className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900"
                         >
                           <option value="">
