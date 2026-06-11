@@ -2,7 +2,7 @@
   "name": "DlalaDZ - Marketplace Algeria",
   "short_name": "DlalaDZ",
   "description": "Algeria's premier marketplace for buying, selling, jobs, services, and rentals",
-  "start_url": "/",
+  "start_url": "/en",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

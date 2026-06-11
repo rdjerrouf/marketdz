@@ -50,18 +50,18 @@ const MANIFEST: Record<string, string> = {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
-  const meta = META[locale] ?? META.ar
+  const meta = META[locale] ?? META.fr
   const baseUrl = 'https://dlaladz.com'
 
   return {
     title: meta.title,
     description: meta.description,
-    manifest: MANIFEST[locale] ?? '/manifest-ar.json',
+    manifest: MANIFEST[locale] ?? '/manifest-fr.json',
     alternates: {
-      canonical: locale === 'ar' ? baseUrl : `${baseUrl}/${locale}`,
+      canonical: locale === 'fr' ? baseUrl : `${baseUrl}/${locale}`,
       languages: {
-        'ar': baseUrl,
-        'fr': `${baseUrl}/fr`,
+        'ar': `${baseUrl}/ar`,
+        'fr': baseUrl,
         'en': `${baseUrl}/en`,
         'x-default': baseUrl
       }

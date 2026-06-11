@@ -2,7 +2,7 @@
   "name": "دلالة دي زد - سوق الجزائر الرقمي",
   "short_name": "دلالة دي زد",
   "description": "تسوّق وبيع بسهولة في الجزائر — إعلانات البيع والإيجار والوظائف والخدمات",
-  "start_url": "/",
+  "start_url": "/ar",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

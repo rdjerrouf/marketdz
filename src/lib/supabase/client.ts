@@ -8,6 +8,7 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database'
+import { locales } from '@/i18n/config'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -58,8 +59,11 @@ console.error = (...args) => {
     if (typeof window !== 'undefined') {
       const currentPath = window.location.pathname
       if (!currentPath.includes('/signin') && !currentPath.includes('/signup')) {
+        // Keep the locale prefix (/ar, /en, /fr) so the user lands on signin in their language
+        const firstSegment = currentPath.split('/')[1]
+        const localePrefix = (locales as readonly string[]).includes(firstSegment) ? `/${firstSegment}` : ''
         setTimeout(() => {
-          window.location.href = '/signin?message=Session expired. Please sign in again.'
+          window.location.href = `${localePrefix}/signin?message=Session expired. Please sign in again.`
         }, 100)
       }
     }

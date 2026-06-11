@@ -19,6 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 # Development
 npm run dev              # Start dev server → http://localhost:3000 (Turbopack)
+                         # ("command not found: start" on macOS is harmless — Windows-only browser opener)
 npx supabase start       # Start local Supabase (required for local dev)
 npx supabase status      # Show local URLs and keys
 
@@ -48,12 +49,24 @@ npm run mock:medium      # Medium dataset
 npm run mock:full        # Full dataset (~4000 listings, 10 users)
 ```
 
+### Cloud test data
+
+These scripts seed the **cloud** Supabase project directly. They require `SUPABASE_SERVICE_ROLE_KEY` (and `SUPABASE_URL`) in the environment — load `.env.cloud` first. See `MOCK_DATA_SETUP.md` for details.
+
+```bash
+set -a; source .env.cloud; set +a
+node scripts/create-cloud-test-users.mjs        # user1..user20@email.com / TestPass123! + profiles rows
+node scripts/upload-test-photos-to-storage.mjs  # ./test_photos → listing-photos bucket
+node scripts/generate-mock-listings.mjs         # bulk listings, all categories, JSONB listing_details
+node scripts/seed-auto-parts.mjs                # ~1000 auto-parts listings (override with TOTAL_PARTS=N)
+```
+
 ---
 
 ## ARCHITECTURE
 
 ### Overview
-- **Trilingual**: Arabic (default, RTL, no URL prefix) + French (`/fr/`) + English (`/en/`) via `next-intl`
+- **Trilingual**: French (default, no URL prefix) + Arabic (`/ar/`, RTL) + English (`/en/`) via `next-intl`
 - **Auth**: Supabase PKCE with email verification + TOTP MFA (`otplib`)
 - **Search**: Full-text search across Arabic/French/English with geographic filtering; service-role client bypasses RLS for performance at scale
 - **Admin**: Role-based panel (`super_admin`, `admin`, `moderator`)
@@ -112,8 +125,8 @@ tests/                     # Playwright E2E tests
 ## I18N ARCHITECTURE
 
 Uses `next-intl` with `localePrefix: 'as-needed'`:
-- Arabic (`ar`) is the default — no URL prefix, RTL, Cairo font
-- French/English use `/fr/` and `/en/` prefixes
+- French (`fr`) is the default — no URL prefix
+- Arabic/English use `/ar/` and `/en/` prefixes (Arabic is RTL with Cairo font)
 - **Every page must live under `src/app/[locale]/`** — pages outside this directory are intercepted by next-intl middleware and return 404
 - Navigation helpers come from `src/i18n/navigation.ts` — **never import from `next/navigation`** directly in locale-aware pages
 - `next.config.ts` plugin order matters: `withNextIntl(withPWAConfig(nextConfig))`

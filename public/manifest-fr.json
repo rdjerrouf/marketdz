@@ -2,7 +2,7 @@
   "name": "DlalaDZ - Marketplace Algérie",
   "short_name": "DlalaDZ",
   "description": "Achetez et vendez facilement en Algérie — annonces, emplois, services, locations",
-  "start_url": "/fr",
+  "start_url": "/",
   "scope": "/fr",
   "display": "standalone",
   "orientation": "portrait-primary",

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Link } from '@/i18n/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import { Search, Plus, Heart, Grid, TrendingUp, Clock, DollarSign, Eye, Star, Home, User, MessageCircle, Bell, Zap, Award, ChevronRight, ArrowRight, Sparkles, Trophy, Users, AlertCircle } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { useAuth } from '@/contexts/AuthContext'
@@ -41,6 +41,7 @@ interface Listing {
 
 export default function CompleteKickAssHomepage() {
   const { user, loading } = useAuth()
+  const router = useRouter()
   const locale = useLocale()
   const isRtl = locale === 'ar'
   const tNav = useTranslations('nav')
@@ -249,8 +250,8 @@ export default function CompleteKickAssHomepage() {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      // Redirect to browse page with search query
-      window.location.href = `/browse?search=${encodeURIComponent(searchQuery.trim())}`
+      // i18n router keeps the current locale prefix (/en, /ar) on the URL
+      router.push(`/browse?search=${encodeURIComponent(searchQuery.trim())}`)
     }
   }
 
