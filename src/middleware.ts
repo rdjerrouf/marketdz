@@ -142,6 +142,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Match all paths except static assets
-    '/((?!_next/static|_next/image|favicon\\.ico|manifest\\.json|icons/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // manifest-*.json = per-locale PWA manifests; sw/push-sw/workbox = service workers
+    '/((?!_next/static|_next/image|favicon\\.ico|manifest.*\\.json|sw\\.js|push-sw\\.js|workbox-.*\\.js|icons/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
