@@ -30,8 +30,17 @@ async function gotoAndWait(page: any, url: string) {
   );
   await page.goto(url);
   await done;
-  // Wait for the submit button to re-enable (loading=false)
-  await page.waitForSelector('button:not([disabled]):has-text("Search")', { timeout: 10000 });
+  // Wait for the submit button to re-enable (loading=false).
+  // type="submit" is locale-agnostic (default locale is French since 2026-06-11).
+  await page.waitForSelector('button[type="submit"]:not([disabled])', { timeout: 10000 });
+  await page.waitForTimeout(200);
+}
+
+// Navigate to a bare browse URL — no filters means NO auto-search (cold-load
+// optimization, commit 2310a91), so there is no /api/search response to await.
+async function gotoBare(page: any, url: string) {
+  await page.goto(url);
+  await page.waitForSelector('button[type="submit"]:not([disabled])', { timeout: 15000 });
   await page.waitForTimeout(200);
 }
 
@@ -227,8 +236,20 @@ test.describe('Browse Page', () => {
   // Parallel execution causes response-listener races under load.
   test.describe.configure({ mode: 'serial' });
 
-  test('loads with default listing cards', async ({ page }) => {
-    await gotoAndWait(page, '/browse');
+  test('bare /browse does NOT auto-search (cold-load optimization)', async ({ page }) => {
+    // Since commit 2310a91 a filterless /browse skips the DB hit entirely.
+    let searched = false;
+    page.on('request', (r: any) => { if (r.url().includes('/api/search')) searched = true; });
+
+    await gotoBare(page, '/browse');
+    await page.waitForTimeout(1500);
+
+    expect(searched).toBe(false);
+    expect(await listingCards(page).count()).toBe(0);
+  });
+
+  test('loads listing cards when a filter is present', async ({ page }) => {
+    await gotoAndWait(page, '/browse?category=for_sale');
 
     const cards = listingCards(page);
     await expect(cards.first()).toBeVisible({ timeout: 10000 });
@@ -250,7 +271,7 @@ test.describe('Browse Page', () => {
   });
 
   test('subcategory dropdown disabled until category selected', async ({ page }) => {
-    await gotoAndWait(page, '/browse');
+    await gotoBare(page, '/browse');
 
     const subcatSelect = page.locator('#subcategory-select');
     await expect(subcatSelect).toBeDisabled();
@@ -268,7 +289,7 @@ test.describe('Browse Page', () => {
   });
 
   test('category filter change triggers new search', async ({ page }) => {
-    await gotoAndWait(page, '/browse');
+    await gotoBare(page, '/browse');
 
     const searchDone = page.waitForResponse(
       (resp: any) => resp.url().includes('/api/search') && resp.url().includes('category=for_sale') && resp.status() === 200,
@@ -283,7 +304,7 @@ test.describe('Browse Page', () => {
   });
 
   test('wilaya filter change updates results', async ({ page }) => {
-    await gotoAndWait(page, '/browse');
+    await gotoBare(page, '/browse');
 
     const searchDone = page.waitForResponse(
       (resp: any) => resp.url().includes('/api/search') && resp.url().includes('wilaya=') && resp.status() === 200,
@@ -305,7 +326,7 @@ test.describe('Browse Page', () => {
   });
 
   test('listing card click navigates to detail page', async ({ page }) => {
-    await gotoAndWait(page, '/browse');
+    await gotoAndWait(page, '/browse?category=for_sale');
 
     await listingCards(page).first().click();
     await page.waitForURL(/\/browse\/[a-f0-9-]+/, { timeout: 10000 });
@@ -313,7 +334,7 @@ test.describe('Browse Page', () => {
   });
 
   test('load more — appends additional results', async ({ page }) => {
-    await gotoAndWait(page, '/browse');
+    await gotoAndWait(page, '/browse?category=for_sale');
 
     const initialCount = await listingCards(page).count();
     expect(initialCount).toBeGreaterThan(0);

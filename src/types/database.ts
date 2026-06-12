@@ -445,6 +445,50 @@ export interface Database {
           }
         ]
       }
+      search_zero_results: {
+        Row: {
+          id: number
+          query: string
+          locale: string | null
+          filters: Json | null
+          created_at: string
+        }
+        Insert: {
+          query: string
+          locale?: string | null
+          filters?: Json | null
+          created_at?: string
+        }
+        Update: {
+          query?: string
+          locale?: string | null
+          filters?: Json | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      search_lexicon: {
+        Row: {
+          id: number
+          terms: string[]
+          category: string | null
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          terms: string[]
+          category?: string | null
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          terms?: string[]
+          category?: string | null
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -465,6 +509,69 @@ export interface Database {
       mark_all_notifications_read: {
         Args: Record<string, never>
         Returns: undefined
+      }
+      search_listings_v2: {
+        Args: {
+          p_query?: string | null
+          p_category?: string | null
+          p_subcategory?: string | null
+          p_wilaya?: string | null
+          p_city?: string | null
+          p_min_price?: number | null
+          p_max_price?: number | null
+          p_available_from?: string | null
+          p_available_to?: string | null
+          p_rental_period?: string | null
+          p_min_salary?: number | null
+          p_max_salary?: number | null
+          p_job_type?: string | null
+          p_company_name?: string | null
+          p_condition?: string | null
+          p_vehicle_make?: string | null
+          p_vehicle_transmission?: string | null
+          p_vehicle_fuel_type?: string | null
+          p_vehicle_year_min?: number | null
+          p_vehicle_year_max?: number | null
+          p_vehicle_mileage_max?: number | null
+          p_details?: Json | null
+          p_details_text?: Json | null
+          p_sort?: string
+          p_limit?: number
+          p_offset?: number
+        }
+        Returns: {
+          id: string
+          title: string
+          description: string | null
+          price: number | null
+          category: string
+          subcategory: string | null
+          created_at: string
+          status: string
+          user_id: string
+          location_wilaya: string | null
+          location_city: string | null
+          photos: string[] | null
+          condition: string | null
+          available_from: string | null
+          available_to: string | null
+          rental_period: string | null
+          salary_min: number | null
+          salary_max: number | null
+          job_type: string | null
+          company_name: string | null
+          favorites_count: number | null
+          views_count: number | null
+          vehicle_make: string | null
+          vehicle_model: string | null
+          vehicle_year: number | null
+          vehicle_mileage: number | null
+          vehicle_transmission: string | null
+          vehicle_fuel_type: string | null
+          vehicle_body_type: string | null
+          listing_details: Json | null
+          rank: number
+        }[]
       }
     }
     Enums: {

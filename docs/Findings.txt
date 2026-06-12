@@ -1,0 +1,572 @@
+Codex:
+
+1. Recommended cross-language approach for your schema/scale
+
+For this project, I would ship a staged hybrid:
+
+- Phase A (now): query-time synonym expansion in app/SQL function, plus strong token normalization and sanitization.
+- Phase B: typo fallback with pg_trgm only when FTS returns 0.
+- Phase C (later, optional): pgvector only if zero-result logs remain high after A+B.
+
+Why this fits your current stack:
+- You already have dual precomputed vectors and GIN indexes (20251002000001_align_search_with_cloud.sql, 20251002000001_align_search_with_cloud.sql, 20251002000001_align_search_with_cloud.sql).
+- Search currently passes raw query to .wfts on both vectors (route.ts, route.ts).
+- You are intentionally optimizing for 250k+ scale and avoiding expensive runtime transformations (route.ts, 20251020000000_performance_optimization_250k.sql).
+
+Comparison of options you asked for:
+
+- Query-time synonym expansion (app or SQL function):
+  - Pros: no listing backfill, no schema churn, fastest to iterate from zero-result logs, reversible.
+  - Cons: dictionary curation burden, query strings get larger, needs strict sanitization.
+  - Verdict: best immediate ROI for your multilingual/Darija/Arabizi reality.
+
+- Postgres thesaurus/synonym dictionaries:
+  - Pros: elegant if you control DB filesystem.
+  - Cons: on hosted managed PG, file-based dictionary maintenance is usually the blocker.
+  - Verdict: generally not practical on hosted Supabase for custom synonym files.
+
+- Extra translated/keyword column populated at write time:
+  - Pros: very fast query path once materialized; simpler runtime query.
+  - Cons: write amplification, translation pipeline quality/cost, backfill + drift handling, vendor/model dependency.
+  - Verdict: only worth it if you commit to translation infra; otherwise too heavy for this stage.
+
+- pgvector embeddings:
+  - Pros: best for semantic cross-language and long-tail phrasing.
+  - Cons: storage/index overhead, inference cost, recall/precision tuning, operational complexity.
+  - Verdict: defer until after you measure residual failure rate post synonyms + typo fallback.
+
+2. Can synonym/thesaurus dictionary files be used on hosted Supabase?
+
+Short answer: not in the normal custom way.
+
+- CREATE TEXT SEARCH DICTIONARY with TEMPLATE synonym/thesaurus relies on server-side files in tsearch_data.
+- In hosted Supabase you do not manage server filesystem, so custom synonym/thesaurus file workflows are not a reliable path.
+
+Closest supported alternatives:
+- Table-driven synonym expansion in SQL (or app layer) by building tsquery expressions from a synonyms table.
+- SQL query rewrite via ts_rewrite using rules stored in tables (file-free).
+- Keep using built-in configs/dictionaries and do multilingual term expansion before FTS call.
+
+3. Performance of query-time token expansion at 250k+ and query structure
+
+At your size, token-group expansion is usually fine if controlled:
+
+- Keep token count bounded (for example max 6-8 tokens).
+- Keep variants per token bounded (for example max 8-12).
+- Normalize and dedupe variants before query build.
+- Keep status/category predicates first to reduce candidate set.
+
+I would prefer a single SQL/RPC function over many PostgREST .or filter fragments for this use case:
+
+- Better control of parsing and escaping.
+- Easier to enforce limits and reject pathological queries.
+- More stable execution plans and easier EXPLAIN.
+- Cleaner semantics for AND-of-OR token logic.
+
+Your current approach interpolates raw query text directly into PostgREST filter strings (route.ts, route.ts, route.ts), so moving expansion into SQL function is both safer and cleaner.
+
+4. Typo tolerance pattern with pg_trgm
+
+Yes, your proposed pattern is the right baseline:
+
+- Partial GIN trigram index on active rows.
+- Run trigram search only as fallback when FTS returns 0.
+- Keep hard cap on fallback rows.
+
+You already use this pattern for company_name and it is sound (20260503000000_add_company_name_trigram_index.sql).
+
+Operator choice:
+- For suggestion ranking, word_similarity is usually a strong default.
+- similarity is broader and can over-match short/noisy strings.
+- strict_word_similarity is stricter and often better for whole-word correction.
+
+Practical recommendation:
+- Use fallback candidate generation with the trigram index operator (%).
+- Rank by greatest(word_similarity(query, title), strict_word_similarity(query, title)).
+- Keep threshold conservative and tune from logs.
+
+Fuzzy inside standard FTS is limited; FTS is lexical, not typo-tolerant. So trigram fallback (or spell-correction dictionary) is the right tool.
+
+5. arabic config vs simple with normalize_arabic for Darija
+
+Your current pipeline is arabic config + normalize_arabic (20251002000001_align_search_with_cloud.sql, 20251002000001_align_search_with_cloud.sql).
+
+My recommendation for your language mix:
+- For MSA-heavy content, arabic stemming helps.
+- For Darija/borrowed words/Arabizi, arabic stemming can be neutral or harmful.
+- Given your marketplace reality, simple over normalized Arabic text is often safer for recall.
+
+So I’d test:
+- search_vector_ar built with simple on normalized Arabic text.
+- Keep FR vector as french.
+- Compare recall/precision on a labeled set before switching globally.
+
+Also important: normalize query-side Arabic the same way as indexed text; currently raw query is sent to .wfts in main/lean routes (route.ts, route.ts).
+
+6. Are FTS GIN indexes being used as expected? headroom for another GIN trigram?
+
+From the repository alone, I can confirm index design intent but not live scan counts:
+
+- FTS GIN indexes exist and duplicate copies were cleaned up (20251002000001_align_search_with_cloud.sql, 20260408000000_drop_duplicate_indexes.sql).
+- Search routes target these vectors (route.ts, route.ts).
+- I do not see checked-in pg_stat_user_indexes or pg_stat_statements snapshots to verify actual cloud usage.
+
+So: likely yes architecturally, but cannot prove from repo artifacts alone.
+
+On headroom:
+- Adding one partial trigram GIN on title is usually acceptable at 250k-500k if writes are moderate.
+- Cost is extra write amplification on title updates/inserts and extra disk.
+- Since listings are append-heavy and title changes are usually infrequent, this is commonly a good trade if fallback is rare.
+
+7. If adding pgvector later at 250k-500k: storage and HNSW vs IVFFlat
+
+Ballpark (common multilingual embedding sizes):
+- 384 dims float4 vector: about 1.5 KB per row for vector payload.
+- 250k rows: roughly 375-450 MB vector column storage.
+- 500k rows: roughly 750-900 MB vector column storage.
+- Index adds more:
+  - IVFFlat: lower overhead, often around 10-40% over vector payload depending list count.
+  - HNSW: higher overhead, often around 1.5x to 3x vector payload depending m/ef params.
+
+Choice:
+- If RAM/storage budget is tight: start with IVFFlat.
+- If low-latency/high-recall ANN is priority and budget allows: HNSW.
+
+For your plan stage, I would start IVFFlat first if you go vector, then evaluate HNSW only if latency/recall needs justify bigger memory footprint.
+
+8. Quick flags and wins in current setup
+
+Highest-value issues I’d fix first:
+
+- Unsanitized raw query interpolation into PostgREST filter strings:
+  - route.ts
+  - route.ts
+  - route.ts
+  - This is robustness-critical because PostgREST filter grammar is sensitive to punctuation.
+
+- Inconsistent search semantics between endpoints:
+  - main/lean use .wfts (route.ts, route.ts)
+  - count uses .fts after normalizeSearchQuery (route.ts, route.ts)
+  - This can produce mismatched counts vs result pages.
+
+- Fallback try/catch in main route likely won’t catch runtime FTS parse failures where they actually occur (on query execution), so ILIKE fallback reliability is limited:
+  - route.ts
+  - route.ts
+
+- Comment drift/outdated index naming in code comments:
+  - route mentions idx_listings_fts_* (route.ts)
+  - duplicate idx_listings_fts_* were dropped (20260408000000_drop_duplicate_indexes.sql)
+
+- Relevance ranking gap:
+  - search endpoint orders by created_at/price, not textual rank, so relevant older hits can be buried.
+  - You already have a ranked SQL function available (20251008000000_add_ranked_search_function.sql).
+
+If you want, I can draft a concrete SQL function design for Phase 1 that does:
+- query normalization
+- token expansion from a synonyms table
+- safe tsquery construction
+- AND-of-OR matching against both vectors
+- optional ranked output and typo fallback trigger point.
+
+
+Gemini pro:
+
+
+
+
+
+
+Of course. This is an excellent and detailed set of questions. Based on the project context provided in DAILY_TASK.md and CLAUDE.md, here is a breakdown of the answers.
+
+### 1. Recommended Approach for Cross-Language Search
+
+Given the scale and context, the **query-time synonym expansion** approach detailed in the `DAILY_TASK.md` plan is the most pragmatic and effective starting point. Here’s a comparison of the options:
+
+*   **Query-Time Synonym Expansion (Recommended):**
+    *   **Approach:** Maintain a curated dictionary of equivalent terms (e.g., `['brake', 'frein', 'فرامل']`) in the application code. At search time, expand each token in the user's query into its multilingual equivalents and construct a Full-Text Search (FTS) query that looks for any of them (e.g., `(brake OR frein OR فرامل) AND (tire OR pneu OR إطار)`).
+    *   **Pros:**
+        *   **No Schema Changes:** Leverages the existing `search_vector_ar` and `search_vector_fr` columns and their GIN indexes.
+        *   **Low Risk & Reversible:** Can be implemented behind a feature flag and rolled back without a database migration.
+        *   **Dynamic:** The synonym dictionary can be updated and deployed easily. It can be fed by logging zero-result queries, as proposed in "Phase 0" of the plan.
+        *   **Stateless:** No need to backfill or reprocess existing listings.
+    *   **Cons:**
+        *   **Curation Effort:** The quality of matching depends entirely on the quality and completeness of the synonym dictionary. This requires ongoing manual effort.
+
+*   **Postgres Thesaurus Dictionaries:**
+    *   **Approach:** Use `CREATE TEXT SEARCH DICTIONARY` with the `thesaurus` template to manage synonyms at the database level.
+    *   **Pros:** Moves the logic into the database, potentially simplifying application code.
+    *   **Cons:** As you noted, this is **not a viable option on standard hosted Supabase**, as it requires filesystem access on the database server to manage the dictionary files.
+
+*   **Extra Translated/Keyword Column:**
+    *   **Approach:** At write time, use a translation service to translate the listing's title/description into a primary language (or into a set of keywords) and store it in a new, indexed column.
+    *   **Pros:** Simplifies the read query, as it would only need to target one language.
+    *   **Cons:**
+        *   **Cost & Latency:** Introduces a dependency on an external translation API, adding cost and latency to every listing creation/update.
+        *   **Data Backfill:** All existing ~100k listings would need to be reprocessed, incurring significant egress and API costs.
+        *   **Translation Quality:** Machine translation may not accurately capture local dialect (Darija) or code-switching ("Arabizi"), which is a key part of the problem space.
+
+*   **pgvector Embeddings (Semantic Search):**
+    *   **Approach:** Generate vector embeddings for each listing's text using a multilingual model. At query time, generate an embedding for the search query and perform a vector similarity search.
+    *   **Pros:** The most powerful solution. It can handle synonyms, typos, and semantic relationships without a manually curated dictionary.
+    *   **Cons:**
+        *   **High Complexity & Cost:** Requires significant infrastructure changes, an embedding generation pipeline (API or self-hosted model), and a `pgvector` index, which consumes substantial memory.
+        *   **"Black Box":** Harder to debug or tune why certain results are returned compared to explicit keyword matching.
+        *   **Premature Optimization:** As noted in the "Phase 3" plan, this is a heavy solution to adopt before validating that a simpler synonym approach is insufficient.
+
+**Conclusion:** The planned "Phase 1" (query-time expansion) is the right choice. It directly addresses the core problem with the lowest cost, risk, and complexity.
+
+### 2. Supabase and Custom Text Search Dictionaries
+
+You are correct. Using `CREATE TEXT SEARCH DICTIONARY` with templates like `synonym` or `thesaurus` is **not possible on hosted Supabase** because it requires placing dictionary files on the database server's filesystem, which users do not have access to.
+
+The closest supported alternative is the **query-time expansion** method described above. By managing the synonym logic in your application, you achieve the same outcome without needing unsupported Postgres features.
+
+### 3. Performance of Query-Time Expansion
+
+The proposed query structure is sound and should perform well, even at 250k+ rows.
+
+*   **Performance Concerns:** The key is that you are still using the GIN indexes. A query like `q.or('search_vector_ar.wfts.t1 OR t2, search_vector_fr.wfts.t1 OR t2')` for one token, followed by another `.or(...)` for the next token, translates to an efficient index lookup. The database is very good at handling `OR` conditions within a `tsquery`. The performance bottleneck in FTS is typically scanning rows, not resolving the query against the index. Since the GIN index can quickly identify matching rows, performance should remain high.
+*   **Query Structure:** The proposed structure of chaining `.or()` filters in PostgREST (one per token) is correct. This correctly creates an `AND` relationship between the tokens while allowing an `OR` relationship for the synonyms within each token. Using a single complex SQL function with `to_tsquery` and manual `|` and `&` operators would be more complex to build and sanitize correctly, and PostgREST is already optimized for the filter-chaining pattern. The plan's note on sanitizing input to remove characters like `( ) | &` is critical to prevent PostgREST parsing errors.
+
+### 4. Typo Tolerance with `pg_trgm`
+
+The fallback pattern described in "Phase 2" is the standard and recommended approach.
+
+*   **Pattern:** Using a partial GIN trigram index on `title` (and possibly other key fields) `WHERE status = 'active'` is efficient. Querying it **only as a fallback** when the primary FTS query returns zero results is crucial. This ensures that the more expensive trigram search does not impact the performance of the common search path.
+*   **Functions:** For ranking, `word_similarity` is often a good starting point as it's less strict than `strict_word_similarity` but more focused on whole words than the raw `similarity` function. You may need to experiment, but `word_similarity` is a robust choice.
+*   **FTS Fuzzy Matching:** While Postgres FTS has some features for prefix matching, it does not have built-in fuzzy matching for typos in the same way as dedicated search engines like Elasticsearch. The `pg_trgm` extension is the idiomatic Postgres solution for this problem.
+
+### 5. Value of the `arabic` Text Search Configuration
+
+The standard `arabic` configuration provides stemming rules for Modern Standard Arabic (MSA). It will correctly stem `فرامل` (brakes) to a root form.
+
+*   **Pros:** It helps normalize standard Arabic words, which is valuable.
+*   **Cons:** As you suspect, it can be ineffective or even detrimental for dialectal Arabic (Darija) or "Arabizi," as its stemming rules won't apply and may incorrectly alter words.
+*   **Conclusion:** The current setup is a reasonable compromise. The `normalize_arabic()` function handles character normalization (e.g., `أ` -> `ا`), which is essential and works for all Arabic script. The `arabic` stemmer then helps with MSA. For non-standard terms, the effectiveness is limited, but this is precisely what the **Phase 1 synonym dictionary will solve**. By explicitly listing dialectal and Arabizi variants in the dictionary, you bypass the need for a perfect stemmer. Using the `simple` configuration would lose the benefit of MSA stemming.
+
+### 6. Index Usage and Headroom
+
+This question requires running `EXPLAIN ANALYZE` on typical search queries and querying `pg_stat_user_indexes` on the production database. Without access to that live data, I can only provide general guidance based on the project description.
+
+*   **Verification:** You would need to check if slow queries are using sequential scans instead of the GIN indexes (`idx_listings_search_vector_ar_gin`, `idx_listings_search_vector_fr_gin`). If the indexes are being used, `EXPLAIN` will show a "Bitmap Index Scan" or similar.
+*   **Headroom:** Adding one more GIN trigram index will increase write amplification and storage. GIN indexes are slower to update than B-tree indexes. However, since a listing's `title` changes infrequently after creation, the ongoing write overhead is usually acceptable. The main cost is the initial index build time and the storage space. Given the importance of typo tolerance for user experience, this is almost always a worthwhile trade-off.
+
+### 7. `pgvector` Indexing at Scale
+
+If you were to implement "Phase 3":
+
+*   **Index Memory/Storage:** This is highly dependent on the number of dimensions in your embeddings (e.g., 384 for `all-MiniLM-L6-v2`, 768 for many others). A rough formula for HNSW index size is `1.1 * (D * 4 + M * 2 * 4) * num_rows` bytes, where `D` is dimensions and `M` is a build-time parameter (e.g., 16 or 32). For 500k rows with 384 dimensions, you could be looking at **1-2 GB** of index size, which directly translates to memory usage for effective searching. This is a significant consideration for your Supabase instance size.
+*   **HNSW vs. IVFFlat:**
+    *   **HNSW (Hierarchical Navigable Small World):** Generally the recommended choice. It provides better recall/performance trade-offs, especially for high-dimensional data, and doesn't require "training" (or `build()`) before use. Its main downside is higher memory usage and slower build times.
+    *   **IVFFlat:** Requires a training step to define centroids (`lists`). It can be faster for very large datasets if tuned correctly, but tuning is complex. HNSW is simpler to get started with and often superior unless you are operating at extreme scale (many millions of vectors). For a 250k-500k row table, **HNSW is the safer and likely better-performing bet.**
+
+### 8. Other Problems or Quick Wins
+
+The `DAILY_TASK.md` file demonstrates a very strong understanding of the problem space. The proposed plan is excellent. One point to emphasize from that plan is **Arabic Query Normalization**.
+
+The plan correctly notes that while the `search_vector_ar` is built from normalized text, the API currently sends the *raw* Arabic query against it. Applying the same `normalize_arabic()` logic to the user's search query before it's sent to the database is a **critical quick win**. This fixes a latent bug where users typing with different variants of alef (`أ` vs `ا`) or yaa (`ي` vs `ى`) would fail to get matches, even for listings written in the same language. This should be implemented as part of Phase 1, as planned.
+
+
+
+Supabase AI Assistant:
+
+
+
+1) Recommended approach at your scale (250k+)
+My recommendation now:
+	1	Keep FTS as primary retrieval
+	2	Add query-time multilingual expansion (DB-driven dictionary, not hardcoded)
+	3	Add trigram fallback for typo rescue
+	4	Consider pgvector later for semantic/hybrid ranking (phase 2)
+Why: this gives best cost/complexity for your current size and plan.
+Option trade-offs
+	•	Query-time expansion in app/DB function
+	•	✅ Fast to ship, fully controllable, no reindex of entire corpus when lexicon changes
+	•	✅ Works well for high-intent marketplace keywords (parts, brands, colloquials)
+	•	⚠️ Query explosion if uncontrolled (too many OR terms)
+	•	Best near-term choice
+	•	Postgres synonym/thesaurus text-search dictionaries
+	•	✅ Native FTS pipeline conceptually elegant
+	•	❌ On hosted Supabase, custom synonym/thesaurus dictionaries that require server-side dictionary files are not practical (no filesystem access to place rule files)
+	•	Not recommended on hosted unless using built-in dictionaries only
+	•	Extra translated/keyword column at write time
+	•	✅ Very fast search-time performance, simpler queries
+	•	✅ Stable quality if you trust your translation/keyword extractor
+	•	⚠️ Write-path complexity, backfill jobs, reprocessing when lexicon/model changes
+	•	Good if your vocab is stable and high-volume reads dominate
+	•	pgvector embeddings
+	•	✅ Best for cross-language semantic matching, paraphrase, mixed language intent
+	•	⚠️ More infra cost + tuning + ranking logic
+	•	⚠️ Not currently installed in your project (available but not enabled)
+	•	Great phase 2, not first fix
+
+2) Can custom synonym/thesaurus dictionaries be used on hosted Supabase?
+Short answer: generally no for the file-based thesaurus/synonym templates that require server files.
+Closest supported alternatives:
+	•	Table-driven query expansion (recommended)
+	•	ts_rewrite-based query rewrite rules in SQL tables
+	•	Write-time keyword enrichment column (aliases/translations in DB column)
+	•	For broader multilingual token matching: optionally evaluate pgroonga extension later
+
+3) Performance of query-time expansion at 250k+ and query structure
+Your pattern (per-token OR group, groups ANDed) is sound. At 250k rows, with GIN on precomputed vectors, this is usually fine if you cap expansion.
+I’d structure as:
+	•	Single SQL RPC function that:
+	•	normalizes input
+	•	builds bounded tsquery per token (| inside token group, & across groups)
+	•	searches both vectors in one SQL statement
+	•	returns rank via ts_rank_cd
+	•	Avoid large chains of PostgREST or= filters; SQL function gives cleaner plans and observability.
+Guardrails:
+	•	cap expansions to ~5 per token
+	•	drop very short/noisy tokens
+	•	cap max tokens per query
+	•	log query cardinality and latency percentiles
+
+4) Typo tolerance (pg_trgm) pattern
+Yes — your plan is good:
+	•	Partial GIN trigram index on active listings only (e.g., title or normalized title)
+	•	Run trigram fallback only when FTS returns too few results (0 or <N)
+Operator guidance:
+	•	similarity() is full-string similarity
+	•	word_similarity() is often better for search terms inside longer text
+	•	strict_word_similarity() is usually too strict for noisy marketplace text
+	•	FTS itself is not typo-tolerant; trigram fallback is the right complement
+
+5) Arabic config vs simple with Darija/Arabizi
+For MSA Arabic, arabic stemming helps.For Darija/Arabizi-heavy user text, stemming can hurt recall.
+Practical approach:
+	•	Keep your normalization function
+	•	A/B test:
+	•	arabic config vector
+	•	simple config vector over normalized text
+	•	If simple wins on Darija/Arabizi queries, use it (or keep both with weighted ranking)
+
+6) What your real stats currently say
+From your posted stats:
+	•	listings_total_size: 146 MB
+	•	table heap: 15 MB
+	•	indexes: 131 MB
+	•	n_dead_tup: 297 on ~10.7k rows (low)
+	•	autovacuum/autoanalyze running regularly
+Interpretation:
+	•	Autovacuum health looks good
+	•	No immediate bloat emergency
+	•	Index footprint is already high relative to table (expected with GIN-heavy search schema, but notable)
+From your pg_stat_statements sample:
+	•	Top slow queries are mostly bulk deletes/maintenance, not FTS
+	•	So we can’t yet prove whether FTS index scans are hot from that sample alone
+To confirm index usage headroom precisely, run:
+	•	pg_stat_user_indexes for public.listings (idx_scan by index)
+	•	optional EXPLAIN (ANALYZE, BUFFERS) on representative search RPC
+
+7) If you add pgvector later (250k–500k), storage/memory impact + index type
+Rough vector column storage (float32):
+	•	384 dims: ~1.5 KB/row → ~375 MB (250k), ~750 MB (500k)
+	•	768 dims: ~3 KB/row → ~750 MB, ~1.5 GB
+	•	1536 dims: ~6 KB/row → ~1.5 GB, ~3 GB
+Then add ANN index overhead:
+	•	HNSW: usually larger memory/storage, better recall/latency robustness
+	•	IVFFlat: smaller/lighter, more tuning sensitivity (lists/probes)
+Given Supabase guidance and your multilingual need: HNSW is preferred if budget allows.For tighter plans, start with smaller embeddings (e.g., 384-dim multilingual) before jumping to 768/1536.
+
+8) Quick wins I’d flag now
+	•	Move search logic into one SQL RPC (ranking + expansion + fallback orchestration)
+	•	Add weighted ranking (title > company_name > description)
+	•	Add status-filtered partial indexes wherever possible
+	•	Track search quality with labeled eval set (FR/AR/EN + Darija/Arabizi)
+	•	Keep lexicon in DB tables so you can iterate without redeploying app code
+
+If you want, next I can give you a production-ready SQL RPC design (inputs, expansion tables, ranking formula, fallback trigram branch) tailored to your listings schema.
+￼
+OK
+
+
+
+
+Reasoned
+I’ll inspect your public.listings columns first, then create a focused SQL search RPC with multilingual expansion + trigram fallback that fits your current schema.
+
+Ran list_tables
+
+Reasoned
+I’m now applying a production-safe search upgrade: a DB lexicon table, a tsquery builder, one RPC search function, and an active-only trigram fallback index.
+
+CREATE SEARCH RPC STACK
+WRITE
+create table if not exists public.search_lexicon (
+  term text not null,
+  lang text not null default 'any',
+  equivalents text[] not null,
+  weight real not null default 1.0,
+  is_active boolean not null default true,
+  updated_at timestamptz not null default now(),
+  constraint search_lexicon_term_lang_key unique (term, lang)
+);
+
+create index if not exists search_lexicon_term_idx
+  on public.search_lexicon (term)
+  where is_active = true;
+
+create or replace function public.build_multilingual_tsquery(
+  p_search_text text,
+  p_lang text default 'any',
+  p_max_tokens int default 6,
+  p_max_expansions int default 6
+)
+returns table(q_ar tsquery, q_fr tsquery)
+language plpgsql
+stable
+as $$
+declare
+  v_token text;
+  v_terms text[];
+  v_group_ar tsquery;
+  v_group_fr tsquery;
+  v_all_ar tsquery;
+  v_all_fr tsquery;
+  v_tokens text[];
+begin
+  v_tokens := regexp_split_to_array(lower(coalesce(p_search_text, '')), '\\s+');
+
+  v_tokens := (
+    select coalesce(array_agg(t), '{}'::text[])
+    from (
+      select t
+      from unnest(v_tokens) as t
+      where length(t) >= 2
+      limit greatest(1, p_max_tokens)
+    ) s
+  );
+
+  if coalesce(array_length(v_tokens, 1), 0) = 0 then
+    return query select null::tsquery, null::tsquery;
+    return;
+  end if;
+
+  foreach v_token in array v_tokens loop
+    select coalesce(
+      array(
+        select distinct x
+        from (
+          select v_token as x
+          union all
+          select unnest(l.equivalents)
+          from public.search_lexicon l
+          where l.is_active = true
+            and l.term = v_token
+            and (l.lang = p_lang or l.lang = 'any')
+        ) z
+        where length(x) >= 2
+        limit greatest(1, p_max_expansions)
+      ),
+      array[v_token]
+    )
+    into v_terms;
+
+    v_group_ar := null;
+    v_group_fr := null;
+
+    for i in 1..coalesce(array_length(v_terms, 1), 0) loop
+      v_group_ar := case when v_group_ar is null
+        then to_tsquery('arabic', quote_literal(v_terms[i]))
+        else v_group_ar || to_tsquery('arabic', quote_literal(v_terms[i])) end;
+
+      v_group_fr := case when v_group_fr is null
+        then to_tsquery('french', quote_literal(v_terms[i]))
+        else v_group_fr || to_tsquery('french', quote_literal(v_terms[i])) end;
+    end loop;
+
+    v_all_ar := case when v_all_ar is null then v_group_ar else v_all_ar && v_group_ar end;
+    v_all_fr := case when v_all_fr is null then v_group_fr else v_all_fr && v_group_fr end;
+  end loop;
+
+  return query select v_all_ar, v_all_fr;
+end;
+$$;
+
+create or replace function public.search_listings_v2(
+  p_search_text text,
+  p_lang text default 'any',
+  p_limit int default 30,
+  p_offset int default 0,
+  p_min_trgm_similarity real default 0.35
+)
+returns table(
+  id uuid,
+  title text,
+  description text,
+  company_name text,
+  price numeric,
+  status listing_status,
+  created_at timestamptz,
+  rank_score real,
+  match_source text
+)
+language sql
+stable
+as $$
+with q as (
+  select * from public.build_multilingual_tsquery(p_search_text, p_lang)
+),
+fts_hits as (
+  select
+    l.id,
+    l.title,
+    l.description,
+    l.company_name,
+    l.price,
+    l.status,
+    l.created_at,
+    (
+      1.5 * ts_rank_cd(l.search_vector_fr, q.q_fr) +
+      1.2 * ts_rank_cd(l.search_vector_ar, q.q_ar)
+    )::real as rank_score,
+    'fts'::text as match_source
+  from public.listings l
+  cross join q
+  where l.status = 'active'
+    and (
+      (q.q_ar is not null and l.search_vector_ar @@ q.q_ar)
+      or
+      (q.q_fr is not null and l.search_vector_fr @@ q.q_fr)
+    )
+),
+fallback as (
+  select
+    l.id,
+    l.title,
+    l.description,
+    l.company_name,
+    l.price,
+    l.status,
+    l.created_at,
+    extensions.word_similarity(lower(coalesce(l.title, '')), lower(coalesce(p_search_text, '')))::real as rank_score,
+    'trgm_fallback'::text as match_source
+  from public.listings l
+  where l.status = 'active'
+    and not exists (select 1 from fts_hits)
+    and lower(coalesce(l.title, '')) % lower(coalesce(p_search_text, ''))
+    and extensions.word_similarity(lower(coalesce(l.title, '')), lower(coalesce(p_search_text, ''))) >= p_min_trgm_similarity
+)
+select *
+from (
+  select * from fts_hits
+  union all
+  select * from fallback
+) s
+order by s.rank_score desc, s.created_at desc
+limit greatest(1, least(p_limit, 100))
+offset greatest(0, p_offset);
+$$;
+
+create index if not exists listings_title_trgm_active_idx
+  on public.listings
+  using gin (lower(coalesce(title, '')) extensions.gin_trgm_ops)
+  where status = 'active';
+
+
+
+I did not run this last query, I am not going to run anything that changes DB schema and definitely NOT without your advice
+
+

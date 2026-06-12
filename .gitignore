@@ -87,3 +87,6 @@ playwright-report/data/
 
 # Seed scripts with embedded credentials
 scripts/seed-cloud-users-listings.js
+
+# curl cookie jars — never commit session cookies
+cookies.txt

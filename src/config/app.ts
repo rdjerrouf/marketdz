@@ -77,6 +77,10 @@ export const APP_CONFIG = {
     enableAnalytics: true,
     enableAdmin: true,
     enablePWA: true,
+    // Cross-language search via search_listings_v2 RPC (synonym expansion +
+    // relevance ranking). Kill switch: set false to fall back to the legacy
+    // dual-vector PostgREST path. See docs/DAILY_TASK.md 2026-06-11 plan.
+    searchSynonymExpansion: true,
   },
 
   // SEO Configuration

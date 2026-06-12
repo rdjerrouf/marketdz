@@ -245,6 +245,7 @@ function BrowsePageContent() {
       queryParams.set('sortBy', mapSortBy(filters.sortBy))
       queryParams.set('page', page.toString())
       queryParams.set('limit', '20')
+      queryParams.set('locale', locale)  // for zero-result search telemetry
 
       // Reduced logging for production performance
       if (process.env.NODE_ENV === 'development') {
