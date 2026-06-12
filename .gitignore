@@ -90,3 +90,6 @@ scripts/seed-cloud-users-listings.js
 
 # curl cookie jars — never commit session cookies
 cookies.txt
+
+# Local test photos for cloud seeding — never commit (24MB)
+test_photos/
