@@ -3,7 +3,7 @@
   "short_name": "DlalaDZ",
   "description": "Achetez et vendez facilement en Algérie — annonces, emplois, services, locations",
   "start_url": "/",
-  "scope": "/fr",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",

@@ -8,6 +8,10 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig = {
   output: 'standalone', // Enable for Docker deployment
+  // Render metadata in <head> instead of streaming it into <body>.
+  // iOS Add to Home Screen ignores <link rel=manifest> / apple-mobile-web-app-title
+  // when they land in the body, so the home-screen label fell back to the long <title>.
+  htmlLimitedBots: /.*/,
   images: {
     remotePatterns: [
       {
