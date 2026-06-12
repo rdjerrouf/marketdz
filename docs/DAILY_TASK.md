@@ -254,3 +254,16 @@ Fixes in `tests/search.spec.ts`:
 - Inserted 5 local test listings (FR + AR, Computers & Tablets, Béjaïa) covering the data-dependent tests; bonus assertion observed: FR query "voiture logan" finds Arabic 'سيارة داسيا لوقان للبيع' via the cross-script lexicon.
 
 **Result: 22 passed, 1 skipped (legit), 0 failed.**
+
+---
+
+## 2026-06-11 (session 3) — Cross-language test matrix on cloud + lexicon tuning
+
+Seeded 6 cloud test listings (tires + brake pads × FR/AR/EN, owned by user1@email.com) and ran the full language matrix through `search_listings_v2`. Two findings, one real bug fixed:
+
+1. **Expansion-cap bug (fixed, `20260611000002_raise_expansion_cap.sql`):** groups with ~10 terms were trimmed to 8 variants *alphabetically* — Latin sorts before Arabic, so the Arabic spellings (the entire point) were dropped. FR "pneus" couldn't reach إطارات. Cap raised to 12. **Curation rule: keep lexicon groups ≤ 12 terms.**
+2. **Multi-word lexicon terms are emit-only:** lookup is per-token, so "brake pads" in a group matches nothing unless `pad`/`pads`/`تيل` exist as single-word terms too. Plaquettes group updated accordingly (cloud + local). **Curation rule: every multi-word term needs its distinctive single words in the group.**
+
+Final matrix: **all 9 language combinations match** (pneus/tires/إطارات and plaquettes/brake pads/تيل فرامل each find the FR, AR, and EN listings). Apparent "misses" in earlier runs were ranking artifacts: the English-heavy 1000-listing parts seed pushes single-mention listings past the 50-row page — verified via uncapped queries (85 and 64 total matches, both including the cross-language listing). Resolves itself as real mixed-language inventory replaces the seed.
+
+The 6 test listings remain on cloud for browser testing (delete via `user1@email.com`'s listings when no longer needed).
