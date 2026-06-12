@@ -1,4 +1,4 @@
-# Geolocation Implementation Blueprint for MarketDZ
+# Geolocation Implementation Blueprint for MarketDZ. Note: the app does not really need it!
 
 > **Status**: Future Consideration - Not Currently Needed
 > **Last Updated**: January 2025

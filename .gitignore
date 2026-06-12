@@ -93,3 +93,9 @@ cookies.txt
 
 # Local test photos for cloud seeding — never commit (24MB)
 test_photos/
+
+# Supabase CLI scratch files (version pins, pooler url) — machine-local
+supabase/.temp/
+
+# Per-machine Claude Code permission grants — keep settings.json, ignore local
+.claude/settings.local.json
