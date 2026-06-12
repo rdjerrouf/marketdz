@@ -262,7 +262,7 @@ export default function AdvancedSearchPage() {
               <select
                 id="category-select"
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => { setCategory(e.target.value); e.target.blur() }}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">{tBrowse('allCategories')}</option>
@@ -281,7 +281,7 @@ export default function AdvancedSearchPage() {
               <select
                 id="wilaya-select"
                 value={wilaya}
-                onChange={(e) => setWilaya(e.target.value)}
+                onChange={(e) => { setWilaya(e.target.value); e.target.blur() }}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">{tBrowse('filters.allWilayas')}</option>
@@ -326,7 +326,7 @@ export default function AdvancedSearchPage() {
               <select
                 id="sort-select"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => { setSortBy(e.target.value); e.target.blur() }}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="created_at">{tBrowse('sortNewest')}</option>

@@ -272,7 +272,7 @@ const SimpleAdvancedSearch = () => {
         <div className="flex flex-wrap gap-4 mb-6 justify-center">
           <select
             value={searchParams.category}
-            onChange={(e) => handleFiltersChange({ category: e.target.value })}
+            onChange={(e) => { handleFiltersChange({ category: e.target.value }); e.target.blur() }}
             className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             aria-label="Sélectionner une catégorie"
           >
@@ -286,7 +286,7 @@ const SimpleAdvancedSearch = () => {
 
           <select
             value={searchParams.wilaya}
-            onChange={(e) => handleFiltersChange({ wilaya: e.target.value })}
+            onChange={(e) => { handleFiltersChange({ wilaya: e.target.value }); e.target.blur() }}
             className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             aria-label="Sélectionner une wilaya"
           >
@@ -318,7 +318,7 @@ const SimpleAdvancedSearch = () => {
 
           <select
             value={searchParams.sortBy}
-            onChange={(e) => handleFiltersChange({ sortBy: e.target.value })}
+            onChange={(e) => { handleFiltersChange({ sortBy: e.target.value }); e.target.blur() }}
             className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             aria-label="Sort by"
           >

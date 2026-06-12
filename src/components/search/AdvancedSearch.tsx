@@ -293,7 +293,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFiltersCha
               </label>
               <select
                 value={localFilters.category || ''}
-                onChange={(e) => updateFilter('category', e.target.value)}
+                onChange={(e) => { updateFilter('category', e.target.value); e.target.blur() }}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 aria-label="Sélectionner une catégorie"
               >
@@ -314,7 +314,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFiltersCha
               </label>
               <select
                 value={localFilters.wilaya || ''}
-                onChange={(e) => updateFilter('wilaya', e.target.value)}
+                onChange={(e) => { updateFilter('wilaya', e.target.value); e.target.blur() }}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 aria-label="Sélectionner une wilaya"
               >
@@ -357,7 +357,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({ filters, onFiltersCha
               </label>
               <select
                 value={localFilters.sortBy || 'created_at'}
-                onChange={(e) => updateFilter('sortBy', e.target.value)}
+                onChange={(e) => { updateFilter('sortBy', e.target.value); e.target.blur() }}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 aria-label="Sort by"
               >
