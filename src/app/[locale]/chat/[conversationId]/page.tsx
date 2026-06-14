@@ -33,11 +33,7 @@ export default function ChatPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center" style={{ background: '#06402B' }}>
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-60 h-60 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-8 dark:opacity-15 animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-indigo-400 rounded-full mix-blend-multiply filter blur-xl opacity-8 dark:opacity-15 animate-pulse [animation-delay:3s]"></div>
-        </div>
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center" style={{ background: '#F2DA85' }}>
         <div className="text-center bg-white/80 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-slate-200 dark:border-white/20">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">{t('authRequired')}</h1>
           <p className="text-purple-600 dark:text-purple-200 mb-6">{t('authRequiredDesc')}</p>
@@ -53,12 +49,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: '#06402B' }}>
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-60 h-60 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-8 dark:opacity-15 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-indigo-400 rounded-full mix-blend-multiply filter blur-xl opacity-8 dark:opacity-15 animate-pulse [animation-delay:3s]"></div>
-      </div>
-
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#F2DA85' }}>
       {/* Header */}
       <div className="bg-white/80 dark:bg-white/10 backdrop-blur-md border-b border-slate-200 dark:border-white/20 p-4">
         <div className="flex items-center justify-between max-w-4xl mx-auto">

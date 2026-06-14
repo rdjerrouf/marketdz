@@ -285,45 +285,7 @@ export default function CompleteKickAssHomepage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#06402B' }}>
-      {/* Animated background elements with enhanced effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
-
-        {/* Floating particles */}
-        <div className="absolute inset-0">
-          {[
-            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
-            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
-            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
-            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
-            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' },
-            { left: 'left-[15%]', top: 'top-[60%]', opacity: 'opacity-20' },
-            { left: 'left-[35%]', top: 'top-[75%]', opacity: 'opacity-30' },
-            { left: 'left-[55%]', top: 'top-[50%]', opacity: 'opacity-10' },
-            { left: 'left-[75%]', top: 'top-[70%]', opacity: 'opacity-40' },
-            { left: 'left-[90%]', top: 'top-[45%]', opacity: 'opacity-20' },
-            { left: 'left-[5%]', top: 'top-[80%]', opacity: 'opacity-30' },
-            { left: 'left-[45%]', top: 'top-[5%]', opacity: 'opacity-50' },
-            { left: 'left-[65%]', top: 'top-[85%]', opacity: 'opacity-10' },
-            { left: 'left-[85%]', top: 'top-[35%]', opacity: 'opacity-40' },
-            { left: 'left-[30%]', top: 'top-[90%]', opacity: 'opacity-20' },
-            { left: 'left-[70%]', top: 'top-[40%]', opacity: 'opacity-30' },
-            { left: 'left-[20%]', top: 'top-[65%]', opacity: 'opacity-50' },
-            { left: 'left-[50%]', top: 'top-[95%]', opacity: 'opacity-10' },
-            { left: 'left-[95%]', top: 'top-[15%]', opacity: 'opacity-40' },
-            { left: 'left-[12%]', top: 'top-[40%]', opacity: 'opacity-20' }
-          ].map((particle, i) => (
-            <div
-              key={i}
-              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
-            />
-          ))}
-        </div>
-      </div>
-
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#F2DA85' }}>
       {/* Mobile Navigation Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-lg border-b border-white/10 pointer-events-auto">
         <div className="flex items-center justify-between p-4">
@@ -361,14 +323,14 @@ export default function CompleteKickAssHomepage() {
       </div>
 
       {/* Enhanced Desktop Sidebar */}
-      <div className={`hidden lg:flex w-52 fixed top-0 bottom-0 bg-black/20 backdrop-blur-xl pointer-events-auto ${isRtl ? 'right-0 border-l border-white/10' : 'left-0 border-r border-white/10'}`}>
+      <div className={`hidden lg:flex w-52 fixed top-0 bottom-0 bg-white/30 backdrop-blur-xl pointer-events-auto ${isRtl ? 'right-0 border-l border-black/10' : 'left-0 border-r border-black/10'}`}>
         <div className="p-6 flex flex-col h-full">
           {/* Enhanced Logo */}
           <div className="flex items-center mb-12">
             <span className="text-6xl mr-4">🇩🇿</span>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">DlalaDZ</h1>
-              <p className="text-white/60 text-sm">
+              <h1 className="text-2xl font-bold text-gray-900">DlalaDZ</h1>
+              <p className="text-gray-700 text-sm">
                 {tHome('hero.subtitle')}
               </p>
             </div>
@@ -378,26 +340,26 @@ export default function CompleteKickAssHomepage() {
 
           {/* Enhanced Navigation Menu */}
           <nav className="space-y-3 flex-1">
-            <Link href="/" className="flex items-center w-full p-4 text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl border border-purple-500/20 hover:from-purple-500/30 hover:to-pink-500/30 transition-all duration-300 group shadow-lg">
+            <Link href="/" className="flex items-center w-full p-4 text-gray-900 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl border border-purple-500/30 hover:from-purple-500/30 hover:to-pink-500/30 transition-all duration-300 group shadow-lg">
               <Home className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
               <span className="font-medium">{tNav('home')}</span>
               <div className="ms-auto w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
             </Link>
 
-            <Link href="/browse" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
+            <Link href="/browse" className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-black/5 hover:text-gray-900 transition-all duration-300 group">
               <Search className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
               <span className="font-medium">{tNav('browse')}</span>
               <ChevronRight className={`w-4 h-4 ms-auto opacity-0 group-hover:opacity-100 transition-all ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
             </Link>
 
             {user ? (
-              <Link href="/my-listings" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
+              <Link href="/my-listings" className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-black/5 hover:text-gray-900 transition-all duration-300 group">
                 <Grid className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
                 <span className="font-medium">{tNav('myListings')}</span>
               </Link>
             ) : null}
 
-            <Link href="/add-item" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group relative overflow-hidden">
+            <Link href="/add-item" className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-black/5 hover:text-gray-900 transition-all duration-300 group relative overflow-hidden">
               <Plus className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
               <span className="font-medium">{tNav('post')}</span>
               <div className="ms-auto bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse shadow-lg">
@@ -405,18 +367,18 @@ export default function CompleteKickAssHomepage() {
               </div>
             </Link>
 
-            <Link href="/favorites" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
+            <Link href="/favorites" className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-black/5 hover:text-gray-900 transition-all duration-300 group">
               <Heart className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
               <span className="font-medium">{tNav('favorites')}</span>
             </Link>
 
-            <Link href="/messages" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
+            <Link href="/messages" className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-black/5 hover:text-gray-900 transition-all duration-300 group">
               <MessageCircle className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
               <span className="font-medium">{tNav('messages')}</span>
               <div className="ms-auto w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
             </Link>
 
-            <Link href="/profile" className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-white/5 hover:text-white transition-all duration-300 group">
+            <Link href="/profile" className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-black/5 hover:text-gray-900 transition-all duration-300 group">
               <User className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
               <span className="font-medium">{tNav('profile')}</span>
             </Link>
@@ -434,17 +396,17 @@ export default function CompleteKickAssHomepage() {
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-black/20 animate-pulse"></div>
                     </div>
                     <div className="ml-3 flex-1">
-                      <p className="text-white font-semibold text-sm">
+                      <p className="text-gray-900 font-semibold text-sm">
                         {profile?.first_name} {profile?.last_name}
                       </p>
-                      <p className="text-white/60 text-xs flex items-center">
+                      <p className="text-gray-700 text-xs flex items-center">
                         <Trophy className="w-3 h-3 mr-1" />
                         {/* TODO: Add premium status field to database when implementing premium features */}
                         {profile?.rating && profile.rating > 4.0 ? 'Trusted Seller' : 'Member'}
                       </p>
                     </div>
                     <div className="relative">
-                      <Bell className="w-5 h-5 text-white/60 hover:text-white transition-colors cursor-pointer" />
+                      <Bell className="w-5 h-5 text-gray-700 hover:text-gray-900 transition-colors cursor-pointer" />
                       <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
                     </div>
                   </div>
@@ -452,7 +414,7 @@ export default function CompleteKickAssHomepage() {
                 {/* Sign Out Button */}
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-red-500/10 hover:text-red-300 transition-all duration-300 border border-red-500/20 group"
+                  className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-red-500/10 hover:text-red-700 transition-all duration-300 border border-red-500/30 group"
                 >
                   <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -466,7 +428,7 @@ export default function CompleteKickAssHomepage() {
                 {/* Sign In Button */}
                 <Link 
                   href="/signin" 
-                  className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-green-500/10 hover:text-green-300 transition-all duration-300 border border-green-500/20 group"
+                  className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-green-500/10 hover:text-green-700 transition-all duration-300 border border-green-500/30 group"
                 >
                   <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -476,7 +438,7 @@ export default function CompleteKickAssHomepage() {
                 </Link>
                 <Link
                   href="/signup"
-                  className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-blue-500/10 hover:text-blue-300 transition-all duration-300 border border-blue-500/20 group"
+                  className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-blue-500/10 hover:text-blue-700 transition-all duration-300 border border-blue-500/30 group"
                 >
                   <svg className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -518,7 +480,7 @@ export default function CompleteKickAssHomepage() {
               {/* Quick filters */}
               <div className="flex flex-wrap gap-3 mt-4">
                 {[
-                  { label: tHome('quickFilters.electronics'), href: '/browse?category=for_sale' },
+                  { label: tHome('quickFilters.autoParts'), href: `/browse?category=for_sale&subcategory=${encodeURIComponent('Auto & Motorcycle Parts')}` },
                   { label: tHome('quickFilters.realEstate'), href: '/browse?category=for_rent' },
                   { label: tHome('categories.jobs'), href: '/browse?category=job' },
                   { label: tHome('categories.services'), href: '/browse?category=service' },
@@ -526,7 +488,7 @@ export default function CompleteKickAssHomepage() {
                   <Link
                     key={tag.label}
                     href={tag.href}
-                    className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-105 hover:shadow-lg"
+                    className="bg-white/50 backdrop-blur-sm text-gray-900 px-4 py-2 rounded-full text-sm hover:bg-white/70 transition-all duration-300 border border-white/60 hover:scale-105 hover:shadow-lg"
                   >
                     {tag.label}
                   </Link>
@@ -623,8 +585,8 @@ export default function CompleteKickAssHomepage() {
 
           {/* Enhanced Category Pills */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold text-white mb-8 flex items-center">
-              <Grid className="w-8 h-8 me-3 text-purple-400" />
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center">
+              <Grid className="w-8 h-8 me-3 text-purple-700" />
               {tHome('categories.title')}
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -635,13 +597,13 @@ export default function CompleteKickAssHomepage() {
                   <Link
                     key={category}
                     href={`/browse?category=${category}`}
-                    className="group bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/30 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl block"
+                    className="group bg-white/40 backdrop-blur-sm rounded-2xl p-6 border border-white/50 hover:border-white/70 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl block"
                   >
                     <div className={`bg-gradient-to-r ${badge.color} p-4 rounded-xl mb-4 mx-auto w-fit group-hover:scale-110 transition-transform shadow-lg group-hover:shadow-2xl`}>
                       <Icon className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-white font-semibold text-lg mb-2">{badge.text}</h3>
-                    <p className="text-white/60 text-sm">
+                    <h3 className="text-gray-900 font-semibold text-lg mb-2">{badge.text}</h3>
+                    <p className="text-gray-700 text-sm">
                       {category === 'for_sale' && tHome('quickFilters.electronics')}
                       {category === 'for_rent' && tHome('quickFilters.realEstate')}
                       {category === 'job' && tHome('categories.jobs')}
@@ -657,17 +619,17 @@ export default function CompleteKickAssHomepage() {
           <div className="mb-16">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2 flex items-center">
-                  <Star className="w-8 h-8 me-3 text-yellow-400" />
+                <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center">
+                  <Star className="w-8 h-8 me-3 text-yellow-600" />
                   {tHome('featured.title')}
                 </h2>
-                <p className="text-white/60">
+                <p className="text-gray-700">
                   {listingsLoading ? tCommon('loading') :
                    featuredListings.length === 0 ? tCommon('noResults') :
                    tHome('featured.subtitle')}
                 </p>
               </div>
-              <Link href="/browse" className="flex items-center text-purple-400 hover:text-purple-300 font-medium transition-colors group">
+              <Link href="/browse" className="flex items-center text-purple-700 hover:text-purple-900 font-medium transition-colors group">
                 {tCommon('seeAll')}
                 <ArrowRight className={`w-5 h-5 ms-2 transition-transform ${isRtl ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
               </Link>
@@ -679,11 +641,11 @@ export default function CompleteKickAssHomepage() {
                 {/* Mobile Loading - 2 columns */}
                 <div className="md:hidden grid grid-cols-2 gap-3">
                   {[...Array(6)].map((_, i) => (
-                    <div key={i} className="animate-pulse bg-white/5 rounded-2xl overflow-hidden">
-                      <div className="h-40 bg-white/10"></div>
+                    <div key={i} className="animate-pulse bg-white/40 rounded-2xl overflow-hidden">
+                      <div className="h-40 bg-black/10"></div>
                       <div className="p-3 space-y-2">
-                        <div className="h-4 bg-white/10 rounded w-3/4"></div>
-                        <div className="h-3 bg-white/10 rounded w-1/2"></div>
+                        <div className="h-4 bg-black/10 rounded w-3/4"></div>
+                        <div className="h-3 bg-black/10 rounded w-1/2"></div>
                       </div>
                     </div>
                   ))}
@@ -691,12 +653,12 @@ export default function CompleteKickAssHomepage() {
                 {/* Desktop Loading - 3 columns */}
                 <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {[...Array(6)].map((_, i) => (
-                    <div key={i} className="animate-pulse bg-white/5 rounded-3xl overflow-hidden">
-                      <div className="h-56 bg-white/10"></div>
+                    <div key={i} className="animate-pulse bg-white/40 rounded-3xl overflow-hidden">
+                      <div className="h-56 bg-black/10"></div>
                       <div className="p-6 space-y-3">
-                        <div className="h-6 bg-white/10 rounded w-3/4"></div>
-                        <div className="h-4 bg-white/10 rounded w-full"></div>
-                        <div className="h-4 bg-white/10 rounded w-2/3"></div>
+                        <div className="h-6 bg-black/10 rounded w-3/4"></div>
+                        <div className="h-4 bg-black/10 rounded w-full"></div>
+                        <div className="h-4 bg-black/10 rounded w-2/3"></div>
                       </div>
                     </div>
                   ))}
@@ -707,10 +669,10 @@ export default function CompleteKickAssHomepage() {
             {/* Empty State */}
             {!listingsLoading && featuredListings.length === 0 && (
               <div className="text-center py-16">
-                <div className="bg-white/5 rounded-3xl p-12 max-w-md mx-auto">
-                  <Star className="w-16 h-16 text-white/30 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-white mb-2">{tCommon('noResults')}</h3>
-                  <p className="text-white/60 mb-6">{tHome('featured.subtitle')}</p>
+                <div className="bg-white/40 rounded-3xl p-12 max-w-md mx-auto">
+                  <Star className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{tCommon('noResults')}</h3>
+                  <p className="text-gray-700 mb-6">{tHome('featured.subtitle')}</p>
                   <Link
                     href="/add-item"
                     className="inline-flex items-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
@@ -746,10 +708,10 @@ export default function CompleteKickAssHomepage() {
                   <Link
                     href={`/browse/${listing.id}`}
                     key={listing.id}
-                    className={`group bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl block ${
+                    className={`group bg-white/40 backdrop-blur-sm rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl block ${
                       isUrgent
                         ? 'border-2 border-red-500 hover:border-red-400 animate-pulse-slow shadow-red-500/50'
-                        : 'border border-white/10 hover:border-white/30'
+                        : 'border border-white/50 hover:border-white/70'
                     }`}
                   >
                     {/* Enhanced Image Container */}
@@ -831,23 +793,23 @@ export default function CompleteKickAssHomepage() {
 
                     {/* Enhanced Content */}
                     <div className="p-6">
-                      <h3 className="text-white font-bold text-xl mb-3 line-clamp-1 group-hover:text-purple-300 transition-colors">
+                      <h3 className="text-gray-900 font-bold text-xl mb-3 line-clamp-1 group-hover:text-purple-700 transition-colors">
                         {listing.title}
                       </h3>
 
-                      <p className="text-white/70 text-sm mb-4 line-clamp-2 leading-relaxed">
+                      <p className="text-gray-700 text-sm mb-4 line-clamp-2 leading-relaxed">
                         {listing.description}
                       </p>
 
                       <div className="flex items-center justify-between mb-4">
                         <div className={`text-2xl font-bold bg-gradient-to-r ${
                           isUrgent
-                            ? 'from-red-400 to-red-600'
-                            : 'from-green-400 to-green-600'
+                            ? 'from-red-500 to-red-700'
+                            : 'from-green-600 to-green-800'
                         } bg-clip-text text-transparent`}>
                           {formatPrice(listing.price, listing.category, listing.rental_period)}
                         </div>
-                        <div className="flex items-center text-white/50 text-sm">
+                        <div className="flex items-center text-gray-600 text-sm">
                           <Users className="w-4 h-4 mr-1" />
                           {5 + (parseInt(listing.id) * 23) % 15} interested
                         </div>
@@ -867,12 +829,12 @@ export default function CompleteKickAssHomepage() {
           </div>
 
           {/* Enhanced Call to Action Section */}
-          <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-3xl p-12 border border-purple-500/30 text-center mb-16 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <div className="bg-white/40 backdrop-blur-sm rounded-3xl p-12 border border-white/50 text-center mb-16 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-4xl font-bold text-white mb-6">
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">
                 {tHome('hero.cta')}
               </h2>
-              <p className="text-xl text-white/80 mb-8 leading-relaxed">
+              <p className="text-xl text-gray-700 mb-8 leading-relaxed">
                 {tHome('featured.subtitle')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -880,7 +842,7 @@ export default function CompleteKickAssHomepage() {
                   <Plus className="w-6 h-6 me-3" />
                   {tNav('post')}
                 </Link>
-                <Link href="/help" className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold hover:bg-white/20 transition-all duration-300 border border-white/20 flex items-center justify-center shadow-lg hover:shadow-xl">
+                <Link href="/help" className="bg-white/60 backdrop-blur-sm text-gray-900 px-8 py-4 rounded-2xl font-semibold hover:bg-white/80 transition-all duration-300 border border-white/70 flex items-center justify-center shadow-lg hover:shadow-xl">
                   <Award className="w-6 h-6 me-3" />
                   {tCommon('seeAll')}
                 </Link>
@@ -889,34 +851,34 @@ export default function CompleteKickAssHomepage() {
           </div>
 
           {/* Enhanced Footer Section */}
-          <div className="text-center py-12 border-t border-white/10 relative z-10">
+          <div className="text-center py-12 border-t border-black/10 relative z-10">
             <div className="flex items-center justify-center mb-4">
               <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3 flex items-center justify-center">
                 <span className="text-2xl">🇩🇿</span>
               </div>
-              <h3 className="text-white text-lg font-semibold">DlalaDZ</h3>
+              <h3 className="text-gray-900 text-lg font-semibold">DlalaDZ</h3>
             </div>
-            <p className="text-white/60 mb-4">Algeria&apos;s premier marketplace connecting buyers and sellers nationwide</p>
-            <div className="flex justify-center space-x-6 text-white/40 text-sm relative z-20">
+            <p className="text-gray-700 mb-4">Algeria&apos;s premier marketplace connecting buyers and sellers nationwide</p>
+            <div className="flex justify-center space-x-6 text-gray-600 text-sm relative z-20">
               <span>© 2026 DlalaDZ</span>
               <span>•</span>
               <Link
                 href="/privacy"
-                className="hover:text-white hover:underline transition-colors cursor-pointer inline-block pointer-events-auto"
+                className="hover:text-gray-900 hover:underline transition-colors cursor-pointer inline-block pointer-events-auto"
               >
                 Privacy Policy
               </Link>
               <span>•</span>
               <Link
                 href="/terms"
-                className="hover:text-white hover:underline transition-colors cursor-pointer inline-block pointer-events-auto"
+                className="hover:text-gray-900 hover:underline transition-colors cursor-pointer inline-block pointer-events-auto"
               >
                 Terms of Service
               </Link>
               <span>•</span>
               <Link
                 href="/help"
-                className="hover:text-white hover:underline transition-colors cursor-pointer inline-block pointer-events-auto"
+                className="hover:text-gray-900 hover:underline transition-colors cursor-pointer inline-block pointer-events-auto"
               >
                 Support
               </Link>

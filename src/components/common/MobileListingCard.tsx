@@ -176,10 +176,10 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
   return (
     <div
       onClick={handleClick}
-      className={`bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-2xl overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shadow-xl ${
+      className={`bg-white/40 backdrop-blur-sm rounded-2xl overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shadow-xl ${
         isUrgent
           ? 'border-2 border-red-500 hover:border-red-400 animate-pulse-slow shadow-red-500/50'
-          : 'border border-white/10 hover:border-white/20'
+          : 'border border-white/50 hover:border-white/70'
       }`}
     >
       {/* Compact Image Container - Mobile Optimized for 2x2 Grid */}
@@ -250,7 +250,7 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
       {/* Content Section - Compact for 2-Column Grid */}
       <div className="p-3">
         {/* Title - Compact */}
-        <h3 className="text-white font-bold text-sm mb-2 line-clamp-2 leading-tight">
+        <h3 className="text-gray-900 font-bold text-sm mb-2 line-clamp-2 leading-tight">
           {listing.title}
         </h3>
 
@@ -258,8 +258,8 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
         <div className="mb-2">
           <div className={`text-lg font-bold ${
             isUrgent
-              ? 'bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent'
-              : 'bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent'
+              ? 'bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent'
+              : 'bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent'
           }`}>
             {formatPrice(listing.price, listing.category, listing.rental_period)}
           </div>
@@ -267,7 +267,7 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
 
         {/* Location - Compact */}
         {(listing.city || listing.wilaya) && (
-          <div className="flex items-center text-white/60 text-xs mb-2">
+          <div className="flex items-center text-gray-600 text-xs mb-2">
             <MapPin className="w-3 h-3 me-1" />
             <span className="truncate">{listing.city || listing.wilaya}</span>
           </div>

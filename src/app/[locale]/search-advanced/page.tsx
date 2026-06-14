@@ -151,37 +151,14 @@ export default function AdvancedSearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#06402B] relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
-        
-        {/* Floating particles */}
-        <div className="absolute inset-0">
-          {[
-            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
-            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
-            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
-            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
-            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' }
-          ].map((particle, i) => (
-            <div
-              key={i}
-              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
-            />
-          ))}
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
             {tCommon('search')}
           </h1>
-          <p className="text-lg text-white/80">
+          <p className="text-lg text-gray-700">
             {t('subtitle')}
           </p>
         </div>

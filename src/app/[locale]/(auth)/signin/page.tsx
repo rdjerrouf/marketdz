@@ -128,36 +128,13 @@ function SignInPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#06402B] relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
-        
-        {/* Floating particles */}
-        <div className="absolute inset-0">
-          {[
-            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
-            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
-            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
-            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
-            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' }
-          ].map((particle, i) => (
-            <div
-              key={i}
-              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
-            />
-          ))}
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
         {/* Back button and PWA Install */}
         <div className="mb-4 flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center text-sm text-white/80 hover:text-white transition-colors duration-200"
+            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 transition-colors duration-200"
           >
             <svg className={`w-4 h-4 me-2 ${isRtl ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -167,10 +144,10 @@ function SignInPageContent() {
           <PWAInstallButton variant="compact" />
         </div>
 
-        <h1 className="text-center text-3xl font-bold text-white mb-2">
+        <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
           {tCommon('appName')}
         </h1>
-        <h2 className="text-center text-xl text-white/80">
+        <h2 className="text-center text-xl text-gray-700">
           {t('title')}
         </h2>
       </div>
@@ -292,7 +269,7 @@ function SignInPageContent() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">Loading...</div>}>
       <SignInPageContent />
     </Suspense>
   )

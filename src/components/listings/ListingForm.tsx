@@ -794,7 +794,7 @@ export default function ListingForm({
       {/* Submit */}
       <div className="flex justify-end gap-4 pt-4">
         <button type="button" onClick={() => router.back()}
-          className="px-8 py-3 border-2 border-white rounded-lg text-white font-semibold hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+          className="px-8 py-3 border-2 border-gray-600 rounded-lg text-gray-800 font-semibold hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
           {t('form.cancel')}
         </button>
         <button type="submit" disabled={loading}

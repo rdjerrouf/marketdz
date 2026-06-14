@@ -84,6 +84,7 @@
     },
     "quickFilters": {
       "electronics": "Electronics",
+      "autoParts": "Auto parts for sale",
       "vehicles": "Vehicles",
       "realEstate": "Real Estate",
       "furniture": "Furniture"

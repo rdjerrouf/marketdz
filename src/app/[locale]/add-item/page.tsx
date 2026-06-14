@@ -122,17 +122,10 @@ export default function AddItemPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#06402B] relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-          <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
-        </div>
-        
+      <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
         <div className="relative z-10 flex items-center justify-center min-h-screen">
-          <div className="text-center text-white">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
+          <div className="text-center text-gray-800">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
             <p>{t('loading')}</p>
           </div>
         </div>
@@ -141,38 +134,10 @@ export default function AddItemPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#06402B] relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
-        
-        {/* Floating particles */}
-        <div className="absolute inset-0">
-          {[
-            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
-            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
-            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
-            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
-            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' },
-            { left: 'left-[15%]', top: 'top-[60%]', opacity: 'opacity-20' },
-            { left: 'left-[35%]', top: 'top-[75%]', opacity: 'opacity-30' },
-            { left: 'left-[55%]', top: 'top-[50%]', opacity: 'opacity-10' },
-            { left: 'left-[75%]', top: 'top-[70%]', opacity: 'opacity-40' },
-            { left: 'left-[90%]', top: 'top-[45%]', opacity: 'opacity-20' }
-          ].map((particle, i) => (
-            <div
-              key={i}
-              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
-            />
-          ))}
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
       <div className="relative z-10 flex">
       {/* Sidebar Navigation - Hidden on mobile/PWA, visible on desktop */}
-      <div className={`hidden lg:block ${isPWA ? 'lg:w-44' : 'lg:w-64'} bg-black/20 backdrop-blur-lg ${isRtl ? 'border-l' : 'border-r'} border-white/10`}>
+      <div className={`hidden lg:block ${isPWA ? 'lg:w-44' : 'lg:w-64'} bg-white/30 backdrop-blur-lg ${isRtl ? 'border-l' : 'border-r'} border-black/10`}>
         <div className={isPWA ? 'p-4' : 'p-6'}>
           {/* Logo */}
           <div className="flex items-center mb-8">
@@ -182,13 +147,13 @@ export default function AddItemPage() {
               </svg>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
             </div>
-            <h1 className="text-white text-xl font-bold">DlalaDZ</h1>
+            <h1 className="text-gray-900 text-xl font-bold">DlalaDZ</h1>
           </div>
 
           {/* Back Button */}
           <button
             onClick={() => router.back()}
-            className="flex items-center text-white/80 hover:text-white transition-colors mb-6 group"
+            className="flex items-center text-gray-800 hover:text-gray-900 transition-colors mb-6 group"
           >
             <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -200,7 +165,7 @@ export default function AddItemPage() {
           <nav className="space-y-2">
             <button 
               onClick={() => router.push('/')}
-              className="flex items-center w-full p-3 text-white/80 rounded-xl hover:bg-white/10 hover:text-white transition-all duration-200"
+              className="flex items-center w-full p-3 text-gray-800 rounded-xl hover:bg-black/5 hover:text-gray-900 transition-all duration-200"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -210,7 +175,7 @@ export default function AddItemPage() {
 
             <button
               onClick={() => router.push('/browse')}
-              className="flex items-center w-full p-3 text-white/80 rounded-xl hover:bg-white/10 hover:text-white transition-all duration-200"
+              className="flex items-center w-full p-3 text-gray-800 rounded-xl hover:bg-black/5 hover:text-gray-900 transition-all duration-200"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -219,7 +184,7 @@ export default function AddItemPage() {
             </button>
 
             <button
-              className="flex items-center w-full p-3 text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-xl"
+              className="flex items-center w-full p-3 text-gray-900 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/40 rounded-xl"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -230,7 +195,7 @@ export default function AddItemPage() {
 
             <button
               onClick={() => router.push('/browse')}
-              className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -238,15 +203,15 @@ export default function AddItemPage() {
               {tNav('browse')}
             </button>
 
-            <button className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors">
+            <button className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors">
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
               {tNav('favorites')}
-              <span className="ms-auto bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full">0</span>
+              <span className="ms-auto bg-black/10 text-gray-800 text-xs px-2 py-1 rounded-full">0</span>
             </button>
 
-            <button className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors">
+            <button className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors">
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
@@ -255,7 +220,7 @@ export default function AddItemPage() {
 
             <button
               onClick={() => router.push('/profile')}
-              className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -263,7 +228,7 @@ export default function AddItemPage() {
               {tNav('profile')}
             </button>
 
-            <div className="pt-4 border-t border-white border-opacity-20 mt-4">
+            <div className="pt-4 border-t border-black/10 mt-4">
               {user ? (
                 <button 
                   onClick={async () => {
@@ -275,7 +240,7 @@ export default function AddItemPage() {
                       router.push('/signin')
                     }
                   }}
-                  className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+                  className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors"
                 >
                   <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -286,7 +251,7 @@ export default function AddItemPage() {
                 <>
                   <button
                     onClick={() => router.push('/signin')}
-                    className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors mb-2"
+                    className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors mb-2"
                   >
                     <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -295,7 +260,7 @@ export default function AddItemPage() {
                   </button>
                   <button
                     onClick={() => router.push('/signup')}
-                    className="flex items-center w-full p-3 text-white/80 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+                    className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors"
                   >
                     <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -311,7 +276,7 @@ export default function AddItemPage() {
         {/* User Info at Bottom */}
         {user && (
           <div className="absolute bottom-4 start-4 end-4 max-w-56">
-            <div className="bg-black/30 backdrop-blur-sm border border-white/10 p-3 rounded-lg">
+            <div className="bg-white/40 backdrop-blur-sm border border-white/50 p-3 rounded-lg">
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center me-3">
                   <span className="text-white font-semibold">
@@ -319,10 +284,10 @@ export default function AddItemPage() {
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-white font-medium text-sm truncate">
+                  <p className="text-gray-900 font-medium text-sm truncate">
                     {user.first_name} {user.last_name}
                   </p>
-                  <p className="text-white/70 text-xs truncate">
+                  <p className="text-gray-700 text-xs truncate">
                     {user.email}
                   </p>
                 </div>
@@ -339,7 +304,7 @@ export default function AddItemPage() {
           <div className="flex items-center justify-between">
             <button
               onClick={() => router.back()}
-              className="flex items-center text-white/80 hover:text-white transition-colors group"
+              className="flex items-center text-gray-800 hover:text-gray-900 transition-colors group"
             >
               <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -352,20 +317,20 @@ export default function AddItemPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
               </div>
-              <h1 className="text-white text-lg font-bold">DlalaDZ</h1>
+              <h1 className="text-gray-900 text-lg font-bold">DlalaDZ</h1>
             </div>
           </div>
         </div>
 
         {/* Header */}
         <div className="text-center mb-12 relative">
-          <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center">
             ✨ {t('createTitle')}
           </h1>
-          <p className="text-xl text-white text-opacity-90 mb-2">
+          <p className="text-xl text-gray-700 mb-2">
             {t('createSubtitle')}
           </p>
-          <p className="text-white text-opacity-70">
+          <p className="text-gray-600">
             {t('selectCategory')}
           </p>
         </div>
@@ -377,7 +342,7 @@ export default function AddItemPage() {
               <button
                 key={category.id}
                 onClick={() => handleCategorySelect(category.id)}
-                className="group relative bg-white/10 backdrop-blur-lg hover:bg-white/20 rounded-2xl p-8 transition-all duration-300 transform hover:scale-105 border border-white/20 hover:border-white/30"
+                className="group relative bg-white/40 backdrop-blur-lg hover:bg-white/50 rounded-2xl p-8 transition-all duration-300 transform hover:scale-105 border border-white/50 hover:border-white/70"
               >
                 {/* Background Gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-30 rounded-2xl transition-opacity duration-300`}></div>
@@ -388,21 +353,21 @@ export default function AddItemPage() {
                     {category.icon}
                   </div>
                   
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
                     {category.title}
                   </h3>
-                  
-                  <p className="text-white/90 mb-2 font-medium">
+
+                  <p className="text-gray-700 mb-2 font-medium">
                     {category.description}
                   </p>
-                  
-                  <p className="text-white/70 italic text-sm">
+
+                  <p className="text-gray-600 italic text-sm">
                     {category.subtitle}
                   </p>
 
                   {/* Arrow Icon */}
                   <div className="mt-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg className={`w-6 h-6 text-white mx-auto ${isRtl ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className={`w-6 h-6 text-gray-700 mx-auto ${isRtl ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
@@ -416,7 +381,7 @@ export default function AddItemPage() {
         <div className="text-center mt-12">
           <button
             onClick={() => router.push('/')}
-            className="text-white text-opacity-70 hover:text-opacity-100 transition-colors flex items-center mx-auto"
+            className="text-gray-700 hover:text-gray-900 transition-colors flex items-center mx-auto"
           >
             <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

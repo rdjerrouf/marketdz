@@ -93,16 +93,10 @@ export default function MyListingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#06402B] relative overflow-hidden flex items-center justify-center">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-        </div>
-        
-        <div className="relative z-10 flex items-center bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
-          <span className="ml-3 text-white/80">Loading...</span>
+      <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex items-center justify-center">
+        <div className="relative z-10 flex items-center bg-white/40 backdrop-blur-sm p-6 rounded-xl border border-white/50">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+          <span className="ml-3 text-gray-800">Loading...</span>
         </div>
       </div>
     )
@@ -110,16 +104,10 @@ export default function MyListingsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#06402B] relative overflow-hidden flex items-center justify-center">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-        </div>
-        
-        <div className="relative z-10 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-8 max-w-md text-center">
-          <h2 className="text-xl font-bold text-white mb-4">Authentication Required</h2>
-          <p className="text-white/80 mb-6">You need to be signed in to view your listings.</p>
+      <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex items-center justify-center">
+        <div className="relative z-10 bg-white/40 backdrop-blur-sm rounded-xl border border-white/50 p-8 max-w-md text-center">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Authentication Required</h2>
+          <p className="text-gray-700 mb-6">You need to be signed in to view your listings.</p>
           <button
             onClick={() => router.push('/signin')}
             className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -132,30 +120,7 @@ export default function MyListingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#06402B] relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
-        
-        {/* Floating particles */}
-        <div className="absolute inset-0">
-          {[
-            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
-            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
-            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
-            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
-            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' }
-          ].map((particle, i) => (
-            <div
-              key={i}
-              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
-            />
-          ))}
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 py-8 pb-24 md:pb-8">
         {/* Header with back button */}
         <div className="mb-8">
@@ -174,7 +139,7 @@ export default function MyListingsPage() {
                 router.push('/')
               }
             }}
-            className="flex items-center text-white/80 hover:text-white transition-colors mb-4 group"
+            className="flex items-center text-gray-800 hover:text-gray-900 transition-colors mb-4 group"
           >
             <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -182,11 +147,11 @@ export default function MyListingsPage() {
             Back
           </button>
           
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-6">
+          <div className="bg-white/40 backdrop-blur-sm rounded-xl border border-white/50 p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-3xl font-bold text-white mb-2">{t('title')}</h1>
-                <p className="text-white/70">Manage your posted items and services</p>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('title')}</h1>
+                <p className="text-gray-700">Manage your posted items and services</p>
               </div>
             </div>
           </div>

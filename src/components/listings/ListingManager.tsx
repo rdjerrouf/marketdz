@@ -181,7 +181,7 @@ export default function ListingManager({ userId }: ListingManagerProps) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
-        <span className="ml-3 text-white/80">Loading listings...</span>
+        <span className="ml-3 text-gray-800">Loading listings...</span>
       </div>
     )
   }
@@ -190,7 +190,7 @@ export default function ListingManager({ userId }: ListingManagerProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-white">My Listings</h2>
+        <h2 className="text-2xl font-bold text-gray-900">My Listings</h2>
         
         <div className="flex flex-col sm:flex-row gap-3">
           <select

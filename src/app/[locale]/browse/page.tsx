@@ -494,48 +494,25 @@ function BrowsePageContent() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex flex-col md:flex-row" style={{ background: '#06402B' }}>
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
-
-        {/* Floating particles - hidden on mobile */}
-        <div className="absolute inset-0 hidden md:block">
-          {[
-            { left: 'left-[10%]', top: 'top-[20%]', opacity: 'opacity-10' },
-            { left: 'left-[25%]', top: 'top-[15%]', opacity: 'opacity-20' },
-            { left: 'left-[40%]', top: 'top-[30%]', opacity: 'opacity-30' },
-            { left: 'left-[60%]', top: 'top-[10%]', opacity: 'opacity-40' },
-            { left: 'left-[80%]', top: 'top-[25%]', opacity: 'opacity-50' }
-          ].map((particle, i) => (
-            <div
-              key={i}
-              className={`absolute w-2 h-2 bg-white/10 rounded-full animate-pulse ${particle.left} ${particle.top} ${particle.opacity}`}
-            />
-          ))}
-        </div>
-      </div>
-
+    <div className="min-h-screen relative overflow-hidden flex flex-col md:flex-row" style={{ background: '#F2DA85' }}>
       {/* Sidebar Navigation - Hidden on mobile, shown on desktop */}
-      <div className={`hidden md:block relative z-10 w-64 bg-slate-900/90 backdrop-blur-sm ${isRtl ? 'border-l' : 'border-r'} border-white/10`}>
+      <div className={`hidden md:block relative z-10 w-64 bg-white/30 backdrop-blur-sm ${isRtl ? 'border-l' : 'border-r'} border-black/10`}>
         <div className="p-6">
           {/* Logo */}
           <div className="flex items-center mb-8">
             <div className="bg-purple-600/30 p-2 rounded-lg me-3">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </div>
-            <h1 className="text-white text-xl font-bold">DlalaDZ</h1>
+            <h1 className="text-gray-900 text-xl font-bold">DlalaDZ</h1>
           </div>
 
           {/* Back Button */}
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => router.back()}
-              className="flex items-center text-white/80 hover:text-white transition-colors group"
+              className="flex items-center text-gray-800 hover:text-gray-900 transition-colors group"
             >
               <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -548,7 +525,7 @@ function BrowsePageContent() {
           <nav className="space-y-2">
             <button
               onClick={() => router.push('/')}
-              className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
+              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-purple-600/20 hover:text-gray-900 transition-all duration-200"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -556,7 +533,7 @@ function BrowsePageContent() {
               {tNav('home')}
             </button>
 
-            <div className="flex items-center w-full p-3 text-white bg-purple-600/30 rounded-lg border border-purple-400/30">
+            <div className="flex items-center w-full p-3 text-gray-900 bg-purple-500/20 rounded-lg border border-purple-400/40">
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -565,7 +542,7 @@ function BrowsePageContent() {
 
             <button
               onClick={() => router.push('/add-item')}
-              className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
+              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-purple-600/20 hover:text-gray-900 transition-all duration-200"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -575,7 +552,7 @@ function BrowsePageContent() {
 
             <button
               onClick={() => router.push('/my-listings')}
-              className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
+              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-purple-600/20 hover:text-gray-900 transition-all duration-200"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -585,7 +562,7 @@ function BrowsePageContent() {
 
             <button
               onClick={() => router.push('/favorites')}
-              className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
+              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-purple-600/20 hover:text-gray-900 transition-all duration-200"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -595,7 +572,7 @@ function BrowsePageContent() {
 
             <button
               onClick={() => router.push('/profile')}
-              className="flex items-center w-full p-3 text-gray-300 rounded-lg hover:bg-purple-600/20 hover:text-white transition-all duration-200"
+              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-purple-600/20 hover:text-gray-900 transition-all duration-200"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -610,8 +587,8 @@ function BrowsePageContent() {
       <div className="relative z-10 flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-auto">
         {/* Header */}
         <div className="text-center mb-4 md:mb-8 relative">
-          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{t('searchTitle')}</h1>
-          <p className="text-sm md:text-lg text-white text-opacity-90 px-4">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">{t('searchTitle')}</h1>
+          <p className="text-sm md:text-lg text-gray-700 px-4">
             {t('searchSubtitle')}
           </p>
         </div>
@@ -972,13 +949,13 @@ function BrowsePageContent() {
           {/* Results Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-gray-900">
                 {loading && pagination.totalItems === 0 ? t('searching') :
                  error ? t('searchError') :
                  t('searchResults')}
               </h2>
               {!loading && !error && (
-                <p className="text-white/80 mt-1">
+                <p className="text-gray-700 mt-1">
                   {listings.length === 0 ?
                     t('noListings') :
                     pagination.totalItems ?
@@ -991,7 +968,7 @@ function BrowsePageContent() {
 
             {/* Results Info */}
             {!loading && !error && listings.length > 0 && pagination.totalItems > 0 && (
-              <div className="text-sm text-white/70">
+              <div className="text-sm text-gray-600">
                 {t('showingRange', {
                   from: ((pagination.currentPage - 1) * 20) + 1,
                   to: Math.min(pagination.currentPage * 20, pagination.totalItems),
@@ -1102,7 +1079,7 @@ function BrowsePageContent() {
                   return (
                     <div
                       key={listing.id}
-                      className="group bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl"
+                      className="group bg-white/40 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/50 hover:border-white/70 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl"
                       onClick={(e) => {
                         // Don't navigate if clicking on favorite button or its children
                         const target = e.target as HTMLElement
@@ -1175,21 +1152,21 @@ function BrowsePageContent() {
 
                       {/* Enhanced Content */}
                       <div className="p-6">
-                        <h3 className="text-white font-bold text-xl mb-3 line-clamp-1 group-hover:text-purple-300 transition-colors">
+                        <h3 className="text-gray-900 font-bold text-xl mb-3 line-clamp-1 group-hover:text-purple-700 transition-colors">
                           {listing.title}
                         </h3>
 
-                        <p className="text-white/70 text-sm mb-4 line-clamp-2 leading-relaxed">
+                        <p className="text-gray-700 text-sm mb-4 line-clamp-2 leading-relaxed">
                           {listing.description}
                         </p>
 
                         <div className="flex items-center justify-between mb-4">
-                          <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
+                          <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">
                             {formatPrice(listing.price, listing.category, listing.rental_period)}
                           </div>
 
                           {listing.search_rank && listing.search_rank > 0 && (
-                            <div className="flex items-center text-xs text-white/70">
+                            <div className="flex items-center text-xs text-gray-600">
                               <svg className="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
@@ -1200,7 +1177,7 @@ function BrowsePageContent() {
 
                         {/* User Info */}
                         {listing.user && (
-                          <div className="mt-3 pt-3 border-t border-white/10">
+                          <div className="mt-3 pt-3 border-t border-black/10">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -1208,7 +1185,7 @@ function BrowsePageContent() {
                                   router.push(`/profile/${listing.user.id}`)
                                 }
                               }}
-                              className="flex items-center text-sm text-white/70 hover:text-purple-300 transition-colors w-full text-left"
+                              className="flex items-center text-sm text-gray-700 hover:text-purple-700 transition-colors w-full text-left"
                             >
                               {listing.user.avatar_url ? (
                                 <img
@@ -1219,18 +1196,18 @@ function BrowsePageContent() {
                                   decoding="async"
                                 />
                               ) : (
-                                <div className="w-8 h-8 rounded-full bg-white/10 me-2 flex items-center justify-center border-2 border-white/20">
-                                  <span className="text-xs text-white">
+                                <div className="w-8 h-8 rounded-full bg-black/10 me-2 flex items-center justify-center border-2 border-black/20">
+                                  <span className="text-xs text-gray-800">
                                     {listing.user.first_name?.[0]}{listing.user.last_name?.[0]}
                                   </span>
                                 </div>
                               )}
                               <div className="flex flex-col flex-1">
-                                <span className="text-white">By {listing.user.first_name} {listing.user.last_name}</span>
+                                <span className="text-gray-900">By {listing.user.first_name} {listing.user.last_name}</span>
                                 {listing.user.rating > 0 && (
                                   <div className="flex items-center mt-1">
                                     <StarRating rating={listing.user.rating} readonly size="sm" />
-                                    <span className="text-xs text-white/50 ms-1">
+                                    <span className="text-xs text-gray-500 ms-1">
                                       ({listing.user.rating.toFixed(1)})
                                     </span>
                                   </div>
@@ -1283,7 +1260,7 @@ function BrowsePageContent() {
 
 export default function ImprovedSearchBrowsePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">Loading...</div>}>
       <BrowsePageContent />
     </Suspense>
   )

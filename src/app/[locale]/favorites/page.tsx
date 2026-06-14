@@ -56,8 +56,8 @@ export default function FavoritesPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#06402B] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-700"></div>
       </div>
     )
   }
@@ -67,25 +67,13 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#06402B] relative overflow-hidden">
-      {/* Floating particles background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute animate-bounce opacity-10"
-          >
-            <div className="w-2 h-2 bg-white rounded-full"></div>
-          </div>
-        ))}
-      </div>
-
+    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 py-8 pb-24 md:pb-8">
         {/* Header with PWA button outside the content area */}
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center text-white hover:text-white/80 transition-colors group"
+            className="flex items-center text-gray-800 hover:text-gray-900 transition-colors group"
           >
             <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -94,9 +82,9 @@ export default function FavoritesPage() {
           </button>
         </div>
         
-        <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl">
+        <div className="bg-white/40 backdrop-blur-md rounded-2xl p-8 border border-white/50 shadow-2xl">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black">
+            <h1 className="text-3xl font-bold text-gray-900">
               ❤️ {t('title')}
             </h1>
           </div>
@@ -119,8 +107,8 @@ export default function FavoritesPage() {
           ) : !favoritesData || favoritesData.favorites.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">💔</div>
-              <h2 className="text-2xl font-bold text-white mb-2">No favorites</h2>
-              <p className="text-purple-200 mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">No favorites</h2>
+              <p className="text-gray-700 mb-6">
                 You haven't added any listings to your favorites yet.
               </p>
               <button
@@ -147,7 +135,7 @@ export default function FavoritesPage() {
                     <div
                       key={favorite.favoriteId}
                       data-listing-card="true"
-                      className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl border border-white border-opacity-20 overflow-hidden hover:bg-opacity-20 transition-all duration-200 cursor-pointer group"
+                      className="bg-white/40 backdrop-blur-md rounded-xl border border-white/50 overflow-hidden hover:bg-white/50 transition-all duration-200 cursor-pointer group"
                       onClick={(e) => {
                         // Don't navigate if clicking on buttons
                         const target = e.target as HTMLElement
@@ -239,7 +227,7 @@ export default function FavoritesPage() {
                       </div>
 
                       <div className="p-4">
-                        <h3 className="font-bold text-white text-lg mb-2 line-clamp-2 group-hover:text-gray-200 transition-colors">
+                        <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-purple-700 transition-colors">
                           {listing.title}
                         </h3>
                         
@@ -250,7 +238,7 @@ export default function FavoritesPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             {listing.price && (
-                              <p className="text-2xl font-bold text-white">
+                              <p className="text-2xl font-bold text-gray-900">
                                 {formatPrice(listing.price)}
                               </p>
                             )}
@@ -262,7 +250,7 @@ export default function FavoritesPage() {
 
                         {/* User Info */}
                         {listing.user && (
-                          <div className="flex items-center mt-3 pt-3 border-t border-white border-opacity-20">
+                          <div className="flex items-center mt-3 pt-3 border-t border-black/10">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -303,19 +291,19 @@ export default function FavoritesPage() {
                   <button
                     onClick={() => setCurrentPage(currentPage - 1)}
                     disabled={!favoritesData.pagination.hasPreviousPage}
-                    className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-30 transition-all"
+                    className="px-4 py-2 bg-black/10 text-gray-900 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/20 transition-all"
                   >
                     Previous
                   </button>
                   
-                  <span className="px-4 py-2 text-white">
+                  <span className="px-4 py-2 text-gray-900">
                     Page {currentPage} of {favoritesData.pagination.totalPages}
                   </span>
                   
                   <button
                     onClick={() => setCurrentPage(currentPage + 1)}
                     disabled={!favoritesData.pagination.hasNextPage}
-                    className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-30 transition-all"
+                    className="px-4 py-2 bg-black/10 text-gray-900 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/20 transition-all"
                   >
                     Next
                   </button>

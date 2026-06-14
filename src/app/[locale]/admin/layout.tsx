@@ -291,7 +291,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigation = getNavigationItems()
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#F2DA85] flex">
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'

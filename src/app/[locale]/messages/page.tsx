@@ -14,18 +14,12 @@ export default function MessagesPage() {
   const { user } = useUser();
   const { conversations, loading, error, refetch } = useConversations();
 
-  const backgroundEl = (
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-      <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
-    </div>
-  );
+  const backgroundEl = null;
 
   const backButton = (
     <button
       onClick={() => router.push('/')}
-      className="flex items-center text-white hover:text-white/80 transition-colors group"
+      className="flex items-center text-gray-800 hover:text-gray-900 transition-colors group"
     >
       <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -36,7 +30,7 @@ export default function MessagesPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#06402B] relative overflow-hidden">
+      <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
         {backgroundEl}
 
         <div className="relative z-10 p-4 pt-8">
@@ -60,7 +54,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#06402B] relative overflow-hidden">
+    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
       {backgroundEl}
 
       <div className="relative z-10 max-w-6xl mx-auto p-4 pb-24 md:pb-4 min-h-screen">
@@ -71,8 +65,8 @@ export default function MessagesPage() {
           </div>
 
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-2">💬 {t('title')}</h1>
-            <p className="text-purple-200">{t('subtitle')}</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">💬 {t('title')}</h1>
+            <p className="text-gray-700">{t('subtitle')}</p>
           </div>
         </div>
 
@@ -97,8 +91,8 @@ export default function MessagesPage() {
           ) : conversations.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">📭</div>
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">{t('empty')}</h2>
-              <p className="text-purple-600 dark:text-purple-200 mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('empty')}</h2>
+              <p className="text-gray-700 mb-6">
                 {t('emptyDesc')}
               </p>
               <button

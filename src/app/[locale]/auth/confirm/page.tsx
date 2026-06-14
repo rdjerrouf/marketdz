@@ -112,19 +112,12 @@ function ConfirmEmailContent() {
   }, [searchParams, router])
 
   return (
-    <div className="min-h-screen bg-[#06402B] relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:2s]"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse [animation-delay:4s]"></div>
-      </div>
-
+    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 className="text-center text-3xl font-bold text-white mb-2">
+        <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
           DlalaDZ
         </h1>
-        <h2 className="text-center text-xl text-white/80 mb-8">
+        <h2 className="text-center text-xl text-gray-700 mb-8">
           Email Verification
         </h2>
       </div>
@@ -201,10 +194,10 @@ function ConfirmEmailContent() {
 export default function ConfirmEmailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#06402B] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
-          <p className="text-white">Loading...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-700 mb-4"></div>
+          <p className="text-gray-800">Loading...</p>
         </div>
       </div>
     }>

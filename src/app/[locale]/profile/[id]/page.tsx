@@ -92,8 +92,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
   if (profileLoading || ratingLoading) {
     return (
-      <div className="min-h-screen bg-[#06402B] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-700"></div>
       </div>
     )
   }
@@ -106,13 +106,13 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const canReview = user && !isOwnProfile
 
   return (
-    <div className="min-h-screen bg-[#06402B]">
+    <div className="min-h-screen bg-[#F2DA85]">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Back Button */}
           <button
             onClick={() => router.back()}
-            className="flex items-center text-white/80 hover:text-white transition-colors mb-6 group"
+            className="flex items-center text-gray-800 hover:text-gray-900 transition-colors mb-6 group"
           >
             <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -121,7 +121,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           </button>
 
           {/* Profile Header */}
-          <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl mb-8">
+          <div className="bg-white/40 backdrop-blur-md rounded-2xl p-8 border border-white/50 shadow-2xl mb-8">
             <div className="flex items-start space-x-6">
               {/* Avatar */}
               <div className="w-24 h-24 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
@@ -140,12 +140,12 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
               {/* Profile Info */}
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-white mb-2">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
                   {profile.first_name} {profile.last_name}
                 </h1>
-                
+
                 {profile.city && profile.wilaya && (
-                  <p className="text-purple-200 mb-3">
+                  <p className="text-gray-700 mb-3">
                     📍 {profile.city}, {profile.wilaya}
                   </p>
                 )}
@@ -154,14 +154,14 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="flex items-center space-x-2">
                     <StarRating rating={rating} readonly showValue />
-                    <span className="text-white text-sm">
+                    <span className="text-gray-800 text-sm">
                       ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
                     </span>
                   </div>
                 </div>
 
                 {/* Join Date */}
-                <p className="text-purple-300 text-sm">
+                <p className="text-gray-600 text-sm">
                   Member since {formatJoinDate(profile.created_at)}
                 </p>
 
@@ -191,14 +191,14 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           )}
 
           {/* Reviews Section */}
-          <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl">
-            <h2 className="text-2xl font-bold text-white mb-6">
+          <div className="bg-white/40 backdrop-blur-md rounded-2xl p-8 border border-white/50 shadow-2xl">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
               Reviews ({reviewCount})
             </h2>
 
             {reviewsLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-700"></div>
               </div>
             ) : reviewsData && reviewsData.reviews.length > 0 ? (
               <>
@@ -219,19 +219,19 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     <button
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={!reviewsData.pagination.hasPreviousPage}
-                      className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-30 transition-all"
+                      className="px-4 py-2 bg-black/10 text-gray-900 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/20 transition-all"
                     >
                       Previous
                     </button>
 
-                    <span className="px-4 py-2 text-white">
+                    <span className="px-4 py-2 text-gray-900">
                       Page {currentPage} of {reviewsData.pagination.totalPages}
                     </span>
 
                     <button
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={!reviewsData.pagination.hasNextPage}
-                      className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-30 transition-all"
+                      className="px-4 py-2 bg-black/10 text-gray-900 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/20 transition-all"
                     >
                       Next
                     </button>
@@ -241,8 +241,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
             ) : (
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">📝</div>
-                <h3 className="text-xl font-bold text-white mb-2">No Reviews Yet</h3>
-                <p className="text-purple-200">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">No Reviews Yet</h3>
+                <p className="text-gray-700">
                   This user hasn't received any reviews yet.
                 </p>
               </div>
