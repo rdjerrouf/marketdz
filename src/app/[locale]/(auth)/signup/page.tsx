@@ -208,7 +208,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
         {/* Back button */}
         <div className="mb-4">

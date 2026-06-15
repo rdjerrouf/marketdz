@@ -105,7 +105,7 @@ export default function NotificationsPage() {
 
   if (userLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F4F2] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
       </div>
     )
@@ -114,7 +114,7 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter(n => !n.is_read).length
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] py-8">
+    <div className="min-h-screen bg-[#F5F4F2] py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">

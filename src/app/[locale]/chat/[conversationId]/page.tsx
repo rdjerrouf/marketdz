@@ -33,7 +33,7 @@ export default function ChatPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center" style={{ background: '#F2DA85' }}>
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center" style={{ background: '#F5F4F2' }}>
         <div className="text-center bg-white/80 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-slate-200 dark:border-white/20">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">{t('authRequired')}</h1>
           <p className="text-purple-600 dark:text-purple-200 mb-6">{t('authRequiredDesc')}</p>
@@ -49,7 +49,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: '#F2DA85' }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#F5F4F2' }}>
       {/* Header */}
       <div className="bg-white/80 dark:bg-white/10 backdrop-blur-md border-b border-slate-200 dark:border-white/20 p-4">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
@@ -66,7 +66,7 @@ export default function ChatPage() {
           <button
             onClick={refetch}
             disabled={loading}
-            className="px-4 py-2 bg-white/50 dark:bg-white/20 text-slate-700 dark:text-white rounded-lg hover:bg-white/70 dark:hover:bg-white/30 transition-all disabled:opacity-50"
+            className="px-4 py-2 bg-white dark:bg-white/20 text-slate-700 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white transition-all disabled:opacity-50"
           >
             {loading ? t('loading') : t('refresh')}
           </button>
@@ -120,7 +120,7 @@ export default function ChatPage() {
                       {/* Date Separator */}
                       {showDateSeparator && (
                         <div className="flex justify-center my-4">
-                          <div className="px-3 py-1 bg-slate-300 dark:bg-white/30 text-slate-600 dark:text-white text-xs rounded-full">
+                          <div className="px-3 py-1 bg-slate-300 dark:bg-white text-slate-600 dark:text-white text-xs rounded-full">
                             {messageDate.toDateString() === new Date().toDateString()
                               ? t('today')
                               : messageDate.toLocaleDateString(locale === 'ar' ? 'ar-DZ' : locale === 'fr' ? 'fr-FR' : 'en-US', {

@@ -93,8 +93,8 @@ export default function MyListingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex items-center justify-center">
-        <div className="relative z-10 flex items-center bg-white/40 backdrop-blur-sm p-6 rounded-xl border border-white/50">
+      <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden flex items-center justify-center">
+        <div className="relative z-10 flex items-center bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
           <span className="ml-3 text-gray-800">Loading...</span>
         </div>
@@ -104,8 +104,8 @@ export default function MyListingsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex items-center justify-center">
-        <div className="relative z-10 bg-white/40 backdrop-blur-sm rounded-xl border border-white/50 p-8 max-w-md text-center">
+      <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden flex items-center justify-center">
+        <div className="relative z-10 bg-white backdrop-blur-sm rounded-xl border border-gray-200 p-8 max-w-md text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Authentication Required</h2>
           <p className="text-gray-700 mb-6">You need to be signed in to view your listings.</p>
           <button
@@ -120,7 +120,7 @@ export default function MyListingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 py-8 pb-24 md:pb-8">
         {/* Header with back button */}
         <div className="mb-8">
@@ -147,7 +147,7 @@ export default function MyListingsPage() {
             Back
           </button>
           
-          <div className="bg-white/40 backdrop-blur-sm rounded-xl border border-white/50 p-6">
+          <div className="bg-white backdrop-blur-sm rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('title')}</h1>

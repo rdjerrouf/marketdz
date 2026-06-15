@@ -56,7 +56,7 @@ export default function FavoritesPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F4F2] flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-700"></div>
       </div>
     )
@@ -67,7 +67,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 py-8 pb-24 md:pb-8">
         {/* Header with PWA button outside the content area */}
         <div className="flex items-center justify-between mb-6">
@@ -82,7 +82,7 @@ export default function FavoritesPage() {
           </button>
         </div>
         
-        <div className="bg-white/40 backdrop-blur-md rounded-2xl p-8 border border-white/50 shadow-2xl">
+        <div className="bg-white backdrop-blur-md rounded-2xl p-8 border border-gray-200 shadow-2xl">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900">
               ❤️ {t('title')}
@@ -135,7 +135,7 @@ export default function FavoritesPage() {
                     <div
                       key={favorite.favoriteId}
                       data-listing-card="true"
-                      className="bg-white/40 backdrop-blur-md rounded-xl border border-white/50 overflow-hidden hover:bg-white/50 transition-all duration-200 cursor-pointer group"
+                      className="bg-white backdrop-blur-md rounded-xl border border-gray-200 overflow-hidden hover:bg-gray-50 transition-all duration-200 cursor-pointer group"
                       onClick={(e) => {
                         // Don't navigate if clicking on buttons
                         const target = e.target as HTMLElement

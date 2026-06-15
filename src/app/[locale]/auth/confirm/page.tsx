@@ -112,7 +112,7 @@ function ConfirmEmailContent() {
   }, [searchParams, router])
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
         <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
           DlalaDZ
@@ -194,7 +194,7 @@ function ConfirmEmailContent() {
 export default function ConfirmEmailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F4F2] flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-700 mb-4"></div>
           <p className="text-gray-800">Loading...</p>

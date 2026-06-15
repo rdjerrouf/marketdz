@@ -92,7 +92,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
   if (profileLoading || ratingLoading) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F4F2] flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-700"></div>
       </div>
     )
@@ -106,7 +106,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const canReview = user && !isOwnProfile
 
   return (
-    <div className="min-h-screen bg-[#F2DA85]">
+    <div className="min-h-screen bg-[#F5F4F2]">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Back Button */}
@@ -121,7 +121,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           </button>
 
           {/* Profile Header */}
-          <div className="bg-white/40 backdrop-blur-md rounded-2xl p-8 border border-white/50 shadow-2xl mb-8">
+          <div className="bg-white backdrop-blur-md rounded-2xl p-8 border border-gray-200 shadow-2xl mb-8">
             <div className="flex items-start space-x-6">
               {/* Avatar */}
               <div className="w-24 h-24 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
@@ -191,7 +191,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           )}
 
           {/* Reviews Section */}
-          <div className="bg-white/40 backdrop-blur-md rounded-2xl p-8 border border-white/50 shadow-2xl">
+          <div className="bg-white backdrop-blur-md rounded-2xl p-8 border border-gray-200 shadow-2xl">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               Reviews ({reviewCount})
             </h2>

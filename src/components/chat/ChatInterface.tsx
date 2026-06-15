@@ -76,7 +76,7 @@ export default function ChatInterface({ conversationId, onBack }: ChatInterfaceP
           {onBack && (
             <button
               onClick={onBack}
-              className="p-2 hover:bg-white/80 rounded-full transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               title="Go back"
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -93,19 +93,19 @@ export default function ChatInterface({ conversationId, onBack }: ChatInterfaceP
         
         <div className="flex items-center space-x-2">
           <button 
-            className="p-2 hover:bg-white/80 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             title="Voice call"
           >
             <Phone className="w-5 h-5 text-gray-600" />
           </button>
           <button 
-            className="p-2 hover:bg-white/80 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             title="Video call"
           >
             <Video className="w-5 h-5 text-gray-600" />
           </button>
           <button 
-            className="p-2 hover:bg-white/80 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             title="More options"
           >
             <MoreVertical className="w-5 h-5 text-gray-600" />

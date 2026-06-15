@@ -117,7 +117,7 @@ export default function CreateListingPage() {
   const display = getCategoryDisplay(category)
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
       <div className="relative z-10">
         <div className="container mx-auto px-4 py-8">
           {/* Header with Back Button */}

@@ -74,7 +74,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F4F2] flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
         <span className="ml-3 text-gray-600">{t('loading')}</span>
       </div>
@@ -83,7 +83,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F4F2] flex items-center justify-center">
         <div className="bg-red-50 border border-red-200 rounded-lg p-8 max-w-md text-center">
           <h2 className="text-xl font-bold text-red-600 mb-4">{t('errorTitle')}</h2>
           <p className="text-red-600 font-medium mb-6">{error}</p>
@@ -100,7 +100,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
 
   if (!listing) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F4F2] flex items-center justify-center">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-4">{t('notFound')}</h2>
           <p className="text-gray-600 mb-6">{t('notFoundDesc')}</p>
@@ -128,7 +128,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
   const display = getCategoryDisplay(listing.category)
 
   return (
-    <div className="min-h-screen bg-[#F2DA85]">
+    <div className="min-h-screen bg-[#F5F4F2]">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">

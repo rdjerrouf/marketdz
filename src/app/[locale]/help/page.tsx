@@ -34,7 +34,7 @@ export default function HelpPage() {
   const features = t.raw('features') as Feature[]
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] py-8">
+    <div className="min-h-screen bg-[#F5F4F2] py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <Link href="/" className={`inline-flex items-center text-green-600 hover:text-green-700 mb-6 transition-colors ${isRtl ? 'flex-row-reverse' : ''}`}>

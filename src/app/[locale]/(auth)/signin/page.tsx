@@ -128,7 +128,7 @@ function SignInPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
         {/* Back button and PWA Install */}
         <div className="mb-4 flex items-center justify-between">
@@ -269,7 +269,7 @@ function SignInPageContent() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F5F4F2] flex items-center justify-center">Loading...</div>}>
       <SignInPageContent />
     </Suspense>
   )

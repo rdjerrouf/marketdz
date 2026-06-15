@@ -122,7 +122,7 @@ function ResetPasswordPageContent() {
   // Show loading if we're checking tokens
   if (!accessToken || !refreshToken || type !== 'recovery') {
     return (
-      <div className="min-h-screen bg-[#F2DA85] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#F5F4F2] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -135,7 +135,7 @@ function ResetPasswordPageContent() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#F5F4F2] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
             {tCommon('appName')}
@@ -176,7 +176,7 @@ function ResetPasswordPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F4F2] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h1 className="text-center text-3xl font-bold text-gray-900 mb-2">
           {tCommon('appName')}
@@ -295,7 +295,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">
+        <div className="min-h-screen bg-[#F5F4F2] flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       }

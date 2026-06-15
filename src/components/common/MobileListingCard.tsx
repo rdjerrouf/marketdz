@@ -176,10 +176,10 @@ export default function MobileListingCard({ listing, onClick }: MobileListingCar
   return (
     <div
       onClick={handleClick}
-      className={`bg-white/40 backdrop-blur-sm rounded-2xl overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shadow-xl ${
+      className={`bg-white backdrop-blur-sm rounded-2xl overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shadow-xl ${
         isUrgent
           ? 'border-2 border-red-500 hover:border-red-400 animate-pulse-slow shadow-red-500/50'
-          : 'border border-white/50 hover:border-white/70'
+          : 'border border-gray-200 hover:border-gray-300'
       }`}
     >
       {/* Compact Image Container - Mobile Optimized for 2x2 Grid */}

@@ -97,7 +97,7 @@ export default function PWAInstallButton({ className = '', variant = 'compact' }
         return `${base} w-full p-4 text-white/70 rounded-2xl hover:bg-gradient-to-r hover:from-pink-500/10 hover:to-purple-500/10 hover:text-pink-300 border border-pink-500/20`;
       case 'compact':
       default:
-        return `${base} px-4 py-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg border border-white/20`;
+        return `${base} px-4 py-2 text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 backdrop-blur-sm rounded-lg border border-gray-200`;
     }
   };
 

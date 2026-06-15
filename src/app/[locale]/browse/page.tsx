@@ -494,9 +494,9 @@ function BrowsePageContent() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex flex-col md:flex-row" style={{ background: '#F2DA85' }}>
+    <div className="min-h-screen relative overflow-hidden flex flex-col md:flex-row" style={{ background: '#F5F4F2' }}>
       {/* Sidebar Navigation - Hidden on mobile, shown on desktop */}
-      <div className={`hidden md:block relative z-10 w-64 bg-white/30 backdrop-blur-sm ${isRtl ? 'border-l' : 'border-r'} border-black/10`}>
+      <div className={`hidden md:block relative z-10 w-64 bg-white backdrop-blur-sm ${isRtl ? 'border-l' : 'border-r'} border-black/10`}>
         <div className="p-6">
           {/* Logo */}
           <div className="flex items-center mb-8">
@@ -1079,7 +1079,7 @@ function BrowsePageContent() {
                   return (
                     <div
                       key={listing.id}
-                      className="group bg-white/40 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/50 hover:border-white/70 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl"
+                      className="group bg-white backdrop-blur-sm rounded-3xl overflow-hidden border border-gray-200 hover:border-gray-300 transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl"
                       onClick={(e) => {
                         // Don't navigate if clicking on favorite button or its children
                         const target = e.target as HTMLElement
@@ -1260,7 +1260,7 @@ function BrowsePageContent() {
 
 export default function ImprovedSearchBrowsePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F2DA85] flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F5F4F2] flex items-center justify-center">Loading...</div>}>
       <BrowsePageContent />
     </Suspense>
   )

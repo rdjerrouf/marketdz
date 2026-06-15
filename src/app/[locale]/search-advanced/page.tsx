@@ -151,7 +151,7 @@ export default function AdvancedSearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">

@@ -30,7 +30,7 @@ export default function MessagesPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
+      <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
         {backgroundEl}
 
         <div className="relative z-10 p-4 pt-8">
@@ -54,7 +54,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
       {backgroundEl}
 
       <div className="relative z-10 max-w-6xl mx-auto p-4 pb-24 md:pb-4 min-h-screen">
@@ -112,7 +112,7 @@ export default function MessagesPage() {
                 <div
                   key={conversation.id}
                   onClick={() => router.push(`/chat/${conversation.id}`)}
-                  className="bg-white/50 dark:bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-slate-200 dark:border-white/20 hover:bg-white/70 dark:hover:bg-white/20 transition-all duration-200 cursor-pointer group"
+                  className="bg-white dark:bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-slate-200 dark:border-white/20 hover:bg-gray-100 dark:hover:bg-white/20 transition-all duration-200 cursor-pointer group"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">

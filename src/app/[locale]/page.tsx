@@ -285,13 +285,13 @@ export default function CompleteKickAssHomepage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#F2DA85' }}>
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#F5F4F2' }}>
       {/* Mobile Navigation Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-lg border-b border-white/10 pointer-events-auto">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200 pointer-events-auto">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🇩🇿</span>
-            <h1 className="text-white text-xl font-bold">DlalaDZ</h1>
+            <h1 className="text-gray-900 text-xl font-bold">DlalaDZ</h1>
             {showInstallButton && (
               <button
                 onClick={handleInstallClick}
@@ -303,9 +303,9 @@ export default function CompleteKickAssHomepage() {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher compact className="border border-white/10 rounded-lg px-1.5 py-1 bg-white/5" />
+            <LanguageSwitcher compact className="border border-gray-200 rounded-lg px-1.5 py-1 bg-gray-50" />
             {/* Profile Icon */}
-            <Link href="/profile" className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+            <Link href="/profile" className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
               {profile?.avatar_url ? (
                 <img
                   src={fixPhotoUrl(profile.avatar_url)}
@@ -313,7 +313,7 @@ export default function CompleteKickAssHomepage() {
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
-                <User className="w-5 h-5 text-white" />
+                <User className="w-5 h-5 text-gray-700" />
               )}
             </Link>
           </div>
@@ -323,7 +323,7 @@ export default function CompleteKickAssHomepage() {
       </div>
 
       {/* Enhanced Desktop Sidebar */}
-      <div className={`hidden lg:flex w-52 fixed top-0 bottom-0 bg-white/30 backdrop-blur-xl pointer-events-auto ${isRtl ? 'right-0 border-l border-black/10' : 'left-0 border-r border-black/10'}`}>
+      <div className={`hidden lg:flex w-52 fixed top-0 bottom-0 bg-white backdrop-blur-xl pointer-events-auto ${isRtl ? 'right-0 border-l border-black/10' : 'left-0 border-r border-black/10'}`}>
         <div className="p-6 flex flex-col h-full">
           {/* Enhanced Logo */}
           <div className="flex items-center mb-12">
@@ -336,7 +336,7 @@ export default function CompleteKickAssHomepage() {
             </div>
           </div>
 
-          <LanguageSwitcher compact className="mb-6 border border-white/10 rounded-xl px-2 py-1.5 bg-white/5" />
+          <LanguageSwitcher compact className="mb-6 border border-gray-200 rounded-xl px-2 py-1.5 bg-gray-50" />
 
           {/* Enhanced Navigation Menu */}
           <nav className="space-y-3 flex-1">
@@ -488,7 +488,7 @@ export default function CompleteKickAssHomepage() {
                   <Link
                     key={tag.label}
                     href={tag.href}
-                    className="bg-white/50 backdrop-blur-sm text-gray-900 px-4 py-2 rounded-full text-sm hover:bg-white/70 transition-all duration-300 border border-white/60 hover:scale-105 hover:shadow-lg"
+                    className="bg-white backdrop-blur-sm text-gray-900 px-4 py-2 rounded-full text-sm hover:bg-gray-100 transition-all duration-300 border border-gray-200 hover:scale-105 hover:shadow-lg"
                   >
                     {tag.label}
                   </Link>
@@ -597,7 +597,7 @@ export default function CompleteKickAssHomepage() {
                   <Link
                     key={category}
                     href={`/browse?category=${category}`}
-                    className="group bg-white/40 backdrop-blur-sm rounded-2xl p-6 border border-white/50 hover:border-white/70 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl block"
+                    className="group bg-white backdrop-blur-sm rounded-2xl p-6 border border-gray-200 hover:border-gray-300 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl block"
                   >
                     <div className={`bg-gradient-to-r ${badge.color} p-4 rounded-xl mb-4 mx-auto w-fit group-hover:scale-110 transition-transform shadow-lg group-hover:shadow-2xl`}>
                       <Icon className="w-8 h-8 text-white" />
@@ -641,7 +641,7 @@ export default function CompleteKickAssHomepage() {
                 {/* Mobile Loading - 2 columns */}
                 <div className="md:hidden grid grid-cols-2 gap-3">
                   {[...Array(6)].map((_, i) => (
-                    <div key={i} className="animate-pulse bg-white/40 rounded-2xl overflow-hidden">
+                    <div key={i} className="animate-pulse bg-white rounded-2xl overflow-hidden">
                       <div className="h-40 bg-black/10"></div>
                       <div className="p-3 space-y-2">
                         <div className="h-4 bg-black/10 rounded w-3/4"></div>
@@ -653,7 +653,7 @@ export default function CompleteKickAssHomepage() {
                 {/* Desktop Loading - 3 columns */}
                 <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {[...Array(6)].map((_, i) => (
-                    <div key={i} className="animate-pulse bg-white/40 rounded-3xl overflow-hidden">
+                    <div key={i} className="animate-pulse bg-white rounded-3xl overflow-hidden">
                       <div className="h-56 bg-black/10"></div>
                       <div className="p-6 space-y-3">
                         <div className="h-6 bg-black/10 rounded w-3/4"></div>
@@ -669,7 +669,7 @@ export default function CompleteKickAssHomepage() {
             {/* Empty State */}
             {!listingsLoading && featuredListings.length === 0 && (
               <div className="text-center py-16">
-                <div className="bg-white/40 rounded-3xl p-12 max-w-md mx-auto">
+                <div className="bg-white rounded-3xl p-12 max-w-md mx-auto">
                   <Star className="w-16 h-16 text-gray-500 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">{tCommon('noResults')}</h3>
                   <p className="text-gray-700 mb-6">{tHome('featured.subtitle')}</p>
@@ -708,10 +708,10 @@ export default function CompleteKickAssHomepage() {
                   <Link
                     href={`/browse/${listing.id}`}
                     key={listing.id}
-                    className={`group bg-white/40 backdrop-blur-sm rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl block ${
+                    className={`group bg-white backdrop-blur-sm rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 cursor-pointer shadow-lg hover:shadow-2xl block ${
                       isUrgent
                         ? 'border-2 border-red-500 hover:border-red-400 animate-pulse-slow shadow-red-500/50'
-                        : 'border border-white/50 hover:border-white/70'
+                        : 'border border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     {/* Enhanced Image Container */}
@@ -829,7 +829,7 @@ export default function CompleteKickAssHomepage() {
           </div>
 
           {/* Enhanced Call to Action Section */}
-          <div className="bg-white/40 backdrop-blur-sm rounded-3xl p-12 border border-white/50 text-center mb-16 shadow-2xl hover:shadow-3xl transition-all duration-300">
+          <div className="bg-white backdrop-blur-sm rounded-3xl p-12 border border-gray-200 text-center mb-16 shadow-2xl hover:shadow-3xl transition-all duration-300">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
                 {tHome('hero.cta')}
@@ -842,7 +842,7 @@ export default function CompleteKickAssHomepage() {
                   <Plus className="w-6 h-6 me-3" />
                   {tNav('post')}
                 </Link>
-                <Link href="/help" className="bg-white/60 backdrop-blur-sm text-gray-900 px-8 py-4 rounded-2xl font-semibold hover:bg-white/80 transition-all duration-300 border border-white/70 flex items-center justify-center shadow-lg hover:shadow-xl">
+                <Link href="/help" className="bg-white backdrop-blur-sm text-gray-900 px-8 py-4 rounded-2xl font-semibold hover:bg-gray-100 transition-all duration-300 border border-gray-300 flex items-center justify-center shadow-lg hover:shadow-xl">
                   <Award className="w-6 h-6 me-3" />
                   {tCommon('seeAll')}
                 </Link>

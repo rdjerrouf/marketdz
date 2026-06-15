@@ -122,7 +122,7 @@ export default function AddItemPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
+      <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <div className="text-center text-gray-800">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
@@ -134,10 +134,10 @@ export default function AddItemPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
       <div className="relative z-10 flex">
       {/* Sidebar Navigation - Hidden on mobile/PWA, visible on desktop */}
-      <div className={`hidden lg:block ${isPWA ? 'lg:w-44' : 'lg:w-64'} bg-white/30 backdrop-blur-lg ${isRtl ? 'border-l' : 'border-r'} border-black/10`}>
+      <div className={`hidden lg:block ${isPWA ? 'lg:w-44' : 'lg:w-64'} bg-white backdrop-blur-lg ${isRtl ? 'border-l' : 'border-r'} border-black/10`}>
         <div className={isPWA ? 'p-4' : 'p-6'}>
           {/* Logo */}
           <div className="flex items-center mb-8">
@@ -276,7 +276,7 @@ export default function AddItemPage() {
         {/* User Info at Bottom */}
         {user && (
           <div className="absolute bottom-4 start-4 end-4 max-w-56">
-            <div className="bg-white/40 backdrop-blur-sm border border-white/50 p-3 rounded-lg">
+            <div className="bg-white backdrop-blur-sm border border-gray-200 p-3 rounded-lg">
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center me-3">
                   <span className="text-white font-semibold">
@@ -342,7 +342,7 @@ export default function AddItemPage() {
               <button
                 key={category.id}
                 onClick={() => handleCategorySelect(category.id)}
-                className="group relative bg-white/40 backdrop-blur-lg hover:bg-white/50 rounded-2xl p-8 transition-all duration-300 transform hover:scale-105 border border-white/50 hover:border-white/70"
+                className="group relative bg-white backdrop-blur-lg hover:bg-gray-50 rounded-2xl p-8 transition-all duration-300 transform hover:scale-105 border border-gray-200 hover:border-gray-300"
               >
                 {/* Background Gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-30 rounded-2xl transition-opacity duration-300`}></div>

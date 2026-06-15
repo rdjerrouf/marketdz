@@ -290,8 +290,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex items-center justify-center">
-        <div className="relative z-10 text-center bg-white/40 backdrop-blur-sm p-8 rounded-xl border border-white/50">
+      <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden flex items-center justify-center">
+        <div className="relative z-10 text-center bg-white backdrop-blur-sm p-8 rounded-xl border border-gray-200">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-800">Loading profile...</p>
         </div>
@@ -301,8 +301,8 @@ export default function ProfilePage() {
 
   if (error && !user) {
     return (
-      <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden flex items-center justify-center">
-        <div className="relative z-10 text-center bg-white/40 backdrop-blur-sm p-8 rounded-xl border border-white/50">
+      <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden flex items-center justify-center">
+        <div className="relative z-10 text-center bg-white backdrop-blur-sm p-8 rounded-xl border border-gray-200">
           <div className="text-red-500 mb-4">
             <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -326,9 +326,9 @@ export default function ProfilePage() {
   const labelClassName = "block text-sm font-semibold text-gray-700 mb-2"
 
   return (
-    <div className="min-h-screen bg-[#F2DA85] relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
       {/* Header */}
-      <div className="relative z-10 bg-white/40 backdrop-blur-sm border-b border-white/50">
+      <div className="relative z-10 bg-white backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
             <button
