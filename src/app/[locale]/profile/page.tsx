@@ -366,7 +366,7 @@ export default function ProfilePage() {
             <div className="bg-white rounded-xl shadow-lg p-6 relative z-30">
               {/* User Avatar and Info */}
               <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 bg-[#A16207] rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white font-bold text-2xl">
                     {user?.first_name?.[0] || 'U'}
                   </span>

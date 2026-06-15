@@ -273,7 +273,7 @@ export default function AddItemPage() {
           <div className="absolute bottom-4 start-4 end-4 max-w-56">
             <div className="bg-white backdrop-blur-sm border border-gray-200 p-3 rounded-lg">
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center me-3">
+                <div className="w-10 h-10 bg-[#A16207] rounded-full flex items-center justify-center me-3">
                   <span className="text-white font-semibold">
                     {user.first_name[0]}
                   </span>

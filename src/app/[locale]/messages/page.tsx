@@ -71,16 +71,16 @@ export default function MessagesPage() {
         </div>
 
         {/* Messages Container */}
-        <div className="bg-white/80 dark:bg-white/10 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-white/20 shadow-2xl p-6">
+        <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-6">
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-slate-600 dark:border-white"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-slate-600"></div>
             </div>
           ) : error ? (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">❌</div>
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">{t('errorLoading')}</h2>
-              <p className="text-red-600 dark:text-red-300 mb-6">{error}</p>
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">{t('errorLoading')}</h2>
+              <p className="text-red-600 mb-6">{error}</p>
               <button
                 onClick={refetch}
                 className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
@@ -104,7 +104,7 @@ export default function MessagesPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4">
+              <h2 className="text-xl font-bold text-slate-800 mb-4">
                 {t('conversations')} ({conversations.length})
               </h2>
 
@@ -112,12 +112,12 @@ export default function MessagesPage() {
                 <div
                   key={conversation.id}
                   onClick={() => router.push(`/chat/${conversation.id}`)}
-                  className="bg-white dark:bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-slate-200 dark:border-white/20 hover:bg-gray-100 dark:hover:bg-white/20 transition-all duration-200 cursor-pointer group"
+                  className="bg-white backdrop-blur-sm rounded-xl p-4 border border-slate-200 hover:bg-gray-100 transition-all duration-200 cursor-pointer group"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       {/* Avatar */}
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-[#A16207] flex items-center justify-center flex-shrink-0">
                         {conversation.other_user?.avatar_url ? (
                           <img
                             src={conversation.other_user.avatar_url}
@@ -133,10 +133,10 @@ export default function MessagesPage() {
 
                       {/* Conversation Info */}
                       <div>
-                        <h3 className="font-semibold text-slate-800 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-200 transition-colors">
+                        <h3 className="font-semibold text-slate-800 group-hover:text-[#A16207] transition-colors">
                           {conversation.other_user?.first_name} {conversation.other_user?.last_name}
                         </h3>
-                        <p className="text-purple-600 dark:text-purple-300 text-sm">
+                        <p className="text-gray-600 text-sm">
                           {conversation.listing_id ? t('aboutListing') : t('generalConversation')}
                         </p>
                       </div>
@@ -144,10 +144,10 @@ export default function MessagesPage() {
 
                     {/* Timestamp */}
                     <div className={isRtl ? 'text-start' : 'text-end'}>
-                      <div className="text-slate-600 dark:text-purple-200 text-sm">
+                      <div className="text-slate-600 text-sm">
                         {new Date(conversation.last_message_at).toLocaleDateString()}
                       </div>
-                      <div className="text-slate-500 dark:text-purple-300 text-xs">
+                      <div className="text-slate-500 text-xs">
                         {new Date(conversation.last_message_at).toLocaleTimeString()}
                       </div>
                     </div>

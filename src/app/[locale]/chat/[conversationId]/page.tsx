@@ -34,9 +34,9 @@ export default function ChatPage() {
   if (!user) {
     return (
       <div className="min-h-screen relative overflow-hidden flex items-center justify-center" style={{ background: '#F5F4F2' }}>
-        <div className="text-center bg-white/80 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-slate-200 dark:border-white/20">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">{t('authRequired')}</h1>
-          <p className="text-purple-600 dark:text-purple-200 mb-6">{t('authRequiredDesc')}</p>
+        <div className="text-center bg-white/80 backdrop-blur-md rounded-2xl p-8 border border-slate-200">
+          <h1 className="text-2xl font-bold text-slate-800 mb-4">{t('authRequired')}</h1>
+          <p className="text-purple-600 mb-6">{t('authRequiredDesc')}</p>
           <button
             onClick={() => router.push('/signin')}
             className="px-6 py-3 bg-[#A16207] hover:bg-[#854D0E] text-white rounded-lg transition-all"
@@ -51,22 +51,22 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: '#F5F4F2' }}>
       {/* Header */}
-      <div className="bg-white/80 dark:bg-white/10 backdrop-blur-md border-b border-slate-200 dark:border-white/20 p-4">
+      <div className="bg-white/80 backdrop-blur-md border-b border-slate-200 p-4">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push('/messages')}
-              className="text-slate-700 dark:text-white hover:text-purple-600 dark:hover:text-purple-200 transition-colors"
+              className="text-slate-700 hover:text-purple-600 transition-colors"
             >
               {isRtl ? '→' : '←'} {t('backToMessages')}
             </button>
-            <h1 className="text-xl font-bold text-slate-800 dark:text-white">{t('title')}</h1>
+            <h1 className="text-xl font-bold text-slate-800">{t('title')}</h1>
           </div>
 
           <button
             onClick={refetch}
             disabled={loading}
-            className="px-4 py-2 bg-white dark:bg-white/20 text-slate-700 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white transition-all disabled:opacity-50"
+            className="px-4 py-2 bg-white text-slate-700 rounded-lg hover:bg-gray-100 transition-all disabled:opacity-50"
           >
             {loading ? t('loading') : t('refresh')}
           </button>
@@ -75,18 +75,18 @@ export default function ChatPage() {
 
       <div className="relative z-10 max-w-4xl mx-auto p-4 h-[calc(100vh-200px)] flex flex-col">
         {/* Messages Area */}
-        <div className="flex-1 bg-white/80 dark:bg-white/10 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-white/20 overflow-hidden flex flex-col">
+        <div className="flex-1 bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
 
           {/* Messages List */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {loading ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 dark:border-white"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600"></div>
               </div>
             ) : error ? (
               <div className="text-center py-8">
-                <div className="text-red-600 dark:text-red-300 mb-2">{t('errorLoading')}</div>
-                <div className="text-sm text-red-500 dark:text-red-200">{error}</div>
+                <div className="text-red-600 mb-2">{t('errorLoading')}</div>
+                <div className="text-sm text-red-500">{error}</div>
                 <button
                   onClick={refetch}
                   className="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
@@ -97,8 +97,8 @@ export default function ChatPage() {
             ) : messages.length === 0 ? (
               <div className="text-center py-8">
                 <div className="text-4xl mb-4">💬</div>
-                <div className="text-slate-800 dark:text-white text-lg mb-2">{t('noMessages')}</div>
-                <div className="text-purple-600 dark:text-purple-200">{t('noMessagesDesc')}</div>
+                <div className="text-slate-800 text-lg mb-2">{t('noMessages')}</div>
+                <div className="text-purple-600">{t('noMessagesDesc')}</div>
               </div>
             ) : (
               <div className="space-y-3">
@@ -120,7 +120,7 @@ export default function ChatPage() {
                       {/* Date Separator */}
                       {showDateSeparator && (
                         <div className="flex justify-center my-4">
-                          <div className="px-3 py-1 bg-slate-300 dark:bg-white text-slate-600 dark:text-white text-xs rounded-full">
+                          <div className="px-3 py-1 bg-slate-300 text-slate-600 text-xs rounded-full">
                             {messageDate.toDateString() === new Date().toDateString()
                               ? t('today')
                               : messageDate.toLocaleDateString(locale === 'ar' ? 'ar-DZ' : locale === 'fr' ? 'fr-FR' : 'en-US', {
@@ -140,16 +140,16 @@ export default function ChatPage() {
                           className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
                             isMyMessage
                               ? 'bg-[#A16207] text-white'
-                              : 'bg-slate-200 dark:bg-white/20 text-slate-800 dark:text-white'
+                              : 'bg-slate-200 text-slate-800'
                           }`}
                         >
                           {!isMyMessage && message.sender && (
-                            <div className="text-xs text-purple-600 dark:text-purple-200 mb-1">
+                            <div className="text-xs text-purple-600 mb-1">
                               {message.sender.first_name} {message.sender.last_name}
                             </div>
                           )}
                           <div className="break-words">{message.content}</div>
-                          <div className={`text-xs mt-1 ${isMyMessage ? 'text-purple-200' : 'text-purple-600 dark:text-purple-300'}`}>
+                          <div className={`text-xs mt-1 ${isMyMessage ? 'text-purple-200' : 'text-purple-600'}`}>
                             {messageDate.toLocaleDateString(locale === 'ar' ? 'ar-DZ' : locale === 'fr' ? 'fr-FR' : 'en-US', {
                               month: 'short',
                               day: 'numeric',
@@ -170,7 +170,7 @@ export default function ChatPage() {
           </div>
 
           {/* Message Input */}
-          <div className="border-t border-slate-200 dark:border-white/20 p-4">
+          <div className="border-t border-slate-200 p-4">
             <form onSubmit={handleSendMessage} className="flex gap-3">
               <input
                 type="text"
@@ -178,7 +178,7 @@ export default function ChatPage() {
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder={t('typeMessage')}
                 disabled={sending}
-                className="flex-1 px-4 py-3 bg-white dark:bg-white/20 text-slate-800 dark:text-white placeholder-slate-500 dark:placeholder-purple-200 rounded-xl border border-slate-300 dark:border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="flex-1 px-4 py-3 bg-white text-slate-800 placeholder-slate-500 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
               <button
                 type="submit"

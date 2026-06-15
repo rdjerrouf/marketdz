@@ -389,9 +389,9 @@ export default function CompleteKickAssHomepage() {
             {user ? (
               <>
                 {/* Enhanced User Profile */}
-                <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-4 border border-purple-500/20 backdrop-blur-sm mb-3">
+                <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200 backdrop-blur-sm mb-3">
                   <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center text-white font-bold text-lg relative shadow-lg">
+                    <div className="w-12 h-12 bg-[#A16207] rounded-xl flex items-center justify-center text-white font-bold text-lg relative shadow-lg">
                       {profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-black/20 animate-pulse"></div>
                     </div>

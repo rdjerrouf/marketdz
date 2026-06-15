@@ -260,7 +260,7 @@ export default function FavoritesPage() {
                               }}
                               className="flex items-center hover:bg-white hover:bg-opacity-10 rounded-lg p-1 transition-colors"
                             >
-                              <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center mr-2">
+                              <div className="w-8 h-8 rounded-full bg-[#A16207] flex items-center justify-center mr-2">
                                 {listing.user.avatar_url ? (
                                   <img
                                     src={listing.user.avatar_url}

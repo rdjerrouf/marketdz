@@ -124,7 +124,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           <div className="bg-white backdrop-blur-md rounded-2xl p-8 border border-gray-200 shadow-2xl mb-8">
             <div className="flex items-start space-x-6">
               {/* Avatar */}
-              <div className="w-24 h-24 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+              <div className="w-24 h-24 rounded-full bg-[#A16207] flex items-center justify-center flex-shrink-0">
                 {profile.avatar_url ? (
                   <img
                     src={profile.avatar_url}

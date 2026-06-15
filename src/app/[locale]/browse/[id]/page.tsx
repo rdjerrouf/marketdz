@@ -657,7 +657,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center me-4 flex-shrink-0">
+                      <div className="w-12 h-12 bg-[#A16207] rounded-full flex items-center justify-center me-4 flex-shrink-0">
                         <span className="text-white font-semibold text-lg">
                           {seller.first_name?.[0] || 'U'}
                         </span>
