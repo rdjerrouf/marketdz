@@ -156,7 +156,7 @@ export default function ReviewForm({
           <button
             type="submit"
             disabled={isLoading || rating === 0}
-            className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+            className="px-6 py-2 bg-[#A16207] text-white rounded-md hover:bg-[#854D0E] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
             {isLoading && (
               <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

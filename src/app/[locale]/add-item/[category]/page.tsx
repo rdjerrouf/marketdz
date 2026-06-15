@@ -94,7 +94,7 @@ export default function CreateListingPage() {
           <p className="text-red-600 font-medium">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="mt-4 px-6 py-2 bg-[#A16207] text-white rounded-lg hover:bg-[#854D0E] transition-colors"
           >
             {t('backToHome')}
           </button>

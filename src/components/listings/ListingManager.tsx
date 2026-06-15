@@ -209,7 +209,7 @@ export default function ListingManager({ userId }: ListingManagerProps) {
           
           <Link
             href="/add-item"
-            className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors text-center"
+            className="px-6 py-2 bg-[#A16207] text-white font-semibold rounded-lg hover:bg-[#854D0E] focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors text-center"
           >
             + Add New Listing
           </Link>
@@ -235,7 +235,7 @@ export default function ListingManager({ userId }: ListingManagerProps) {
           </p>
           <Link
             href="/add-item"
-            className="inline-block px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+            className="inline-block px-6 py-3 bg-[#A16207] text-white font-semibold rounded-lg hover:bg-[#854D0E] transition-colors"
           >
             Create Your First Listing
           </Link>

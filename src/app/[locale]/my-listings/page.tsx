@@ -110,7 +110,7 @@ export default function MyListingsPage() {
           <p className="text-gray-700 mb-6">You need to be signed in to view your listings.</p>
           <button
             onClick={() => router.push('/signin')}
-            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="px-6 py-2 bg-[#A16207] text-white rounded-lg hover:bg-[#854D0E] transition-colors"
           >
             Sign In
           </button>

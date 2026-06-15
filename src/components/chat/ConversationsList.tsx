@@ -73,7 +73,7 @@ export default function ConversationsList({ onSelectConversation, selectedConver
             <h2 className="text-xl font-semibold text-gray-900">Messages</h2>
           </div>
           <button 
-            className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+            className="p-2 bg-[#A16207] text-white rounded-full hover:bg-[#854D0E] transition-colors"
             title="New conversation"
           >
             <Plus className="w-5 h-5" />
@@ -126,7 +126,7 @@ export default function ConversationsList({ onSelectConversation, selectedConver
                 <p className="text-gray-500 mb-6">
                   Start chatting with buyers and sellers about listings.
                 </p>
-                <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <button className="bg-[#A16207] text-white px-6 py-2 rounded-lg hover:bg-[#854D0E] transition-colors">
                   Browse Listings
                 </button>
               </>

@@ -57,7 +57,7 @@ export default function ComingSoonModal({
         <div className="relative p-8">
           {/* Icon */}
           <div className="flex justify-center mb-6">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-2xl shadow-lg animate-pulse">
+            <div className="bg-[#A16207] p-4 rounded-2xl shadow-lg animate-pulse">
               {featureIcon || <Sparkles className="w-12 h-12 text-white" />}
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function ComingSoonModal({
               <ul className="space-y-3">
                 {displayBenefits.map((benefit, index) => (
                   <li key={index} className="flex items-start text-white/70">
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-full p-1 mr-3 mt-0.5 flex-shrink-0">
+                    <div className="bg-[#A16207] rounded-full p-1 mr-3 mt-0.5 flex-shrink-0">
                       <TrendingUp className="w-3 h-3 text-white" />
                     </div>
                     <span>{benefit}</span>
@@ -103,7 +103,7 @@ export default function ComingSoonModal({
           {/* CTA Button */}
           <button
             onClick={onClose}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            className="w-full bg-[#A16207] text-white py-4 rounded-xl font-semibold hover:bg-[#854D0E] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
           >
             Got it, Thanks!
           </button>

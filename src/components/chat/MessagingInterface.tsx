@@ -63,7 +63,7 @@ export default function MessagingInterface() {
                 Choose a conversation from the sidebar to start chatting, or browse listings to find items you're interested in.
               </p>
               <div className="space-y-3">
-                <button className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                <button className="w-full bg-[#A16207] text-white px-6 py-3 rounded-lg hover:bg-[#854D0E] transition-colors font-medium">
                   Browse Listings
                 </button>
                 <button className="w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors font-medium">

@@ -169,7 +169,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                 {canReview && !showReviewForm && (
                   <button
                     onClick={() => setShowReviewForm(true)}
-                    className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    className="mt-4 px-4 py-2 bg-[#A16207] text-white rounded-lg hover:bg-[#854D0E] transition-colors"
                   >
                     Leave a Review
                   </button>

@@ -295,7 +295,7 @@ export default function CompleteKickAssHomepage() {
             {showInstallButton && (
               <button
                 onClick={handleInstallClick}
-                className="px-2 py-1 text-xs bg-green-500/20 text-green-300 border border-green-500/30 rounded-lg hover:bg-green-500/30 transition-colors whitespace-nowrap ml-1"
+                className="px-2 py-1 text-xs bg-[#A16207]/20 text-green-300 border border-green-500/30 rounded-lg hover:bg-[#A16207]/30 transition-colors whitespace-nowrap ml-1"
                 title={browserInfo?.installInstructions}
               >
                 Install
@@ -428,7 +428,7 @@ export default function CompleteKickAssHomepage() {
                 {/* Sign In Button */}
                 <Link 
                   href="/signin" 
-                  className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-green-500/10 hover:text-green-700 transition-all duration-300 border border-green-500/30 group"
+                  className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-[#A16207]/10 hover:text-green-700 transition-all duration-300 border border-green-500/30 group"
                 >
                   <svg className="w-5 h-5 mr-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -438,7 +438,7 @@ export default function CompleteKickAssHomepage() {
                 </Link>
                 <Link
                   href="/signup"
-                  className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-blue-500/10 hover:text-blue-700 transition-all duration-300 border border-blue-500/30 group"
+                  className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-[#A16207]/10 hover:text-blue-700 transition-all duration-300 border border-blue-500/30 group"
                 >
                   <svg className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -675,7 +675,7 @@ export default function CompleteKickAssHomepage() {
                   <p className="text-gray-700 mb-6">{tHome('featured.subtitle')}</p>
                   <Link
                     href="/add-item"
-                    className="inline-flex items-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+                    className="inline-flex items-center bg-[#A16207] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#854D0E] transition-all duration-300"
                   >
                     <Plus className="w-5 h-5 me-2" />
                     {tNav('post')}

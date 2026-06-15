@@ -200,7 +200,7 @@ export default function NotificationsPage() {
                 <p className="text-sm text-gray-500">Get notified about new messages and updates</p>
               </div>
               <button
-                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm"
+                className="bg-[#A16207] text-white px-4 py-2 rounded-md hover:bg-[#854D0E] text-sm"
                 onClick={() => {
                   // Request notification permission
                   if ('Notification' in window) {

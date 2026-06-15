@@ -141,12 +141,7 @@ export default function AddItemPage() {
         <div className={isPWA ? 'p-4' : 'p-6'}>
           {/* Logo */}
           <div className="flex items-center mb-8">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl me-3 relative">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse"></div>
-            </div>
+            <img src="/icons/icon-192x192.png" alt="DlalaDZ" className="w-12 h-12 rounded-xl me-3" />
             <h1 className="text-gray-900 text-xl font-bold">DlalaDZ</h1>
           </div>
 
@@ -312,11 +307,7 @@ export default function AddItemPage() {
               <span className="font-medium">{tCommon('back')}</span>
             </button>
             <div className="flex items-center">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl me-2 relative">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-              </div>
+              <img src="/icons/icon-192x192.png" alt="DlalaDZ" className="w-9 h-9 rounded-lg me-2" />
               <h1 className="text-gray-900 text-lg font-bold">DlalaDZ</h1>
             </div>
           </div>

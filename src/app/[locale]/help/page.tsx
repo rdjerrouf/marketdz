@@ -92,7 +92,7 @@ export default function HelpPage() {
           <p className="text-gray-600 mb-6">{t('contactDesc')}</p>
           <Link
             href="mailto:support@dlaladz.com"
-            className="inline-block bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors font-medium"
+            className="inline-block bg-[#A16207] text-white px-6 py-3 rounded-md hover:bg-[#854D0E] transition-colors font-medium"
           >
             {t('contactEmail')}
           </Link>

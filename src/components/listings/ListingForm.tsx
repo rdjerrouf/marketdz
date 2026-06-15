@@ -798,7 +798,7 @@ export default function ListingForm({
           {t('form.cancel')}
         </button>
         <button type="submit" disabled={loading}
-          className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transition-colors">
+          className="px-8 py-3 bg-[#A16207] text-white font-semibold rounded-lg hover:bg-[#854D0E] focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transition-colors">
           {loading ? (
             <div className="flex items-center gap-3">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

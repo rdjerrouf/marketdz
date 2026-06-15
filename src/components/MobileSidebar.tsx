@@ -293,7 +293,7 @@ function MobileSidebarComponent({
               </button>
               
               <div className="flex items-center mb-4 mt-16">
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl me-3">
+                <div className="bg-[#A16207] p-2 rounded-xl me-3">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
                 <h1 className="text-white text-xl font-bold">DlalaDZ</h1>
@@ -420,7 +420,7 @@ function MobileSidebarComponent({
                     <>
                       <Link 
                         href="/signin" 
-                        className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-green-500/10 hover:text-green-300 transition-all duration-300 border border-green-500/20"
+                        className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-[#A16207]/10 hover:text-green-300 transition-all duration-300 border border-green-500/20"
                         style={{ WebkitTapHighlightColor: 'transparent' }}
                       >
                         <svg className="w-5 h-5 me-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -430,7 +430,7 @@ function MobileSidebarComponent({
                       </Link>
                       <Link 
                         href="/signup" 
-                        className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-blue-500/10 hover:text-blue-300 transition-all duration-300 border border-blue-500/20"
+                        className="flex items-center w-full p-4 text-white/70 rounded-2xl hover:bg-[#A16207]/10 hover:text-blue-300 transition-all duration-300 border border-blue-500/20"
                         style={{ WebkitTapHighlightColor: 'transparent' }}
                       >
                         <svg className="w-5 h-5 me-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -123,7 +123,7 @@ export default function ContactSeller({
       <div className="space-y-3">
         <button
           onClick={handleContactSeller}
-          className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+          className="w-full bg-[#A16207] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#854D0E] transition-colors"
           disabled={isLoading}
         >
           Contact Seller
@@ -132,7 +132,7 @@ export default function ContactSeller({
         <button
           onClick={handleSendMessage}
           disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-[#A16207] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#854D0E] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <div className="flex items-center justify-center">

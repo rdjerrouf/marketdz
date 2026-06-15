@@ -265,7 +265,7 @@ export default function FileUpload({
               <button
                 onClick={proceedWithUpload}
                 disabled={uploading}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                className="flex-1 bg-blue-500 hover:bg-[#A16207] disabled:opacity-50 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
               >
                 {uploading ? 'جاري الرفع...' : 'رفع الصورة'}
               </button>

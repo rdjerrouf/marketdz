@@ -248,7 +248,7 @@ export default function UserListings({ userId, isOwnProfile }: UserListingsProps
         {isOwnProfile && (
           <Link
             href="/add-item"
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+            className="px-4 py-2 bg-[#A16207] text-white rounded-lg hover:bg-[#854D0E] transition-colors font-medium"
           >
             + Add New Listing
           </Link>
@@ -324,7 +324,7 @@ export default function UserListings({ userId, isOwnProfile }: UserListingsProps
           {isOwnProfile && (
             <Link
               href="/add-item"
-              className="inline-block mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              className="inline-block mt-4 px-6 py-3 bg-[#A16207] text-white rounded-lg hover:bg-[#854D0E] transition-colors font-medium"
             >
               Create Your First Listing
             </Link>
@@ -398,7 +398,7 @@ export default function UserListings({ userId, isOwnProfile }: UserListingsProps
                     <div className="flex space-x-2">
                       <Link
                         href={`/edit-listing/${listing.id}`}
-                        className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-center"
+                        className="flex-1 px-3 py-2 text-sm bg-[#A16207] text-white rounded hover:bg-[#854D0E] transition-colors text-center"
                       >
                         Edit
                       </Link>

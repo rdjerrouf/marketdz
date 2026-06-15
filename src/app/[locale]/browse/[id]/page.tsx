@@ -245,7 +245,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
           <p className="text-gray-600 mb-4">{t('notFoundDesc')}</p>
           <button
             onClick={() => router.push('/browse')}
-            className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
+            className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-[#A16207] transition-colors"
           >
             {t('browseAll')}
           </button>
@@ -695,7 +695,7 @@ export default function ListingDetailsPage({ params }: { params: Promise<{ id: s
                     <div className="flex gap-3 pt-3 border-t border-gray-100">
                       <button
                         onClick={() => router.push(`/profile/${listing?.user_id}`)}
-                        className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                        className="flex-1 bg-[#A16207] text-white px-4 py-2 rounded-lg hover:bg-[#854D0E] transition-colors text-sm font-medium"
                       >
                         {t('viewProfileRate')}
                       </button>

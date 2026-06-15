@@ -318,7 +318,7 @@ export default function AdvancedSearchPage() {
           <div className="flex justify-center mt-6">
             <button
               onClick={handleSearch}
-              className="flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+              className="flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-[#A16207] transition-colors font-medium"
             >
               <Search className="w-5 h-5" />
               <span>{tCommon('search')}</span>

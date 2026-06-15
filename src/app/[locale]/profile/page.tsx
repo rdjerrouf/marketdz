@@ -312,7 +312,7 @@ export default function ProfilePage() {
           <p className="text-gray-700 mb-4">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            className="bg-[#A16207] text-white px-6 py-2 rounded-lg hover:bg-[#854D0E] transition-colors"
           >
             Go Home
           </button>
@@ -441,7 +441,7 @@ export default function ProfilePage() {
                   {!editMode && (
                     <button
                       onClick={() => setEditMode(true)}
-                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                      className="bg-[#A16207] text-white px-4 py-2 rounded-lg hover:bg-[#854D0E] transition-colors"
                     >
                       Edit Profile
                     </button>
@@ -583,7 +583,7 @@ export default function ProfilePage() {
                       <button
                         type="submit"
                         disabled={saving}
-                        className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-6 py-3 bg-[#A16207] text-white font-semibold rounded-lg hover:bg-[#854D0E] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         {saving ? 'Saving...' : 'Save Changes'}
                       </button>
@@ -656,7 +656,7 @@ export default function ProfilePage() {
                   <h2 className="text-2xl font-bold text-gray-900">My Listings ({userListings.length})</h2>
                   <button
                     onClick={() => router.push('/add-item')}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                    className="bg-[#A16207] text-white px-4 py-2 rounded-lg hover:bg-[#854D0E] transition-colors"
                   >
                     Create New Listing
                   </button>
@@ -673,7 +673,7 @@ export default function ProfilePage() {
                     <p className="text-gray-600 mb-4">Create your first listing to start selling!</p>
                     <button
                       onClick={() => router.push('/add-item')}
-                      className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                      className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-[#A16207] transition-colors"
                     >
                       Create Listing
                     </button>
@@ -733,13 +733,13 @@ export default function ProfilePage() {
                             <div className="flex space-x-2">
                               <button
                                 onClick={() => router.push(`/browse/${listing.id}`)}
-                                className="flex-1 bg-green-600 text-white py-2 px-4 rounded text-sm hover:bg-green-700 transition-colors"
+                                className="flex-1 bg-[#A16207] text-white py-2 px-4 rounded text-sm hover:bg-[#854D0E] transition-colors"
                               >
                                 View
                               </button>
                               <button
                                 onClick={() => router.push(`/edit-listing/${listing.id}`)}
-                                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded text-sm hover:bg-blue-700 transition-colors"
+                                className="flex-1 bg-[#A16207] text-white py-2 px-4 rounded text-sm hover:bg-[#854D0E] transition-colors"
                               >
                                 Edit
                               </button>
@@ -850,7 +850,7 @@ export default function ProfilePage() {
                           // TODO: Implement password change
                           alert('Password change feature coming soon!')
                         }}
-                        className="w-full md:w-auto bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        className="w-full md:w-auto bg-[#A16207] text-white px-6 py-2 rounded-lg hover:bg-[#854D0E] transition-colors"
                       >
                         Change Password
                       </button>

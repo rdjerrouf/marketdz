@@ -89,7 +89,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
           <p className="text-red-600 font-medium mb-6">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="px-6 py-2 bg-[#A16207] text-white rounded-lg hover:bg-[#854D0E] transition-colors"
           >
             {t('goHome')}
           </button>
@@ -106,7 +106,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
           <p className="text-gray-600 mb-6">{t('notFoundDesc')}</p>
           <button
             onClick={() => router.push('/')}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="px-6 py-2 bg-[#A16207] text-white rounded-lg hover:bg-[#854D0E] transition-colors"
           >
             {t('goHome')}
           </button>
