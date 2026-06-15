@@ -340,10 +340,10 @@ export default function CompleteKickAssHomepage() {
 
           {/* Enhanced Navigation Menu */}
           <nav className="space-y-3 flex-1">
-            <Link href="/" className="flex items-center w-full p-4 text-gray-900 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl border border-purple-500/30 hover:from-purple-500/30 hover:to-pink-500/30 transition-all duration-300 group shadow-lg">
+            <Link href="/" className="flex items-center w-full p-4 text-gray-900 bg-amber-100 rounded-2xl border border-amber-300 hover:bg-amber-200 transition-all duration-300 group shadow-lg">
               <Home className="w-5 h-5 me-4 group-hover:scale-110 transition-transform" />
               <span className="font-medium">{tNav('home')}</span>
-              <div className="ms-auto w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+              <div className="ms-auto w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
             </Link>
 
             <Link href="/browse" className="flex items-center w-full p-4 text-gray-800 rounded-2xl hover:bg-black/5 hover:text-gray-900 transition-all duration-300 group">
@@ -470,7 +470,7 @@ export default function CompleteKickAssHomepage() {
                 />
                 <button
                   onClick={handleSearch}
-                  className="bg-[#7c3f00] hover:bg-[#5f2e00] text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="bg-[#A16207] hover:bg-[#854D0E] text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   <Search className="w-5 h-5 me-2" />
                   {tHome('hero.searchButton')}
@@ -815,8 +815,8 @@ export default function CompleteKickAssHomepage() {
                         </div>
                       </div>
 
-                      {/* Enhanced Action Button (switched to #7c3f00) */}
-                      <div className="w-full bg-[#7c3f00] hover:bg-[#5f2e00] text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
+                      {/* Enhanced Action Button (switched to #A16207) */}
+                      <div className="w-full bg-[#A16207] hover:bg-[#854D0E] text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
                         {tCommon('viewDetails')}
                         <ArrowRight className={`w-4 h-4 ms-2 transition-transform ${isRtl ? 'rotate-180' : ''}`} />
                       </div>
@@ -838,7 +838,7 @@ export default function CompleteKickAssHomepage() {
                 {tHome('featured.subtitle')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/add-item" className="bg-[#7c3f00] hover:bg-[#5f2e00] text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-xl hover:shadow-2xl">
+                <Link href="/add-item" className="bg-[#A16207] hover:bg-[#854D0E] text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-xl hover:shadow-2xl">
                   <Plus className="w-6 h-6 me-3" />
                   {tNav('post')}
                 </Link>

@@ -533,7 +533,7 @@ function BrowsePageContent() {
               {tNav('home')}
             </button>
 
-            <div className="flex items-center w-full p-3 text-gray-900 bg-purple-500/20 rounded-lg border border-purple-400/40">
+            <div className="flex items-center w-full p-3 text-gray-900 bg-amber-100 rounded-lg border border-amber-300">
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>

@@ -39,7 +39,7 @@ export default function ChatPage() {
           <p className="text-purple-600 dark:text-purple-200 mb-6">{t('authRequiredDesc')}</p>
           <button
             onClick={() => router.push('/signin')}
-            className="px-6 py-3 bg-[#7c3f00] hover:bg-[#5f2e00] text-white rounded-lg transition-all"
+            className="px-6 py-3 bg-[#A16207] hover:bg-[#854D0E] text-white rounded-lg transition-all"
           >
             {tMsg('signIn')}
           </button>
@@ -139,7 +139,7 @@ export default function ChatPage() {
                         <div
                           className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
                             isMyMessage
-                              ? 'bg-[#7c3f00] text-white'
+                              ? 'bg-[#A16207] text-white'
                               : 'bg-slate-200 dark:bg-white/20 text-slate-800 dark:text-white'
                           }`}
                         >
@@ -183,7 +183,7 @@ export default function ChatPage() {
               <button
                 type="submit"
                 disabled={!newMessage.trim() || sending}
-                className="px-6 py-3 bg-[#7c3f00] hover:bg-[#5f2e00] text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-[#A16207] hover:bg-[#854D0E] text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {sending ? t('sending') : t('send')}
               </button>

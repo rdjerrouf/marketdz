@@ -43,7 +43,7 @@ export default function MessagesPage() {
             <p className="text-black">{t('signInRequired')}</p>
             <button
               onClick={() => router.push('/signin')}
-              className="mt-4 px-6 py-3 bg-[#7c3f00] hover:bg-[#5f2e00] text-white rounded-lg transition-all"
+              className="mt-4 px-6 py-3 bg-[#A16207] hover:bg-[#854D0E] text-white rounded-lg transition-all"
             >
               {t('signIn')}
             </button>
@@ -97,7 +97,7 @@ export default function MessagesPage() {
               </p>
               <button
                 onClick={() => router.push('/browse')}
-                className="px-6 py-3 bg-[#7c3f00] hover:bg-[#5f2e00] text-white rounded-lg transition-all duration-200 transform hover:scale-105 font-medium"
+                className="px-6 py-3 bg-[#A16207] hover:bg-[#854D0E] text-white rounded-lg transition-all duration-200 transform hover:scale-105 font-medium"
               >
                 {t('browseListings')}
               </button>

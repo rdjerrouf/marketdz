@@ -184,7 +184,7 @@ export default function AddItemPage() {
             </button>
 
             <button
-              className="flex items-center w-full p-3 text-gray-900 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/40 rounded-xl"
+              className="flex items-center w-full p-3 text-gray-900 bg-amber-100 border border-amber-300 rounded-xl"
             >
               <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

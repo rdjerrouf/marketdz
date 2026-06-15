@@ -86,7 +86,7 @@ export default function BottomNavigation() {
               onClick={() => router.push(item.path)}
               className={`flex flex-col items-center justify-center flex-1 py-2 transition-colors relative ${
                 isItemActive
-                  ? 'text-purple-400'
+                  ? 'text-amber-400'
                   : hasUnread
                   ? 'text-green-400'
                   : 'text-gray-400 hover:text-white'
@@ -107,7 +107,7 @@ export default function BottomNavigation() {
                 {item.label}
               </span>
               {isItemActive && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-purple-400 rounded-b-full"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-amber-400 rounded-b-full"></div>
               )}
             </button>
           )
