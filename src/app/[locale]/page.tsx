@@ -290,7 +290,7 @@ export default function CompleteKickAssHomepage() {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200 pointer-events-auto">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🇩🇿</span>
+            <img src="/icons/icon-192x192.png" alt="DlalaDZ" className="w-9 h-9 rounded-lg" />
             <h1 className="text-gray-900 text-xl font-bold">DlalaDZ</h1>
             {showInstallButton && (
               <button
@@ -327,7 +327,7 @@ export default function CompleteKickAssHomepage() {
         <div className="p-6 flex flex-col h-full">
           {/* Enhanced Logo */}
           <div className="flex items-center mb-12">
-            <span className="text-6xl mr-4">🇩🇿</span>
+            <img src="/icons/icon-192x192.png" alt="DlalaDZ" className="w-14 h-14 rounded-xl mr-4" />
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-gray-900">DlalaDZ</h1>
               <p className="text-gray-700 text-sm">
@@ -853,9 +853,7 @@ export default function CompleteKickAssHomepage() {
           {/* Enhanced Footer Section */}
           <div className="text-center py-12 border-t border-black/10 relative z-10">
             <div className="flex items-center justify-center mb-4">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-xl mr-3 flex items-center justify-center">
-                <span className="text-2xl">🇩🇿</span>
-              </div>
+              <img src="/icons/icon-192x192.png" alt="DlalaDZ" className="w-10 h-10 rounded-xl mr-3" />
               <h3 className="text-gray-900 text-lg font-semibold">DlalaDZ</h3>
             </div>
             <p className="text-gray-700 mb-4">Algeria&apos;s premier marketplace connecting buyers and sellers nationwide</p>
