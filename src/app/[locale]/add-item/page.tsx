@@ -16,7 +16,6 @@ interface User {
 export default function AddItemPage() {
   const router = useRouter()
   const t = useTranslations('addItem')
-  const tCommon = useTranslations('common')
   const locale = useLocale()
   const isRtl = locale === 'ar'
   const [user, setUser] = useState<User | null>(null)
@@ -138,25 +137,6 @@ export default function AddItemPage() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto p-8 pb-24 md:pb-8">
-        {/* Top bar: back + logo */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center text-gray-800 hover:text-gray-900 transition-colors group"
-            >
-              <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span className="font-medium">{tCommon('back')}</span>
-            </button>
-            <div className="flex items-center">
-              <img src="/icons/icon-192x192.png" alt="DlalaDZ" className="w-9 h-9 rounded-lg me-2" />
-              <h1 className="text-gray-900 text-lg font-bold">DlalaDZ</h1>
-            </div>
-          </div>
-        </div>
-
         {/* Header */}
         <div className="text-center mb-12 relative">
           <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center">
