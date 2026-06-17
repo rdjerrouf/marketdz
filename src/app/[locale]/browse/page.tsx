@@ -76,7 +76,6 @@ function BrowsePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const t = useTranslations('browse')
-  const tNav = useTranslations('nav')
   const tForm = useTranslations('addItem')
   const locale = useLocale()
   const isRtl = locale === 'ar'
@@ -495,90 +494,6 @@ function BrowsePageContent() {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col md:flex-row" style={{ background: '#F5F4F2' }}>
-      {/* Sidebar Navigation - Hidden on mobile, shown on desktop */}
-      <div className={`hidden md:block relative z-10 w-64 bg-white backdrop-blur-sm ${isRtl ? 'border-l' : 'border-r'} border-black/10`}>
-        <div className="p-6">
-          {/* Logo */}
-          <div className="flex items-center mb-8">
-            <img src="/icons/icon-192x192.png" alt="DlalaDZ" className="w-11 h-11 rounded-lg me-3" />
-            <h1 className="text-gray-900 text-xl font-bold">DlalaDZ</h1>
-          </div>
-
-          {/* Back Button */}
-          <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center text-gray-800 hover:text-gray-900 transition-colors group"
-            >
-              <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              {t('back')}
-            </button>
-          </div>
-
-          {/* Navigation Menu */}
-          <nav className="space-y-2">
-            <button
-              onClick={() => router.push('/')}
-              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-[#A16207]/20 hover:text-gray-900 transition-all duration-200"
-            >
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              {tNav('home')}
-            </button>
-
-            <div className="flex items-center w-full p-3 text-gray-900 bg-amber-100 rounded-lg border border-amber-300">
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              {t('searchAndBrowse')}
-            </div>
-
-            <button
-              onClick={() => router.push('/add-item')}
-              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-[#A16207]/20 hover:text-gray-900 transition-all duration-200"
-            >
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              {t('createListing')}
-            </button>
-
-            <button
-              onClick={() => router.push('/my-listings')}
-              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-[#A16207]/20 hover:text-gray-900 transition-all duration-200"
-            >
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              {tNav('myListings')}
-            </button>
-
-            <button
-              onClick={() => router.push('/favorites')}
-              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-[#A16207]/20 hover:text-gray-900 transition-all duration-200"
-            >
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              {tNav('favorites')}
-            </button>
-
-            <button
-              onClick={() => router.push('/profile')}
-              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-[#A16207]/20 hover:text-gray-900 transition-all duration-200"
-            >
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              {tNav('profile')}
-            </button>
-          </nav>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="relative z-10 flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-auto">
         {/* Header */}

@@ -122,31 +122,8 @@ export default function MyListingsPage() {
   return (
     <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 py-8 pb-24 md:pb-8">
-        {/* Header with back button */}
+        {/* Header */}
         <div className="mb-8">
-          <button
-            onClick={() => {
-              console.log('👤 MyListingsPage - Back button clicked')
-              try {
-                if (window.history.length > 1) {
-                  router.back()
-                } else {
-                  console.log('👤 MyListingsPage - No history, going to home')
-                  router.push('/')
-                }
-              } catch (error) {
-                console.error('👤 MyListingsPage - Back navigation failed:', error)
-                router.push('/')
-              }
-            }}
-            className="flex items-center text-gray-800 hover:text-gray-900 transition-colors mb-4 group"
-          >
-            <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back
-          </button>
-          
           <div className="bg-white backdrop-blur-sm rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <div>

@@ -69,19 +69,6 @@ export default function FavoritesPage() {
   return (
     <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 py-8 pb-24 md:pb-8">
-        {/* Header with PWA button outside the content area */}
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center text-gray-800 hover:text-gray-900 transition-colors group"
-          >
-            <svg className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back
-          </button>
-        </div>
-        
         <div className="bg-white backdrop-blur-md rounded-2xl p-8 border border-gray-200 shadow-2xl">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900">

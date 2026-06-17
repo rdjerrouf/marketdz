@@ -16,7 +16,6 @@ interface User {
 export default function AddItemPage() {
   const router = useRouter()
   const t = useTranslations('addItem')
-  const tNav = useTranslations('nav')
   const tCommon = useTranslations('common')
   const locale = useLocale()
   const isRtl = locale === 'ar'
@@ -135,167 +134,12 @@ export default function AddItemPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F4F2] relative overflow-hidden">
-      <div className="relative z-10 flex">
-      {/* Sidebar Navigation - Hidden on mobile/PWA, visible on desktop */}
-      <div className={`hidden lg:block ${isPWA ? 'lg:w-44' : 'lg:w-64'} bg-white backdrop-blur-lg ${isRtl ? 'border-l' : 'border-r'} border-black/10`}>
-        <div className={isPWA ? 'p-4' : 'p-6'}>
-          {/* Logo */}
-          <div className="flex items-center mb-8">
-            <img src="/icons/icon-192x192.png" alt="DlalaDZ" className="w-12 h-12 rounded-xl me-3" />
-            <h1 className="text-gray-900 text-xl font-bold">DlalaDZ</h1>
-          </div>
-
-          {/* Back Button */}
-          <button
-            onClick={() => router.back()}
-            className="flex items-center text-gray-800 hover:text-gray-900 transition-colors mb-6 group"
-          >
-            <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'} transition-transform`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            {tCommon('back')}
-          </button>
-
-          {/* Navigation Menu */}
-          <nav className="space-y-2">
-            <button 
-              onClick={() => router.push('/')}
-              className="flex items-center w-full p-3 text-gray-800 rounded-xl hover:bg-black/5 hover:text-gray-900 transition-all duration-200"
-            >
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              {tNav('home')}
-            </button>
-
-            <button
-              onClick={() => router.push('/browse')}
-              className="flex items-center w-full p-3 text-gray-800 rounded-xl hover:bg-black/5 hover:text-gray-900 transition-all duration-200"
-            >
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              {tNav('browse')}
-            </button>
-
-            <button
-              className="flex items-center w-full p-3 text-gray-900 bg-amber-100 border border-amber-300 rounded-xl"
-            >
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              {t('createTitle')}
-              <span className="ms-2 px-2 py-1 bg-red-500 text-white text-xs rounded-full">{t('new')}</span>
-            </button>
-
-            <button
-              onClick={() => router.push('/browse')}
-              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors"
-            >
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              {tNav('browse')}
-            </button>
-
-            <button className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors">
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              {tNav('favorites')}
-              <span className="ms-auto bg-black/10 text-gray-800 text-xs px-2 py-1 rounded-full">0</span>
-            </button>
-
-            <button className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors">
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              {tNav('messages')}
-            </button>
-
-            <button
-              onClick={() => router.push('/profile')}
-              className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors"
-            >
-              <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              {tNav('profile')}
-            </button>
-
-            <div className="pt-4 border-t border-black/10 mt-4">
-              {user ? (
-                <button 
-                  onClick={async () => {
-                    try {
-                      await fetch('/api/auth/signout', { method: 'POST' })
-                      router.push('/signin')
-                    } catch (error) {
-                      console.error('Signout error:', error)
-                      router.push('/signin')
-                    }
-                  }}
-                  className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors"
-                >
-                  <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  {tNav('signOut')}
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => router.push('/signin')}
-                    className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors mb-2"
-                  >
-                    <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                    </svg>
-                    {tNav('signIn')}
-                  </button>
-                  <button
-                    onClick={() => router.push('/signup')}
-                    className="flex items-center w-full p-3 text-gray-800 rounded-lg hover:bg-black/5 hover:text-gray-900 transition-colors"
-                  >
-                    <svg className="w-5 h-5 me-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                    </svg>
-                    {tNav('signUp')}
-                  </button>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-
-        {/* User Info at Bottom */}
-        {user && (
-          <div className="absolute bottom-4 start-4 end-4 max-w-56">
-            <div className="bg-white backdrop-blur-sm border border-gray-200 p-3 rounded-lg">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-[#A16207] rounded-full flex items-center justify-center me-3">
-                  <span className="text-white font-semibold">
-                    {user.first_name[0]}
-                  </span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-gray-900 font-medium text-sm truncate">
-                    {user.first_name} {user.last_name}
-                  </p>
-                  <p className="text-gray-700 text-xs truncate">
-                    {user.email}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      <div className="relative z-10">
 
       {/* Main Content */}
-      <div className="flex-1 p-8 pb-24 md:pb-8 overflow-auto">
-        {/* Mobile Header - Only visible when sidebar is hidden */}
-        <div className="lg:hidden mb-6">
+      <div className="max-w-6xl mx-auto p-8 pb-24 md:pb-8">
+        {/* Top bar: back + logo */}
+        <div className="mb-6">
           <div className="flex items-center justify-between">
             <button
               onClick={() => router.back()}
@@ -368,18 +212,6 @@ export default function AddItemPage() {
           </div>
         </div>
 
-        {/* Back to Home */}
-        <div className="text-center mt-12">
-          <button
-            onClick={() => router.push('/')}
-            className="text-gray-700 hover:text-gray-900 transition-colors flex items-center mx-auto"
-          >
-            <svg className={`w-5 h-5 me-2 ${isRtl ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            {t('backToHome')}
-          </button>
-        </div>
       </div>
       </div>
     </div>
